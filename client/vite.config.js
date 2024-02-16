@@ -14,7 +14,7 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: resolve(root, 'index.html'),
+        main: resolve('index.html'),
         team: resolve(root, 'pages/team/team.html'),
         tournament: resolve(root, 'pages/tournament/tournament.html'),
         tournaments: resolve(root, 'pages/tournaments/tournaments.html')
