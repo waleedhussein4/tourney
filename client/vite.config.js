@@ -17,7 +17,10 @@ export default defineConfig({
         main: resolve('index.html'),
         team: resolve(root, 'pages/team/team.html'),
         tournament: resolve(root, 'pages/tournament/tournament.html'),
-        tournaments: resolve(root, 'pages/tournaments/tournaments.html')
+        tournaments: resolve(root, 'pages/tournaments/tournaments.html'),
+        host: resolve(root, 'pages/host/host.html'),
+        signin: resolve(root, 'pages/signin/signin.html'),
+        signup: resolve(root, 'pages/signup/signup.html')
       }
     }
   }
