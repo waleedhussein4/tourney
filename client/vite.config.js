@@ -15,12 +15,12 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve('index.html'),
-        team: resolve(root, 'pages/team/team.html'),
-        tournament: resolve(root, 'pages/tournament/tournament.html'),
-        tournaments: resolve(root, 'pages/tournaments/tournaments.html'),
-        host: resolve(root, 'pages/host/host.html'),
-        signin: resolve(root, 'pages/signin/signin.html'),
-        signup: resolve(root, 'pages/signup/signup.html')
+        team: resolve('team/index.html'),
+        tournament: resolve('tournament/index.html'),
+        tournaments: resolve('tournaments/index.html'),
+        host: resolve('host/index.html'),
+        signin: resolve('signin/index.html'),
+        signup: resolve('signup/index.html')
       }
     }
   }
