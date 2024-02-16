@@ -7,14 +7,14 @@ function Nav() {
       <img id='menu' src={menu} alt="" />
       <img id='logo-nav' src={logo} alt="" />
       <div id='options'>
-        <a href="./src/pages/host/host.html">Host</a>
-        <a href="./src/pages/tournaments/tournaments.html">Compete</a>
-        <a href="">Triumph</a>
+        <a href="./host/">Host</a>
+        <a href="./tournaments/">Compete</a>
+        <a href="./team/">Team</a>
       </div>
       <div id="account">
-        <span><a href="./src/pages/signin/signin.html">Sign In</a></span>
+        <span><a href="./signin/">Sign In</a></span>
         <span> | </span>
-        <span><a href="./src/pages/signup/signup.html">Sign Up</a></span>
+        <span><a href="./signup/">Sign Up</a></span>
       </div>
     </div>
   )
