@@ -1,8 +1,10 @@
 import logo from '../assets/logo.png'
+import menu from '../assets/menu.png'
 
 function Nav() {
   return (
     <div id="nav">
+      <img id='menu' src={menu} alt="" />
       <img id='logo-nav' src={logo} alt="" />
       <div id='options'>
         <a href="">Host</a>
