@@ -1,5 +1,5 @@
 #nav {
-  height: fit-content;
+  height: 50pt;
   width: 100%;
   padding: 1em;
   display: flex;
@@ -25,4 +25,9 @@
 
 #menu {
   width: 26pt;
+}
+
+.search_icon {
+  width: 16px;
+  height: 16px;
 }
