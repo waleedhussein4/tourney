@@ -1,5 +1,6 @@
 import '../styles/Sidebar.css'
 import search_icon from '/src/assets/search-icon.png'
+import dropdown_button from '/src/assets/menu-down.svg'
 
 function Sidebar() {
   return (
@@ -15,7 +16,7 @@ function Sidebar() {
           <div className="select">
               <span className="selected">Fortnite</span>
               <div className="imgContainer">
-                <img src="/src/assets/menu-down.svg" alt="" />
+                <img src={dropdown_button} alt="" />
               </div>
           </div>
           <ul className='menu category'>
