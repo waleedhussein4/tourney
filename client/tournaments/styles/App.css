@@ -1,0 +1,52 @@
+#root {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+#nav {
+  flex: 1 0 auto;
+}
+
+#sidebar {
+  flex: 0.25;
+}
+
+#content {
+  flex: 0.75;
+  padding: 0.8em;
+}
+
+#tournaments {
+  display: grid;
+  gap: 1em;
+  overflow: hidden;
+  overflow-y: auto;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  padding: 0.5em;
+}
+
+.tournament {
+  background-color: darkgray;
+  display: flex;
+  flex-direction: column;
+  padding: 0.4em;
+  gap: 0.3em;
+}
+
+.tournament .title {
+  text-align: center;
+}
+
+.tournament a {
+  text-decoration: none;
+  color: unset;
+}
+
+#content h1 {
+  text-align: center;
+}
+
+.tournament .view:hover {
+  cursor: pointer;
+}
