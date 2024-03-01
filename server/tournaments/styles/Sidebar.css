@@ -64,16 +64,17 @@
 }
 
 .selected {
-  flex-basis: 80%;
+  flex: 8 1 0;
   border: 2px solid black;
   user-select: none;
   padding: 0.2em;
-  display: flex;
-  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .select .imgContainer {
-  flex-basis: 20%;
+  flex: 2 0 0;
   border: 2px solid black;
   border-left: none;
   display: flex;
