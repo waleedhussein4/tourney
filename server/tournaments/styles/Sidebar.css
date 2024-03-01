@@ -1,7 +1,6 @@
 #sidebar {
   background-color: blueviolet;
   height: calc(100vh - 50pt);
-  width: 25%;
   display: flex;
   flex-direction: column;
   padding: 1em;
@@ -41,9 +40,78 @@
   background: #0b7dda;
 }
 
-#sidebar span {
+.filters-header {
   color: white;
   font-weight: 700;
   font-size: 1.2em;
   text-align: center;
+}
+
+/* DROPDOWN */
+
+.select {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-self: center;
+  width: 140px;
+  height: 30px;
+  background-color: white;
+}
+
+.select:hover {
+  cursor: pointer;
+}
+
+.selected {
+  flex-basis: 80%;
+  border: 2px solid black;
+  user-select: none;
+  padding: 0.2em;
+  display: flex;
+  align-items: center;
+}
+
+.select .imgContainer {
+  flex-basis: 20%;
+  border: 2px solid black;
+  border-left: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.select img {
+  width: 100%;
+  max-width: 100%;
+}
+
+.menu {
+  display: none;
+  position: absolute;
+  background-color: white;
+  list-style: none;
+  list-style-position: inside;
+  padding: 0;
+  margin: 0;
+  width: 140px;
+  border: 2px solid black;
+  border-top: none;
+}
+
+.menu li:hover {
+  cursor: pointer;
+  background-color: rgb(229, 229, 229);
+}
+
+.menu li {
+  height: 30px;
+  user-select: none;
+  padding: 0.2em;
+  display: flex;
+  align-items: center;
+}
+
+.active {
+  background-color: rgb(205, 205, 205);
 }
