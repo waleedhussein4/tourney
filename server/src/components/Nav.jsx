@@ -5,7 +5,7 @@ function Nav() {
   return (
     <div id="nav">
       <img id='menu' src={menu} alt="" />
-      <img id='logo-nav' src={logo} alt="" />
+      <a href='/'><img id='logo-nav' src={logo} alt="" /></a>
       <div id='options'>
         <a href="/host/">Host</a>
         <a href="/tournaments/">Compete</a>
