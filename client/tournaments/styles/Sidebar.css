@@ -98,6 +98,7 @@
   width: 140px;
   border: 2px solid black;
   border-top: none;
+  z-index: 2;
 }
 
 .menu li:hover {
@@ -115,4 +116,23 @@
 
 .active {
   background-color: rgb(205, 205, 205);
+}
+
+#filters {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  user-select: none;
+}
+
+.radio {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+.radio-item {
+  display: flex;
+  flex-direction: row;
+  gap: 0.2em;
 }
