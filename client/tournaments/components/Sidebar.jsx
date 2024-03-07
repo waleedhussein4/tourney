@@ -14,19 +14,12 @@ function Sidebar() {
         <div id='filter-category' className="filter dropdown" data-name="category">
           <span className="name">Category</span>
           <div className="select">
-              <span className="selected">Fortnite</span>
+              <span className="selected"></span>
               <div className="imgContainer">
                 <img src={dropdown_button} alt="" />
               </div>
           </div>
-          <ul className='menu category'>
-            <li data-value="Coding">Coding</li>
-            <li data-value="League of Legends">League of Legends</li>
-            <li data-value="Poker">Poker</li>
-            <li data-value="Chess">Chess</li>
-            <li data-value="Fortnite" className="active">Fortnite</li>
-            <li data-value="Football">Football</li>
-          </ul>
+          <ul className='menu category'></ul>
         </div>
         <div id='filter-entryFee' className="filter" data-name="entryFee">
           <span className="name">Entry Fee</span>
