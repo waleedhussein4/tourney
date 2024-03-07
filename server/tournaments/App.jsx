@@ -24,8 +24,36 @@ function App() {
 
 export default App
 
-window.addEventListener('load', dropdownHandler)
-window.addEventListener('load', generateSliders)
+window.addEventListener('load', onPageLoad)
+
+function onPageLoad() {
+  generateCategoryFilterDropdown()
+  dropdownHandler()
+  generateSliders()
+}
+
+function generateCategoryFilterDropdown() {
+  let container = document.getElementById('filter-category')
+  let list = container.querySelector('.menu')
+  let selected = container.querySelector('.selected')
+
+  let categories = api_getCategories()
+  categories.forEach(category => {
+    let li = document.createElement('li')
+    li.setAttribute("data-value", category)
+    li.innerHTML = category
+
+    list.appendChild(li)
+  })
+
+  let first = list.childNodes[0]
+  selected.innerText = first.innerText
+  first.classList.add('active')
+}
+
+function api_getCategories() {
+  return ["League of Legends", "Poker", "Chess", "Fortnite", "Football", "Coding"]
+}
 
 function dropdownHandler() {
   let dropdowns = document.querySelectorAll(".dropdown")
