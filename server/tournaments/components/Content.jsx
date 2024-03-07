@@ -1,9 +1,8 @@
-import data from '/data/tournaments.json'; 
 import Tournament from './Tournament';
 
-function Content() {
+function Content(props) {
 
-  const arrayDataItems = data.map((tourney) => <Tournament key={tourney.UUID} obj={tourney} />)
+  const arrayDataItems = props.data.map((tourney) => <Tournament key={tourney.UUID} obj={tourney} />)
 
   return (
     <div id="content">

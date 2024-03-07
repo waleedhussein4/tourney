@@ -10,8 +10,8 @@ function Sidebar() {
         <button type='submit'><img className='search_icon' src={search_icon} alt="" /></button>
       </form>
       <span className='filters-header'>Filters</span>
-      <div id="filters">
-        <div className="filter dropdown" data-name="category">
+      <form id="filters">
+        <div id='filter-category' className="filter dropdown" data-name="category">
           <span className="name">Category</span>
           <div className="select">
               <span className="selected">Fortnite</span>
@@ -28,12 +28,35 @@ function Sidebar() {
             <li data-value="Football">Football</li>
           </ul>
         </div>
+        <div id='filter-entryFee' className="filter" data-name="entryFee">
+          <span className="name">Entry Fee</span>
+          <div className="slider"></div>
+          <div className="valueDisplay">
+            <span>Min: </span>
+            <span className="value-min"></span>
+            <br />
+            <span>Max: </span>
+            <span className="value-max"></span>
+          </div>
+        </div>
+        <div id="filter-type" className="filter" data-name="type">
+          <span className="name">Type</span>
+          <div className="radio">
+            <div className="radio-item">
+              <input id='radio-brackets' type="radio" name='type' value="Brackets" defaultChecked={true} readOnly={true} />
+              <label htmlFor="radio-brackets">Brackets</label>
+            </div>
+            <div className="radio-item">
+              <input id='radio-br' type="radio" name='type' value="Battle Royale" />
+              <label htmlFor="radio-br">Battle Royale</label>
+            </div>
+          </div>
+        </div>
         <ul>
-          <li>Entry fee</li>
           <li>tournament type</li>
           <li>public/private</li>
         </ul>
-      </div>
+      </form>
     </div>
   )
 }
