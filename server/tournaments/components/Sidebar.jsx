@@ -4,12 +4,12 @@ import search_icon from '/src/assets/search-icon.png'
 import dropdown_button from '/src/assets/menu-down.svg'
 import { useEffect } from 'react'
 
-function Sidebar({tournaments}) {
+function Sidebar() {
 
   useEffect(() => {
     generateCategoryFilterDropdown()
     dropdownHandler()
-  })
+  }, [])
 
   return (
     <div id="sidebar">
@@ -22,10 +22,12 @@ function Sidebar({tournaments}) {
         <div id='filter-category' className="filter dropdown" data-name="category">
           <span className="name">Category</span>
           <div className="select">
+            <div className="selected-wrapper">
               <span className="selected"></span>
-              <div className="imgContainer">
-                <img src={dropdown_button} alt="" />
-              </div>
+            </div>
+            <div className="imgContainer">
+              <img src={dropdown_button} alt="" />
+            </div>
           </div>
           <ul className='menu category'></ul>
         </div>
@@ -33,11 +35,14 @@ function Sidebar({tournaments}) {
           <span className="name">Entry Fee</span>
           <div className="slider"></div>
           <div className="valueDisplay">
-            <span>Min: </span>
-            <span className="value-min"></span>
-            <br />
-            <span>Max: </span>
-            <span className="value-max"></span>
+            <div className="minInput">
+              <span>Min: </span>
+              <input className="value-min" />
+            </div>
+            <div className="maxInput">
+              <span>Max: </span>
+              <input className="value-max" />
+            </div>
           </div>
         </div>
         <div id="filter-type" className="filter" data-name="type">
@@ -53,10 +58,19 @@ function Sidebar({tournaments}) {
             </div>
           </div>
         </div>
-        <ul>
-          <li>tournament type</li>
-          <li>public/private</li>
-        </ul>
+        <div id="filter-accessibility" className="filter" data-name="accessibility">
+          <span className="name">Accessibility</span>
+          <div className="radio">
+            <div className="radio-item">
+              <input id='radio-open' type="radio" name='accessibility' value="Open" defaultChecked={true} readOnly={true} />
+              <label htmlFor="radio-open">Open</label>
+            </div>
+            <div className="radio-item">
+              <input id='radio-app' type="radio" name='accessibility' value="Application Required" />
+              <label htmlFor="radio-app">Application Required</label>
+            </div>
+          </div>
+        </div>
       </form>
     </div>
   )
