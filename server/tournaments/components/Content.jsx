@@ -8,7 +8,9 @@ const URL = ' https://api.npoint.io/62625fd6706d67650348'
 function Content({tournaments, setTournaments}) {
   
   useEffect(() => {
-    renderTournaments(tournaments)
+    if(tournaments) {
+      renderTournaments(tournaments)
+    }
   },[tournaments])
 
   const fetchData = useCallback(async () => {
