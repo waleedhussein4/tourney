@@ -9,11 +9,11 @@
 }
 
 #sidebar {
-  flex: 0.25;
+  flex: 0.2;
 }
 
 #content {
-  flex: 0.75;
+  flex: 0.8;
   padding: 0.8em;
 }
 
@@ -45,6 +45,10 @@
 
 #content h1 {
   text-align: center;
+}
+
+.tournament .view {
+  user-select: none;
 }
 
 .tournament .view:hover {
