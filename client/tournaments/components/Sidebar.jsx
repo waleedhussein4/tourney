@@ -4,11 +4,20 @@ import search_icon from '/src/assets/search-icon.png'
 import dropdown_button from '/src/assets/menu-down.svg'
 import { useEffect } from 'react'
 
-function Sidebar() {
+function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTourneys, setFilteredTourneys}) {
+
+  const handleClick = () => {
+    setFilters(getFilterFormData())
+
+    const filteredData = applyFilter(filters, tournaments)
+
+    setFilteredTourneys(filteredData)
+  }
 
   useEffect(() => {
     generateCategoryFilterDropdown()
     dropdownHandler()
+    defaults()
   }, [])
 
   return (
@@ -71,6 +80,7 @@ function Sidebar() {
             </div>
           </div>
         </div>
+        <button id='applyFilters' onClick={handleClick}>Apply</button>
       </form>
     </div>
   )
@@ -145,6 +155,23 @@ function getHighestEntryFee(tournaments) {
 
 function getFilterFormData() {
 
+  const data = {
+    "category" : document.querySelector('#filter-category .active').innerText,
+    "entryFee" : [document.querySelector('#filter-entryFee .value-min').value, document.querySelector('#filter-entryFee .value-max').value],
+    "type" : document.querySelector('#filter-type input[name="type"]:checked').value,
+    "accessibility" : document.querySelector('#filter-accessibility input[name="accessibility"]:checked').value,
+  }
+  
+  return data
+
+}
+
+function applyFilter(filters, tournaments) {
+  return [tournaments[0], tournaments[1]]
+}
+
+function defaults() {
+  document.getElementById('applyFilters').addEventListener('click', (e) => { e.preventDefault() })
 }
 
 export default Sidebar
