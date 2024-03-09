@@ -132,7 +132,6 @@ function generateCategoryFilterDropdown() {
 }
 
 function api_getCategories() {
-  // return ["League of Legends", "Poker", "Chess", "Fortnite", "Football", "Coding"]
   return ["Fortnite", "Football", "Baskbetball", "Counter Strike", "Valorant", "League of Legends", "Tennis"]
 }
 
