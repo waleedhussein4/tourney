@@ -10,17 +10,28 @@ import Content from './components/Content.jsx'
 
 function App() {
 
-  const [tournaments, setTournaments] = useState()
+  const [tournaments, setTournaments] = useState([])
+  const [filters, setFilters] = useState()
+  const [filteredTourneys, setFilteredTourneys] = useState([])
 
   return (
     <>
       <Nav />
       <Sidebar
         tournaments={tournaments}
+        setTournaments={setTournaments}
+        filters={filters}
+        setFilters={setFilters}
+        filteredTourneys={filteredTourneys}
+        setFilteredTourneys={setFilteredTourneys}
       />
       <Content
         tournaments={tournaments}
         setTournaments={setTournaments}
+        filters={filters}
+        setFilters={setFilters}
+        filteredTourneys={filteredTourneys}
+        setFilteredTourneys={setFilteredTourneys}
       />
     </>
   )
