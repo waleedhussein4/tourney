@@ -3,7 +3,7 @@
     "UUID":"89b72cfe-0b87-4395-8230-8e8e1f571cb7",
     "host":"9410f264-0bef-4516-b3ea-661c575490f2",
     "title":"Fortnite Solo Cup",
-    "type":1,
+    "type":"battle royale",
     "category":"fortnite",
     "startDate":"2024-02-29T10:01:31.474Z",
     "endDate":"2024-02-29T10:02:10.959Z",
@@ -14,62 +14,67 @@
       "2":100,
       "3":75
     },
-    "maxCapacity":100
+    "maxCapacity":100,
+    "accessibility":"application required"
   },
   {
     "UUID":"adf5e6e6-73f9-4af4-b648-6f6bc1eb76e1",
     "host":"0a3c91ed-a13b-433e-a6bc-56b826dbf95b",
     "title":"Chess Championship",
-    "type":0,
+    "type":"brackets",
     "category":"chess",
     "startDate":"2024-02-29T10:07:37.904Z",
     "endDate":"2024-02-29T10:07:51.048Z",
     "enrolledUsers":["09c90671-1043-4cee-957b-96b10e044ee3"],
-    "entryFee":0,
+    "entryFee":50,
     "earnings":{
       "1":500,
       "2":200,
       "3":100
     },
-    "maxCapacity":30
+    "maxCapacity":30,
+    "accessibility":"application required"
   },
   {
     "UUID":"61ab6df0-38a1-44ce-b3da-fe42f6fbeeec",
     "host":"0a3c91ed-a13b-433e-a6bc-56b826dbf95b",
     "title":"League of Legends",
-    "type":0,
+    "type":"brackets",
     "category":"league of legends",
     "startDate":"2024-02-29T10:07:37.904Z",
     "endDate":"2024-02-29T10:07:51.048Z",
     "enrolledUsers":["09c90671-1043-4cee-957b-96b10e044ee3", "6569e400-6779-4814-be4b-f6463cd6b8fa", "9bd1be74-dd83-4532-8d6b-5ec6e9cdb984", "7e1f3e6b-eacc-4b98-ad2a-c1964ed8933d", "a1634078-b4d7-42d4-8656-938c4a26aa41"],
-    "entryFee":0,
+    "entryFee":1,
     "earnings":null,
-    "maxCapacity":5
+    "maxCapacity":5,
+    "accessibility":"open"
   },
   {
     "UUID":"e6b8a808-3330-4787-811e-af30ada79c16",
     "host":"0a3c91ed-a13b-433e-a6bc-56b826dbf95b",
     "title":"Hackathon",
-    "type":0,
+    "type":"brackets",
     "category":"coding",
     "startDate":"2024-03-01T11:07:19.334Z",
     "endDate":"2024-03-01T11:07:26.706Z",
     "enrolledUsers":[],
     "entryFee":0,
     "earnings":null,
-    "maxCapacity":40
+    "maxCapacity":40,
+    "accessibility":"open"
   },
   {
     "UUID":"972ba3db-de94-41d6-b2b9-cb5d425ffb52",
     "host":"0a3c91ed-a13b-433e-a6bc-56b826dbf95b",
     "title":"Poker",
-    "type":0,
+    "type":"battle royale",
     "category":"poker",
     "startDate":"2024-03-01T11:05:29.396Z",
     "endDate":"2024-03-01T11:05:44.235Z",
     "enrolledUsers":["09c90671-1043-4cee-957b-96b10e044ee3", "6569e400-6779-4814-be4b-f6463cd6b8fa", "9bd1be74-dd83-4532-8d6b-5ec6e9cdb984", "7e1f3e6b-eacc-4b98-ad2a-c1964ed8933d", "a1634078-b4d7-42d4-8656-938c4a26aa41"],
     "entryFee":0,
     "earnings":null,
-    "maxCapacity":8
+    "maxCapacity":8,
+    "accessibility":"open"
   }
 ]

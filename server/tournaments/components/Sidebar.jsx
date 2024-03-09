@@ -6,14 +6,27 @@ import { useEffect } from 'react'
 
 function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTourneys, setFilteredTourneys}) {
 
+  // on submit button click
   const handleClick = () => {
-    setFilters(getFilterFormData())
-
-    const filteredData = applyFilter(filters, tournaments)
-
-    setFilteredTourneys(filteredData)
+    setFilters(getFilterFormData)
   }
 
+  // on filters change
+  useEffect(() => {
+    const filteredData = () => {
+      return tournaments.filter( (tournament) => {      
+        return (tournament.category.toLowerCase() == filters.category.toLowerCase() || filters.category.toLowerCase() == "all")
+            && (tournament.entryFee <= filters.entryFee[1] || filters.entryFee[1] == '')
+            && (tournament.entryFee >= filters.entryFee[0] || filters.entryFee[0] == '')
+            && (tournament.type.toLowerCase() == filters.type.toLowerCase() || filters.type.toLowerCase() == 'any')
+            && (tournament.accessibility.toLowerCase() == filters.accessibility.toLowerCase() || filters.accessibility.toLowerCase() == 'any')
+      })
+    }
+
+    setFilteredTourneys(filteredData)
+  }, [filters])
+
+  // on sidebar load
   useEffect(() => {
     generateCategoryFilterDropdown()
     dropdownHandler()
@@ -58,7 +71,11 @@ function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTour
           <span className="name">Type</span>
           <div className="radio">
             <div className="radio-item">
-              <input id='radio-brackets' type="radio" name='type' value="Brackets" defaultChecked={true} readOnly={true} />
+              <input id='radio-anyType' type="radio" name='type' value="any" defaultChecked={true} readOnly={true} />
+              <label htmlFor="radio-anyType">Any</label>
+            </div>
+            <div className="radio-item">
+              <input id='radio-brackets' type="radio" name='type' value="Brackets" />
               <label htmlFor="radio-brackets">Brackets</label>
             </div>
             <div className="radio-item">
@@ -71,7 +88,11 @@ function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTour
           <span className="name">Accessibility</span>
           <div className="radio">
             <div className="radio-item">
-              <input id='radio-open' type="radio" name='accessibility' value="Open" defaultChecked={true} readOnly={true} />
+              <input id='radio-anyAccessibility' type="radio" name='accessibility' value="any" defaultChecked={true} readOnly={true} />
+              <label htmlFor="radio-anyAccessibility">Any</label>
+            </div>
+            <div className="radio-item">
+              <input id='radio-open' type="radio" name='accessibility' value="Open" />
               <label htmlFor="radio-open">Open</label>
             </div>
             <div className="radio-item">
@@ -91,6 +112,11 @@ function generateCategoryFilterDropdown() {
   let list = container.querySelector('.menu')
   let selected = container.querySelector('.selected')
 
+  let all = document.createElement('li')
+  all.setAttribute("data-value", "All")
+  all.innerHTML = "All"
+  list.appendChild(all)
+
   let categories = api_getCategories()
   categories.forEach(category => {
     let li = document.createElement('li')
@@ -106,7 +132,8 @@ function generateCategoryFilterDropdown() {
 }
 
 function api_getCategories() {
-  return ["League of Legends", "Poker", "Chess", "Fortnite", "Football", "Coding"]
+  // return ["League of Legends", "Poker", "Chess", "Fortnite", "Football", "Coding"]
+  return ["Fortnite", "Football", "Baskbetball", "Counter Strike", "Valorant", "League of Legends", "Tennis"]
 }
 
 function dropdownHandler() {
@@ -166,12 +193,9 @@ function getFilterFormData() {
 
 }
 
-function applyFilter(filters, tournaments) {
-  return [tournaments[0], tournaments[1]]
-}
-
 function defaults() {
   document.getElementById('applyFilters').addEventListener('click', (e) => { e.preventDefault() })
+  document.querySelector('#search button').addEventListener('click', (e) => { e.preventDefault() })
 }
 
 export default Sidebar
