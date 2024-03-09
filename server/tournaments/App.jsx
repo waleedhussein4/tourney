@@ -11,7 +11,7 @@ import Content from './components/Content.jsx'
 function App() {
 
   const [tournaments, setTournaments] = useState([])
-  const [filters, setFilters] = useState()
+  const [filters, setFilters] = useState([])
   const [filteredTourneys, setFilteredTourneys] = useState([])
 
   return (
