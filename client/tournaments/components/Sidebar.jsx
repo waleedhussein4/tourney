@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import '../styles/Sidebar.css'
-import search_icon from '/src/assets/search-icon.png'
 import dropdown_button from '/src/assets/menu-down.svg'
 import { useEffect } from 'react'
 
@@ -13,15 +12,14 @@ function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTour
 
   // on filters change
   useEffect(() => {
-    const filteredData = () => {
-      return tournaments.filter( (tournament) => {      
-        return (tournament.category.toLowerCase() == filters.category.toLowerCase() || filters.category.toLowerCase() == "all")
-            && (tournament.entryFee <= filters.entryFee[1] || filters.entryFee[1] == '')
-            && (tournament.entryFee >= filters.entryFee[0] || filters.entryFee[0] == '')
-            && (tournament.type.toLowerCase() == filters.type.toLowerCase() || filters.type.toLowerCase() == 'any')
-            && (tournament.accessibility.toLowerCase() == filters.accessibility.toLowerCase() || filters.accessibility.toLowerCase() == 'any')
-      })
-    }
+    const filteredData = tournaments.filter( (tournament) => { 
+      return (tournament.title.toLowerCase().includes(filters.search.toLowerCase()) || filters.search == '')
+          && (tournament.category.toLowerCase() == filters.category.toLowerCase() || filters.category.toLowerCase() == "all")
+          && (tournament.entryFee <= filters.entryFee[1] || filters.entryFee[1] == '')
+          && (tournament.entryFee >= filters.entryFee[0] || filters.entryFee[0] == '')
+          && (tournament.type.toLowerCase() == filters.type.toLowerCase() || filters.type.toLowerCase() == 'any')
+          && (tournament.accessibility.toLowerCase() == filters.accessibility.toLowerCase() || filters.accessibility.toLowerCase() == 'any')
+    })
 
     setFilteredTourneys(filteredData)
   }, [filters])
@@ -35,12 +33,12 @@ function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTour
 
   return (
     <div id="sidebar">
-      <form id='search' action="" method='get'>
-        <input id='searchbar' type="search" placeholder='ID, title...' name='search' />
-        <button type='submit'><img className='search_icon' src={search_icon} alt="" /></button>
-      </form>
-      <span className='filters-header'>Filters</span>
+      <span className='filters-header'>Search</span>
       <form id="filters">
+        <div id='filter-search' className="filter" data-name="search">
+          <span className="name">Search</span>
+          <input id='searchbar' type="search" placeholder='ID, title...' name='search' />
+        </div>
         <div id='filter-category' className="filter dropdown" data-name="category">
           <span className="name">Category</span>
           <div className="select">
@@ -168,33 +166,63 @@ function toggledropdown(name) {
   }
 }
 
-function getHighestEntryFee(tournaments) {
-  let highest = 0
-  tournaments.forEach(tourney => {
-    if(tourney.entryFee > highest) {
-      highest = tourney.entryFee
-    }
-  })
-  return highest
-}
-
-
 function getFilterFormData() {
 
+  let search = document.getElementById('searchbar').value
+  let category = document.querySelector('#filter-category .active').innerText
+  let entryFee = [document.querySelector('#filter-entryFee .value-min').value, document.querySelector('#filter-entryFee .value-max').value]
+  let type = document.querySelector('#filter-type input[name="type"]:checked').value
+  let accessibility = document.querySelector('#filter-accessibility input[name="accessibility"]:checked').value
+
+  // const urlParams = new URLSearchParams(window.location.search);
+
+  // urlParams.set('search', search)
+  // urlParams.set('category', category);
+  // urlParams.set('entryFee', entryFee);
+  // urlParams.set('type', type);
+  // urlParams.set('accessibility', accessibility);
+
+  // window.location.search = urlParams;
+
   const data = {
-    "category" : document.querySelector('#filter-category .active').innerText,
-    "entryFee" : [document.querySelector('#filter-entryFee .value-min').value, document.querySelector('#filter-entryFee .value-max').value],
-    "type" : document.querySelector('#filter-type input[name="type"]:checked').value,
-    "accessibility" : document.querySelector('#filter-accessibility input[name="accessibility"]:checked').value,
+    "search" : search,
+    "category" : category,
+    "entryFee" : entryFee,
+    "type" : type,
+    "accessibility" : accessibility,
   }
   
   return data
 
 }
 
+function getFiltersFromURL() {
+  const search =  new URLSearchParams(window.location.search).get('search');
+  const category =  new URLSearchParams(window.location.search).get('category');
+  const entryFee =  new URLSearchParams(window.location.search).get('entryFee');
+  const type =  new URLSearchParams(window.location.search).get('type');
+  const accessibility =  new URLSearchParams(window.location.search).get('accessibility');
+
+  let data = {
+    "search" : search,
+    "category" : category,
+    "entryFee" : entryFee,
+    "type" : type,
+    "accessibility" : accessibility,
+  }
+
+  data = JSON.stringify(data, function (key, value) {
+    if(!value) {
+      return ''
+    }
+    return value
+  });
+  
+  return data
+}
+
 function defaults() {
   document.getElementById('applyFilters').addEventListener('click', (e) => { e.preventDefault() })
-  document.querySelector('#search button').addEventListener('click', (e) => { e.preventDefault() })
 }
 
 export default Sidebar

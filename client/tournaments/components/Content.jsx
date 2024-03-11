@@ -13,7 +13,6 @@ function Content({tournaments, setTournaments, filters, setFilters, filteredTour
       setTournaments(data)
       setFilteredTourneys(data)
     })
-    .then(() => console.log)
     return response
   }, [])
 
