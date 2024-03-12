@@ -20,12 +20,14 @@ export default function Login(props) {
     e.preventDefault();
     console.log(email);
     console.log(pass);
+    console.log(rememberPassword)
     try {
       myDiv.current.textContent = "";
 
       const response = await axios.post("http://localhost:2000/api/user/login", {
         email,
         pass,
+        rememberPassword,
       });
 
       console.log(response.data);
