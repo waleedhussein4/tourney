@@ -1,0 +1,85 @@
+body{
+  margin: 0;
+  padding: 0;
+}
+.container{
+  display: flex;   
+  border-radius: 2px;
+ justify-content: center;
+  background-color: black;
+  height: 100vh;
+  align-items: center;
+}
+.container-center{
+background-color:aliceblue ;
+border-radius: 6px;
+width: 400px;
+}
+
+.container-center h2{
+  color: rgb(65, 40, 228);
+  text-align: center;
+  margin-top: 40px;
+}
+
+.container-center p {
+  color: rgb(53, 50, 50);
+  font-size: small;
+  margin-left: 10px;
+  font-weight: 100;
+  margin-bottom: 0;
+}
+
+.container-center input[type="text"]{
+  margin-left: 10px;
+  border: 2px solid #8c8888; /* Add a border around the input field */
+  border-radius: 5px; /* Add some border radius for rounded corners */
+  outline: none; /* Remove the default focus outline */
+  transition: border-color 0.3s; /* Add a smooth transition effect for the border color */
+  width: 375px;
+  height: 25px;
+  background-color: aliceblue;
+}
+.container-center input[type="password"]{
+  margin-left: 10px;
+  border: 2px solid #8c8888; /* Add a border around the input field */
+  border-radius: 5px; /* Add some border radius for rounded corners */
+  outline: none; /* Remove the default focus outline */
+  transition: border-color 0.3s; /* Add a smooth transition effect for the border color */
+  width: 375px;
+  height: 25px;
+  background-color: aliceblue;
+}
+.container-center input[type="checkbox"]{
+  margin-top: 10px;
+  margin-left: 10px;
+  background-color: aliceblue;
+}
+
+label{
+  font-size: small;
+  color: rgb(53, 50, 50);
+  font-weight: 100;
+  
+}
+
+.container-center input[type="submit"]{
+  background-color:rgb(65, 40, 228);
+  margin-top: 15px; 
+  border-radius: 5px;
+  font-size: small;
+  color: white;
+  width:380px;
+  margin-left: 10px;
+  border:rgb(65, 40, 228);
+  height:30px;
+}#error{
+  color: red;
+    text-align: center;
+}
+button{
+  margin-top: 5px;
+  border: 0;
+  margin-left: 3px;
+  margin-bottom: 5px;
+}
