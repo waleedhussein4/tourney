@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import axios from "axios";
 
 export default function Login(props) {
@@ -59,7 +59,7 @@ export default function Login(props) {
           <div><input type="checkbox" checked={rememberPassword} onChange={handleRememberPasswordChange}></input> Remember password</div>
           <input type="submit" value="Login" id='submit'></input></form>
         <div id="error" ref={myDiv}></div>
-        <button onClick={() => props.onFormSwitch('Signup')}>Don't have an account? Sign up</button>
+        <span>Don't have an account? <a href="/signup/">Sign up</a></span>
       </div>
     </div>
   )
