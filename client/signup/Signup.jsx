@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import axios from "axios"; 
 
 export default function Signup(props) {
@@ -7,14 +7,14 @@ export default function Signup(props) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const emailTester = /^(\w{4,16})@(\w{2,10}(\.\w{2,10})*)\.((com)|(net)|(org)|(edu)|(lb))$/.test(email);
-    const userNameTester = /^[a-zA-Z]+ [a-zA-Z]+$/.test(userName); 
+    const userNameTester = /^[a-zA-Z]{3,12}$/.test(userName); 
     const passwordCheck = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(.{8,})$/.test(password);
     
     if (!emailTester) {
       myDiv.current.textContent = "Invalid email!";
       return false;
     } else if (!userNameTester) {
-      myDiv.current.textContent = "Username must exist";
+      myDiv.current.textContent = "Username must be between 3 and 12 characters long, consisting only of letters.";
       return false;
     } else if (!passwordCheck) {
       myDiv.current.textContent = "Invalid password!";
@@ -65,7 +65,7 @@ export default function Signup(props) {
         </form>
        
         <div id="error" ref={myDiv}></div>
-        <button onClick={()=>props.onFormSwitch('Login')}>Already have an account? Login</button>
+        <span>Already have an account? <a href="/signin/">Login</a></span>
       </div>
     </div>
   )
