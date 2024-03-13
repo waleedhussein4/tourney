@@ -15,16 +15,16 @@ function Nav() {
         <a href="/team/">Team</a>
       </div>
       <div id="account">
-        <a href="index.html">
+        {/* <a href="index.html">
           <img src={profilePic} alt="Profile Icon" className="profilePic" />
-        </a>
-        {/* <span>
+        </a> */}
+        <span>
           <a href="/signin/">Sign In</a>
         </span>
         <span> | </span>
         <span>
           <a href=" /signup/">Sign Up</a>
-        </span> */}
+        </span>
       </div>
     </div>
   );
