@@ -6,10 +6,15 @@
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
+  border-style: solid;
+  border-width: 3px;
+  border-color: rgb(11, 1, 11);
+  
 }
 
 #logo-nav {
-  height: 30pt;
+  height: 40pt;
+  
 }
 
 #options {
@@ -21,6 +26,8 @@
 
 #nav a {
   text-decoration: none;
+  color: white;
+  /* text-shadow: 1px 1px 5px purple;  */
 }
 
 #menu {
@@ -30,4 +37,67 @@
 .search_icon {
   width: 16px;
   height: 16px;
+}
+
+.banner img {
+  width: 300px;
+}
+
+.banner p{
+  color: white;
+  text-align: center;
+  font-size: large;
+  font-weight: bold;
+}
+
+.about {
+  width: 70%;
+  height: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+  padding: 1em;
+  margin-top: 1em;
+}
+
+.about h1{
+  color: white;
+   text-shadow: 5px 5px 5px purple; 
+   box-shadow: 5px 5px 5px 5px purple;
+  text-align: center;
+  font-weight: lighter;
+  font-size: 50px;
+
+}
+.about p{
+  color: white;
+  font-size: 20px;
+  /* font-weight: lighter; */
+  font-weight: normal;
+  text-shadow: 0px 0px 5px purple; 
+  /* box-shadow: 5px 5px 5px 5px purple; */
+}
+
+.about .slogan {
+  text-align: center;
+  color: white;
+  font-size: 50px;
+  font-weight: bold;
+  
+}
+
+.banners {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+}
+
+.profilePic{
+  width: 60px;
+  padding: 10px;
+  border-radius: 30px;
+
 }
