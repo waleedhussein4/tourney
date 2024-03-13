@@ -7,14 +7,14 @@ export default function Signup(props) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const emailTester = /^(\w{4,16})@(\w{2,10}(\.\w{2,10})*)\.((com)|(net)|(org)|(edu)|(lb))$/.test(email);
-    const userNameTester = /^[a-zA-Z]{3,12}$/.test(userName); 
+    const userNameTester = /^[a-zA-Z0-9]{3,12}$/.test(userName); 
     const passwordCheck = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(.{8,})$/.test(password);
     
     if (!emailTester) {
       myDiv.current.textContent = "Invalid email!";
       return false;
     } else if (!userNameTester) {
-      myDiv.current.textContent = "Username must be between 3 and 12 characters long, consisting only of letters.";
+      myDiv.current.textContent = "Username must be between 3 and 12 alphanumeric characters long.";
       return false;
     } else if (!passwordCheck) {
       myDiv.current.textContent = "Invalid password!";
