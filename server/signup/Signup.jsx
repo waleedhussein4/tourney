@@ -27,11 +27,10 @@ export default function Signup(props) {
         myDiv.current.textContent = ""; 
 
         
-        const response = await axios.post("Localhost2000:/api/user/signup", {
+        const response = await axios.post("http://localhost:2000/api/user/signup", {
           email,
           userName,
-          password,
-          confirmPassword
+          password
         });
 
         
