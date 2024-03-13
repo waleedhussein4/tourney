@@ -6,9 +6,7 @@
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
-  border-style: solid;
-  border-width: 3px;
-  border-color: rgb(11, 1, 11);
+  background-color: rgb(30, 6, 30);
 }
 
 #logo-nav {
@@ -37,7 +35,8 @@
 }
 
 .banner img {
-  width: 300px;
+  width: 400px;
+  border: 6px solid rgb(30, 6, 30);
 }
 
 .banner p{
@@ -61,8 +60,6 @@
 
 .about h1{
   color: white;
-   text-shadow: 5px 5px 5px purple; 
-   box-shadow: 5px 5px 5px 5px purple;
   text-align: center;
   font-weight: lighter;
   font-size: 50px;
@@ -73,7 +70,6 @@
   color: white;
   font-size: 20px;
   font-weight: normal;
-  text-shadow: 0px 0px 5px purple; 
 }
 
 .about .slogan {

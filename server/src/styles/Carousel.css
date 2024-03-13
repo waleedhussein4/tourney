@@ -1,9 +1,8 @@
 .carousel {
-  border: 3px solid black;
-  width: 90%;
+  width: 100%;
   overflow-x: scroll;
   padding: 30px;
-  margin: 1em;
+  margin: 1em 0 1em 0;
 }
 
 .carousel__container {
@@ -14,10 +13,10 @@
 }
 
 .categories__title {
-  color: rgb(77, 55, 102);
+  color: white;
   font-size: 28px;
   position: absolute;
-  padding-left: 30px;
+  padding-left: 10px;
 }
 
 .carousel-item {
