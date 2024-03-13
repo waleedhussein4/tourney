@@ -1,7 +1,7 @@
 import "../styles/Main.css";
 import "../styles/App.css";
+import Carousel from "./Carousel";
 
-// export default Main
 import BattleRoyalImage from "../assets/BattleRoyal.jpg"; // Adjust the path if necessary
 import bracket from "../assets/bracket.jpg";
 
@@ -9,7 +9,7 @@ function Main() {
   return (
     <div id="main">
       <div className="about">
-        <h1> YOUR JOYFULL LIFE BEGINS WITH US!</h1>
+        <h1> YOUR JOYFUL LIFE BEGINS HERE</h1>
         <p>
           Welcome to our exciting tournament website! Here, you'll enter a world
           of fierce competition and thrilling battles. Our platform is designed
@@ -42,6 +42,29 @@ function Main() {
           </a>
         </div>
       </div>
+      <Carousel
+        title="Trending"
+        data={[
+          {
+            UUID: '8930c122-0016-49d9-9437-049bbc7323bf',
+            title: "Fortnite FNCS",
+            description: "March Solo Cash Cup",
+            image: "https://m.media-amazon.com/images/M/MV5BOGY3ZjM3NWUtMWNiMi00OTcwLWIxN2UtMjNhMDhmZWRlNzRkXkEyXkFqcGdeQXVyNjMxNzQ2NTQ@._V1_.jpg"
+          },
+          {
+            UUID: '4a265b77-fd44-47ca-a3b9-6238454e0f6d',
+            title: "Counter Strike Gold Championship",
+            description: "The highly anticipated annual tournament",
+            image: "https://static.displate.com/857x1200/displate/2023-06-12/6e217abc7f5bb5d0dc56e68752193a11_5c51574f5f2f216f9ef25a0d08fa6400.jpg"
+          }, 
+          {
+            UUID: '0c431807-b67f-4f7f-a2d0-89c062935074',
+            title: "Tennis Skirmish Casual",
+            description: "BBQ after!",
+            image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/2013_Australian_Open_-_Guillaume_Rufin.jpg/800px-2013_Australian_Open_-_Guillaume_Rufin.jpg"
+          }, 
+        ]}
+      />
     </div>
   );
 }
