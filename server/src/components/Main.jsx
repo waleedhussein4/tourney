@@ -4,7 +4,6 @@ import "../styles/App.css";
 // export default Main
 import BattleRoyalImage from "../assets/BattleRoyal.jpg"; // Adjust the path if necessary
 import bracket from "../assets/bracket.jpg";
-import bigImg from "../assets/body1.jpeg";
 
 function Main() {
   return (
