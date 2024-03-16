@@ -9,10 +9,7 @@ function Content({tournaments, setTournaments, filters, setFilters, filteredTour
   const fetchData = useCallback(async () => {
     const response = await fetch(URL)
     .then(res => res.json())
-    .then(data => {
-      setTournaments(data)
-      setFilteredTourneys(data)
-    })
+    .then(data => setTournaments(data))
     return response
   }, [])
 
