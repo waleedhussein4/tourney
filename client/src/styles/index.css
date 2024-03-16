@@ -1,6 +1,9 @@
 :root {
   font-family: Raleway;
   font-size: 14px;
+  --color-primary: black;
+  --color-secondary: darkgray;
+  --color-tertiary: rgb(128, 50, 128);
 }
 
 @font-face {
