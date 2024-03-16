@@ -1,3 +1,5 @@
+import '../styles/Nav.css'
+
 import LOGO1 from "../assets/LOGO1.jpg";
 import profilePic from "../assets/profilePic.png";
 
