@@ -1,11 +1,10 @@
-import menu from "../assets/menu.png";
 import LOGO1 from "../assets/LOGO1.jpg";
 import profilePic from "../assets/profilePic.png";
 
 function Nav() {
   return (
     <div id="nav">
-      <img id="menu" src={menu} alt="" />
+      {/* <img id="menu" src={menu} alt="" /> */}
       <a href="/">
         <img id="logo-nav" src={LOGO1} alt="Logo" />
       </a>
