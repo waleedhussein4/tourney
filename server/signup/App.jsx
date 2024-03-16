@@ -1,8 +1,10 @@
 import '../signin/App.css'
 import Signup from './Signup'
+import  authContext  from './authContext'
 function App() {
   return (
-    <Signup />
+    <authContext>
+    <Signup /></authContext>
   )
 }
 
