@@ -65,7 +65,7 @@ export default function Signup(props) {
         </form>
        
         <div id="error" ref={myDiv}></div>
-        <span>Already have an account? <a href="/signin/">Login</a></span>
+        <span id="account">Already have an account? <a href="/signin/">Login</a></span>
       </div>
     </div>
   )
