@@ -1,5 +1,6 @@
 #sidebar {
-  background-color: blueviolet;
+  background-color: var(--color-primary);
+  color: white;
   height: calc(100vh - 50pt);
   display: flex;
   flex-direction: column;
@@ -17,7 +18,6 @@
 }
 
 .filters-header {
-  color: white;
   font-weight: 700;
   font-size: 1.2em;
   text-align: center;
@@ -52,6 +52,7 @@
   white-space: nowrap;  
   text-overflow: ellipsis;
   user-select: none;
+  color: black;
 }
 
 .select .imgContainer {
@@ -72,6 +73,7 @@
   display: none;
   position: absolute;
   background-color: white;
+  color: black;
   list-style: none;
   list-style-position: inside;
   padding: 0;
@@ -102,8 +104,10 @@
 #filters {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 1em;
   user-select: none;
+  flex: 1;
 }
 
 .filter .name {
