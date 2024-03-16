@@ -58,10 +58,10 @@ export default function Login(props) {
           <input type="text" id="username" placeholder='Enter a username or an email' onChange={(e) => setEmail(e.target.value)}></input>
           <p>Password</p>
           <input type="password" id="password" placeholder='Enter a password' value={pass} onChange={(e) => setPass(e.target.value)}></input>
-          <div><input type="checkbox" checked={rememberPassword} onChange={handleRememberPasswordChange}></input> Remember password</div>
+          <div id="rememberPassword"><input type="checkbox" checked={rememberPassword} onChange={handleRememberPasswordChange}></input> Remember password</div>
           <input type="submit" value="Login" id='submit'></input></form>
         <div id="error" ref={myDiv}></div>
-        <span>Don't have an account? <a href="/signup/">Sign up</a></span>
+        <span id="account">Don't have an account? <a href="/signup/">Sign up</a></span>
       </div>
     </div>
   )
