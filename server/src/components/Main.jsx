@@ -27,12 +27,12 @@ function Main() {
       <br></br>
       <div className="banners">
         <div className="banner">
-          <a href="">
+          <a href="/tournaments/?type=Brackets">
             <img src={bracket} alt="Bracket Tournament" />
           </a>
         </div>
         <div className="banner">
-          <a href="">
+        <a href="/tournaments/?type=Battle Royale">
             <img
               src={BattleRoyalImage}
               alt="Battle Royale Tournament"
