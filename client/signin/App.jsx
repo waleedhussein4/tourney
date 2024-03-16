@@ -1,13 +1,13 @@
 import './App.css'
 import Login from './Login'
 import '/src/styles/index.css'
-import  authContext  from './authContext'
+import { AuthContextProvider } from './authContext'
 
 function App() {
   return (
-    <authContext>
+    <AuthContextProvider>
     <Login />
-    </authContext>
+    </AuthContextProvider>
   )
 }
 
