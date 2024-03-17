@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useSignup } from "./useSignup";
 
-export default function Signup(props) {
+function Signup(props) {
   const [userName, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,8 +31,7 @@ export default function Signup(props) {
       myDiv.current.textContent = "";
       await signup(userName ,email , password)
     }
-
-  
+  }
 
   return (
     <div className="container">
@@ -57,4 +56,5 @@ export default function Signup(props) {
     </div>
   )
 }
-}
+
+export default Signup
