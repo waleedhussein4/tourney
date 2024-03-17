@@ -2,6 +2,10 @@ import { useRef, useState } from "react";
 import { useSignup } from "./useSignup";
 
 export default function Signup(props) {
+  const [userName, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const myDiv = useRef(null);
   const[signup , error , isLoading]= useSignup()
 
@@ -28,10 +32,7 @@ export default function Signup(props) {
       await signup(userName ,email , password)
     }
 
-  const [userName, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  
 
   return (
     <div className="container">
