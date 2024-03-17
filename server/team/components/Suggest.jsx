@@ -5,7 +5,7 @@ function Suggest() {
       <div className="join">
         <h2>Join a team</h2>
         <form id="joinTeam" action="" method="POST">
-          <label htmlFor="teamLink">Enter invite link or team ID </label>
+          <label htmlFor="teamLink">Enter team ID </label>
           <input type="text" id="teamLink" />
           <button>Join</button>
         </form>
