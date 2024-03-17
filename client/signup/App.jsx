@@ -4,7 +4,8 @@ import  { AuthContextProvider }  from './authContext'
 function App() {
   return (
     <AuthContextProvider>
-    <Signup /></AuthContextProvider>
+    <Signup />
+    </AuthContextProvider>
   )
 }
 
