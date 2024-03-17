@@ -70,7 +70,8 @@
 }
 
 .team {
-  background-color: darkgray;
+  background-color: black;
+  border: 2px solid white;
   display: flex;
   flex-direction: column;
   padding: 0.4em;
@@ -79,6 +80,21 @@
   justify-content: space-between;
 }
 
-.team .title {
+.team .name {
   text-align: center;
+  user-select: none;
+  color: var(--color-tertiary);
+}
+
+.team a {
+  text-decoration: none;
+  color: unset;
+}
+
+.team .view {
+  user-select: none;
+}
+
+.team .view:hover {
+  cursor: pointer;
 }
