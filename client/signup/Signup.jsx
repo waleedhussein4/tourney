@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
-import axios from "axios"; 
+import { useSignup } from "./useSignup";
 
 export default function Signup(props) {
   const myDiv = useRef(null);
+  const[signup , error , isLoading]= useSignup()
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,7 +17,6 @@ export default function Signup(props) {
     } else if (!userNameTester) {
       myDiv.current.textContent = "Username must be between 3 and 12 alphanumeric characters long.";
       return false;
-      return false;
     } else if (!passwordCheck) {
       myDiv.current.textContent = "Invalid password!";
       return false;
@@ -24,24 +24,9 @@ export default function Signup(props) {
       myDiv.current.textContent = "confirmPassword must match the password";
       return false;
     } else {
-      try {
-        myDiv.current.textContent = ""; 
-
-        
-        const response = await axios.post("http://localhost:2000/api/user/signup", {
-          email,
-          userName,
-          password,
-        });
-
-        
-        console.log(response.data); 
-      } catch (error) {
-        console.error("Error sending form data:", error);
-        myDiv.current.textContent = "An error occurred while processing your request. Please try again later.";
-      }
+      myDiv.current.textContent = "";
+      await signup(userName ,email , password)
     }
-  };
 
   const [userName, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -61,7 +46,8 @@ export default function Signup(props) {
           <input type="password" placeholder='Enter a password' id="password" onChange={(e)=>setPassword(e.target.value)}></input>
           <p>Confirm Password</p>
           <input type="password" id="confirmPassword" placeholder='Confirm your password'onChange={(e)=>setConfirmPassword(e.target.value)} ></input>
-          <input type="submit" value="Signup" id='submit'></input>
+          <input type="submit" disabled={isLoading} value="Signup" id='submit'></input>
+          {error && <div>{error}</div>}
         </form>
        
         <div id="error" ref={myDiv}></div>
@@ -69,4 +55,5 @@ export default function Signup(props) {
       </div>
     </div>
   )
+}
 }

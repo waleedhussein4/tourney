@@ -1,13 +1,14 @@
 import { useRef, useState, useEffect } from "react";
-import axios from "axios";
+import { useLogin } from "./useLogin";
+
 
 export default function Login(props) {
   const myDiv = useRef(null);
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [rememberPassword, setRememberPassword] = useState(false);
+  const[login , error , isLoading]= useLogin()
 
-  
   useEffect(() => {
     const rememberedPassword = localStorage.getItem('rememberedPassword');
     if (rememberedPassword) {
@@ -21,20 +22,7 @@ export default function Login(props) {
     console.log(email);
     console.log(pass);
     console.log(rememberPassword)
-    try {
-      myDiv.current.textContent = "";
-
-      const response = await axios.post("http://localhost:2000/api/user/login", {
-        email,
-        pass,
-        rememberPassword,
-      });
-
-      console.log(response.data);
-    } catch (error) {
-      console.error("Error sending form data:", error);
-      myDiv.current.textContent = "An error occurred while processing your request. Please try again later.";
-    }
+    await login(userName , password , rememberPassword)
   }
 
 
@@ -59,7 +47,9 @@ export default function Login(props) {
           <p>Password</p>
           <input type="password" id="password" placeholder='Enter a password' value={pass} onChange={(e) => setPass(e.target.value)}></input>
           <div id="rememberPassword"><input type="checkbox" checked={rememberPassword} onChange={handleRememberPasswordChange}></input> Remember password</div>
-          <input type="submit" value="Login" id='submit'></input></form>
+          <input type="submit" value="Login" disabled={isLoading} id='submit'></input>
+          {error && <div>{error}</div>}
+          </form>
         <div id="error" ref={myDiv}></div>
         <span id="account">Don't have an account? <a href="/signup/">Sign up</a></span>
       </div>
