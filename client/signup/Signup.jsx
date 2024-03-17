@@ -2,8 +2,8 @@ import { useRef, useState } from "react";
 import { useSignup } from "./useSignup";
 
 function Signup(props) {
-  const [userName, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [userName, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const myDiv = useRef(null);
@@ -29,7 +29,8 @@ function Signup(props) {
       return false;
     } else {
       myDiv.current.textContent = "";
-      await signup(userName ,email , password)
+      await signup(email ,userName , password)
+      console.log("sent")
     }
   }
 

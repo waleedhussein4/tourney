@@ -22,7 +22,7 @@ export default function Login(props) {
     console.log(email);
     console.log(pass);
     console.log(rememberPassword)
-    await login(email , pass , rememberPassword)
+    await login(email , pass)
   }
 
 
