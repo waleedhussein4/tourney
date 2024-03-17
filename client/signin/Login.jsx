@@ -1,13 +1,13 @@
 import { useRef, useState, useEffect } from "react";
-import { useLogin } from "./useLogin";
-
+import {useLogin} from './useLogin'
+console.log(useLogin);
 
 export default function Login(props) {
   const myDiv = useRef(null);
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [rememberPassword, setRememberPassword] = useState(false);
-  const[login , error , isLoading]= useLogin()
+  const[login , error , isLoading]= useLogin();
 
   useEffect(() => {
     const rememberedPassword = localStorage.getItem('rememberedPassword');
@@ -22,7 +22,7 @@ export default function Login(props) {
     console.log(email);
     console.log(pass);
     console.log(rememberPassword)
-    await login(userName , password , rememberPassword)
+    await login(email , pass , rememberPassword)
   }
 
 
