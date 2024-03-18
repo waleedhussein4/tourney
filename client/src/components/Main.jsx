@@ -1,5 +1,4 @@
 import "../styles/Main.css";
-import "../styles/App.css";
 
 import Carousel from "./Carousel";
 import BattleRoyalImage from "../assets/BattleRoyal.jpg";
