@@ -3,7 +3,6 @@ function CarouselItems(props) {
   let items = []
 
   Array.from(props.data).forEach(item => {
-    console.log('item: ' + item)
     items.push(CarouselItem(item))
   })
 
@@ -13,7 +12,6 @@ function CarouselItems(props) {
 }
 
 function CarouselItem(data) {
-  console.log(data)
   return (
     <a href={`/tournament/?UUID=${data.UUID}`}>
       <div className="carousel-item">
