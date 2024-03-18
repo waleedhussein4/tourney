@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-import 'nouislider/dist/nouislider.css';
 import '/src/styles/App.css'
 import './styles/App.css'
 
