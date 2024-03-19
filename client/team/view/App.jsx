@@ -6,7 +6,7 @@ import './styles/App.css'
 import { useState, useEffect } from 'react'
 
 const teamURL = 'https://api.npoint.io/210cd82412e3a35bc6e2'
-const membersURL = 'https://api.npoint.io/faf09f3f8f33b8a5a37b'
+const membersURL = 'https://api.npoint.io/f04f5eb3c2a4f955edcc'
 
 function App() {
 
