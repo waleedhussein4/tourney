@@ -28,7 +28,7 @@ function App() {
     <>
       <Nav />
       <Main
-        teams={[]}
+        teams={teams}
         loadingTeams={loadingTeams}
       />
     </>
