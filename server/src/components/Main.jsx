@@ -44,7 +44,7 @@ function Main() {
         title="Trending"
         data={[
           {
-            UUID: '8930c122-0016-49d9-9437-049bbc7323bf',
+            UUID: '89b72cfe-0b87-4395-8230-8e8e1f571cb7',
             title: "Fortnite FNCS",
             description: "March Solo Cash Cup",
             image: "https://m.media-amazon.com/images/M/MV5BOGY3ZjM3NWUtMWNiMi00OTcwLWIxN2UtMjNhMDhmZWRlNzRkXkEyXkFqcGdeQXVyNjMxNzQ2NTQ@._V1_.jpg"
