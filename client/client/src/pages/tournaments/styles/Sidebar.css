@@ -1,0 +1,150 @@
+#Tournaments #sidebar {
+  background-color: var(--color-primary);
+  color: white;
+  height: calc(100vh - 50pt);
+  display: flex;
+  flex-direction: column;
+  padding: 1em;
+  gap: 1em;
+}
+
+#Tournaments #searchbar {
+  padding: 0.6em;
+  width: 100%
+}
+
+#Tournaments #searchbar:focus {
+  outline: none;
+}
+
+#Tournaments .filters-header {
+  font-weight: 700;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+#Tournaments .select {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 140px;
+  height: 30px;
+  background-color: white;
+  min-width: 140px;
+}
+
+#Tournaments .select:hover {
+  cursor: pointer;
+}
+
+#Tournaments .selected-wrapper {
+  display: flex;
+  align-items: center;
+
+  width: 80%;
+  border: 2px solid black;
+  padding: 0.2em;
+
+}
+
+#Tournaments .selected {
+  overflow: hidden;
+  white-space: nowrap;  
+  text-overflow: ellipsis;
+  user-select: none;
+  color: black;
+}
+
+#Tournaments .select .imgContainer {
+  width: 20%;
+  border: 2px solid black;
+  border-left: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#Tournaments .select img {
+  width: 100%;
+  max-width: 100%;
+}
+
+#Tournaments .menu {
+  display: none;
+  position: absolute;
+  background-color: white;
+  color: black;
+  list-style: none;
+  list-style-position: inside;
+  padding: 0;
+  margin: 0;
+  width: 140px;
+  border: 2px solid black;
+  border-top: none;
+  z-index: 2;
+}
+
+#Tournaments .menu li:hover {
+  cursor: pointer;
+  background-color: rgb(229, 229, 229);
+}
+
+#Tournaments .menu li {
+  height: 30px;
+  user-select: none;
+  padding: 0.2em;
+  display: flex;
+  align-items: center;
+}
+
+#Tournaments .active {
+  background-color: rgb(205, 205, 205);
+}
+
+#Tournaments #filters {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1em;
+  user-select: none;
+  flex: 1;
+}
+
+#Tournaments .filter .name {
+  font-weight: 600;
+  font-size: 1.1em;
+  margin-bottom: 0.2e;
+}
+
+#Tournaments .radio {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+#Tournaments .radio-item {
+  display: flex;
+  flex-direction: row;
+  gap: 0.2em;
+  justify-content: center;
+  align-items: center;
+  height: 1em;
+}
+
+#Tournaments .valueDisplay {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+#Tournaments .valueDisplay>* {
+  display: flex;
+  flex-direction: row;
+  gap: 0.1em;
+  justify-content: center;
+  align-items: center;
+}
+
+#Tournaments .valueDisplay input {
+  width: 4em;
+}

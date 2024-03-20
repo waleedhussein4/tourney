@@ -1,0 +1,91 @@
+#ViewTeam {
+  display: flex;
+  flex-direction: column;
+  color: white;
+  height: 100%;
+}
+
+#ViewTeam #main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1em;
+  align-items: center;
+  background-color: black;
+  flex: 1;
+}
+
+#ViewTeam #team {
+  padding: 2em;
+  width: 100%;
+  min-height: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2em;
+}
+
+#ViewTeam .leaveTeam, .deleteTeam {
+  background-color: var(--color-red);
+  color: white;
+  border: none;
+  font-weight: bold;
+  padding: 4pt;
+  width: fit-content;
+  font-size: 1.2rem;
+}
+
+#ViewTeam #team h1 {
+  margin-bottom: 0.5em;
+}
+
+#ViewTeam .members {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  flex: 1;
+  width: 100%;
+}
+
+#ViewTeam .member {
+  font-size: 1.2rem;
+  height: 2em;
+  width: 100%;
+  border: 2px solid white;
+  padding: 0.5em;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#ViewTeam .crown {
+  height: 1em;
+  margin-right: 8pt;
+}
+
+#ViewTeam .name {
+  font-weight: bold;
+}
+
+#ViewTeam .buttonsWrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+}
+
+#ViewTeam .buttonsWrapper button {
+  background-color: var(--color-red);
+  color: white;
+  height: 100%;
+  border: none;
+  font-weight: bold;
+  padding: 2pt;
+  display: none;
+}
+
+#ViewTeam button:hover {
+  cursor: pointer;
+  opacity: 0.8;
+}

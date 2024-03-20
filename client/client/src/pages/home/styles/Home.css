@@ -1,0 +1,66 @@
+#Home .search_icon {
+  width: 16px;
+  height: 16px;
+}
+
+#Home .banner img {
+  width: 400px;
+  border: 6px solid rgb(30, 6, 30);
+}
+
+#Home .banner p{
+  color: white;
+  text-align: center;
+  font-size: large;
+  font-weight: bold;
+}
+
+#Home .about {
+  width: 70%;
+  height: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+  padding: 1em;
+  margin-top: 1em;
+  gap: 2em;
+}
+
+#Home .about h1{
+  color: white;
+  text-align: center;
+  font-weight: lighter;
+  font-size: 50px;
+
+}
+
+#Home .about p{
+  color: white;
+  font-size: 20px;
+  font-weight: normal;
+}
+
+#Home .about .slogan {
+  text-align: center;
+  color: white;
+  font-size: 50px;
+  font-weight: bold;
+}
+
+#Home .banners {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+}
+
+#Home #main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1em;
+  align-items: center;
+  background-color: black;
+}
