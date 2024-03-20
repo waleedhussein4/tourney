@@ -1,0 +1,91 @@
+#Signin body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#Signin .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-image: url("./assets/abstract-digital-grid-vector-black-background_53876-111550.avif");
+}
+
+#Signin .container-center {
+  background-image: url("./assets/abstract-digital-grid-vector-black-background_53876-111550.avif");
+  border-radius: 6px;
+  width: 400px;
+  padding: 20px;
+  border: 1px solid whitesmoke;
+}
+
+#Signin .container-center h2 {
+  color: #03fcff;
+  text-align: center;
+  margin-top: 0;
+}
+
+#Signin .container-center p {
+  color: white;
+  font-size: small;
+  margin: 10px 0;
+}
+
+#Signin .container-center input[type="text"],
+#Signin .container-center input[type="password"] {
+  margin-bottom: 10px;
+  border: 2px solid #8c8888;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.3s;
+  width: calc(100% - 10px);
+  height: 25px;
+  background-color: aliceblue;
+  padding: 5px;
+}
+
+#Signin .container-center input[type="checkbox"] {
+  margin-top: 10px;
+  margin-right: 5px;
+  background-color: aliceblue;
+  
+}
+
+#Signin #rememberPassword {
+  color: whitesmoke;
+  font-size: small;
+}
+
+#Signin #error {
+  color: red;
+  text-align: center;
+  font-size: small;
+  background-color: rgba(255, 0, 0, 0.1);
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+#Signin input[type="submit"] {
+  background-color: whitesmoke;
+  margin-top: 15px;
+  border-radius: 5px;
+  font-size: small;
+  color: gray;
+  width: calc(100% - 10px);
+  border: none;
+  height: 35px;
+  cursor: pointer;
+}
+
+#Signin input[type="submit"]:hover {
+  background-color: #03fcff;
+}
+
+#Signin a {
+  color: whitesmoke;
+}
+
+#Signin #account{
+  color: whitesmoke;
+}

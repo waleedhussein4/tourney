@@ -1,0 +1,57 @@
+#Tournaments {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+#Tournaments #nav {
+  flex: 1 0 auto;
+}
+
+#Tournaments #sidebar {
+  flex: 0.2;
+}
+
+#Tournaments #content {
+  flex: 1;
+  padding: 0.8em;
+}
+
+#Tournaments #tournaments {
+  display: grid;
+  gap: 1em;
+  overflow: hidden;
+  overflow-y: auto;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  padding: 0.5em;
+}
+
+#Tournaments .tournament {
+  background-color: darkgray;
+  display: flex;
+  flex-direction: column;
+  padding: 0.4em;
+  gap: 0.3em;
+}
+
+#Tournaments .tournament .title {
+  text-align: center;
+}
+
+#Tournaments .tournament a {
+  text-decoration: none;
+  color: unset;
+}
+
+#Tournaments #content h1 {
+  text-align: center;
+}
+
+#Tournaments .tournament .view {
+  user-select: none;
+}
+
+#Tournaments .tournament .view:hover {
+  cursor: pointer;
+}
+
