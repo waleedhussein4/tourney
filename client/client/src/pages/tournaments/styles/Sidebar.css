@@ -23,82 +23,88 @@
   text-align: center;
 }
 
-#Tournaments .select {
+#Tournaments #filter-category-input {
+  padding: 0.6em;
+  width: 100%
+}
+
+#Tournaments #filter-category-input:focus {
+  outline: none;
+}
+
+#Tournaments #category-search-results {
+  background-color: black;
+  border: 2px solid green;
+  width: calc(30% - 2em);
+  
+  max-height: 200pt;
+
+  overflow-y: auto;
+  position: absolute;
+  
+  display: none;
+  color: black;
+}
+
+#Tournaments #category-search-results::after {
+  display: none;
+}
+
+#Tournaments .category-search-result {
+  background-color: black;
+  height: 75pt;
+  width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: center;
-  width: 140px;
-  height: 30px;
-  background-color: white;
-  min-width: 140px;
+  align-items: center;
+  justify-content: space-between;
 }
 
-#Tournaments .select:hover {
+#Tournaments .category-search-result:hover {
   cursor: pointer;
+  background-color: rgb(34, 34, 34);
 }
 
-#Tournaments .selected-wrapper {
-  display: flex;
-  align-items: center;
-
-  width: 80%;
-  border: 2px solid black;
-  padding: 0.2em;
-
+#Tournaments .category-search-result-img {
+  height: 100%;
+  width: 50pt;
 }
 
-#Tournaments .selected {
-  overflow: hidden;
-  white-space: nowrap;  
-  text-overflow: ellipsis;
-  user-select: none;
-  color: black;
-}
-
-#Tournaments .select .imgContainer {
-  width: 20%;
-  border: 2px solid black;
-  border-left: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#Tournaments .select img {
+#Tournaments .category-search-result-img img {
+  height: 100%;
   width: 100%;
-  max-width: 100%;
+  object-fit: cover;
 }
 
-#Tournaments .menu {
-  display: none;
-  position: absolute;
-  background-color: white;
-  color: black;
-  list-style: none;
-  list-style-position: inside;
-  padding: 0;
-  margin: 0;
-  width: 140px;
-  border: 2px solid black;
-  border-top: none;
-  z-index: 2;
+#Tournaments .category-search-result>p {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  color: var(--color-tertiary);
+  flex: 1;
+  text-align: center;
+  font-size: 1.2em;
 }
 
-#Tournaments .menu li:hover {
-  cursor: pointer;
-  background-color: rgb(229, 229, 229);
+#Tournaments .active-category {
+  background-color: rgb(34, 34, 34);
 }
 
-#Tournaments .menu li {
-  height: 30px;
-  user-select: none;
-  padding: 0.2em;
-  display: flex;
-  align-items: center;
+::-webkit-scrollbar {
+  width: 10px;
+  height: 100%;
 }
 
-#Tournaments .active {
-  background-color: rgb(205, 205, 205);
+::-webkit-scrollbar-track {
+  background: black; 
+}
+ 
+::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
 }
 
 #Tournaments #filters {
