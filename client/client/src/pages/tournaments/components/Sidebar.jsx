@@ -125,6 +125,7 @@ function getFiltersFromURL() {
   let type =  new URLSearchParams(window.location.search).get('type');
   let accessibility =  new URLSearchParams(window.location.search).get('accessibility');
 
+  if(!category) {category = "All"}
   if(!type) {type = "Any"}
   if(!accessibility) {accessibility = "Any"}
 
@@ -157,8 +158,10 @@ function refillFiltersForm(urlFilters) {
   el_search.value = urlFilters.search
 
   // category
-  let el_category = document.getElementById('filter-category-input')
-  el_category.value = urlFilters.category 
+  if(urlFilters.category != "All") {
+    let el_category = document.getElementById('filter-category-input')
+    el_category.value = urlFilters.category
+  }
 
   // entry fee
   document.querySelector('.value-min').value = urlFilters.entryFee.substring(0, urlFilters.entryFee.indexOf(","));
