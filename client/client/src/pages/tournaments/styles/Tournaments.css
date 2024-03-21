@@ -9,12 +9,14 @@
 }
 
 #Tournaments #sidebar {
-  flex: 0.2;
+  /* flex: 0.2; */
+  width: 30%;
 }
 
 #Tournaments #content {
   flex: 1;
-  padding: 0.8em;
+  /* padding: 0.8em; */
+  width: 70%;
 }
 
 #Tournaments #tournaments {
