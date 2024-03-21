@@ -1,13 +1,9 @@
 /* eslint-disable react/prop-types */
 import '../styles/Sidebar.css'
-import dropdown_button from '/src/assets/menu-down.svg'
 import { useEffect } from 'react'
-
-// load > getParams > getTourneys > Display > filter tourneys
 
 function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTourneys, setFilteredTourneys}) {
 
-  // on submit button click
   const handleClick = () => {
     submitForm()
   }
@@ -27,14 +23,10 @@ function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTour
     setFilteredTourneys(filteredData)
   }, [tournaments])
 
-  // on sidebar load
   useEffect(() => {
-    generateCategoryFilterDropdown()
-    dropdownHandler()
     defaults()
 
     let urlFilters = getFiltersFromURL()
-    console.log(urlFilters)
     setFilters(urlFilters)
     refillFiltersForm(urlFilters)
   }, [])
@@ -47,17 +39,10 @@ function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTour
           <span className="name">Search</span>
           <input id='searchbar' type="search" placeholder='ID, title...' name='search' />
         </div>
-        <div id='filter-category' className="filter dropdown" data-name="category">
+        <div id='filter-category' className="filter" data-name="category">
           <span className="name">Category</span>
-          <div className="select">
-            <div className="selected-wrapper">
-              <span className="selected"></span>
-            </div>
-            <div className="imgContainer">
-              <img src={dropdown_button} alt="" />
-            </div>
-          </div>
-          <ul className='menu category'></ul>
+          <input id='filter-category-input' type="text" placeholder='Search' />
+          <div id="category-search-results"></div>
         </div>
         <div id='filter-entryFee' className="filter" data-name="entryFee">
           <span className="name">Entry Fee</span>
@@ -113,71 +98,10 @@ function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTour
   )
 }
 
-function generateCategoryFilterDropdown() {
-  let container = document.getElementById('filter-category')
-  let list = container.querySelector('.menu')
-  let selected = container.querySelector('.selected')
-
-  let all = document.createElement('li')
-  all.setAttribute("data-value", "All")
-  all.innerHTML = "All"
-  list.appendChild(all)
-
-  let categories = api_getCategories()
-  categories.forEach(category => {
-    let li = document.createElement('li')
-    li.setAttribute("data-value", category)
-    li.innerHTML = category
-
-    list.appendChild(li)
-  })
-
-  let first = list.childNodes[0]
-  selected.innerText = first.innerText
-  first.classList.add('active')
-}
-
-function api_getCategories() {
-  return ["Fortnite", "Football", "Baskbetball", "Counter Strike", "Valorant", "League of Legends", "Tennis"]
-}
-
-function dropdownHandler() {
-  let dropdowns = document.querySelectorAll(".dropdown")
-
-  Array.from(dropdowns).forEach(dropdown => {
-    let name = dropdown.dataset.name
-    let select = dropdown.querySelector('.select')
-    select.addEventListener('click', () => { toggledropdown(name) } )
-
-    Array.from(dropdown.querySelectorAll('.menu li')).forEach(option => {
-      option.addEventListener('click', () => {
-        let value = option.dataset.value
-        let selected = dropdown.querySelector('.selected')
-        let active = dropdown.querySelector('.active')
-        active.classList.remove('active')
-        option.classList.add('active')
-        selected.innerText = value
-        toggledropdown(name)
-      })
-    })
-  })
-}
-
-function toggledropdown(name) {
-  let menu = document.querySelector(".menu." + name)
-  let display = window.getComputedStyle(menu).display
-  if(display == "none") {
-    menu.style.display = "block"
-  }
-  else {
-    menu.style.display = "none"
-  }
-}
-
 function getFilterFormData() {
 
   let search = document.getElementById('searchbar').value
-  let category = document.querySelector('#filter-category .active').innerText
+  let category = document.getElementById('filter-category-input').value
   let entryFee = [document.querySelector('#filter-entryFee .value-min').value, document.querySelector('#filter-entryFee .value-max').value]
   let type = document.querySelector('#filter-type input[name="type"]:checked').value
   let accessibility = document.querySelector('#filter-accessibility input[name="accessibility"]:checked').value
@@ -201,7 +125,6 @@ function getFiltersFromURL() {
   let type =  new URLSearchParams(window.location.search).get('type');
   let accessibility =  new URLSearchParams(window.location.search).get('accessibility');
 
-  if(!category) {category = "All"}
   if(!type) {type = "Any"}
   if(!accessibility) {accessibility = "Any"}
 
@@ -234,22 +157,8 @@ function refillFiltersForm(urlFilters) {
   el_search.value = urlFilters.search
 
   // category
-  let el_category_selected = document.querySelector('#filter-category .selected')
-  el_category_selected.innerHTML = urlFilters.category
-  document.querySelector('.active').classList.remove('active')
-
-  function findCategory() {
-    let items = document.querySelectorAll('.menu li')
-    let target = undefined
-    Array.from(items).forEach(item => {
-      if(item.dataset.value == urlFilters.category) {
-        target = item
-      }
-    })
-    return target
-  }
-
-  findCategory().classList.add('active')
+  let el_category = document.getElementById('filter-category-input')
+  el_category.value = urlFilters.category 
 
   // entry fee
   document.querySelector('.value-min').value = urlFilters.entryFee.substring(0, urlFilters.entryFee.indexOf(","));
@@ -293,8 +202,94 @@ function refillFiltersForm(urlFilters) {
 
 }
 
+function hideCategorySearchResults() {
+  let searchResults = document.getElementById('category-search-results')
+  searchResults.style.display = 'none'
+}
+
+function showCategorySearchResults() {
+  let searchResults = document.getElementById('category-search-results')
+  if(searchResults.innerHTML && searchResults.innerHTML != '' && document.getElementById('filter-category-input').value) {
+    searchResults.style.display = 'block'
+  }
+}
+
+const getCategorySearchResults = async () => {
+
+  const URL = 'https://api.npoint.io/6d1404adfb577cda1149'
+
+  let results
+  let resultsDiv = document.getElementById('category-search-results')
+  let input = document.getElementById('filter-category-input')
+
+  await fetch(URL)
+  .then(res => res.json())
+  .then(data => {
+    results = data
+    resultsDiv.innerHTML = ''
+
+    if(!results) {
+      resultsDiv.innerHTML = 'No results'
+      return
+    }
+  
+    Array.from(results).forEach(e => {
+      if(!(e.name.toLowerCase().includes(input.value.toLowerCase()))) {
+        return
+      }
+      let div = document.createElement('div')
+      div.classList.add('category-search-result')
+      div.addEventListener('click', () => {
+        hideCategorySearchResults()
+        document.getElementById('filter-category-input').value = e.name
+        try {
+          document.querySelector('.active-category').classList.remove('active-category')
+        }
+        catch(e) {
+          console.log(e)
+        }
+        div.classList.add('active-category')
+      })
+
+      let imgDiv = document.createElement('div')
+      imgDiv.classList.add('category-search-result-img')
+
+      let img = document.createElement('img')
+      img.src = e.img
+
+      let p = document.createElement('p')
+      p.innerHTML = e.name
+
+      imgDiv.appendChild(img)
+      div.appendChild(imgDiv)
+      div.appendChild(p)
+      resultsDiv.appendChild(div)
+    })
+
+    showCategorySearchResults()
+
+  })
+
+
+
+}
+
 function defaults() {
   document.getElementById('applyFilters').addEventListener('click', (e) => { e.preventDefault() })
+
+  document.getElementById('filter-category-input').addEventListener('input', (e) => {
+
+    if(!e.target.value) {
+      hideCategorySearchResults()
+
+      return
+    }
+
+    getCategorySearchResults()
+
+  })
+
+  document.getElementById('filter-category-input').addEventListener('focus', showCategorySearchResults)
 }
 
 export default Sidebar
