@@ -1,37 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./styles/App.css";
 import Nav from "/src/components/Nav.jsx";
 
-const url = "";
-
-const tournament = {
-  UUID: "89b72cfe-0b87-4395-8230-8e8e1f571cb7",
-  host: "9410f264-0bef-4516-b3ea-661c575490f2",
-  title: "Fortnite Solo Cup",
-  type: "battle royale",
-  category: "fortnite",
-  startDate: "2024-02-29T10:01:31.474Z",
-  endDate: "2024-02-29T10:02:10.959Z",
-  enrolledUsers: [
-    "f61bc24d-bebc-4391-acbb-2928b6ad74a4",
-    "f976aa28-133d-4a9c-a295-cc55a2198435",
-    "141002f8-f9da-4ad4-a86d-eef1bf4b9c3a",
-  ],
-  entryFee: 5.5,
-  earnings: {
-    1: 200,
-    2: 100,
-    3: 75,
-  },
-  maxCapacity: 100,
-  accessibility: "open",
-  desc: "Join the ultimate Fortnite Solo Cup and battle against other solo players for the top spot.",
-  specs: "Solo players, Battle Royale format, No team support",
-  isTeamBased: false,
-};
+const url = 'https://api.npoint.io/c9523c0ef25065fec8c2';
+const paramUUID = new URLSearchParams(window.location.search).get('UUID')
 
 function Tournament() {
-  const [isHost, setIsHost] = useState(true); // Replace with logic to check actual host
+
+  const [tournament, setTournament] = useState({})
+  const [isLoading, setIsLoading] = useState(true)
+  const [isHost, setIsHost] = useState(false);
   const [applicationAccepted, setApplicationAccepted] = useState(false);
 
   const handleJoin = () => {
@@ -44,72 +22,91 @@ function Tournament() {
     // Implement apply logic here, e.g., display form, send data to backend
   };
 
-  const fetchTournamentData = async () => {
-    await fetch(
-      "https://example.com?" +
-        new URLSearchParams({
-          foo: "value",
-          bar: 2,
-        })
-    )
-      .then((res) => res.json())
-      .then((data) => console.log(data));
-  };
+  // const fetchTournamentData = async () => {
+  //   await fetch(url + new URLSearchParams({
+  //     UUID: paramUUID
+  //   }))
+  //   .then(res => res.json())
+  //   .then(data => {tournament = JSON.parse(data)})
+  // };
 
-  fetchTournamentData();
+  const fetchTournamentData = async () => {
+    await fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      setTournament(data)
+      setIsLoading(false)
+      // setIsHost(data.host == user.UUID)
+      // setApplicationAccepted(tournament.isAccepted)
+    })
+  }
+
+  useEffect(() => {
+    fetchTournamentData()
+  }, [])
+
+  let button
+
+  if(!isHost) {
+    if(!tournament.hasStarted && tournament.accessibility === "open") {
+      button = <button className="btn btn-primary" onClick={handleJoin}>Join</button>
+    }
+    else if(!tournament.hasStarted && !applicationAccepted) {
+      button = <button className="btn btn-secondary" onClick={handleApply}>Apply</button>
+    }
+    else if(!tournament.hasStarted) {
+      button = <button className="btn btn-primary" onClick={handleJoin}>Join</button>
+    }
+    else {
+      button = <></>
+    }
+  }
+  else {
+    button = <button className="btn btn-manage" onClick={() => console.log("Manage tournament")}>Manage</button>
+  }
 
   return (
     <div id="Tournament">
       <Nav />
-      <div className="tournament-container">
-        <div className="tournament-header">
-          <h1 className="tournament-title">{tournament.title}</h1>
-          <p className="tournament-description">{tournament.desc}</p>
-          <p className="tournament-specs">{tournament.specs}</p>
-        </div>
+        <div className="tournament-container">
+        { isLoading ? <h1 className="loadingText">Loading tournament ...</h1> : 
+        <>
+          <div className="tournament-info">
+            <div className="tournament-specs">
+              <h1 className="tournament-title">{tournament.title}</h1>
+              <p className="tournament-description">{tournament.description}</p>
+              <p className="tournament-category">Category: {tournament.category.replace(/(^\w|\s\w)/g, m => m.toUpperCase())}</p>
+              <p className="tournament-type">Format: {tournament.type.replace(/(^\w|\s\w)/g, m => m.toUpperCase())}</p>
+              <p className="tournament-teamSize">{tournament.teamSize != 1 ? (`Team size: ${tournament.teamSize} players`) : "Team size: Solo"}</p>
+              <p className="tournament-capacity">Capacity: {tournament.enrolledUsers.length}/{tournament.maxCapacity}</p>
+              <p className="tournament-entryFee">Entry Fee: ${tournament.entryFee}</p>
+              <div className="tournament-earnings">Earnings:
+                <p>1st: ${tournament.earnings[1]}</p>
+                <p>2nd: ${tournament.earnings[2]}</p>
+                <p>3rd: ${tournament.earnings[3]}</p>
+              </div>
+              <p className="tournament-accessibility">{tournament.accessibility != 'open' ? tournament.accessibility.replace(/(^\w|\s\w)/g, m => m.toUpperCase()) : ""}</p>
+            </div>
 
-        {isHost && (
-          <button
-            className="btn btn-manage"
-            onClick={() => console.log("Manage tournament")}
-          >
-            Manage
-          </button>
-        )}
-
-        <div className="tournament-content">
-          {/* Display brackets or battle royale list based on the type */}
-          {tournament.type === "brackets" ? (
-            <div className="brackets">Brackets Display</div>
-          ) : (
-            <div className="battle-royale">Battle Royale List</div>
-          )}
-
-          {/* Join or Apply button based on accessibility and application status */}
-          <div className="tournament-actions">
-            {tournament.accessibility === "open" ? (
-              <button className="btn btn-primary" onClick={handleJoin}>
-                Join
-              </button>
-            ) : !applicationAccepted ? (
-              <button className="btn btn-secondary" onClick={handleApply}>
-                Apply
-              </button>
-            ) : (
-              <button className="btn btn-primary" onClick={handleJoin}>
-                Join
-              </button>
-            )}
+            {button}
           </div>
 
-          {/* Team-based or Solo prompt based on tournament type */}
-          <p className="tournament-join-as">
-            {tournament.isTeamBased
-              ? "Join as a team"
-              : "Join as a solo player"}
-          </p>
+          <div className="tournament-content">
+
+            {tournament.type === "brackets" ? (
+              <div className="brackets">Brackets Display</div>
+            ) : (
+              <div className="battle-royale">Battle Royale List</div>
+            )}
+
+            <div className="tournament-updates">
+              <h3>Updates</h3>
+              {tournament.updates.map((update) => <p key={update.date}>[{(new Date(update.date)).toDateString()}] {update.content}</p>)}
+            </div>
+          </div>
+        </>
+        }
         </div>
-      </div>
     </div>
   );
 }
