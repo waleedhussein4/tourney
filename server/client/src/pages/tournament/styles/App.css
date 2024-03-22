@@ -2,6 +2,77 @@
   height: 100%;
 }
 
+#Tournament .joinPopup {
+  /* height: 400pt; */
+  width: 600pt;
+  position: absolute;
+  top:50%;
+  left:50%;
+  transform: translate(-50%, -50%);
+  background-color: black;
+  /* border: 2px solid white; */
+  box-shadow: 0px 0px 6px 4px rgb(136, 136, 136, 0.5);
+  padding: 1em;
+  color: white;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5em;
+}
+
+#Tournament .joinPopup h1 {
+  text-align: center;
+}
+
+#Tournament .joinPopup-details {
+  text-align: center;
+}
+
+#Tournament .joinPopup-confirm {
+  padding: 0.5em;
+  width: fit-content;
+}
+
+#Tournament .joinPopup img {
+  color: white;
+  position: absolute;
+  height: 20pt;
+  right: 6pt;
+  top: 6pt;
+}
+
+#Tournament .joinPopup img:hover {
+  cursor: pointer;
+}
+
+#Tournament .joinPopup-teams {
+  border: 2px solid white;
+  width: 90%;
+  max-height: 180pt;
+  display: flex;
+  flex-direction: column;
+  gap: 1pt;
+  overflow-y: auto;
+  background-color: white;
+  font-size: 1.2em;
+  color: var(--color-tertiary);
+}
+
+#Tournament .joinPopup-teams>div {
+  width: 100%;
+  padding: 0.8em;
+  background-color: black;
+  display: flex;
+  align-items: center;
+  border-right: 1pt solid white;
+}
+
+#Tournament .joinPopup-teams>div:hover {
+  opacity: 0.85;
+  cursor: pointer;
+}
+
 #Tournament .loadingText {
   color: white;
   width: 100%;
