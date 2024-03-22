@@ -5,6 +5,7 @@
   --color-secondary: darkgray;
   --color-tertiary: rgb(128, 50, 128);
   --color-red: rgb(165, 14, 14);
+  --color-green: #28a745;
 }
 
 @font-face {
