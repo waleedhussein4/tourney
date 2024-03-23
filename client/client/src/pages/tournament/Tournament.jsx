@@ -15,10 +15,16 @@ function Tournament() {
   const [applicationAccepted, setApplicationAccepted] = useState(false);
   const [teams, setTeams] = useState([])
   const [isLoadingTeams, setIsLoadingTeams] = useState(true)
+  const [chosenTeam, setChosenTeam] = useState({uuid:''})
 
   const handleJoin = () => {
     console.log("Joining tournament");
-    displayJoinPopup()
+    if(tournament.teamSize > 1) {
+      displayJoinPopup()
+    }
+    else {
+      joinTournamentAsSolo()
+    }
     // Implement joining logic here, e.g., update backend, redirect to 'join tournament' page
   };
 
@@ -50,7 +56,6 @@ function Tournament() {
     await fetch(teamsURL)
     .then(res => res.json())
     .then(data => {
-      console.log(data)
       setTeams(data)
       setIsLoadingTeams(false)
     })
@@ -108,11 +113,34 @@ function Tournament() {
         <img onClick={hideJoinPopup} src={alpha_x} alt="" />
         <h1>Choose Team</h1>
         <div className="joinPopup-teams">
-          { isLoadingTeams ? <div>Loading teams ...</div> : teams.map(team => <div key={team.UUID}>{team.name}</div>) }
+          { isLoadingTeams ? <div>Loading teams ...</div> : teams.map(team => <div onClick={chooseTeam} key={team.UUID} data-uuid={(team.UUID)}>{team.name}</div>) }
         </div>
-        <button className="btn btn-primary joinPopup-confirm">Confirm</button>
+        <button className="btn btn-primary joinPopup-confirm" onClick={joinTournamentAsTeam}>Confirm</button>
       </div>
     )
+  }
+
+  function chooseTeam(e) {
+    let div = e.target
+    let uuid = div.dataset.uuid
+    chosenTeam.uuid = uuid
+
+    try {
+      document.querySelector('.selectedTeam').classList.remove('selectedTeam')
+    }catch(e){console.log()}
+
+    div.classList.add('selectedTeam')
+  }
+
+  function joinTournamentAsTeam() {
+    hideJoinPopup()
+    // axios
+    // send post request to server with tournament ID and team ID and token
+  }
+
+  function joinTournamentAsSolo() {
+    // axios
+    // send post request to server with tournament ID and token
   }
 
   return (
