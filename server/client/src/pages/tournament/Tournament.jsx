@@ -3,7 +3,8 @@ import "./styles/App.css";
 import Nav from "/src/components/Nav.jsx";
 import alpha_x from '/src/assets/alpha-x.svg';
 
-const url = 'https://api.npoint.io/c9523c0ef25065fec8c2';
+const tournamentURL = 'https://api.npoint.io/c9523c0ef25065fec8c2';
+const teamsURL = 'https://api.npoint.io/06c398320417bddefa14'
 const paramUUID = new URLSearchParams(window.location.search).get('UUID')
 
 function Tournament() {
@@ -12,16 +13,12 @@ function Tournament() {
   const [isLoading, setIsLoading] = useState(true)
   const [isHost, setIsHost] = useState(false);
   const [applicationAccepted, setApplicationAccepted] = useState(false);
+  const [teams, setTeams] = useState([])
+  const [isLoadingTeams, setIsLoadingTeams] = useState(true)
 
   const handleJoin = () => {
     console.log("Joining tournament");
     displayJoinPopup()
-    // if(tournament.teamSize > 1) {
-    //   generateJoinAsTeamPopup()
-    // }
-    // else {
-    //   generateJoinAsSoloPopup()
-    // }
     // Implement joining logic here, e.g., update backend, redirect to 'join tournament' page
   };
 
@@ -39,7 +36,7 @@ function Tournament() {
   // };
 
   const fetchTournamentData = async () => {
-    await fetch(url)
+    await fetch(tournamentURL)
     .then(res => res.json())
     .then(data => {
       setTournament(data)
@@ -49,8 +46,19 @@ function Tournament() {
     })
   }
 
+  const fetchTeams = async () => {
+    await fetch(teamsURL)
+    .then(res => res.json())
+    .then(data => {
+      console.log(data)
+      setTeams(data)
+      setIsLoadingTeams(false)
+    })
+  }
+
   useEffect(() => {
     fetchTournamentData()
+    fetchTeams()
   }, [])
 
   function displayJoinPopup() {
@@ -89,9 +97,7 @@ function Tournament() {
         <div className="joinPopup-details">
           Are you sure you want to join this tournament?
         </div>
-        <button className="btn btn-primary joinPopup-confirm">
-          Confirm
-        </button>
+        <button className="btn btn-primary joinPopup-confirm">Confirm</button>
       </div>
     )
   }
@@ -102,20 +108,9 @@ function Tournament() {
         <img onClick={hideJoinPopup} src={alpha_x} alt="" />
         <h1>Choose Team</h1>
         <div className="joinPopup-teams">
-          <div>Team 1</div>
-          <div>Team 2</div>
-          <div>Team 3</div>
-          <div>...</div>
-          <div>...</div>
-          <div>...</div>
-          <div>...</div>
-          <div>...</div>
-          <div>...</div>
-          <div>...</div>
+          { isLoadingTeams ? <div>Loading teams ...</div> : teams.map(team => <div key={team.UUID}>{team.name}</div>) }
         </div>
-        <button className="btn btn-primary joinPopup-confirm">
-          Confirm
-        </button>
+        <button className="btn btn-primary joinPopup-confirm">Confirm</button>
       </div>
     )
   }
