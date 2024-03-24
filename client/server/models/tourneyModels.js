@@ -26,7 +26,8 @@ const tournamentSchema = new Schema({
   updates: [{
     date: { type: Date },
     content: { type: String }
-  }]
+  }],
+  isHost: { type: Boolean }
 }, { timestamps: true });
 
 const Tournament = mongoose.model('Tournament', tournamentSchema);

@@ -1,4 +1,5 @@
 const Tournament = require('../models/tourneyModels');
+const jwt = require('jsonwebtoken');
 
 // Create a new tournament
 const createTournament = async (req, res) => {
@@ -153,10 +154,21 @@ const getTournamentDisplayData = async (req, res) => {
     if (!UUID) {
       return res.status(400).json({ error: 'UUID parameter is missing' });
     }
+
+    // test token for test. remove after zeid finishes authentication system
+    const token = jwt.sign({ uuid: "9410f264-0bef-4516-b3ea-661c575490f2" }, process.env.SECRET, { expiresIn: '1h' });
+
+    // const token = req.headers.authorization.split(' ')[1];
+    const decodedToken = jwt.verify(token, process.env.SECRET);
+    const userUUID = decodedToken.uuid;
+
     const tournament = await Tournament.findById(UUID);
     if (!tournament) {
       return res.status(404).json({ error: 'Tournament not found' });
     }
+
+    const isHost = (tournament.host == userUUID)
+
     res.status(200).json({
       hasStarted: tournament.hasStarted,
       accessibility: tournament.accessibility,
@@ -169,8 +181,9 @@ const getTournamentDisplayData = async (req, res) => {
       maxCapacity: tournament.maxCapacity,
       earnings: tournament.earnings,
       host: tournament.host,
-      isAccepted: tournament.isAccepted,
-      updates: tournament.updates
+      isAccepted: tournament.acceptedUsers.includes(userUUID),
+      updates: tournament.updates,
+      isHost: isHost
     });
   } catch (error) {
     console.error(error);
