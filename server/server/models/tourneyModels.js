@@ -27,7 +27,10 @@ const tournamentSchema = new Schema({
     date: { type: Date },
     content: { type: String }
   }],
-  isHost: { type: Boolean }
+  isHost: { type: Boolean },
+  application: [{
+    name: { type: String }
+  }]
 }, { timestamps: true });
 
 const Tournament = mongoose.model('Tournament', tournamentSchema);

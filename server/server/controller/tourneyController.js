@@ -47,7 +47,7 @@ const newTournament = new Tournament({
     "3": 75
   },
   maxCapacity: 100,
-  accessibility: "open",
+  accessibility: "application required",
   updates: [{
       date: new Date("2024-02-29T10:01:31.474Z"),
       content: "Tournament Started"
@@ -55,6 +55,17 @@ const newTournament = new Tournament({
     {
       date: new Date("2024-02-29T10:02:10.959Z"),
       content: "First Round Complete"
+    }
+  ],
+  application: [
+    {
+      name: "Name"
+    },
+    {
+      name: "Age"
+    },
+    {
+      name: "Epic Games Username"
     }
   ]
 });
@@ -156,7 +167,7 @@ const getTournamentDisplayData = async (req, res) => {
     }
 
     // test token for test. remove after zeid finishes authentication system
-    const token = jwt.sign({ uuid: "9410f264-0bef-4516-b3ea-661c575490f2" }, process.env.SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ uuid: "9410f264-0bef-4516-b3ea-661c575490f3" }, process.env.SECRET, { expiresIn: '1h' });
 
     // const token = req.headers.authorization.split(' ')[1];
     const decodedToken = jwt.verify(token, process.env.SECRET);
@@ -177,13 +188,15 @@ const getTournamentDisplayData = async (req, res) => {
       category: tournament.category,
       type: tournament.type,
       teamSize: tournament.teamSize,
+      entryFee: tournament.entryFee,
       enrolledUsers: tournament.enrolledUsers,
       maxCapacity: tournament.maxCapacity,
       earnings: tournament.earnings,
       host: tournament.host,
       isAccepted: tournament.acceptedUsers.includes(userUUID),
       updates: tournament.updates,
-      isHost: isHost
+      isHost: isHost,
+      application: tournament.application
     });
   } catch (error) {
     console.error(error);
