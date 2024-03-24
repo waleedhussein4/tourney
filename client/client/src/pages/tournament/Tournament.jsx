@@ -3,9 +3,11 @@ import "./styles/App.css";
 import Nav from "/src/components/Nav.jsx";
 import alpha_x from '/src/assets/alpha-x.svg';
 
-const tournamentURL = 'https://api.npoint.io/c9523c0ef25065fec8c2';
-const teamsURL = 'https://api.npoint.io/06c398320417bddefa14'
 const paramUUID = new URLSearchParams(window.location.search).get('UUID')
+const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
+console.log(tournamentURL)
+// const tournamentURL = 'https://api.npoint.io/c9523c0ef25065fec8c2';
+const teamsURL = 'https://api.npoint.io/06c398320417bddefa14'
 
 function Tournament() {
 
@@ -32,8 +34,9 @@ function Tournament() {
   };
 
   const fetchTournamentData = async () => {
-    await fetch(tournamentURL + new URLSearchParams({
-      UUID: paramUUID
+    await fetch(tournamentURL + "?" + new URLSearchParams({
+      UUID: paramUUID,
+      test: "hello"
     }))
     .then(res => res.json())
     .then(data => {
