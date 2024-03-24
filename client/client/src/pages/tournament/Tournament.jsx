@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom'
 import "./styles/App.css";
 import Nav from "/src/components/Nav.jsx";
 import alpha_x from '/src/assets/alpha-x.svg';
@@ -7,6 +8,7 @@ const paramUUID = new URLSearchParams(window.location.search).get('UUID')
 const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
 // const tournamentURL = 'https://api.npoint.io/c9523c0ef25065fec8c2';
 const teamsURL = 'https://api.npoint.io/06c398320417bddefa14'
+const submitApplicationURL = 'http://localhost:2000/api/tournement/tournament/submitApplication'
 const token = 'testToken'
 
 function Tournament() {
@@ -19,6 +21,9 @@ function Tournament() {
   const [isLoadingTeams, setIsLoadingTeams] = useState(true)
   const [chosenTeam, setChosenTeam] = useState({uuid:''})
   const [application, setApplication] = useState({})
+  const [hasApplied, setHasApplied] = useState(false)
+
+  const navigateTo = useNavigate()
 
   const handleJoin = () => {
     console.log("Joining tournament");
@@ -53,6 +58,7 @@ function Tournament() {
       setIsHost(data.isHost)
       setApplicationAccepted(data.isAccepted)
       setApplication(data.application)
+      setHasApplied(data.hasApplied)
     })
   };
 
@@ -86,9 +92,21 @@ function Tournament() {
     document.querySelector('.applicationPopup').style.display = 'none'
   }
 
+  let status = <></>
+
+  if(tournament.hasStarted) {
+    status = <div className="tournament-status">Tournament has started</div>
+  }
+  else if(!applicationAccepted && hasApplied) {
+    status = <div className="tournament-status">Your application is pending approval by the host.</div>
+  }
+
   let button
 
-  if(!isHost) {
+  if(hasApplied && !applicationAccepted) {
+    button = <></>
+  }
+  else if(!isHost) {
     if(!tournament.hasStarted && tournament.accessibility === "open") {
       button = <button className="btn btn-primary" onClick={handleJoin}>Join</button>
     }
@@ -145,6 +163,7 @@ function Tournament() {
             </div>)
           }
         </div>
+        <div className="applicationPopup-error"></div>
         <button className="btn btn-primary joinPopup-confirm" onClick={submitApplication}>Submit Application</button>
       </div>
     )
@@ -173,8 +192,58 @@ function Tournament() {
     // send post request to server with tournament ID and token
   }
 
-  function submitApplication() {
+  async function submitApplication() {
     console.log('Submitting application...')
+
+    let form = document.querySelector('.applicationPopup-application')
+    let fields = form.childNodes
+    if(!validateForm(fields)) {
+      document.querySelector('.applicationPopup-error').innerHTML = 'You must fill all fields.'
+      return
+    }
+
+    let application = []
+
+    Array.from(fields).forEach(field => {
+      let label = field.querySelector('label').innerText
+      let input = field.querySelector('input').value
+
+      application.push({label,input})
+    })
+
+    console.log(application)
+
+    await fetch(submitApplicationURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        tournament: paramUUID,
+        application: application
+      })
+    })
+    .then(res => {
+      if(res.ok) {
+        window.location.href = res.url
+      }
+      else {
+        console.log(res)
+      }
+    })
+
+  }
+
+  function validateForm(fields) {
+    let valid = true
+    Array.from(fields).forEach(field => {
+      let input = field.querySelector('input').value
+      if(!input) {
+        valid = false
+      }
+    })
+    return valid
   }
 
   return (
@@ -200,6 +269,7 @@ function Tournament() {
             <p className="tournament-accessibility">{tournament.accessibility != 'open' ? tournament.accessibility.replace(/(^\w|\s\w)/g, m => m.toUpperCase()) : ""}</p>
           </div>
 
+          {status}
           {button}
         </div>
 
