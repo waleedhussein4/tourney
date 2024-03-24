@@ -30,6 +30,13 @@ const tournamentSchema = new Schema({
   isHost: { type: Boolean },
   application: [{
     name: { type: String }
+  }],
+  applications: [{
+    user: { type: String },
+    application: [{
+      label: { type: String },
+      input: { type: String }
+    }]
   }]
 }, { timestamps: true });
 

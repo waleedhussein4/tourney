@@ -67,7 +67,9 @@ const newTournament = new Tournament({
     {
       name: "Epic Games Username"
     }
-  ]
+  ],
+  acceptedUsers: [],
+  applications: []
 });
 
 // Get all tournaments
@@ -155,6 +157,21 @@ const getTournamentDisplayData = async (req, res) => {
   // .catch(error => {
   //   console.error('Error fetching tournaments:', error);
   // });
+
+  // Tournament.updateOne(
+  //   { _id: req.query.UUID }, // Filter for the tournament by its ID
+  //   { $set: { acceptedUsers: [], applications: [] } } // Set acceptedUsers and applications arrays to empty arrays
+  // )
+  // .then(result => {
+  //   if (result.nModified === 0) {
+  //     console.log('No tournament was updated'); // Tournament not found or no changes applied
+  //   } else {
+  //     console.log('AcceptedUsers and applications arrays cleared successfully');
+  //   }
+  // })
+  // .catch(error => {
+  //   console.error('Error updating tournament:', error);
+  // });
     
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
@@ -196,12 +213,88 @@ const getTournamentDisplayData = async (req, res) => {
       isAccepted: tournament.acceptedUsers.includes(userUUID),
       updates: tournament.updates,
       isHost: isHost,
-      application: tournament.application
+      application: tournament.application,
+      hasApplied: ((tournament.applications).map(app => app.user)).includes(userUUID)
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
+}
+
+const handleApplicationSubmission = async (req, res) => {
+
+  console.log('Handling application submission')
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  const tournament = await Tournament.findById(req.body.tournament);
+  if (!tournament) {
+    return res.status(404).json({ error: 'No such tournament' });
+  }
+
+  // fields must match fields in db
+  let dbApplication = tournament.application
+  let dbApplicationArray = Array.from(dbApplication)
+
+  let userApplication = req.body.application
+  let userApplicationArray = Array.from(userApplication)
+
+  // match application form length
+  if(dbApplicationArray.length != userApplicationArray.length) {
+    return res.status(400).json({ error: 'Invalid application form' })
+  }
+
+  // match fields
+  // fields must not be empty
+  for(let i = 0; i < dbApplicationArray.length; i++) {
+    if(dbApplicationArray[i].name != userApplicationArray[i].label) {
+      return res.status(400).json({ error: 'Invalid application form' })
+    }
+    if(!userApplicationArray[i].input) {
+      return res.status(400).json({ error: 'Invalid application form' })
+    }
+  }
+
+  // test token for test. remove after zeid finishes authentication system
+  const token = jwt.sign({ uuid: "9410f264-0bef-4516-b3ea-661c575490f3" }, process.env.SECRET, { expiresIn: '1h' });
+
+  // const token = req.headers.authorization.split(' ')[1];
+  const decodedToken = jwt.verify(token, process.env.SECRET);
+  const userUUID = decodedToken.uuid;
+
+  // check if user already applied
+  let alreadyApplied = false
+  tournament.applications.forEach(app => {
+    if(app.user == userUUID) {
+      let appUser = app.user
+      alreadyApplied = true
+    }
+  })
+  if(alreadyApplied) {
+    return res.status(400).json({ error: 'User already applied' })
+  }
+
+  // add application to applications
+  Tournament.updateOne(
+    { _id: req.body.tournament },
+    { $push: { applications: {user: userUUID, application: userApplication} } }
+  )
+  .then(result => {
+    if (result.nModified === 0) {
+      console.log('No tournament was updated');
+    } else {
+      console.log('Application added to applications array successfully');
+    }
+  })
+  .catch(error => {
+    console.error('Error updating tournament:', error);
+  });
+
+  // redirect to view tournament page
+  res.writeHead(302, {'Location': 'http://localhost:5173/tournament/?UUID=' + tournament.UUID})
+  return res.end()
 }
 
 module.exports = {
@@ -210,7 +303,8 @@ module.exports = {
   getAllTournaments,
   updateTournament,
   deleteTournament,
-  getTournamentDisplayData
+  getTournamentDisplayData,
+  handleApplicationSubmission
 };
 
   
