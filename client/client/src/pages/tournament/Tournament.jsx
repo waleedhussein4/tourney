@@ -18,6 +18,7 @@ function Tournament() {
   const [teams, setTeams] = useState([])
   const [isLoadingTeams, setIsLoadingTeams] = useState(true)
   const [chosenTeam, setChosenTeam] = useState({uuid:''})
+  const [application, setApplication] = useState({})
 
   const handleJoin = () => {
     console.log("Joining tournament");
@@ -31,6 +32,7 @@ function Tournament() {
 
   const handleApply = () => {
     console.log("Applying for tournament");
+    displayApplicationPopup()
   };
 
   const fetchTournamentData = async () => {
@@ -50,6 +52,7 @@ function Tournament() {
       setIsLoading(false)
       setIsHost(data.isHost)
       setApplicationAccepted(data.isAccepted)
+      setApplication(data.application)
     })
   };
 
@@ -73,6 +76,14 @@ function Tournament() {
 
   function hideJoinPopup() {
     document.querySelector('.joinPopup').style.display = 'none'
+  }
+
+  function displayApplicationPopup() {
+    document.querySelector('.applicationPopup').style.display = 'flex'
+  }
+
+  function hideApplicationPopup() {
+    document.querySelector('.applicationPopup').style.display = 'none'
   }
 
   let button
@@ -121,6 +132,24 @@ function Tournament() {
     )
   }
 
+  function ApplicationPopup() {
+    return (
+      <div className="applicationPopup">
+        <img onClick={hideApplicationPopup} src={alpha_x} alt="" />
+        <h1>Apply</h1>
+        <div className="applicationPopup-application">
+          {
+            application.map(field => <div key={field.name}>
+              <label htmlFor={`application-${field.name}`}>{field.name}</label>
+              <input type="text" id={`application-${field.name}`} />
+            </div>)
+          }
+        </div>
+        <button className="btn btn-primary joinPopup-confirm" onClick={submitApplication}>Submit Application</button>
+      </div>
+    )
+  }
+
   function chooseTeam(e) {
     let div = e.target
     let uuid = div.dataset.uuid
@@ -142,6 +171,10 @@ function Tournament() {
   function joinTournamentAsSolo() {
     // axios
     // send post request to server with tournament ID and token
+  }
+
+  function submitApplication() {
+    console.log('Submitting application...')
   }
 
   return (
@@ -187,6 +220,7 @@ function Tournament() {
       }
       </div>
       { tournament.teamSize == 1 ? <SoloPopup /> : <TeamPopup /> }
+      { tournament.accessibility == "application required" ? <ApplicationPopup /> : <></> }
     </div>
   );
 }
