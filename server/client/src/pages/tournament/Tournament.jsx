@@ -5,9 +5,9 @@ import alpha_x from '/src/assets/alpha-x.svg';
 
 const paramUUID = new URLSearchParams(window.location.search).get('UUID')
 const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
-console.log(tournamentURL)
 // const tournamentURL = 'https://api.npoint.io/c9523c0ef25065fec8c2';
 const teamsURL = 'https://api.npoint.io/06c398320417bddefa14'
+const token = 'testToken'
 
 function Tournament() {
 
@@ -37,26 +37,21 @@ function Tournament() {
     await fetch(tournamentURL + "?" + new URLSearchParams({
       UUID: paramUUID,
       test: "hello"
-    }))
+    }), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
     .then(res => res.json())
     .then(data => {
       setTournament(data)
       setIsLoading(false)
-      // setIsHost(data.host == user.UUID)
-      // setApplicationAccepted(tournament.isAccepted)
+      setIsHost(data.isHost)
+      setApplicationAccepted(data.isAccepted)
     })
   };
-
-  // const fetchTournamentData = async () => {
-  //   await fetch(tournamentURL)
-  //   .then(res => res.json())
-  //   .then(data => {
-  //     setTournament(data)
-  //     setIsLoading(false)
-  //     setIsHost(data.host == user.UUID)
-  //     setApplicationAccepted(tournament.isAccepted)
-  //   })
-  // }
 
   const fetchTeams = async () => {
     await fetch(teamsURL)
