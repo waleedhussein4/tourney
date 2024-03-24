@@ -25,24 +25,16 @@ function Tournament() {
     else {
       joinTournamentAsSolo()
     }
-    // Implement joining logic here, e.g., update backend, redirect to 'join tournament' page
   };
 
   const handleApply = () => {
     console.log("Applying for tournament");
-    // Implement apply logic here, e.g., display form, send data to backend
   };
 
-  // const fetchTournamentData = async () => {
-  //   await fetch(url + new URLSearchParams({
-  //     UUID: paramUUID
-  //   }))
-  //   .then(res => res.json())
-  //   .then(data => {tournament = JSON.parse(data)})
-  // };
-
   const fetchTournamentData = async () => {
-    await fetch(tournamentURL)
+    await fetch(tournamentURL + new URLSearchParams({
+      UUID: paramUUID
+    }))
     .then(res => res.json())
     .then(data => {
       setTournament(data)
@@ -50,7 +42,18 @@ function Tournament() {
       // setIsHost(data.host == user.UUID)
       // setApplicationAccepted(tournament.isAccepted)
     })
-  }
+  };
+
+  // const fetchTournamentData = async () => {
+  //   await fetch(tournamentURL)
+  //   .then(res => res.json())
+  //   .then(data => {
+  //     setTournament(data)
+  //     setIsLoading(false)
+  //     setIsHost(data.host == user.UUID)
+  //     setApplicationAccepted(tournament.isAccepted)
+  //   })
+  // }
 
   const fetchTeams = async () => {
     await fetch(teamsURL)
