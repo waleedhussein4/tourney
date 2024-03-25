@@ -1,4 +1,5 @@
 const Tournament = require('../models/tourneyModels');
+const Team = require('../models/teamModels')
 const jwt = require('jsonwebtoken');
 
 // Create a new tournament
@@ -234,7 +235,13 @@ const handleApplicationSubmission = async (req, res) => {
     return res.status(404).json({ error: 'No such tournament' });
   }
 
-  // fields must match fields in db
+  // test token for test. remove after zeid finishes authentication system
+  const token = jwt.sign({ uuid: "9410f264-0bef-4516-b3ea-661c575490f3" }, process.env.SECRET, { expiresIn: '1h' });
+
+  // const token = req.headers.authorization.split(' ')[1];
+  const decodedToken = jwt.verify(token, process.env.SECRET);
+  const userUUID = decodedToken.uuid;
+
   let dbApplication = tournament.application
   let dbApplicationArray = Array.from(dbApplication)
 
@@ -257,13 +264,6 @@ const handleApplicationSubmission = async (req, res) => {
     }
   }
 
-  // test token for test. remove after zeid finishes authentication system
-  const token = jwt.sign({ uuid: "9410f264-0bef-4516-b3ea-661c575490f3" }, process.env.SECRET, { expiresIn: '1h' });
-
-  // const token = req.headers.authorization.split(' ')[1];
-  const decodedToken = jwt.verify(token, process.env.SECRET);
-  const userUUID = decodedToken.uuid;
-
   // check if user already applied
   let alreadyApplied = false
   tournament.applications.forEach(app => {
@@ -274,6 +274,26 @@ const handleApplicationSubmission = async (req, res) => {
   })
   if(alreadyApplied) {
     return res.status(400).json({ error: 'User already applied' })
+  }
+
+  // tournament must have capacity available
+  if (tournament.enrolledUsers.length + 1 > tournament.maxCapacity) {
+    return res.status(404).json({ error: 'Invalid request' })
+  }
+
+  // tournament must not have started
+  if (tournament.hasStarted) {
+    return res.status(404).json({ error: 'Invalid request' })
+  }
+
+  // user must not already be part of tournament
+  if (tournament.enrolledUsers.includes(userUUID)) {
+    return res.status(404).json({ error: 'Invalid request' })
+  }
+
+  // user must not be host
+  if (tournament.host == userUUID) {
+    return res.status(404).json({ error: 'Invalid request' })
   }
 
   // add application to applications
@@ -297,6 +317,149 @@ const handleApplicationSubmission = async (req, res) => {
   return res.end()
 }
 
+const handleJoinAsSolo = async (req, res) => {
+  console.log('Handling join as solo')
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  const tournament = await Tournament.findById(req.body.tournament);
+  if (!tournament) {
+    return res.status(404).json({ error: 'No such tournament' });
+  }
+
+    // test token for test. remove after zeid finishes authentication system
+    const token = jwt.sign({ uuid: "9410f264-0bef-4516-b3ea-661c575490f3" }, process.env.SECRET, { expiresIn: '1h' });
+
+    // const token = req.headers.authorization.split(' ')[1];
+    const decodedToken = jwt.verify(token, process.env.SECRET);
+    const userUUID = decodedToken.uuid;
+
+  // tournament must be solo
+  if (tournament.teamSize != 1) {
+    return res.status(404).json({ error: 'Invalid request' })
+  }
+
+  // tournament must have capacity available
+  if (tournament.enrolledUsers.length + 1 > tournament.maxCapacity) {
+    return res.status(404).json({ error: 'Invalid request' })
+  }
+
+  // tournament must not have started
+  if (tournament.hasStarted) {
+    return res.status(404).json({ error: 'Invalid request' })
+  }
+
+  // user must not already be part of tournament
+  if (tournament.enrolledUsers.includes(userUUID)) {
+    return res.status(404).json({ error: 'Invalid request' })
+  }
+
+  // user must not be host
+  if (tournament.host == userUUID) {
+    return res.status(404).json({ error: 'Invalid request' })
+  }
+
+  // Add user to enrolled users
+  Tournament.updateOne(
+    { _id: req.body.tournament },
+    { $push: { enrolledUsers: userUUID } }
+  )
+  .then(result => {
+    if (result.nModified === 0) {
+      console.log('No tournament was updated');
+    } else {
+      console.log('User added to enrolledUsers array successfully');
+    }
+  })
+  .catch(error => {
+    console.error('Error updating tournament:', error);
+  });
+
+  // redirect to view tournament page
+  res.writeHead(302, {'Location': 'http://localhost:5173/tournament/?UUID=' + tournament.UUID})
+  return res.end()
+}
+
+const handleJoinAsTeam = async (req, res) => {
+  console.log('Handling join as team')
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  const tournament = await Tournament.findById(req.body.tournament);
+  if (!tournament) {
+    return res.status(404).json({ error: 'No such tournament' });
+  }
+
+  const team = await Team.findById(req.body.team);
+  if (!team) {
+    return res.status(404).json({ error: 'No such team' });
+  }
+
+  // test token for test. remove after zeid finishes authentication system
+  const token = jwt.sign({ uuid: "9410f264-0bef-4516-b3ea-661c575490f3" }, process.env.SECRET, { expiresIn: '1h' });
+
+  // const token = req.headers.authorization.split(' ')[1];
+  const decodedToken = jwt.verify(token, process.env.SECRET);
+  const userUUID = decodedToken.uuid;
+
+  // required team size must match provided team size
+  if (tournament.teamSize != team.members.length) {
+    return res.status(404).json({ error: 'Invalid request' })
+  }
+
+  // tournament must have capacity available
+  if ((tournament.enrolledUsers.length + tournament.teamSize) > tournament.maxCapacity) {
+    return res.status(404).json({ error: 'Invalid request' })
+  }
+
+  // tournament must not have started
+  if (tournament.hasStarted) {
+    return res.status(404).json({ error: 'Invalid request' })
+  }
+
+  // team members must not already be part of tournament
+  function isTeamMemberEnrolled(team, enrolledTeams) {
+    for (let member of team.members) {
+      for (let enrolledTeam of enrolledTeams) {
+        if (enrolledTeam.members.includes(member)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  if (isTeamMemberEnrolled(team, tournament.enrolledTeams)) {
+    return res.status(404).json({ error: 'One of the team members is already enrolled in the tournament' })
+  }
+
+  // team members must not be host
+  if (team.members.includes(tournament.host)) {
+    return res.status(404).json({ error: 'Tournament host cannot join tournament' })
+  }
+
+  // Add team to enrolledTeams
+  Tournament.updateOne(
+    { _id: req.body.tournament },
+    { $push: { enrolledTeams: team } }
+  )
+  .then(result => {
+    if (result.nModified === 0) {
+      console.log('No tournament was updated');
+    } else {
+      console.log('Team added to enrolledTeams array successfully');
+    }
+  })
+  .catch(error => {
+    console.error('Error updating tournament:', error);
+  });
+
+  // redirect to view tournament page
+  res.writeHead(302, {'Location': 'http://localhost:5173/tournament/?UUID=' + tournament.UUID})
+  return res.end()
+}
+
 module.exports = {
   createTournament,
   getTournamentById,
@@ -304,7 +467,9 @@ module.exports = {
   updateTournament,
   deleteTournament,
   getTournamentDisplayData,
-  handleApplicationSubmission
+  handleApplicationSubmission,
+  handleJoinAsSolo,
+  handleJoinAsTeam
 };
 
   
