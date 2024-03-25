@@ -16,7 +16,7 @@ function Signup() {
     e.preventDefault();
     const emailTester = /^(\w{4,16})@(\w{2,10}(\.\w{2,10})*)\.((com)|(net)|(org)|(edu)|(lb))$/.test(email);
     const userNameTester = /^[a-zA-Z0-9]{3,12}$/.test(userName);  
-    const passwordCheck = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(.{8,})$/.test(password);
+    const passwordCheck = /^(?=.\d)(?=.[a-z])(?=.*[A-Z])(.{8,})$/.test(password);
     
     if (!emailTester) {
       myDiv.current.textContent = "Invalid email!";
