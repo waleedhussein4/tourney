@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom'
 import "./styles/App.css";
 import Nav from "/src/components/Nav.jsx";
 import alpha_x from '/src/assets/alpha-x.svg';
@@ -9,6 +8,8 @@ const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
 // const tournamentURL = 'https://api.npoint.io/c9523c0ef25065fec8c2';
 const teamsURL = 'https://api.npoint.io/06c398320417bddefa14'
 const submitApplicationURL = 'http://localhost:2000/api/tournement/tournament/submitApplication'
+const joinAsSoloURL = 'http://localhost:200/api/tournement/tournament/joinAsSolo'
+const joinAsTeamURL = 'http://localhost:200/api/tournement/tournament/joinAsTeam'
 const token = 'testToken'
 
 function Tournament() {
@@ -22,8 +23,6 @@ function Tournament() {
   const [chosenTeam, setChosenTeam] = useState({uuid:''})
   const [application, setApplication] = useState({})
   const [hasApplied, setHasApplied] = useState(false)
-
-  const navigateTo = useNavigate()
 
   const handleJoin = () => {
     console.log("Joining tournament");
@@ -181,15 +180,51 @@ function Tournament() {
     div.classList.add('selectedTeam')
   }
 
-  function joinTournamentAsTeam() {
+  async function joinTournamentAsTeam() {
+    console.log('Joining as team...')
     hideJoinPopup()
-    // axios
-    // send post request to server with tournament ID and team ID and token
+    await fetch(joinAsTeamURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        tournament: paramUUID,
+        team: chosenTeam
+      })
+    })
+    .then(res => {
+      if(res.ok) {
+        window.location.href = res.url
+      }
+      else {
+        console.log(res)
+      }
+    })
   }
 
-  function joinTournamentAsSolo() {
-    // axios
-    // send post request to server with tournament ID and token
+  async function joinTournamentAsSolo() {
+    console.log('Joining as solo...')
+    hideJoinPopup()
+    await fetch(joinAsSoloURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        tournament: paramUUID
+      })
+    })
+    .then(res => {
+      if(res.ok) {
+        window.location.href = res.url
+      }
+      else {
+        console.log(res)
+      }
+    })
   }
 
   async function submitApplication() {

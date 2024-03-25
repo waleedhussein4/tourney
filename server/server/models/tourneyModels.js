@@ -11,6 +11,7 @@ const tournamentSchema = new Schema({
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   enrolledUsers: [{ type: String }],
+  enrolledTeams: [{ type: String }],
   entryFee: { type: Number, required: true },
   earnings: {
     1: { type: Number },
@@ -37,7 +38,7 @@ const tournamentSchema = new Schema({
       label: { type: String },
       input: { type: String }
     }]
-  }]
+  }],
 }, { timestamps: true });
 
 const Tournament = mongoose.model('Tournament', tournamentSchema);
