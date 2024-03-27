@@ -3,9 +3,14 @@ import "./styles/App.css";
 import Nav from "/src/components/Nav.jsx";
 import alpha_x from '/src/assets/alpha-x.svg';
 
-const tournamentURL = 'https://api.npoint.io/c9523c0ef25065fec8c2';
-const teamsURL = 'https://api.npoint.io/06c398320417bddefa14'
 const paramUUID = new URLSearchParams(window.location.search).get('UUID')
+const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
+// const tournamentURL = 'https://api.npoint.io/c9523c0ef25065fec8c2';
+const teamsURL = 'https://api.npoint.io/06c398320417bddefa14'
+const submitApplicationURL = 'http://localhost:2000/api/tournement/tournament/submitApplication'
+const joinAsSoloURL = 'http://localhost:200/api/tournement/tournament/joinAsSolo'
+const joinAsTeamURL = 'http://localhost:200/api/tournement/tournament/joinAsTeam'
+const token = 'testToken'
 
 function Tournament() {
 
@@ -16,6 +21,8 @@ function Tournament() {
   const [teams, setTeams] = useState([])
   const [isLoadingTeams, setIsLoadingTeams] = useState(true)
   const [chosenTeam, setChosenTeam] = useState({uuid:''})
+  const [application, setApplication] = useState({})
+  const [hasApplied, setHasApplied] = useState(false)
 
   const handleJoin = () => {
     console.log("Joining tournament");
@@ -29,31 +36,30 @@ function Tournament() {
 
   const handleApply = () => {
     console.log("Applying for tournament");
+    displayApplicationPopup()
   };
 
   const fetchTournamentData = async () => {
-    await fetch(tournamentURL + new URLSearchParams({
-      UUID: paramUUID
-    }))
+    await fetch(tournamentURL + "?" + new URLSearchParams({
+      UUID: paramUUID,
+      test: "hello"
+    }), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
     .then(res => res.json())
     .then(data => {
       setTournament(data)
       setIsLoading(false)
-      // setIsHost(data.host == user.UUID)
-      // setApplicationAccepted(tournament.isAccepted)
+      setIsHost(data.isHost)
+      setApplicationAccepted(data.isAccepted)
+      setApplication(data.application)
+      setHasApplied(data.hasApplied)
     })
   };
-
-  // const fetchTournamentData = async () => {
-  //   await fetch(tournamentURL)
-  //   .then(res => res.json())
-  //   .then(data => {
-  //     setTournament(data)
-  //     setIsLoading(false)
-  //     setIsHost(data.host == user.UUID)
-  //     setApplicationAccepted(tournament.isAccepted)
-  //   })
-  // }
 
   const fetchTeams = async () => {
     await fetch(teamsURL)
@@ -77,9 +83,29 @@ function Tournament() {
     document.querySelector('.joinPopup').style.display = 'none'
   }
 
+  function displayApplicationPopup() {
+    document.querySelector('.applicationPopup').style.display = 'flex'
+  }
+
+  function hideApplicationPopup() {
+    document.querySelector('.applicationPopup').style.display = 'none'
+  }
+
+  let status = <></>
+
+  if(tournament.hasStarted) {
+    status = <div className="tournament-status">Tournament has started</div>
+  }
+  else if(!applicationAccepted && hasApplied) {
+    status = <div className="tournament-status">Your application is pending approval by the host.</div>
+  }
+
   let button
 
-  if(!isHost) {
+  if(hasApplied && !applicationAccepted) {
+    button = <></>
+  }
+  else if(!isHost) {
     if(!tournament.hasStarted && tournament.accessibility === "open") {
       button = <button className="btn btn-primary" onClick={handleJoin}>Join</button>
     }
@@ -123,6 +149,25 @@ function Tournament() {
     )
   }
 
+  function ApplicationPopup() {
+    return (
+      <div className="applicationPopup">
+        <img onClick={hideApplicationPopup} src={alpha_x} alt="" />
+        <h1>Apply</h1>
+        <div className="applicationPopup-application">
+          {
+            application.map(field => <div key={field.name}>
+              <label htmlFor={`application-${field.name}`}>{field.name}</label>
+              <input type="text" id={`application-${field.name}`} />
+            </div>)
+          }
+        </div>
+        <div className="applicationPopup-error"></div>
+        <button className="btn btn-primary joinPopup-confirm" onClick={submitApplication}>Submit Application</button>
+      </div>
+    )
+  }
+
   function chooseTeam(e) {
     let div = e.target
     let uuid = div.dataset.uuid
@@ -135,15 +180,105 @@ function Tournament() {
     div.classList.add('selectedTeam')
   }
 
-  function joinTournamentAsTeam() {
+  async function joinTournamentAsTeam() {
+    console.log('Joining as team...')
     hideJoinPopup()
-    // axios
-    // send post request to server with tournament ID and team ID and token
+    await fetch(joinAsTeamURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        tournament: paramUUID,
+        team: chosenTeam
+      })
+    })
+    .then(res => {
+      if(res.ok) {
+        window.location.href = res.url
+      }
+      else {
+        console.log(res)
+      }
+    })
   }
 
-  function joinTournamentAsSolo() {
-    // axios
-    // send post request to server with tournament ID and token
+  async function joinTournamentAsSolo() {
+    console.log('Joining as solo...')
+    hideJoinPopup()
+    await fetch(joinAsSoloURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        tournament: paramUUID
+      })
+    })
+    .then(res => {
+      if(res.ok) {
+        window.location.href = res.url
+      }
+      else {
+        console.log(res)
+      }
+    })
+  }
+
+  async function submitApplication() {
+    console.log('Submitting application...')
+
+    let form = document.querySelector('.applicationPopup-application')
+    let fields = form.childNodes
+    if(!validateForm(fields)) {
+      document.querySelector('.applicationPopup-error').innerHTML = 'You must fill all fields.'
+      return
+    }
+
+    let application = []
+
+    Array.from(fields).forEach(field => {
+      let label = field.querySelector('label').innerText
+      let input = field.querySelector('input').value
+
+      application.push({label,input})
+    })
+
+    console.log(application)
+
+    await fetch(submitApplicationURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        tournament: paramUUID,
+        application: application
+      })
+    })
+    .then(res => {
+      if(res.ok) {
+        window.location.href = res.url
+      }
+      else {
+        console.log(res)
+      }
+    })
+
+  }
+
+  function validateForm(fields) {
+    let valid = true
+    Array.from(fields).forEach(field => {
+      let input = field.querySelector('input').value
+      if(!input) {
+        valid = false
+      }
+    })
+    return valid
   }
 
   return (
@@ -169,6 +304,7 @@ function Tournament() {
             <p className="tournament-accessibility">{tournament.accessibility != 'open' ? tournament.accessibility.replace(/(^\w|\s\w)/g, m => m.toUpperCase()) : ""}</p>
           </div>
 
+          {status}
           {button}
         </div>
 
@@ -189,6 +325,7 @@ function Tournament() {
       }
       </div>
       { tournament.teamSize == 1 ? <SoloPopup /> : <TeamPopup /> }
+      { tournament.accessibility == "application required" ? <ApplicationPopup /> : <></> }
     </div>
   );
 }
