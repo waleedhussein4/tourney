@@ -76,6 +76,71 @@
   opacity: 0.85;
 }
 
+#Tournament .applicationPopup {
+  width: 600pt;
+  position: absolute;
+  top:50%;
+  left:50%;
+  transform: translate(-50%, -50%);
+  background-color: black;
+  box-shadow: 0px 0px 6px 4px rgb(136, 136, 136, 0.5);
+  padding: 1em;
+  color: white;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5em;
+}
+
+#Tournament .applicationPopup h1 {
+  text-align: center;
+}
+
+#Tournament .applicationPopup-application {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+#Tournament .applicationPopup-application>div {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+}
+
+#Tournament .applicationPopup-application>div label {
+  width: 25%;
+}
+
+#Tournament .applicationPopup-application>div input {
+  width: 75%;
+  padding: 0.2em;
+}
+
+#Tournament .applicationPopup-confirm {
+  padding: 0.5em;
+  width: fit-content;
+}
+
+#Tournament .applicationPopup img {
+  color: white;
+  position: absolute;
+  height: 20pt;
+  right: 6pt;
+  top: 6pt;
+}
+
+#Tournament .applicationPopup img:hover {
+  cursor: pointer;
+}
+
+#Tournament .applicationPopup-error {
+  color: var(--color-red);
+}
+
 #Tournament .loadingText {
   color: white;
   width: 100%;
@@ -121,6 +186,12 @@
   gap: 2em;
   color: white;
   font-size: 0.7em;
+}
+
+#Tournament .tournament-status {
+  color: white;
+  font-size: 0.7em;
+  text-align: center;
 }
 
 #Tournament .hasStarted {
