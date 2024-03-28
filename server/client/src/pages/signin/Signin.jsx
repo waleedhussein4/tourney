@@ -1,6 +1,6 @@
 import './App.css';
 import '/src/styles/index.css';
-import { AuthContextProvider } from '../../context/authContext';
+import { AuthContextProvider } from '../../context/AuthContext';
 import { useRef, useState, useEffect } from 'react';
 import { useLogin } from './useLogin';
 
