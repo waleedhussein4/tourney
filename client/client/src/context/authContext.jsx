@@ -1,4 +1,4 @@
-import { createContext, useReducer } from "react";
+import { createContext, useEffect, useReducer, useState } from "react";
 
 export const AuthContext = createContext();
 
@@ -12,16 +12,27 @@ export const authReducer = (state, action) => {
       return state
   }
 }
-export const AuthContextProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, {
-    user: null
-  })
 
-  console.log('authContext state:', state)
+export const AuthContextProvider = (props) => {
+  const [loggedIn, setLoggedIn] = useState(undefined)
 
-  return (
-    <AuthContext.Provider value={{ ...state, dispatch }}>
-      { children }
-    </AuthContext.Provider>
-  )
+  async function getLoggedIn() {
+    await fetch('http://localhost:2000/api/user/loggedIn', {
+      credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+      setLoggedIn(data)
+    })
+  }
+
+  useEffect(() => {
+    getLoggedIn()
+  }, [])
+
+  return <AuthContext.Provider value={{loggedIn, getLoggedIn}}>
+    {props.children}
+  </AuthContext.Provider>
 }
+
+export default AuthContext

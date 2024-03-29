@@ -10,7 +10,6 @@ const teamsURL = 'https://api.npoint.io/06c398320417bddefa14'
 const submitApplicationURL = 'http://localhost:2000/api/tournement/tournament/submitApplication'
 const joinAsSoloURL = 'http://localhost:200/api/tournement/tournament/joinAsSolo'
 const joinAsTeamURL = 'http://localhost:200/api/tournement/tournament/joinAsTeam'
-const token = 'testToken'
 
 function Tournament() {
 
@@ -47,8 +46,8 @@ function Tournament() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
+      },
+      credentials: "include"
     })
     .then(res => res.json())
     .then(data => {
@@ -187,7 +186,6 @@ function Tournament() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
         tournament: paramUUID,
@@ -211,7 +209,6 @@ function Tournament() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
         tournament: paramUUID
@@ -252,22 +249,19 @@ function Tournament() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
         tournament: paramUUID,
         application: application
-      })
+      }),
+      credentials: "include"
     })
-    .then(res => {
-      if(res.ok) {
-        window.location.href = res.url
-      }
-      else {
-        console.log(res)
+    .then(res => res.json())
+    .then(data => {
+      if(data.Location) {
+        window.location.href = data.Location
       }
     })
-
   }
 
   function validateForm(fields) {

@@ -1,31 +1,46 @@
-import '/src/styles/Nav.css'
+import { useContext } from 'react';
+import { Link } from 'react-router-dom'
 
+import { AuthContext } from '../context/AuthContext';
+
+import '/src/styles/Nav.css'
 import LOGO1 from "../assets/LOGO1.jpg";
 import profilePic from "../assets/profilePic.png";
+import LogOutButton from './LogOutButton';
 
 function Nav() {
+  const { loggedIn } = useContext(AuthContext)
+
   return (
     <div id="nav">
-      {/* <img id="menu" src={menu} alt="" /> */}
-      <a href="/">
+      <Link to="/">
         <img id="logo-nav" src={LOGO1} alt="Logo" />
-      </a>
+      </Link>
       <div id="options">
         <a href="/host/">Host</a>
         <a href="/tournaments/">Compete</a>
         <a href="/team/">Team</a>
       </div>
       <div id="account">
-        {/* <a href="index.html">
-          <img src={profilePic} alt="Profile Icon" className="profilePic" />
-        </a> */}
-        <span>
-          <a href="/signin/">Sign In</a>
-        </span>
-        <span> | </span>
-        <span>
-          <a href=" /signup/">Sign Up</a>
-        </span>
+        { loggedIn === true && 
+          <>
+          <Link to="/profile">
+            <img src={profilePic} alt="Profile Icon" className="profilePic" />
+          </Link>
+          <LogOutButton />
+          </>
+        }
+        { loggedIn === false && 
+          <>
+          <span>
+            <Link to="/signin">Sign In</Link>
+          </span>
+          <span> | </span>
+          <span>
+            <Link to="/signup">Sign Up</Link>
+          </span>
+          </>
+        }
       </div>
     </div>
   );
