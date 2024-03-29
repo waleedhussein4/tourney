@@ -4,11 +4,11 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const touneyRoute = require('./routes/tourneyRoutes');
-const userRoute = require('./routes/user');
+const userRoute = require('./routes/userRoutes');
 //const teamRoute = require('./routes/teamRoutes');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser')
 const port = 2000;
-
 
 //middleware
 app.use(express.json())
@@ -16,7 +16,8 @@ app.use((req,res,next) => {
     console.log(req.path, req.method)
     next()
 });
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cookieParser())
 
 //route
 app.use('/api/tournement',touneyRoute);

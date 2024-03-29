@@ -5,7 +5,6 @@ import { useAuthContext } from "/src/hooks/useAuthContext";
 import './styles/Home.css'
 
 function App() {
-  console.log(useAuthContext())
   return (
     <div id="Home">
       <Nav />
