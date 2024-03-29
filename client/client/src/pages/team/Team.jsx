@@ -13,7 +13,9 @@ function Team() {
   const [loadingTeams, setLoadingTeams] = useState(true)
 
   const fetchTeams = async () => {
-    await fetch(URL)
+    await fetch(URL, {
+      credentials: 'include'
+    })
     .then(res => res.json())
     .then(data => {
       setTeams(data)
