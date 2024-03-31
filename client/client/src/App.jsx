@@ -11,6 +11,7 @@ import Signin from "./pages/signin/Signin";
 import Signup from "./pages/signup/Signup";
 import Tournament from './pages/tournament/Tournament'
 import Profile from './pages/profile/Profile.jsx'
+import Purchase from './pages/purchase/Purchase.jsx'
 
 import '/src/styles/index.css'
 
@@ -36,6 +37,7 @@ function App() {
       <Route path='/team' element={<Team />} />
       <Route path='/team/view' element={<ViewTeam />} />
       <Route path='/tournament' element={<Tournament />} />
+      <Route path='/purchase' element={<Purchase />} />
     </Routes>
   );
 }
