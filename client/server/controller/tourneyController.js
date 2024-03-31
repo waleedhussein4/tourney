@@ -77,10 +77,6 @@ const newTournament = new Tournament({
 const getAllTournaments = async (req, res) => {
   const tournaments = await Tournament.find().sort({ createdAt: -1 });
   
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
   res.status(200).json(tournaments);
 };
 
@@ -174,22 +170,13 @@ const getTournamentDisplayData = async (req, res) => {
   //   console.error('Error updating tournament:', error);
   // });
     
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
   try {
     const UUID = req.query.UUID;
     if (!UUID) {
       return res.status(400).json({ error: 'UUID parameter is missing' });
     }
 
-    // test token for test. remove after zeid finishes authentication system
-    const token = jwt.sign({ uuid: "9410f264-0bef-4516-b3ea-661c575490f3" }, process.env.SECRET, { expiresIn: '1h' });
-
-    // const token = req.headers.authorization.split(' ')[1];
-    const decodedToken = jwt.verify(token, process.env.SECRET);
-    const userUUID = decodedToken.uuid;
+    const userUUID = req.user;
 
     const tournament = await Tournament.findById(UUID);
     if (!tournament) {
@@ -226,21 +213,13 @@ const getTournamentDisplayData = async (req, res) => {
 const handleApplicationSubmission = async (req, res) => {
 
   console.log('Handling application submission')
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   const tournament = await Tournament.findById(req.body.tournament);
   if (!tournament) {
     return res.status(404).json({ error: 'No such tournament' });
   }
 
-  // test token for test. remove after zeid finishes authentication system
-  const token = jwt.sign({ uuid: "9410f264-0bef-4516-b3ea-661c575490f3" }, process.env.SECRET, { expiresIn: '1h' });
-
-  // const token = req.headers.authorization.split(' ')[1];
-  const decodedToken = jwt.verify(token, process.env.SECRET);
-  const userUUID = decodedToken.uuid;
+  const userUUID = req.user;
 
   let dbApplication = tournament.application
   let dbApplicationArray = Array.from(dbApplication)
@@ -268,7 +247,6 @@ const handleApplicationSubmission = async (req, res) => {
   let alreadyApplied = false
   tournament.applications.forEach(app => {
     if(app.user == userUUID) {
-      let appUser = app.user
       alreadyApplied = true
     }
   })
@@ -313,27 +291,19 @@ const handleApplicationSubmission = async (req, res) => {
   });
 
   // redirect to view tournament page
-  res.writeHead(302, {'Location': 'http://localhost:5173/tournament/?UUID=' + tournament.UUID})
+  res.send({'Location': 'http://localhost:5173/tournament/?UUID=' + tournament.UUID})
   return res.end()
 }
 
 const handleJoinAsSolo = async (req, res) => {
   console.log('Handling join as solo')
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   const tournament = await Tournament.findById(req.body.tournament);
   if (!tournament) {
     return res.status(404).json({ error: 'No such tournament' });
   }
 
-    // test token for test. remove after zeid finishes authentication system
-    const token = jwt.sign({ uuid: "9410f264-0bef-4516-b3ea-661c575490f3" }, process.env.SECRET, { expiresIn: '1h' });
-
-    // const token = req.headers.authorization.split(' ')[1];
-    const decodedToken = jwt.verify(token, process.env.SECRET);
-    const userUUID = decodedToken.uuid;
+  const userUUID = req.user;
 
   // tournament must be solo
   if (tournament.teamSize != 1) {
@@ -383,10 +353,6 @@ const handleJoinAsSolo = async (req, res) => {
 
 const handleJoinAsTeam = async (req, res) => {
   console.log('Handling join as team')
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
   const tournament = await Tournament.findById(req.body.tournament);
   if (!tournament) {
     return res.status(404).json({ error: 'No such tournament' });
@@ -397,12 +363,7 @@ const handleJoinAsTeam = async (req, res) => {
     return res.status(404).json({ error: 'No such team' });
   }
 
-  // test token for test. remove after zeid finishes authentication system
-  const token = jwt.sign({ uuid: "9410f264-0bef-4516-b3ea-661c575490f3" }, process.env.SECRET, { expiresIn: '1h' });
-
-  // const token = req.headers.authorization.split(' ')[1];
-  const decodedToken = jwt.verify(token, process.env.SECRET);
-  const userUUID = decodedToken.uuid;
+  const userUUID = req.user;
 
   // required team size must match provided team size
   if (tournament.teamSize != team.members.length) {
