@@ -68,4 +68,43 @@ const loggedIn = async (req, res) => {
   }
 }
 
-module.exports = { signupUser, loginUser, logoutUser, loggedIn }
+// a payement route that will be used to make payments wether to purchase credits, become host or ... "/payment"
+// implement the payment process coming from the client side
+const paymentProcess = async (req, res) => {
+  console.log("in payment process");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  try {
+    console.log("in try for payment");
+    // implement the payment process
+    // you can use a payment gateway like stripe, paypal, ...
+    // or you can implement your own payment system
+    // or just fake it for now
+    res.status(200).json({ message: "Payment successful" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+    console.log("error");
+  }
+};
+
+// become host route that updates isHost to true
+const becomeHost = async (req, res) => {
+  // get the user id from the token
+  const { userId } = req.body;
+  try {
+    console.log("in try for become host");
+    // find the user
+    const user = await User.findById(userId);
+    // update the user
+    user.isHost = true;
+    await user.save();
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+    console.log("error");
+  }
+};
+
+module.exports = { signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost }
