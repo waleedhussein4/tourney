@@ -1,19 +1,86 @@
+// TODO: handle not signed in user
+
 import Nav from '/src/components/Nav.jsx'
 import { formatCreditCard, getCreditCardType } from 'cleave-zen'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 
 import './styles/Purchase.css'
 
 function Purchase() {
 
+  const navigate = useNavigate()
+
+  const { product } = useParams()
+  if(!product) {
+    navigate('/credits')
+  }
+
   const inputRef = useRef(null)
   const [ccValue, setccValue] = useState('')
   const [ccType, setccType] = useState('')
+  const [item, setItem] = useState({})
+  const [isLoading, setIsLoading] = useState(true)
+
+  const createTestProducts = async () => {
+    await fetch('http://localhost:2000/api/purchase/createTestProducts', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify([
+        {
+          id: '1',
+          name: 'Vbucks 1',
+          description: 'Buy a small amount of vbucks for the in-game store',
+          price: 10
+        },
+        {
+          id: '2',
+          name: 'Vbucks 2',
+          description: 'Buy a medium amount of vbucks for the in-game store',
+          price: 15
+        },
+        {
+          id: '3',
+          name: 'Vbucks 3',
+          description: 'Buy a large amount of vbucks for the in-game store',
+          price: 25
+        }
+      ])
+    })
+    .then(res => res.json())
+    .then(data => console.log(data))
+  }
+
+  const getItem = async () => {
+    const URL = 'http://localhost:2000/api/purchase/getProduct'
+    console.log("Product: " + product)
+
+    await fetch(`${URL}/${product}`)
+    .then(res => {
+      if(res.ok) {
+        setIsLoading(false)
+      } else {
+        navigate('/notfound')
+      }
+      return res.json()
+    })
+    .then(data => {
+      console.log(data)
+      setItem(data)
+    })
+  }
+
+  useEffect(() => {
+    // createTestProducts()
+    getItem()
+  }, [])
 
   return (
     <div id="Purchase">
       <Nav />
-      <div className="container">
+      { !isLoading && <div className="container">
 
         <h1>Checkout</h1>
 
@@ -47,25 +114,16 @@ function Purchase() {
 
           <div className="info">
             <h3>Your item</h3>
-            <div className='item-name'>Item Name</div>
-            <div className='item-description'>Item Description</div>
-            <div className='item-price'>Total Price</div>
-            <button id='submit'>Confirm</button>
+            <div className='item-name'>{item.name}</div>
+            <div className='item-description'>{item.description}</div>
+            <div className='item-price'>{item.totalPrice}</div>
+            <button id='submit'>Continue</button>
           </div>
 
         </div>
-      </div>
+      </div> }
     </div>
   )
 }
-
-// const creditCardInput = document.getElementById('input-creditCardNumber')
-// const creditCardType = document.getElementById('input-creditCardType')
-
-// creditCardInput.addEventListener('input', e => {
-//   const value = e.target.value
-//   creditCardInput.value = formatCreditCard(value)
-//   creditCardType.innerHTML = getCreditCardType(value)
-// })
 
 export default Purchase

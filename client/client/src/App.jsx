@@ -37,7 +37,7 @@ function App() {
       <Route path='/team' element={<Team />} />
       <Route path='/team/view' element={<ViewTeam />} />
       <Route path='/tournament' element={<Tournament />} />
-      <Route path='/purchase' element={<Purchase />} />
+      <Route path='/purchase/:product?' element={<Purchase />} />
     </Routes>
   );
 }
