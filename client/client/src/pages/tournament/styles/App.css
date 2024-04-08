@@ -237,12 +237,11 @@
 
 #Tournament .brackets,
 #Tournament .battle-royale {
-  background-color: #eee;
+  background-color: var(--color-primary);
   padding: 15px;
   border-radius: 5px;
-  color: #666;
+  color: white;
   height: 82%;
-  overflow-y: auto;
 }
 
 #Tournament .tournament-actions {
@@ -256,4 +255,40 @@
   font-size: 14px;
   color: #999;
   overflow-y: auto;
+}
+
+#Tournament .battle-royale {
+  display: flex;
+  flex-direction: column;
+}
+
+#Tournament .table-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-weight: bold;
+  margin: 0.5em 0 0.3em 0;
+  border-bottom: 1pt solid white;
+}
+
+#Tournament .battle-royale .user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1pt;
+  background-color: white;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+#Tournament .battle-royale .user-list li {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+  background-color: var(--color-primary);
+  padding: 0.4em;
+}
+
+#Tournament .user-eliminated {
+  color: var(--color-red)
 }
