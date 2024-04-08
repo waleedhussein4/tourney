@@ -1,6 +1,8 @@
 const Tournament = require('../models/tourneyModels');
-const Team = require('../models/teamModels')
+const Team = require('../models/teamModels');
+const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
+const generateAndAddUsersToTournament = require('./tester');
 
 // Create a new tournament
 const createTournament = async (req, res) => {
@@ -185,6 +187,27 @@ const getTournamentDisplayData = async (req, res) => {
 
     const isHost = (tournament.host == userUUID)
 
+    // await generateAndAddUsersToTournament(UUID, 20);
+
+    const enrolledUserDetails = await Promise.all(
+      tournament.enrolledUsers.map(async (userId) => {
+        const user = await User.findById(userId);
+        if (!user) {
+          return null;
+        }
+        // Simulated elimination status and score
+        const eliminated = Math.random() < 0.5; // Random elimination status
+        const score = eliminated ? 0 : Math.floor(Math.random() * 1000); // Random score if not eliminated
+        return { userName: user.userName, eliminated, score };
+      })
+    );
+
+    // Filter out any null values (users not found)
+    const validEnrolledUserDetails = enrolledUserDetails.filter((user) => user !== null);
+
+    validEnrolledUserDetails.sort((a, b) => b.score - a.score);
+
+
     res.status(200).json({
       hasStarted: tournament.hasStarted,
       accessibility: tournament.accessibility,
@@ -194,7 +217,6 @@ const getTournamentDisplayData = async (req, res) => {
       type: tournament.type,
       teamSize: tournament.teamSize,
       entryFee: tournament.entryFee,
-      enrolledUsers: tournament.enrolledUsers,
       maxCapacity: tournament.maxCapacity,
       earnings: tournament.earnings,
       host: tournament.host,
@@ -202,7 +224,10 @@ const getTournamentDisplayData = async (req, res) => {
       updates: tournament.updates,
       isHost: isHost,
       application: tournament.application,
-      hasApplied: ((tournament.applications).map(app => app.user)).includes(userUUID)
+      hasApplied: ((tournament.applications).map(app => app.user)).includes(userUUID),
+      data: {
+        users: validEnrolledUserDetails,
+      }
     });
   } catch (error) {
     console.error(error);
