@@ -22,7 +22,7 @@ function Purchase() {
   const [item, setItem] = useState({})
   const [isLoading, setIsLoading] = useState(true)
 
-  const createTestProducts = async () => {
+  const createTestProducts = async () => {   // remove for production
     await fetch('http://localhost:2000/api/purchase/createTestProducts', {
       method: "POST",
       headers: {
@@ -114,9 +114,11 @@ function Purchase() {
 
           <div className="info">
             <h3>Your item</h3>
-            <div className='item-name'>{item.name}</div>
-            <div className='item-description'>{item.description}</div>
-            <div className='item-price'>{item.totalPrice}</div>
+            <div className="item-info">
+              <div className='item-name'>{item.name}</div>
+              <div className='item-description'>{item.description}</div>
+              <div className='item-price'>{item.totalPrice}</div>
+            </div>
             <button id='submit'>Continue</button>
           </div>
 
