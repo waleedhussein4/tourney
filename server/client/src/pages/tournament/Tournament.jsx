@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import "./styles/App.css";
 import Nav from "/src/components/Nav.jsx";
 import alpha_x from '/src/assets/alpha-x.svg';
+import Brackets from "./components/Brackets";
+import BattleRoyale from "./components/BattleRoyale";
 
 const paramUUID = new URLSearchParams(window.location.search).get('UUID')
 const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
@@ -288,7 +290,7 @@ function Tournament() {
             <p className="tournament-category">Category: {tournament.category.replace(/(^\w|\s\w)/g, m => m.toUpperCase())}</p>
             <p className="tournament-type">Format: {tournament.type.replace(/(^\w|\s\w)/g, m => m.toUpperCase())}</p>
             <p className="tournament-teamSize">{tournament.teamSize != 1 ? (`Team size: ${tournament.teamSize} players`) : "Team size: Solo"}</p>
-            <p className="tournament-capacity">Capacity: {tournament.enrolledUsers.length}/{tournament.maxCapacity}</p>
+            <p className="tournament-capacity">Capacity: {tournament.data.users.length}/{tournament.maxCapacity}</p>
             <p className="tournament-entryFee">Entry Fee: ${tournament.entryFee}</p>
             <div className="tournament-earnings">Earnings:
               <p>1st: ${tournament.earnings[1]}</p>
@@ -305,9 +307,13 @@ function Tournament() {
         <div className="tournament-content">
 
           {tournament.type === "brackets" ? (
-            <div className="brackets">Brackets Display</div>
+            <Brackets 
+              tournament={tournament}
+            />
           ) : (
-            <div className="battle-royale">Battle Royale List</div>
+            <BattleRoyale
+              tournament={tournament}
+            />
           )}
 
           <div className="tournament-updates">
