@@ -29,6 +29,7 @@ export const useSignup = () => {
     if (response.ok) {
       setIsLoading(false);
       navigate("/")
+      navigate(0)
     }
   };
 
