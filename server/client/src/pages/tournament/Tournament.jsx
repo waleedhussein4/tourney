@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 
 const paramUUID = new URLSearchParams(window.location.search).get('UUID')
 const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
-// const tournamentURL = 'https://api.npoint.io/c9523c0ef25065fec8c2';
 const teamsURL = 'https://api.npoint.io/06c398320417bddefa14'
 const submitApplicationURL = 'http://localhost:2000/api/tournement/tournament/submitApplication'
 const joinAsSoloURL = 'http://localhost:200/api/tournement/tournament/joinAsSolo'
