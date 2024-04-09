@@ -128,7 +128,7 @@ const deleteTournament = async (req, res) => {
 const getTournamentDisplayData = async (req, res) => {
 
   // delete all tournaments
-  // Tournament.deleteMany({})
+  // await Tournament.deleteMany({})
   // .then(result => {
   //   console.log(`${result.deletedCount} tournaments deleted successfully.`);
   // })
@@ -137,7 +137,7 @@ const getTournamentDisplayData = async (req, res) => {
   // });
 
   // create new tournament
-  // newTournament.save()
+  // await newTournament.save()
   // .then(savedTournament => {
   //   console.log('Tournament saved successfully:', savedTournament);
   // })

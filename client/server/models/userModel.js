@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const { v4: uuidv4 } = require('uuid');
 
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
+  _id: { type: String, required: true, default: uuidv4 },
   email: {
     type: String,
     required: [true, "Email is required"],
