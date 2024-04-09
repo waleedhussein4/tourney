@@ -6,7 +6,7 @@ const tournamentSchema = new Schema(
     _id: { type: Object },
     UUID: { type: String, required: true, unique: true },
     host: {
-      type: Schema.Types.ObjectId,
+      type: Schema.Types.String,
       ref: "User",
       required: true,
     },
@@ -17,7 +17,7 @@ const tournamentSchema = new Schema(
     endDate: { type: Date, required: true },
     enrolledUsers: [
       {
-        type: Schema.Types.ObjectId,
+        type: Schema.Types.String,
         ref: "User",
       },
     ],
