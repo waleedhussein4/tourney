@@ -1,7 +1,7 @@
 const express = require('express');
 const {createTournament, getTournamentById, getAllTournaments, updateTournament, deleteTournament, getTournamentDisplayData, handleApplicationSubmission, handleJoinAsSolo, handleJoinAsTeam} = require('../controller/tourneyController');
 const router = express();
-const auth = require("../middleware/auth")
+const auth = require("../middleware/requireAuth")
 
 //tournaments
 router.get('/', auth, getAllTournaments);

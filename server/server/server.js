@@ -5,7 +5,7 @@ const cors = require('cors');
 const app = express();
 const touneyRoute = require('./routes/tourneyRoutes');
 const userRoute = require('./routes/userRoutes');
-//const teamRoute = require('./routes/teamRoutes');
+const teamRoute = require('./routes/teamRoutes');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser')
 const port = 2000;
@@ -22,7 +22,7 @@ app.use(cookieParser())
 //route
 app.use('/api/tournement',touneyRoute);
 app.use('/api/user',userRoute);
-//app.use('/api',teamRoute);
+app.use('/api/team',teamRoute);
 
 mongoose.connect('REDACTED_MONGODB_URI')
 .then(()=>{
@@ -33,7 +33,3 @@ mongoose.connect('REDACTED_MONGODB_URI')
 .catch((error)=>{
     console.log(error)
 })
-
-
-
-
