@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+import { useContext } from "react";
+import { AuthContext } from "/src/context/AuthContext";
 import "./styles/App.css";
 import Nav from "/src/components/Nav.jsx";
 import alpha_x from '/src/assets/alpha-x.svg';
 import Brackets from "./components/Brackets";
 import BattleRoyale from "./components/BattleRoyale";
+import { useNavigate } from "react-router-dom";
 
 const paramUUID = new URLSearchParams(window.location.search).get('UUID')
 const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
@@ -14,6 +17,10 @@ const joinAsSoloURL = 'http://localhost:200/api/tournement/tournament/joinAsSolo
 const joinAsTeamURL = 'http://localhost:200/api/tournement/tournament/joinAsTeam'
 
 function Tournament() {
+
+  const { loggedIn } = useContext(AuthContext)
+  
+  const navigate = useNavigate()
 
   const [tournament, setTournament] = useState({})
   const [isLoading, setIsLoading] = useState(true)
@@ -103,7 +110,10 @@ function Tournament() {
 
   let button
 
-  if(hasApplied && !applicationAccepted) {
+  if(!loggedIn) {
+    button = <button className="btn btn-primary" onClick={() => navigate('/signin')}>Sign in to join</button>
+  }
+  else if(hasApplied && !applicationAccepted) {
     button = <></>
   }
   else if(!isHost) {
