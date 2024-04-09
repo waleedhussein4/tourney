@@ -29,13 +29,13 @@ const userSchema = new Schema({
   },
   tournaments: [
     {
-      type: Schema.Types.ObjectId,
+      type: Schema.Types.String,
       ref: "Tournament",
     },
   ],
   teams: [
     {
-      type: Schema.Types.ObjectId,
+      type: Schema.Types.String,
       ref: "Team",
     },
   ],

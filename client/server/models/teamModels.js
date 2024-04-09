@@ -9,13 +9,13 @@ const teamSchema = new Schema({
   },
   members: [
     {
-      type: Schema.Types.ObjectId, // Assuming members' UUIDs are MongoDB Object IDs
+      type: Schema.Types.String, // Assuming members' UUIDs are MongoDB Object IDs
       ref: "User", // Assuming you have a User model defined elsewhere
       required: true,
     },
   ],
   leader: {
-    type: Schema.Types.ObjectId, // Assuming the leader's UUID is a MongoDB Object ID
+    type: Schema.Types.String, // Assuming the leader's UUID is a MongoDB Object ID
     ref: "User", // Reference to the User model
     required: true,
   },
@@ -26,7 +26,7 @@ const teamSchema = new Schema({
     required: true,
   },
   createdBy: {
-    type: Schema.Types.ObjectId, // Assuming the creator's UUID is a MongoDB Object ID
+    type: Schema.Types.String, // Assuming the creator's UUID is a MongoDB Object ID
     ref: "User", // Reference to the User model
     required: true,
   },
