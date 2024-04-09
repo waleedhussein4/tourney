@@ -1,7 +1,7 @@
 import './App.css';
 import '/src/styles/index.css';
 import { AuthContextProvider } from '../../context/AuthContext';
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useLogin } from './useLogin';
 
 function Signin() {
@@ -20,7 +20,7 @@ function Login(props) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(email, pass);
+    await login(email, pass, rememberPassword);
   };
 
   const handleRememberPasswordChange = () => {
