@@ -5,7 +5,7 @@ import './styles/App.css'
 
 import { useEffect, useState } from 'react'
 
-const URL = 'https://api.npoint.io/068f428eae9b782655fe'
+const URL = 'http://localhost:2000/api/team'
 
 function Team() {
 
@@ -20,6 +20,7 @@ function Team() {
     .then(data => {
       setTeams(data)
       setLoadingTeams(false)
+      console.log(data)
     })
   }
 
