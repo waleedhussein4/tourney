@@ -34,7 +34,7 @@ const tournamentSchema = new Schema(
     teamSize: { type: Number },
     acceptedUsers: [
       {
-        type: Schema.Types.ObjectId,
+        type: Schema.Types.String,
         ref: "User",
       },
     ],
