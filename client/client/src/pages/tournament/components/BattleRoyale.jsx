@@ -14,8 +14,8 @@ const BattleRoyale = ({ tournament }) => {
         </div>
         <ul className="user-list">
           {data.users.map((competitor, index) => (
-            <li key={competitor.userName}>
-              <span>{index + 1}. {competitor.userName} <span className="user-eliminated">{competitor.eliminated ? 'Eliminated' : ''}</span></span>
+            <li key={competitor.username}>
+              <span>{index + 1}. {competitor.username} <span className="user-eliminated">{competitor.eliminated ? 'Eliminated' : ''}</span></span>
               <span>{competitor.score}</span>
             </li>
           ))}
