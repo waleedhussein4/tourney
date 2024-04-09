@@ -1,21 +1,23 @@
 const User = require('../models/userModel')
 const jwt = require('jsonwebtoken')
 
-const createToken = (_id) => {
-  return jwt.sign({_id}, process.env.SECRET, { expiresIn: '3d' })
+const createToken = (_id, expiry) => {
+  return jwt.sign({_id}, process.env.SECRET, { expiresIn: expiry })
 }
 
 // login a user
 const loginUser = async (req, res) => {
-  const {email, password, rememberedPass} = req.body
+  const {email, password, rememberPassword} = req.body
 
   try {
     console.log("in try for login")
     const user = await User.login(email, password)
 
     // create a token
-    const token = createToken(user._id)
-
+    let token = createToken(user._id, '1d')
+    if(rememberPassword) {
+      token = createToken(user._id, '30d')
+    }
     // send token cookie
     res.status(200).cookie("token", token, {
       httpOnly: true
@@ -35,7 +37,7 @@ const signupUser = async (req, res) => {
     const user = await User.signup(email,userName, password)
 
     // create a token
-    const token = createToken(user._id)
+    const token = createToken(user._id, '3d')
 
     // send token cookie
     res.status(200).cookie("token", token, {
