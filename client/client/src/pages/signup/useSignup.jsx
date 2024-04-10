@@ -19,11 +19,10 @@ export const useSignup = () => {
       credentials: "include"
     });
 
-    // const json = await response.json();
-
     if (!response.ok) {
+      const json = await response.json();
       setIsLoading(false);
-      // setError(json.error);
+      setError(json.error);
     }
 
     if (response.ok) {
@@ -33,5 +32,5 @@ export const useSignup = () => {
     }
   };
 
-  return [ signup, error, isLoading ];
+  return [ signup, isLoading, error ];
 };
