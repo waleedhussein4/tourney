@@ -9,6 +9,28 @@ const generateUUID = () => {
   return uuidv4();
 };
 
+// Function to delete all users from the database
+const deleteAllUsers = async () => {
+  try {
+    // Delete all documents in the User collection
+    const result = await User.deleteMany({});
+    console.log(`${result.deletedCount} users were deleted.`);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
+// Function to drop the User schema
+const dropUserSchema = async () => {
+  try {
+    // Drop the User collection
+    await mongoose.connection.db.dropCollection('users');
+    console.log('User schema dropped successfully.');
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
 // Function to generate a random gamer tag
 const generateGamerTag = async () => {
   const adjectives = ['Swift', 'Epic', 'Savage', 'Ninja', 'Fierce', 'Stealthy', 'Rapid', 'Mystic', 'Shadow', 'Blaze', 'Thunder', 'Frosty', 'Iron', 'Golden', 'Silent', 'Inferno', 'Atomic', 'Cyber', 'Elite', 'Mighty', 'Cosmic', 'Neon', 'Phantom', 'Solar'];
@@ -17,7 +39,7 @@ const generateGamerTag = async () => {
   let gamerTag = `${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}`;
 
   // Check if gamer tag already exists in the database
-  const existingUser = await User.findOne({ userName: gamerTag });
+  const existingUser = await User.findOne({ username: gamerTag });
   if (existingUser) {
     // Gamer tag already exists, generate a new one
     gamerTag = await generateGamerTag();
@@ -32,15 +54,15 @@ const generateAndAddUsersToTournament = async (tournamentUUID, count) => {
   try {
     const users = [];
     for (let i = 0; i < count; i++) {
-      let userName = await generateGamerTag();
-      console.log(userName)
+      let username = await generateGamerTag();
+      console.log(username)
       const newUser = await User.create({
         _id: generateUUID(), // Generating random UUID for each user
-        email: `${userName}@example.com`,
-        userName: userName,
+        email: `${username}@example.com`,
+        username: username,
         password: 'password123', // Note: This is just for demonstration, use proper password hashing in real application
       });
-      console.log(`User ${newUser.userName} added with UUID: ${newUser._id}`);
+      console.log(`User ${newUser.username} added with UUID: ${newUser._id}`);
       users.push(newUser);
     }
 
