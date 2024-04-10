@@ -57,7 +57,7 @@
   font-size: small;
 }
 
-#Signup #error {
+#Signup .error {
   color: red;
   text-align: center;
   font-size: small;
