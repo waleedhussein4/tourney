@@ -50,6 +50,10 @@ const userSchema = new Schema({
   updatedAt: {
     type: Date,
   },
+  credits: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const isStrongPasswordd = (password) => {
