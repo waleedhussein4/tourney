@@ -19,7 +19,7 @@ function Nav() {
       <div id="options">
         <a href="/host/">Host</a>
         <a href="/tournaments/">Compete</a>
-        <a href="/team/">Team</a>
+        <a href="/team/">Teams</a>
       </div>
       <div id="account">
         { loggedIn === true && 
