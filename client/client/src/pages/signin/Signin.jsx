@@ -16,7 +16,7 @@ function Login(props) {
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [rememberPassword, setRememberPassword] = useState(false);
-  const [login, error, isLoading] = useLogin();
+  const [login, isLoading, error] = useLogin();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
