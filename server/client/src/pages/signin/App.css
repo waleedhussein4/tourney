@@ -57,11 +57,10 @@
   font-size: small;
 }
 
-#Signin #error {
+#Signin .error {
   color: red;
   text-align: center;
   font-size: small;
-  background-color: rgba(255, 0, 0, 0.1);
   padding: 5px;
   margin-bottom: 10px;
 }
