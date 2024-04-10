@@ -10,11 +10,11 @@
   border-bottom: 1pt solid white;
 }
 
-#logo-nav {
+#nav #logo-nav {
   height: 40pt;
 }
 
-#options {
+#nav #options {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
@@ -26,12 +26,52 @@
   color: var(--color-tertiary);
 }
 
-#menu {
+#nav #menu {
   width: 26pt;
 }
 
-.profilePic{
+#nav .profilePic{
   width: 60px;
   padding: 10px;
   border-radius: 30px;
+}
+
+#nav .profilePic:hover {
+  opacity: 0.9;
+}
+
+#nav #profile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.5em;
+}
+
+#nav .user-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5pt;
+  min-height: 100%;
+}
+
+#nav .user-credits {
+  color: rgba(255, 255, 255, 0.77);
+  font-size: 0.8em;
+}
+
+#nav .username {
+  color: white;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+#nav #profile #btn-logout {
+  color: var(--color-tertiary);
+}
+
+#nav #profile #btn-logout:hover {
+  opacity: 0.9;
+  cursor: pointer;
 }
