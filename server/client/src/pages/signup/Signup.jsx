@@ -10,7 +10,7 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const myDiv = useRef(null);
-  const[signup , error , isLoading]= useSignup()
+  const[signup , isLoading , error]= useSignup()
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +34,6 @@ function Signup() {
     } else {
       myDiv.current.textContent = "";
       await signup(email ,userName , password)
-      console.log("sent")
     }
   }
 
@@ -53,10 +52,10 @@ function Signup() {
             <p>Confirm Password</p>
             <input type="password" id="confirmPassword" placeholder='Confirm your password'onChange={(e)=>setConfirmPassword(e.target.value)} ></input>
             <input type="submit" disabled={isLoading} value="Signup" id='submit'></input>
-            {error && <div>{error}</div>}
+            {error && <div className='error'>{error}</div>}
           </form>
         
-          <div id="error" ref={myDiv}></div>
+          <div className="error" ref={myDiv}></div>
           <span id="account">Already have an account? <a href="/signin/">Login</a></span>
         </div>
       </div>
