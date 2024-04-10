@@ -12,8 +12,8 @@ const paramUUID = new URLSearchParams(window.location.search).get('UUID')
 const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
 const teamsURL = 'https://api.npoint.io/06c398320417bddefa14'
 const submitApplicationURL = 'http://localhost:2000/api/tournement/tournament/submitApplication'
-const joinAsSoloURL = 'http://localhost:200/api/tournement/tournament/joinAsSolo'
-const joinAsTeamURL = 'http://localhost:200/api/tournement/tournament/joinAsTeam'
+const joinAsSoloURL = 'http://localhost:2000/api/tournement/tournament/joinAsSolo'
+const joinAsTeamURL = 'http://localhost:2000/api/tournement/tournament/joinAsTeam'
 
 function Tournament() {
 
