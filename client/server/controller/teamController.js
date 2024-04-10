@@ -34,7 +34,7 @@ const getTeam = async (req, res) => {
   try {
     const team = await Team.findOne({ _id: req.params.id }).populate(
       "members",
-      "userName email"
+      "username email"
     );
     res.status(200).json(team);
   } catch (error) {
@@ -46,7 +46,7 @@ const getTeamMembers = async (req, res) => {
   try {
     const team = await Team.findOne({ _id: req.params.id }).populate(
       "members",
-      "userName email"
+      "username email"
     );
     res.status(200).json(team.members);
   } catch (error) {
@@ -58,7 +58,7 @@ const joinTeam = async (req, res) => {
   try {
     const team = await Team.findOne({ _id: req.params.id }).populate(
       "members",
-      "userName email"
+      "username email"
     );
     if (team.members.length === 5) {
       return res.status(400).json({ message: "Team is full" });
@@ -78,8 +78,8 @@ const changeLeader = async (req, res) => {
   const { newLeader } = req.body;
   try {
     const team = await Team.findOne({ _id: req.params.id })
-      .populate("leader", "userName email")
-      .populate("members", "userName email");
+      .populate("leader", "username email")
+      .populate("members", "username email");
     if (!team.members.includes(req.user._id)) {
       return res.status(400).json({ message: "User is not a member" });
     }
@@ -102,7 +102,7 @@ const kickMember = async (req, res) => {
   try {
     const team = await Team.findOne({ _id: req.params.id }).populate(
       "members",
-      "userName email"
+      "username email"
     );
     if (!team.members.includes(req.user._id)) {
       return res.status(400).json({ message: "User is not a member" });
@@ -137,8 +137,8 @@ const deleteTeam = async (req, res) => {
 const leaveTeam = async (req, res) => {
   try {
     const team = await Team.findOne({ _id: req.params.id })
-      .populate("leader", "userName email")
-      .populate("members", "userName email");
+      .populate("leader", "username email")
+      .populate("members", "username email");
     if (!team.members.includes(req.user._id)) {
       return res.status(400).json({ message: "User is not a member" });
     }
