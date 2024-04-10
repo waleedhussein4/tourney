@@ -109,4 +109,20 @@ const becomeHost = async (req, res) => {
   }
 };
 
-module.exports = { signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost }
+const profile = async (req, res) => {
+  const userUUID = req.user
+  try {
+    console.log("in try for profile");
+    const user = await User.findById(userUUID)
+    const returnData = {
+      username: user.username,
+      credits: user.credits,
+    }
+    res.status(200).json(returnData)
+  } catch (error) {
+    res.status(400).json({ error: 'User not found' });
+    console.log("error");
+  }
+}
+
+module.exports = { signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile }
