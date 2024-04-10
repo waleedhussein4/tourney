@@ -187,7 +187,7 @@ const getTournamentDisplayData = async (req, res) => {
 
     const isHost = (tournament.host == userUUID)
 
-    // await generateAndAddUsersToTournament(UUID, 20);
+    // await generateAndAddUsersToTournament(UUID, 50);
 
     const enrolledUserDetails = await Promise.all(
       tournament.enrolledUsers.map(async (userId) => {
@@ -198,7 +198,7 @@ const getTournamentDisplayData = async (req, res) => {
         // Simulated elimination status and score
         const eliminated = Math.random() < 0.5; // Random elimination status
         const score = eliminated ? 0 : Math.floor(Math.random() * 1000); // Random score if not eliminated
-        return { userName: user.userName, eliminated, score };
+        return { username: user.username, eliminated, score };
       })
     );
 
