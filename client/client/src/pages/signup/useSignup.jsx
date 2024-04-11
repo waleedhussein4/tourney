@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "/src/hooks/useAuthContext";
 
-export const useSignup = () => {
+export const useSignup = (props) => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false); 
 
@@ -27,7 +27,11 @@ export const useSignup = () => {
 
     if (response.ok) {
       setIsLoading(false);
-      navigate("/")
+      if(props) {
+        navigate(props.from);
+      } else {
+        navigate("/")
+      }
       navigate(0)
     }
   };

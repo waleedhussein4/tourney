@@ -1,22 +1,18 @@
+/* eslint-disable react/prop-types */
 import './App.css';
 import '/src/styles/index.css';
 import { AuthContextProvider } from '../../context/AuthContext';
 import { useState, useEffect } from 'react';
 import { useLogin } from './useLogin';
+import { useLocation } from 'react-router-dom';
 
 function Signin() {
-  return (
-    <AuthContextProvider>
-      <Login />
-    </AuthContextProvider>
-  );
-}
-
-function Login(props) {
+  let location = useLocation();
+  
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [rememberPassword, setRememberPassword] = useState(false);
-  const [login, isLoading, error] = useLogin();
+  const [login, isLoading, error] = useLogin(location.state);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,26 +37,28 @@ function Login(props) {
   }, []);
 
   return (
-    <div id="Signin">
-      <div className="container">
-        <div className="container-center">
-          <form onSubmit={handleSubmit}>
-            <h2>Login</h2>
-            <label htmlFor="username">Username or email</label>
-            <input type="text" id="username" placeholder="Enter a username or an email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <label htmlFor="password">Password</label>
-            <input type="password" id="password" placeholder="Enter a password" value={pass} onChange={(e) => setPass(e.target.value)} />
-            <div id="rememberPassword">
-              <input type="checkbox" checked={rememberPassword} onChange={handleRememberPasswordChange} />
-              <label htmlFor="rememberPassword">Remember password</label>
-            </div>
-            <input type="submit" value="Login" disabled={isLoading} className="submit" />
-            {error && <div className="error">{error}</div>}
-          </form>
-          <span id="account">Don't have an account? <a href="/signup/">Sign up</a></span>
+    <AuthContextProvider>
+      <div id="Signin">
+        <div className="container">
+          <div className="container-center">
+            <form onSubmit={handleSubmit}>
+              <h2>Login</h2>
+              <label htmlFor="username">Username or email</label>
+              <input type="text" id="username" placeholder="Enter a username or an email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <label htmlFor="password">Password</label>
+              <input type="password" id="password" placeholder="Enter a password" value={pass} onChange={(e) => setPass(e.target.value)} />
+              <div id="rememberPassword">
+                <input type="checkbox" checked={rememberPassword} onChange={handleRememberPasswordChange} />
+                <label htmlFor="rememberPassword">Remember password</label>
+              </div>
+              <input type="submit" value="Login" disabled={isLoading} className="submit" />
+              {error && <div className="error">{error}</div>}
+            </form>
+            <span id="account">Don't have an account? <a href="/signup/">Sign up</a></span>
+          </div>
         </div>
       </div>
-    </div>
+    </AuthContextProvider>
   );
 }
 
