@@ -1,14 +1,18 @@
 .brackets {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  /* grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); */
+  display: flex;
+  flex-direction: row;
   gap: 16px;
   align-items: start;
+  overflow: auto;
 }
 
 .round {
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 100%;
 }
 
 .match {
@@ -29,8 +33,8 @@
   position: absolute;
   top: 50%;
   right: 0;
-  border-top: 1px solid black;
-  border-right: 1px solid black;
+  border-top: 1px solid white;
+  border-right: 1px solid white;
   width: 20px;
   /* height: calc(var(--round) * 100% + (var */
   height: auto;
