@@ -332,7 +332,6 @@ function Tournament() {
   return (
     <div id="Tournament">
       <Nav />
-      <Brackets />
       <div className="tournament-container">
         {isLoading ? (
           <h1 className="loadingText">Loading tournament ...</h1>
@@ -361,10 +360,10 @@ function Tournament() {
                     ? `Team size: ${tournament.teamSize} players`
                     : "Team size: Solo"}
                 </p>
-                {/* <p className="tournament-capacity">
+                <p className="tournament-capacity">
                   Capacity: {tournament.data.users.length}/
                   {tournament.maxCapacity}
-                </p> */}
+                </p>
                 <p className="tournament-entryFee">
                   Entry Fee: ${tournament.entryFee}
                 </p>

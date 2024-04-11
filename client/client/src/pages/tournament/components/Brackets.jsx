@@ -1,17 +1,18 @@
-import React from "react";
 import "../styles/Brackets.css"; // Ensure this CSS file is created and linked
 
 const Brackets = ({ tournament }) => {
-  const enrolledUsers = [
-    "user 1",
-    "user 2",
-    "user 3",
-    "user 4",
-    "user 5",
-    "user 6",
-    "user 7",
-    "user 8",
-  ];
+  // const enrolledUsers = [
+  //   "user 1",
+  //   "user 2",
+  //   "user 3",
+  //   "user 4",
+  //   "user 5",
+  //   "user 6",
+  //   "user 7",
+  //   "user 8",
+  // ];
+  const enrolledUsers = tournament.data.users;
+  console.log("enrolledUsers", enrolledUsers)
 
   // Generate the bracket structure based on the number of enrolled users.
   // This assumes the number of users is a power of two for simplicity.
@@ -22,7 +23,18 @@ const Brackets = ({ tournament }) => {
   const createPlaceholderForRound = (round) => {
     return Array.from({ length: Math.pow(2, totalRounds - round) }, (_, i) => ({
       id: `placeholder-${round}-${i}`,
-      competitors: ["TBA", "TBA"],
+      competitors: [
+        {
+          username: "TBA",
+          eliminated: false,
+          score: 0,
+        },
+        {
+          username: "TBA",
+          eliminated: false,
+          score: 0,
+        }
+      ],
     }));
   };
 
@@ -42,8 +54,8 @@ const Brackets = ({ tournament }) => {
         <div key={roundIndex} className={`round round-${roundIndex}`}>
           {round.map((match) => (
             <div key={match.id} className="match">
-              <div className="competitor">{match.competitors[0]}</div>
-              <div className="competitor">{match.competitors[1]}</div>
+              <div className="competitor">{match.competitors[0].username}</div>
+              <div className="competitor">{match.competitors[1].username}</div>
               {roundIndex !== rounds.length - 1 && (
                 <div
                   className="connector"
