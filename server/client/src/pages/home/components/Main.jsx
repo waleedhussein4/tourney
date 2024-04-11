@@ -22,7 +22,7 @@ function Main() {
         </p>
       </div>
       <br></br>
-      <div className="banners">
+      {/* <div className="banners">
         <div className="banner">
           <a href="/tournaments/?type=Brackets">
             <img src={bracket} alt="Bracket Tournament" />
@@ -37,6 +37,16 @@ function Main() {
             />
           </a>
         </div>
+      </div> */}
+      <input id='temp' type="text" placeholder="Search..." />
+      <div id='suggest-join'>
+        <div className="text">
+          <h2>Bracket Tournaments</h2>
+          <span>Random description of bracket tournaments to entice the user to click on the button on the right</span>
+          <h2>Battle Royale Tournaments</h2>
+          <span>Random description of battle Royale tournaments to entice the user to click on the button on the right</span>
+        </div>
+        <button>BROWSE TOURNEYS</button>
       </div>
       <Carousel
         title="Trending"
