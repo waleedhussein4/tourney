@@ -1,0 +1,37 @@
+.brackets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.round {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.match {
+  position: relative;
+  text-align: center;
+}
+
+.competitor {
+  border: 1px solid black;
+  margin: 8px 0;
+  padding: 5px 10px;
+  background-color: white;
+  color: blueviolet;
+  width: 150px;
+}
+
+.connector {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  border-top: 1px solid black;
+  border-right: 1px solid black;
+  width: 20px;
+  /* height: calc(var(--round) * 100% + (var */
+  height: auto;
+}
