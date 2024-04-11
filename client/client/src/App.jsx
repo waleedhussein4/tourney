@@ -1,9 +1,4 @@
 
-import { Route, Router, Routes } from "react-router-dom";
-
-import { useContext } from "react";
-import { Route, Routes } from "react-router-dom";
-
 import React, { useContext } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AuthContext from "./context/AuthContext.jsx";
