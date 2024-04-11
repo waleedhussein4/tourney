@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export const useLogin = () => {
+export const useLogin = (props) => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false); 
   const navigate = useNavigate();
@@ -22,7 +22,11 @@ export const useLogin = () => {
     }
     if (response.ok) {
       setIsLoading(false);
-      navigate("/")
+      if(props) {
+        navigate(props.from);
+      } else {
+        navigate("/")
+      }
       navigate(0)
     }
   };
