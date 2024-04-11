@@ -53,11 +53,16 @@ function Nav() {
         { loggedIn === false && 
           <>
           <span>
-            <Link to="/signin">Sign In</Link>
+            <Link 
+              to="/signin"
+              state={{ from: location.pathname }}
+            >
+              Sign In
+            </Link>
           </span>
           <span> | </span>
           <span>
-            <Link to="/signup">Sign Up</Link>
+            <Link to={{pathname:"/signup", state:{ previousLocationPathname: location.pathname }}}>Sign Up</Link>
           </span>
           </>
         }

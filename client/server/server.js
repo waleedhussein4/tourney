@@ -24,6 +24,10 @@ app.use('/api/tournement',touneyRoute);
 app.use('/api/user',userRoute);
 app.use('/api/team',teamRoute);
 
+app.all('*', (req, res) => { 
+    return
+});
+
 mongoose.connect('REDACTED_MONGODB_URI')
 .then(()=>{
     app.listen(port,()=>{
