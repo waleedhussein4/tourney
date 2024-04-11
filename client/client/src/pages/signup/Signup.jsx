@@ -2,15 +2,17 @@ import './App.css'
 
 import { useRef, useState } from "react";
 import { useSignup } from "./useSignup";
+import { useLocation } from "react-router-dom";
 
 function Signup() {
+  let location = useLocation();
 
   const [email, setEmail] = useState('');
   const [userName, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const myDiv = useRef(null);
-  const[signup , isLoading , error]= useSignup()
+  const[signup , isLoading , error]= useSignup(location.state)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
