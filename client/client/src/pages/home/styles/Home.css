@@ -64,3 +64,15 @@
   align-items: center;
   background-color: black;
 }
+
+#Home #temp {
+  width: 80%;
+  background-color: white;
+  border: 2pt solid white;
+}
+
+#Home #suggest-join {
+  color: white;
+  display: flex;
+  flex-direction: row;
+}

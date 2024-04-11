@@ -1,30 +1,33 @@
 import { useState } from "react";
-import { useAuthContext } from "../../context/useAuthContext";
 import { useNavigate } from "react-router-dom";
 
-export const useLogin = () => {
+export const useLogin = (props) => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false); 
-  const { dispatch } = useAuthContext();
   const navigate = useNavigate();
-  const login = async (email, password) => {
+  const login = async (email, password, rememberPassword) => {
     setIsLoading(true);
     setError(null);
     const response = await fetch("http://localhost:2000/api/user/login", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify({ email, password})
+      body: JSON.stringify({ email, password, rememberPassword}),
+      credentials: "include"
     });
-    const json = await response.json();
+
     if (!response.ok) {
-      setIsLoading(false);
+      const json = await response.json();
       setError(json.error);
+      setIsLoading(false);
     }
     if (response.ok) {
-      localStorage.setItem('user', JSON.stringify(json));
-      dispatch({ type: 'Login', payload: json });
       setIsLoading(false);
-      navigate("/")
+      if(props) {
+        navigate(props.from);
+      } else {
+        navigate("/")
+      }
+      navigate(0)
     }
   };
 
