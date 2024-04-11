@@ -5,7 +5,7 @@ import './styles/App.css'
 
 import { useEffect, useState } from 'react'
 
-const URL = 'https://api.npoint.io/068f428eae9b782655fe'
+const URL = 'http://localhost:2000/api/team'
 
 function Team() {
 
@@ -13,11 +13,14 @@ function Team() {
   const [loadingTeams, setLoadingTeams] = useState(true)
 
   const fetchTeams = async () => {
-    await fetch(URL)
+    await fetch(URL, {
+      credentials: 'include'
+    })
     .then(res => res.json())
     .then(data => {
       setTeams(data)
       setLoadingTeams(false)
+      console.log(data)
     })
   }
 
