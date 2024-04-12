@@ -45,7 +45,7 @@ const getTeam = async (req, res) => {
 const getTeamsByUser = async (req, res) => {
   try {
       // Assuming user's ID is passed in the request, e.g., from a middleware that validates and attaches user info
-      const userId = req.user._id;
+      const userId = req.user
 
       // Query the database for teams where this user is a member, leader, or creator
       const teams = await Team.find({
