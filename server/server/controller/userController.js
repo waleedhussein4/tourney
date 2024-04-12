@@ -63,7 +63,7 @@ const loggedIn = async (req, res) => {
     if(!token) return res.json(false)
 
     jwt.verify(token, process.env.SECRET)
-
+    console.log('Token:', data.token);
     res.send(true)
   } catch(error) {
     res.json(false)
