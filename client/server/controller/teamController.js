@@ -42,6 +42,27 @@ const getTeam = async (req, res) => {
   }
 };
 
+const getTeamsByUser = async (req, res) => {
+  try {
+      // Assuming user's ID is passed in the request, e.g., from a middleware that validates and attaches user info
+      const userId = req.user._id;
+
+      // Query the database for teams where this user is a member, leader, or creator
+      const teams = await Team.find({
+          $or: [
+              { members: userId },
+              { leader: userId },
+              { createdBy: userId }
+          ]
+      }).populate('members', 'username email');  // Optionally populate member details
+
+      res.status(200).json(teams);
+  } catch (error) {
+      res.status(500).json({ message: error.message });
+  }
+};
+
+
 const getTeamMembers = async (req, res) => {
   try {
     const team = await Team.findOne({ _id: req.params.id }).populate(
@@ -163,5 +184,6 @@ module.exports = {
   kickMember,
   deleteTeam,
   leaveTeam,
+  getTeamsByUser
 };
 
