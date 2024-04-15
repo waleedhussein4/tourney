@@ -23,14 +23,14 @@
   gap: 3em;
 }
 
-#Team #suggest form {
+#Team #suggest .form {
   display: flex;
   flex-direction: row;
   gap: 0.5em;
   justify-content: space-between;
 }
 
-#Team #suggest form button {
+#Team #suggest .form button {
   width: 60pt;
   color: var(--color-tertiary);
   font-family: inherit;
