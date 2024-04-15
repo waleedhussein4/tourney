@@ -30,7 +30,6 @@ const Brackets = ({ tournament }) => {
   const isTeam = (participant) => participant?.teamName !== null; // Check if participant has a team name
 
   const totalRounds = Math.log2(participants.length);
-  console.log('totalRounds:', totalRounds)
   let matches = [...participants];
 
   const createPlaceholderForRound = (round) => {
