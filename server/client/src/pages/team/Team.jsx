@@ -5,7 +5,7 @@ import './styles/App.css'
 
 import { useEffect, useState } from 'react'
 
-const URL = 'http://localhost:2000/api/team'
+const URL = 'http://localhost:2000/api/team/user'
 
 function Team() {
 
@@ -20,7 +20,6 @@ function Team() {
     .then(data => {
       setTeams(data)
       setLoadingTeams(false)
-      console.log(data)
     })
   }
 

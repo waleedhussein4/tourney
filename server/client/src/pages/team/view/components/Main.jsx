@@ -1,10 +1,11 @@
+/* eslint-disable react/prop-types */
 import crown from '../assets/crown.webp'
 
 const userIsLeader = true
 
-function Main(props) {
+function Main({team, loadingTeam }) {
 
-  if(props.loadingTeam) {
+  if(loadingTeam) {
     return (
       <div id="main">
         <h1>LOADING ...</h1>
@@ -16,32 +17,31 @@ function Main(props) {
     return (
       <div id="main">
         <div id="team">
-          <h1>{props.team.name}</h1>
+          <h1>{team.name}</h1>
           <div className="members">
             <span>Members</span>
-            { props.loadingMembers ? <h1>Loding team members ...</h1> : props.members.map((member) => <Member key={member.UUID} member={member} team={props.team} />) }
+            { team.members.map((member) => <Member key={member.username} member={member} team={team} />) }
           </div>
-          { userIsLeader ? <button className="deleteTeam">Delete Team</button> : <button className="leaveTeam">Leave Team</button> }
+          { userIsLeader ? <button onClick={deleteTeam} className="deleteTeam">Delete Team</button> : <button onClick={leaveTeam} className="leaveTeam">Leave Team</button> }
         </div>
       </div>
     )
   }
-
 }
 
-function Member(props) {
-  const isLeader = props.team.leader == props.member.UUID
+function Member({ member, team }) {
+  const isLeader = team.leader == member.username
   return (
     <div className="member" onMouseEnter={showButton} onMouseLeave={hideButton}>
       <div className="nameWrapper">
+        <span className="name">{member.username}</span>
         { isLeader ? <img className='crown' src={crown} alt="" /> : <></> }
-        <span className="name">{props.member.name}</span>
       </div>
       <div className="buttonsWrapper">
         { userIsLeader && !isLeader ? (
           <>
-            <button className='kickButton'>Kick</button>
-            <button className="promoteButton">Transfer Leadership</button>
+            <button onClick={kickMember} className='kickButton'>Kick</button>
+            <button onClick={promoteMember} className="promoteButton">Transfer Leadership</button>
           </>
         ) : <></>}
         
@@ -58,6 +58,40 @@ function showButton(event) {
 function hideButton(event) {
   let buttons = event.target.querySelectorAll('.buttonsWrapper button')
   Array.from(buttons).forEach(btn => btn.style.display = 'none')
+}
+
+async function deleteTeam() {
+  const paramUUID = new URLSearchParams(window.location.search).get("UUID");
+  const URL = 'http://localhost:2000/api/team/delete/' + paramUUID
+
+  await fetch(URL, {
+    method: 'DELETE',
+    credentials: 'include'
+  })
+  window.location.href = '/team'
+}
+
+function leaveTeam() {
+  const paramUUID = new URLSearchParams(window.location.search).get("UUID");
+  const URL = 'http://localhost:2000/api/team/leave/' + paramUUID
+
+  fetch(URL, {
+    method: 'POST',
+    credentials: 'include'
+  })
+  .then(res => {
+    if(res.ok) {
+      window.location.href = '/team'
+    }
+  })
+}
+
+function kickMember() {
+
+}
+
+function promoteMember() {
+
 }
 
 export default Main
