@@ -2,27 +2,22 @@ const e = require("express");
 const Team = require("../models/teamModels"); // Path to your Team model
 const User = require("../models/userModel"); // Path to your User model
 const { default: mongoose } = require("mongoose");
-
-const getTeams = async (req, res) => {
-  try {
-    // get all teams in the db - require auth later
-    const teams = await Team.find();
-    res.status(200).json(teams);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+const { v4: uuidv4 } = require('uuid');
 
 const createTeam = async (req, res) => {
   // leader and createdBy are object IDs
-  const { name, members, leader, createdBy } = req.body;
+  const { name } = req.body;
   try {
+    const uniqueMembers = new Set(); // Use a Set to avoid duplicates
+    uniqueMembers.add(req.user); // Add the leader to the member set
+
     const team = await Team.create({
+      _id: uuidv4(),
       name,
-      members,
-      leader,
+      members: Array.from(uniqueMembers),
+      leader: req.user,
       dateCreated: new Date(),
-      createdBy,
+      createdBy: req.user,
     });
     res.status(201).json(team);
   } catch (error) {
@@ -31,12 +26,28 @@ const createTeam = async (req, res) => {
 };
 
 const getTeam = async (req, res) => {
+  // check if user is part of team
+
   try {
-    const team = await Team.findOne({ _id: req.params.id }).populate(
+    const team = await Team.findOne({ _id: req.params.UUID }).populate(
       "members",
       "username email"
     );
-    res.status(200).json(team);
+
+    let { _id: UUID, name, members, leader } = team;
+
+    leader = await User.findOne({ _id: leader }).select('username').lean();
+    leader = leader.username
+
+    members = members.map((member) => {
+      return {
+        username: member.username,
+      };
+    })
+
+    const formattedTeam = { UUID, name, members, leader };
+
+    res.status(200).json(formattedTeam);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -56,7 +67,16 @@ const getTeamsByUser = async (req, res) => {
           ]
       }).populate('members', 'username email');  // Optionally populate member details
 
-      res.status(200).json(teams);
+      const returnData = teams.map(team => {
+        return {
+          UUID: team._id,
+          name: team.name,
+          members: team.members
+        }
+      
+      })
+
+      res.status(200).json(returnData);
   } catch (error) {
       res.status(500).json({ message: error.message });
   }
@@ -144,11 +164,12 @@ const kickMember = async (req, res) => {
 
 const deleteTeam = async (req, res) => {
   try {
-    const team = await Team.findOne({ _id: req.params.id });
-    if (team.leader._id !== req.user._id) {
+    const team = await Team.findOne({ _id: req.params.UUID });
+    if (team.leader !== req.user) {
       return res.status(400).json({ message: "User is not the leader" });
     }
-    await team.remove();
+    await team.deleteOne();
+    console.log('Team deleted successfully')
     res.status(200).json({ message: "Team deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -175,7 +196,6 @@ const leaveTeam = async (req, res) => {
 };
 
 module.exports = {
-  getTeams,
   createTeam,
   getTeam,
   getTeamMembers,
