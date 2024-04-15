@@ -358,7 +358,7 @@ function Tournament() {
                     : "Team size: Solo"}
                 </p>
                 <p className="tournament-capacity">
-                  Capacity: {tournament.data.users.length}/
+                  Capacity: {tournament.data.enrolledParticipants.length}/
                   {tournament.maxCapacity}
                 </p>
                 <p className="tournament-entryFee">
@@ -384,7 +384,7 @@ function Tournament() {
             </div>
 
             <div className="tournament-content">
-              {tournament.type === "brackets" ? (
+              {tournament.type === "battle royale" ? (
                 <Brackets tournament={tournament} />
               ) : (
                 <BattleRoyale tournament={tournament} />

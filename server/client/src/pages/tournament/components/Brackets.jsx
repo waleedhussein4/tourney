@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import "../styles/Brackets.css";
 
 import { useState } from "react";
@@ -20,14 +21,16 @@ const TeamUserListPopup = ({ teamName, players, onClose }) => {
 };
 
 const Brackets = ({ tournament }) => {
-  console.log(tournament);
 
   const [isTeamPopupOpen, setIsTeamPopupOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
 
-  const participants = tournament.data.participants;
+  const participants = tournament.data.enrolledParticipants;
+
+  const isTeam = (participant) => participant?.teamName !== null; // Check if participant has a team name
 
   const totalRounds = Math.log2(participants.length);
+  console.log('totalRounds:', totalRounds)
   let matches = [...participants];
 
   const createPlaceholderForRound = (round) => {
@@ -70,8 +73,6 @@ const Brackets = ({ tournament }) => {
       ],
     };
   });
-
-  const isTeam = (participant) => participant?.teamName !== null; // Check if participant has a team name
 
   const getUserDisplayName = (participant) => {
     // Implement logic to retrieve user display name based on participant data (e.g., username)
