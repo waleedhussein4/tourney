@@ -15,10 +15,19 @@ const tournamentSchema = new Schema(
     category: { type: String, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    enrolledUsers: [
+    enrolledParticipants: [
       {
-        type: Schema.Types.String,
-        ref: "User",
+        teamName: { type: String },
+        players: [
+          {
+            UUID: {
+              type: Schema.Types.String,
+              ref: "User"
+            },
+            score: { type: Number },
+            eliminated: { type: Boolean },
+          }
+        ],
       },
     ],
     entryFee: { type: Number, required: true },
