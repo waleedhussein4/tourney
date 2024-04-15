@@ -1,5 +1,7 @@
 import "../styles/Brackets.css";
 
+import { useState } from "react";
+
 const TeamUserListPopup = ({ teamName, players, onClose }) => {
   return (
     <div className="team-user-list-popup">
