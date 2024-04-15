@@ -42,7 +42,38 @@ const newTournament = new Tournament({
   endDate: new Date("2024-02-29T10:02:10.959Z"),
   hasStarted: false,
   hasEnded: false,
-  enrolledUsers: ["f61bc24d-bebc-4391-acbb-2928b6ad74a4", "f976aa28-133d-4a9c-a295-cc55a2198435", "141002f8-f9da-4ad4-a86d-eef1bf4b9c3a"],
+  enrolledParticipants: [
+    {
+      teamName: "Team 1",
+      players: [
+        {
+          UUID: "9410f264-0bef-4516-b3ea-661c575490f2",
+          score: 0,
+          eliminated: false
+        },
+        {
+          UUID: "9410f264-0bef-4516-b3ea-661c575490f2",
+          score: 0,
+          eliminated: false
+        }
+      ]
+    },
+    {
+      teamName: "Team 2",
+      players: [
+        {
+          UUID: "9410f264-0bef-4516-b3ea-661c575690f2",
+          score: 0,
+          eliminated: false
+        },
+        {
+          UUID: "9410f264-0bef-4516-b3ea-661c575690f2",
+          score: 0,
+          eliminated: false
+        }
+      ]
+    }
+  ],
   entryFee: 5.5,
   earnings: {
     "1": 200,
@@ -189,23 +220,33 @@ const getTournamentDisplayData = async (req, res) => {
 
     // await generateAndAddUsersToTournament(UUID, 50);
 
-    const enrolledUserDetails = await Promise.all(
-      tournament.enrolledUsers.map(async (userId) => {
-        const user = await User.findById(userId);
-        if (!user) {
-          return null;
-        }
-        // Simulated elimination status and score
-        const eliminated = Math.random() < 0.5; // Random elimination status
-        const score = eliminated ? 0 : Math.floor(Math.random() * 1000); // Random score if not eliminated
-        return { username: user.username, eliminated, score };
-      })
-    );
+    async function getUserByUsername(username) {
+      try {
+        // Find the user document by username
+        const user = await User.findOne({ username });
+        return user; // Return the user document
+      } catch (error) {
+        console.error('Error finding user by username:', error);
+        throw error; // Throw the error for handling elsewhere
+      }
+    }
 
-    // Filter out any null values (users not found)
-    const validEnrolledUserDetails = enrolledUserDetails.filter((user) => user !== null);
+    // Transform the data
+    const transformedData = await Promise.all(tournament.enrolledParticipants.map(async (participant) => {
+      const players = await Promise.all(participant.players.map(async (player) => {
+        const user = await getUserByUsername(player.UUID);
+        return {
+          username: user ? user.username : null,
+          score: player.score,
+          eliminated: player.eliminated
+        };
+      }));
 
-    validEnrolledUserDetails.sort((a, b) => b.score - a.score);
+      return {
+        teamName: participant.teamName,
+        players: players
+      };
+    }));
 
 
     res.status(200).json({
@@ -226,7 +267,7 @@ const getTournamentDisplayData = async (req, res) => {
       application: tournament.application,
       hasApplied: ((tournament.applications).map(app => app.user)).includes(userUUID),
       data: {
-        users: validEnrolledUserDetails,
+        enrolledParticipants: transformedData,
       }
     });
   } catch (error) {
