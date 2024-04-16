@@ -16,6 +16,8 @@ function generateAlphanumericId(length) {
 
 const createTeam = async (req, res) => {
   const { name } = req.body;
+  const uniqueMembers = new Set(); // Use a Set to avoid duplicates
+  uniqueMembers.add(req.user); // Add the leader to the member set
   try {
     // Generate a 6 character long alphanumeric team ID
     const teamId = generateAlphanumericId(6);
@@ -23,7 +25,7 @@ const createTeam = async (req, res) => {
     console.log('Creating team with ID:', teamId);
     const team = await Team.create({
       teamId,
-      _id: uuid, 
+      _id: uuidv4(), 
       name,
       members: Array.from(uniqueMembers), // Convert Set to Array
       leader: req.user,
