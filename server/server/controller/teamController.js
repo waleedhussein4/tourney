@@ -45,7 +45,10 @@ const getTeam = async (req, res) => {
       };
     })
 
-    const formattedTeam = { UUID, name, members, leader };
+    let requester = await User.findOne({ _id: req.user }).select('username').lean();
+    requester = requester.username
+
+    const formattedTeam = { UUID, name, members, leader, isLeader: leader === requester};
 
     res.status(200).json(formattedTeam);
   } catch (error) {
