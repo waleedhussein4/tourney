@@ -19,6 +19,14 @@ function MyTeams({ teams }) {
       <div className="teams">
         {teams.map((team) => <Team key={team.UUID} team={team} />)}
       </div>
+      <div className="create">
+        <h2>Create a team</h2>
+        <div id="createTeam" className="form">
+          <label htmlFor="teamName">Team name </label>
+          <input type="text" id="teamName" />
+          <button onClick={createTeam}>Create</button>
+        </div>
+      </div>
     </div>
   )
 }

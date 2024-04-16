@@ -384,7 +384,7 @@ function Tournament() {
             </div>
 
             <div className="tournament-content">
-              {tournament.type === "battle royale" ? (
+              {tournament.type === "brackets" ? (
                 <Brackets tournament={tournament} />
               ) : (
                 <BattleRoyale tournament={tournament} />
