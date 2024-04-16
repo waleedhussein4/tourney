@@ -57,10 +57,14 @@
   padding: 2em;
   width: 100%;
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #Team #display h1 {
   margin-bottom: 0.5em;
+  width: 100%;
 }
 
 #Team .teams {
@@ -68,6 +72,7 @@
   gap: 1em;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   padding: 0.5em;
+  width: 100%;
 }
 
 #Team .team {
@@ -98,4 +103,9 @@
 
 #Team .team .view:hover {
   cursor: pointer;
+}
+
+#Team .create {
+  margin-top: auto;
+  width: 100%;
 }
