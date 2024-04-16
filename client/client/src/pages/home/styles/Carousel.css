@@ -1,6 +1,5 @@
 .carousel {
   width: 100%;
-  overflow-x: scroll;
   padding: 30px;
   margin: 1em 0 1em 0;
 }
@@ -8,8 +7,26 @@
 .carousel__container {
   white-space: nowrap;
   margin: 0.5em 0px;
-  padding-bottom: 10px;
+  padding-bottom: 36pt;
   display: inline-block;
+  overflow-x: scroll;
+  max-width: 100%;
+}
+
+.carousel__container::-webkit-scrollbar {
+  height: 10pt;
+}
+
+.carousel__container::-webkit-scrollbar-track {
+  background: black; 
+}
+ 
+.carousel__container::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+.carousel__container::-webkit-scrollbar-thumb:hover {
+  background: #555; 
 }
 
 .categories__title {
