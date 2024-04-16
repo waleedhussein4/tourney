@@ -3,6 +3,11 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const teamSchema = new Schema({
+  teamId: {
+    type: String,
+    required: true,
+    unique: true  // Ensures that each team has a unique teamId
+  },
   _id: { type: Object },
   name: {
     type: String,
