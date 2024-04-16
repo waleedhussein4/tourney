@@ -24,7 +24,6 @@ function App() {
     .then(data => {
       setTeam(data)
       setLoadingTeam(false)
-      console.log(data)
     })
   }
 
@@ -62,6 +61,48 @@ function App() {
 }
 
 function Member({ member, team }) {
+
+  async function kickMember() {
+    const username = member.username
+
+    const URL = 'http://localhost:2000/api/team/kick/' + paramUUID
+  
+    await fetch(URL, {
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        username: username
+      }),
+    })
+    .then(res => {
+      if(res.ok) {
+        const kickedMemberDiv = document.querySelector('.member.' + username)
+        kickedMemberDiv.remove()
+      }
+    })
+  }
+  
+  async function promoteMember() {
+    const username = member.username
+
+    const URL = 'http://localhost:2000/api/team/changeLeader/' + paramUUID
+  
+    await fetch(URL, {
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+        username: username
+      }),
+    })
+    .then(res => {
+      if(res.ok) {
+        window.location.reload()
+      }
+    })
+  }
+
   const isLeader = team.leader == member.username
   return (
     <div className={'member ' + member.username} onMouseEnter={showButton} onMouseLeave={hideButton}>
@@ -72,8 +113,8 @@ function Member({ member, team }) {
       <div className="buttonsWrapper">
         { team.isLeader && !isLeader && (
           <>
-            <button onClick={kickMember(member.username)} className='kickButton'>Kick</button>
-            <button onClick={promoteMember(member.username)} className="promoteButton">Transfer Leadership</button>
+            <button onClick={kickMember} className='kickButton'>Kick</button>
+            <button onClick={promoteMember} className="promoteButton">Transfer Leadership</button>
           </>
         )}
         
@@ -113,37 +154,6 @@ async function leaveTeam() {
   .then(res => {
     if(res.ok) {
       window.location.href = '/team'
-    }
-  })
-}
-
-async function kickMember(username) {
-  const URL = 'http://localhost:2000/api/team/kick/' + paramUUID
-
-  await fetch(URL, {
-    method: 'POST',
-    credentials: 'include',
-    body: JSON.stringify({ username }),
-  })
-  .then(res => {
-    if(res.ok) {
-      const kickedMemberDiv = document.querySelector('.member.' + username)
-      kickedMemberDiv.remove()
-    }
-  })
-}
-
-async function promoteMember(username) {
-  const URL = 'http://localhost:2000/api/team/changeLeader/' + paramUUID
-
-  await fetch(URL, {
-    method: 'POST',
-    credentials: 'include',
-    body: JSON.stringify({ username }),
-  })
-  .then(res => {
-    if(res.ok) {
-      window.location.reload()
     }
   })
 }
