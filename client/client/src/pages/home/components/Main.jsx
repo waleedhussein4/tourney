@@ -1,6 +1,5 @@
 import Carousel from "./Carousel";
-import BattleRoyalImage from "/src/assets/BattleRoyal.jpg";
-import bracket from "/src/assets/bracket.jpg";
+import { Link } from "react-router-dom";
 
 function Main() {
   return (
@@ -21,32 +20,17 @@ function Main() {
           begin!
         </p>
       </div>
-      <br></br>
-      {/* <div className="banners">
-        <div className="banner">
-          <a href="/tournaments/?type=Brackets">
-            <img src={bracket} alt="Bracket Tournament" />
-          </a>
-        </div>
-        <div className="banner">
-        <a href="/tournaments/?type=Battle Royale">
-            <img
-              src={BattleRoyalImage}
-              alt="Battle Royale Tournament"
-              width="350px"
-            />
-          </a>
-        </div>
-      </div> */}
-      <input id='temp' type="text" placeholder="Search..." />
+      <input id='home-search' type="text" placeholder="Search tournaments by title, category, description..." />
       <div id='suggest-join'>
-        <div className="text">
+        <div className="description">
           <h2>Bracket Tournaments</h2>
           <span>Random description of bracket tournaments to entice the user to click on the button on the right</span>
+        </div>
+        <Link to={'/tournaments'} className="browseBtn">BROWSE</Link>
+        <div className="description">
           <h2>Battle Royale Tournaments</h2>
           <span>Random description of battle Royale tournaments to entice the user to click on the button on the right</span>
         </div>
-        <button>BROWSE TOURNEYS</button>
       </div>
       <Carousel
         title="Trending"
