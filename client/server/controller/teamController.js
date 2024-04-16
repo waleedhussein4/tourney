@@ -47,7 +47,7 @@ const getTeam = async (req, res) => {
       "username email"
     );
 
-    let { _id: UUID, name, members, leader, teamId } = team;
+    let { name, members, leader, teamId } = team;
 
     leader = await User.findOne({ _id: leader }).select('username').lean();
     leader = leader.username
@@ -61,8 +61,31 @@ const getTeam = async (req, res) => {
     let requester = await User.findOne({ _id: req.user }).select('username').lean();
     requester = requester.username
 
-    const formattedTeam = { UUID, name, members, leader, isLeader: leader === requester, teamId};
-    console.log(formattedTeam)
+    const formattedTeam = { name, members, leader, isLeader: leader === requester, teamId};
+
+    res.status(200).json(formattedTeam);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getTeamByCode = async (req, res) => {
+
+  try {
+    const team = await Team.findOne({ teamId: req.params.teamCode }).populate(
+      "members",
+      "username email"
+    );
+
+    let { _id, name, leader } = team;
+
+    leader = await User.findOne({ _id: leader }).select('username').lean();
+    leader = leader.username
+
+    let requester = await User.findOne({ _id: req.user }).select('username').lean();
+    requester = requester.username
+
+    const formattedTeam = { UUID: _id, name, isLeader: leader === requester};
 
     res.status(200).json(formattedTeam);
   } catch (error) {
@@ -120,11 +143,16 @@ const joinTeam = async (req, res) => {
       "members",
       "username email"
     );
+
     if (!team) {
       return res.status(404).json({ message: "Team not found" });
     }
 
-    if (team.members.some(member => member._id.equals(user))) {
+    if (team.leader === user._id) {
+      return res.status(400).json({ message: "User is already the leader" });
+    }
+
+    if (team.members.some(member => member._id===user._id)) {
       return res.status(400).json({ message: "User is already a member" });
     }
 
@@ -220,6 +248,7 @@ const leaveTeam = async (req, res) => {
 module.exports = {
   createTeam,
   getTeam,
+  getTeamByCode,
   getTeamMembers,
   joinTeam,
   changeLeader,
