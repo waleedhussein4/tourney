@@ -1,0 +1,41 @@
+#JoinTeam {
+  display: flex;
+  flex-direction: column;
+  color: white;
+  height: 100%;
+}
+
+#JoinTeam #main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3em;
+  align-items: center;
+  background-color: black;
+  flex: 1;
+}
+
+#JoinTeam .prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+#JoinTeam button {
+  background-color: var(--color-green);
+  color: white;
+  height: 100%;
+  border: none;
+  font-weight: bold;
+  padding: 2pt;
+}
+
+#JoinTeam button:hover {
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+#JoinTeam button {
+  border: none;
+  padding: 1em;
+}
