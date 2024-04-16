@@ -9,7 +9,7 @@ function generateAlphanumericId(length) {
   let result = '';
   const charactersLength = characters.length;
   for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
 }
@@ -25,14 +25,14 @@ const createTeam = async (req, res) => {
     console.log('Creating team with ID:', teamId);
     const team = await Team.create({
       teamId,
-      _id: uuidv4(), 
+      _id: uuidv4(),
       name,
       members: Array.from(uniqueMembers), // Convert Set to Array
       leader: req.user,
       dateCreated: new Date(),
       createdBy: req.user,
     });
-     res.status(201).json(team);
+    res.status(201).json(team);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -68,30 +68,30 @@ const getTeam = async (req, res) => {
 
 const getTeamsByUser = async (req, res) => {
   try {
-      // Assuming user's ID is passed in the request, e.g., from a middleware that validates and attaches user info
-      const userId = req.user
+    // Assuming user's ID is passed in the request, e.g., from a middleware that validates and attaches user info
+    const userId = req.user
 
-      // Query the database for teams where this user is a member, leader, or creator
-      const teams = await Team.find({
-          $or: [
-              { members: userId },
-              { leader: userId },
-              { createdBy: userId }
-          ]
-      }).populate('members', 'username email');  // Optionally populate member details
+    // Query the database for teams where this user is a member, leader, or creator
+    const teams = await Team.find({
+      $or: [
+        { members: userId },
+        { leader: userId },
+        { createdBy: userId }
+      ]
+    }).populate('members', 'username email');  // Optionally populate member details
 
-      const returnData = teams.map(team => {
-        return {
-          UUID: team._id,
-          name: team.name,
-          members: team.members
-        }
-      
-      })
+    const returnData = teams.map(team => {
+      return {
+        UUID: team._id,
+        name: team.name,
+        members: team.members
+      }
 
-      res.status(200).json(returnData);
+    })
+
+    res.status(200).json(returnData);
   } catch (error) {
-      res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -110,10 +110,7 @@ const getTeamMembers = async (req, res) => {
 
 const joinTeam = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const user = await User.findById(req.user);
 
     const team = await Team.findOne({ teamId: req.params.teamId }).populate(
       "members",
@@ -123,15 +120,11 @@ const joinTeam = async (req, res) => {
       return res.status(404).json({ message: "Team not found" });
     }
 
-    if (team.members.some(member => member._id.equals(user._id))) {
+    if (team.members.some(member => member._id.equals(user))) {
       return res.status(400).json({ message: "User is already a member" });
     }
 
-    if (team.members.length >= 5) {
-      return res.status(400).json({ message: "Team is full" });
-    }
-
-    team.members.push(user._id);
+    team.members.push(user);
     await team.save();
 
     res.status(200).json(team);
