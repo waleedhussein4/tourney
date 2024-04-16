@@ -1,11 +1,12 @@
 
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AuthContext from "./context/AuthContext.jsx";
 import Home from './pages/home/Home';
 import Tournaments from './pages/tournaments/Tournaments';
 import Team from './pages/team/Team';
 import ViewTeam from './pages/team/view/View';
+import JoinTeam from './pages/team/join/Join';
 import Signin from "./pages/signin/Signin";
 import Signup from "./pages/signup/Signup";
 import Tournament from './pages/tournament/Tournament';
@@ -34,6 +35,7 @@ function App() {
       <Route path='/tournaments' element={<Tournaments />} />
       <Route path='/team' element={<Team />} />
       <Route path='/team/view' element={<ViewTeam />} />
+      <Route path='/team/join/:teamCode' element={<JoinTeam />} />
       <Route path='/tournament' element={<Tournament />} />
       <Route path='/host' element={<Host />} />
     </Routes>
