@@ -4,22 +4,33 @@ const User = require("../models/userModel"); // Path to your User model
 const { default: mongoose } = require("mongoose");
 const { v4: uuidv4 } = require('uuid');
 
+function generateAlphanumericId(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
 const createTeam = async (req, res) => {
-  // leader and createdBy are object IDs
   const { name } = req.body;
   try {
-    const uniqueMembers = new Set(); // Use a Set to avoid duplicates
-    uniqueMembers.add(req.user); // Add the leader to the member set
-
+    // Generate a 6 character long alphanumeric team ID
+    const teamId = generateAlphanumericId(6);
+    console.log('in try')
+    console.log('Creating team with ID:', teamId);
     const team = await Team.create({
-      _id: uuidv4(),
+      teamId,
+      _id: uuid, 
       name,
-      members: Array.from(uniqueMembers),
+      members: Array.from(uniqueMembers), // Convert Set to Array
       leader: req.user,
       dateCreated: new Date(),
       createdBy: req.user,
     });
-    res.status(201).json(team);
+     res.status(201).json(team);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
