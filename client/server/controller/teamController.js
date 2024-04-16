@@ -108,18 +108,30 @@ const getTeamMembers = async (req, res) => {
 
 const joinTeam = async (req, res) => {
   try {
-    const team = await Team.findOne({ _id: req.params.id }).populate(
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const team = await Team.findOne({ teamId: req.params.teamId }).populate(
       "members",
       "username email"
     );
-    if (team.members.length === 5) {
-      return res.status(400).json({ message: "Team is full" });
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
     }
-    if (team.members.includes(req.user._id)) {
+
+    if (team.members.some(member => member._id.equals(user._id))) {
       return res.status(400).json({ message: "User is already a member" });
     }
-    team.members.push(req.user._id);
+
+    if (team.members.length >= 5) {
+      return res.status(400).json({ message: "Team is full" });
+    }
+
+    team.members.push(user._id);
     await team.save();
+
     res.status(200).json(team);
   } catch (error) {
     res.status(500).json({ message: error.message });
