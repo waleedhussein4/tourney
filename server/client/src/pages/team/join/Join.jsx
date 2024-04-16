@@ -25,7 +25,6 @@ function Join() {
     .then(data => {
       setTeam(data)
       setLoadingTeam(false)
-      console.log(data)
       data.isLeader = false
       if(data.isLeader) {
         navigate('/team/view/?UUID=' + data.UUID)
