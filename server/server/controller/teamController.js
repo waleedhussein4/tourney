@@ -47,7 +47,7 @@ const getTeam = async (req, res) => {
       "username email"
     );
 
-    let { _id: UUID, name, members, leader, teamId } = team;
+    let { name, members, leader, teamId } = team;
 
     leader = await User.findOne({ _id: leader }).select('username').lean();
     leader = leader.username
@@ -61,8 +61,31 @@ const getTeam = async (req, res) => {
     let requester = await User.findOne({ _id: req.user }).select('username').lean();
     requester = requester.username
 
-    const formattedTeam = { UUID, name, members, leader, isLeader: leader === requester, teamId};
-    console.log(formattedTeam)
+    const formattedTeam = { name, members, leader, isLeader: leader === requester, teamId};
+
+    res.status(200).json(formattedTeam);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getTeamByCode = async (req, res) => {
+
+  try {
+    const team = await Team.findOne({ teamId: req.params.teamCode }).populate(
+      "members",
+      "username email"
+    );
+
+    let { _id, name, leader } = team;
+
+    leader = await User.findOne({ _id: leader }).select('username').lean();
+    leader = leader.username
+
+    let requester = await User.findOne({ _id: req.user }).select('username').lean();
+    requester = requester.username
+
+    const formattedTeam = { UUID: _id, name, isLeader: leader === requester};
 
     res.status(200).json(formattedTeam);
   } catch (error) {
@@ -120,11 +143,16 @@ const joinTeam = async (req, res) => {
       "members",
       "username email"
     );
+
     if (!team) {
       return res.status(404).json({ message: "Team not found" });
     }
 
-    if (team.members.some(member => member._id.equals(user))) {
+    if (team.leader === user._id) {
+      return res.status(400).json({ message: "User is already the leader" });
+    }
+
+    if (team.members.some(member => member._id===user._id)) {
       return res.status(400).json({ message: "User is already a member" });
     }
 
@@ -138,22 +166,32 @@ const joinTeam = async (req, res) => {
 };
 
 const changeLeader = async (req, res) => {
-  const { newLeader } = req.body;
+  let newLeader = req.body.username;
+
   try {
-    const team = await Team.findOne({ _id: req.params.id })
+    newLeader = await User.findOne({ username: newLeader });
+    newLeader = newLeader._id;
+  } catch (error) {
+    return res.status(400).json({ message: "New leader not found" });
+  }
+
+  const teamUUID = req.params.id;
+  try {
+    const team = await Team.findOne({ _id: teamUUID })
       .populate("leader", "username email")
       .populate("members", "username email");
-    if (!team.members.includes(req.user._id)) {
-      return res.status(400).json({ message: "User is not a member" });
-    }
-    if (team.leader._id !== req.user._id) {
+
+    if (team.leader !== req.user) {
       return res.status(400).json({ message: "User is not the leader" });
     }
-    if (!team.members.includes(newLeader)) {
+
+    if (!team.members.map(member => member._id).includes(newLeader)) {
       return res.status(400).json({ message: "New leader is not a member" });
     }
+    
     team.leader = newLeader;
     await team.save();
+
     res.status(200).json(team);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -161,23 +199,32 @@ const changeLeader = async (req, res) => {
 };
 
 const kickMember = async (req, res) => {
-  const { member } = req.body;
+  let member = req.body.username;
   try {
-    const team = await Team.findOne({ _id: req.params.id }).populate(
+    member = await User.findOne({ username: member });
+    member = member._id;
+  } catch (error) {
+    return res.status(400).json({ message: "Member not found" });
+  }
+
+  const teamUUID = req.params.id;
+  try {
+    const team = await Team.findOne({ _id: teamUUID }).populate(
       "members",
       "username email"
     );
-    if (!team.members.includes(req.user._id)) {
-      return res.status(400).json({ message: "User is not a member" });
-    }
-    if (team.leader._id !== req.user._id) {
+
+    if (team.leader !== req.user) {
       return res.status(400).json({ message: "User is not the leader" });
     }
-    if (!team.members.includes(member)) {
+
+    if (!team.members.map(member => member._id).includes(member)) {
       return res.status(400).json({ message: "Member is not in the team" });
     }
+
     team.members = team.members.filter((m) => m._id !== member);
     await team.save();
+
     res.status(200).json(team);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -220,6 +267,7 @@ const leaveTeam = async (req, res) => {
 module.exports = {
   createTeam,
   getTeam,
+  getTeamByCode,
   getTeamMembers,
   joinTeam,
   changeLeader,
