@@ -21,10 +21,10 @@ router.post("/create", requireAuth, createTeam); // Create a new team
 router.get('/user' ,requireAuth, getTeamsByUser);
 router.get("/view/:UUID", requireAuth, getTeam); // Get specific team info, checks membership
 router.get("/view/:UUID/members", checkTeamMembership, getTeamMembers); // Get list of team members, checks membership
-router.post("/join", joinTeam); // Join a team by ID
-router.post("/changeLeader", checkTeamMembership, changeLeader); // Change team leader, checks membership
-router.post("/kick", checkTeamMembership, kickMember); // Kick a member from the team, checks membership
+router.post("/join", requireAuth, joinTeam); // Join a team by ID
+router.post("/changeLeader", requireAuth, changeLeader); // Change team leader, checks membership
+router.post("/kick", requireAuth, kickMember); // Kick a member from the team, checks membership
 router.delete("/delete/:UUID", requireAuth, deleteTeam); // Delete a team, checks membership
-router.delete("/leave", leaveTeam); // Leave a team
+router.delete("/leave", requireAuth, leaveTeam); // Leave a team
 
 module.exports = router;
