@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import Nav from '/src/components/Nav.jsx'
 import './styles/App.css'
 import crown from './assets/crown.webp'
@@ -5,7 +6,6 @@ import crown from './assets/crown.webp'
 import { useState, useEffect } from 'react'
 
 const paramUUID = new URLSearchParams(window.location.search).get("UUID");
-const teamURL = 'http://localhost:2000/api/team/view/' + paramUUID
 
 function App() {
 
@@ -13,7 +13,8 @@ function App() {
   const [loadingTeam, setLoadingTeam] = useState(true)
 
   const fetchTeam = async () => {
-    await fetch(teamURL,
+    const URL = 'http://localhost:2000/api/team/view/' + paramUUID
+    await fetch(URL,
       {
         method: 'GET',
         credentials: 'include'
@@ -45,6 +46,13 @@ function App() {
               <span>Members</span>
               { team.members.map((member) => <Member key={member.username} member={member} team={team} />) }
             </div>
+            <div className='invite'>
+              <span className='invite-title'>Share this link to invite others to your team</span>
+              <div className='invite-link'>
+                <span>http://localhost:5173/team/join/{team.teamCode}</span>
+                <button className='copyBtn' onClick={copyLink}>Copy</button>
+              </div>
+            </div>
             { team.isLeader ? <button onClick={deleteTeam} className="deleteTeam">Delete Team</button> : <button onClick={leaveTeam} className="leaveTeam">Leave Team</button> }
           </div>
         </div>
@@ -56,18 +64,18 @@ function App() {
 function Member({ member, team }) {
   const isLeader = team.leader == member.username
   return (
-    <div className="member" onMouseEnter={showButton} onMouseLeave={hideButton}>
+    <div className={'member ' + member.username} onMouseEnter={showButton} onMouseLeave={hideButton}>
       <div className="nameWrapper">
         <span className="name">{member.username}</span>
         { isLeader ? <img className='crown' src={crown} alt="" /> : <></> }
       </div>
       <div className="buttonsWrapper">
-        { team.isLeader && !isLeader ? (
+        { team.isLeader && !isLeader && (
           <>
-            <button onClick={kickMember} className='kickButton'>Kick</button>
-            <button onClick={promoteMember} className="promoteButton">Transfer Leadership</button>
+            <button onClick={kickMember(member.username)} className='kickButton'>Kick</button>
+            <button onClick={promoteMember(member.username)} className="promoteButton">Transfer Leadership</button>
           </>
-        ) : <></>}
+        )}
         
       </div>
     </div>
@@ -95,11 +103,10 @@ async function deleteTeam() {
   window.location.href = '/team'
 }
 
-function leaveTeam() {
-  const paramUUID = new URLSearchParams(window.location.search).get("UUID");
+async function leaveTeam() {
   const URL = 'http://localhost:2000/api/team/leave/' + paramUUID
 
-  fetch(URL, {
+  await fetch(URL, {
     method: 'POST',
     credentials: 'include'
   })
@@ -110,12 +117,41 @@ function leaveTeam() {
   })
 }
 
-function kickMember() {
+async function kickMember(username) {
+  const URL = 'http://localhost:2000/api/team/kick/' + paramUUID
 
+  await fetch(URL, {
+    method: 'POST',
+    credentials: 'include',
+    body: JSON.stringify({ username }),
+  })
+  .then(res => {
+    if(res.ok) {
+      const kickedMemberDiv = document.querySelector('.member.' + username)
+      kickedMemberDiv.remove()
+    }
+  })
 }
 
-function promoteMember() {
+async function promoteMember(username) {
+  const URL = 'http://localhost:2000/api/team/changeLeader/' + paramUUID
 
+  await fetch(URL, {
+    method: 'POST',
+    credentials: 'include',
+    body: JSON.stringify({ username }),
+  })
+  .then(res => {
+    if(res.ok) {
+      window.location.reload()
+    }
+  })
+}
+
+function copyLink() {
+  const element = document.querySelector('.invite-link')
+  navigator.clipboard.writeText(element.querySelector('span').innerText)
+  element.querySelector('.copyBtn').innerHTML = 'Copied'
 }
 
 export default App
