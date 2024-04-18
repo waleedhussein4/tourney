@@ -16,8 +16,13 @@ function generateAlphanumericId(length) {
 
 const createTeam = async (req, res) => {
   const { name } = req.body;
+  if (name.length < 3) {
+    return res.status(400).json({ message: "Team name must be at least 3 characters long" });
+  }
+
   const uniqueMembers = new Set(); // Use a Set to avoid duplicates
   uniqueMembers.add(req.user); // Add the leader to the member set
+
   try {
     // Generate a 6 character long alphanumeric team ID
     const teamId = generateAlphanumericId(6);
@@ -39,13 +44,17 @@ const createTeam = async (req, res) => {
 };
 
 const getTeam = async (req, res) => {
-  // check if user is part of team
 
   try {
     const team = await Team.findOne({ _id: req.params.UUID }).populate(
       "members",
       "username email"
     );
+
+    // check if user is part of team
+    if (!team.members.some(member => member._id === req.user)) {
+      return res.status(400).json({ message: "User is not part of the team" });
+    }
 
     let { name, members, leader, teamId } = team;
 
@@ -85,7 +94,9 @@ const getTeamByCode = async (req, res) => {
     let requester = await User.findOne({ _id: req.user }).select('username').lean();
     requester = requester.username
 
-    const formattedTeam = { UUID: _id, name, isLeader: leader === requester};
+    const isMember = team.members.some(member => member._id === req.user);
+
+    const formattedTeam = { UUID: _id, name, isLeader: leader === requester, isMember};
 
     res.status(200).json(formattedTeam);
   } catch (error) {
@@ -125,7 +136,7 @@ const getTeamsByUser = async (req, res) => {
 
 const getTeamMembers = async (req, res) => {
   try {
-    const team = await Team.findOne({ _id: req.params.id }).populate(
+    const team = await Team.findOne({ _id: req.params.UUID }).populate(
       "members",
       "username email"
     );
@@ -175,13 +186,13 @@ const changeLeader = async (req, res) => {
     return res.status(400).json({ message: "New leader not found" });
   }
 
-  const teamUUID = req.params.id;
+  const teamUUID = req.params.UUID;
   try {
     const team = await Team.findOne({ _id: teamUUID })
       .populate("leader", "username email")
       .populate("members", "username email");
 
-    if (team.leader !== req.user) {
+    if (team.leader._id !== req.user) {
       return res.status(400).json({ message: "User is not the leader" });
     }
 
@@ -207,7 +218,7 @@ const kickMember = async (req, res) => {
     return res.status(400).json({ message: "Member not found" });
   }
 
-  const teamUUID = req.params.id;
+  const teamUUID = req.params.UUID;
   try {
     const team = await Team.findOne({ _id: teamUUID }).populate(
       "members",
@@ -247,7 +258,7 @@ const deleteTeam = async (req, res) => {
 
 const leaveTeam = async (req, res) => {
   try {
-    const team = await Team.findOne({ _id: req.params.id })
+    const team = await Team.findOne({ _id: req.params.UUID })
       .populate("leader", "username email")
       .populate("members", "username email");
     if (!team.members.includes(req.user._id)) {

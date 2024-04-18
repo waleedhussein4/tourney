@@ -1,4 +1,8 @@
 /* eslint-disable react/prop-types */
+
+import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+
 function Main({ teams, loadingTeams }) {
   return (
     <>
@@ -13,20 +17,67 @@ function Main({ teams, loadingTeams }) {
 
 
 function MyTeams({ teams }) {
+
+  const [createError, setCreateError] = useState('')
+
+  const navigate = useNavigate()
+
+  function joinTeam() {
+
+    const teamCode = document.getElementById('teamCode').value.match(/[a-zA-Z0-9]{6}$/)
+    navigate('/team/join/' + teamCode)
+  
+  }
+
+  async function createTeam() {
+    const URL = 'http://localhost:2000/api/team/create'
+    let teamName = document.getElementById('teamName').value
+    console.log("Creating team: ", teamName)
+  
+    await fetch(URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name: teamName }),
+      credentials: 'include'
+    })
+    .then(res => {
+      if(res.ok) {
+        window.location.reload()
+      }
+      return res.json()
+    })
+    .then(data => {
+      setCreateError(data.message)
+    })
+  }
+  
   return (
     <div id="display">
       <h1>My Teams</h1>
       <div className="teams">
         {teams.map((team) => <Team key={team.UUID} team={team} />)}
       </div>
-      <div className="create">
-        <h2>Create a team</h2>
-        <div id="createTeam" className="form">
-          <label htmlFor="teamName">Team name </label>
-          <input type="text" id="teamName" />
-          <button onClick={createTeam}>Create</button>
+      <div className="create-join">
+        <div className="create">
+          <h2>Create a team</h2>
+          <div id="createTeam" className="form">
+            <label htmlFor="teamName">Team name </label>
+            <input type="text" id="teamName" />
+            <button onClick={createTeam}>Create</button>
+          </div>
+        </div>
+        <div className="join">
+          <h2>Join a team</h2>
+          <div id="joinTeam" className="form">
+            <label htmlFor="teamName">Team link or code </label>
+            <input type="text" id="teamCode" />
+            <button onClick={joinTeam}>Join</button>
+          </div>
         </div>
       </div>
+      <span className='createError'>{createError}</span>
     </div>
   )
 }
@@ -42,6 +93,42 @@ function Team({ team }) {
 }
 
 function Suggest() {
+
+  const [createError, setCreateError] = useState('')
+
+  const navigate = useNavigate()
+
+  function joinTeam() {
+
+    const teamCode = document.getElementById('teamLink').value.match(/[a-zA-Z0-9]{6}$/)
+    navigate('/team/join/' + teamCode)
+  
+  }
+
+  async function createTeam() {
+    const URL = 'http://localhost:2000/api/team/create'
+    let teamName = document.getElementById('teamName').value
+    console.log("Creating team: ", teamName)
+  
+    await fetch(URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name: teamName }),
+      credentials: 'include'
+    })
+    .then(res => {
+      if(res.ok) {
+        window.location.reload()
+      }
+      return res.json()
+    })
+    .then(data => {
+      setCreateError(data.message)
+    })
+  }
+
   return (
     <div id="suggest">
       <h1>You are not part of any teams ... yet.</h1>
@@ -61,42 +148,9 @@ function Suggest() {
           <button onClick={createTeam}>Create</button>
         </div>
       </div>
+      <span className='createError'>{createError}</span>
     </div>
   )
-}
-
-async function createTeam() {
-  const URL = 'http://localhost:2000/api/team/create'
-  let teamName = document.getElementById('teamName').value
-  console.log("Creating team: ", teamName)
-
-  await fetch(URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ name: teamName }),
-    credentials: 'include'
-  })
-  .then(res => {
-    if(res.ok) {
-      window.location.reload()
-    }
-  })
-}
-
-async function joinTeam() {
-  const URL = 'http://localhost:2000/api/team/join/' + document.getElementById('teamLink').value
-
-  await fetch(URL, {
-    method: 'POST',
-    credentials: 'include'
-  })
-  .then(res => {
-    if(res.ok) {
-      window.location.reload()
-    }
-  })
 }
 
 export default Main
