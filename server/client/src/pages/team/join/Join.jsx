@@ -25,7 +25,7 @@ function Join() {
     .then(data => {
       setTeam(data)
       setLoadingTeam(false)
-      if(data.isLeader) {
+      if(data.isLeader || data.isMember) {
         navigate('/team/view/?UUID=' + data.UUID)
         navigate(0)
       }
@@ -61,11 +61,15 @@ function Join() {
           <h1>LOADING ...</h1>
         </div>
       : <div id="main">
-        <h1>{team.name}</h1>
-          <div className="prompt">
-            <span>Do you want to join this team?</span>
-            <button className='joinBtn' onClick={joinTeam}>Join</button>
-          </div>
+        { team.message
+        ? <h1>Team not found</h1>
+        : <>
+            <h1>{team.name}</h1>
+            <div className="prompt">
+              <span>Do you want to join this team?</span>
+              <button className='joinBtn' onClick={joinTeam}>Join</button>
+            </div>
+          </>}
       </div>
       } 
     </div>
