@@ -36,6 +36,7 @@ function Nav() {
         <a href="/host/">Host</a>
         <a href="/tournaments/">Compete</a>
         <a href="/team/">Teams</a>
+        <a href="/credits/">Buy Credits</a>
       </div>
       <div id="account">
         { loggedIn === true && 
