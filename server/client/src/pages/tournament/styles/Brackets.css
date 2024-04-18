@@ -1,41 +1,113 @@
 .brackets {
-  display: grid;
-  /* grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); */
   display: flex;
   flex-direction: row;
-  gap: 16px;
-  align-items: start;
-  overflow: auto;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 20px;
+  background: #f4f4f4;
 }
 
 .round {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  height: 100%;
+  margin-right: 40px;
 }
 
 .match {
   position: relative;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .competitor {
-  border: 1px solid black;
-  margin: 8px 0;
-  padding: 5px 10px;
-  background-color: white;
-  color: var(--color-secondary);
-  width: 150px;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  padding: 10px 20px;
+  width: 200px;
+  text-align: center;
+  cursor: pointer;
+  color: #333;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.competitor:hover {
+  background-color: #1b8a35;
+  color: #333;
 }
 
 .connector {
   position: absolute;
-  top: 50%;
+  width: 2px;
+  background-color: #000;
+  bottom: 50%;
+  right: -20px;
+  height: calc(100% + 40px);
+}
+
+.connector::before,
+.connector::after {
+  content: "";
+  position: absolute;
   right: 0;
-  border-top: 1px solid white;
-  border-right: 1px solid white;
   width: 20px;
-  /* height: calc(var(--round) * 100% + (var */
-  height: auto;
+  height: 2px;
+  background-color: #000;
+}
+
+.connector::before {
+  top: 0;
+}
+
+.connector::after {
+  bottom: 0;
+}
+
+.team-user-list-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  width: 320px;
+  border-radius: 10px;
+  color: #333;
+}
+
+.team-user-list-popup h2 {
+  color: #333;
+  font-size: 22px;
+}
+
+.team-user-list-popup ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.team-user-list-popup li {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.team-user-list-popup button {
+  display: block;
+  margin-top: 20px;
+  width: 100%;
+  padding: 10px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.team-user-list-popup button:hover {
+  background-color: #1b8a35;
 }
