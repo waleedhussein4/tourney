@@ -24,6 +24,7 @@ function App() {
     .then(data => {
       setTeam(data)
       setLoadingTeam(false)
+      console.log(data.message)
     })
   }
 
@@ -38,23 +39,28 @@ function App() {
       ? <div id="main">
           <h1>LOADING ...</h1>
         </div>
-      : <div id="main">
-          <div id="team">
-            <h1>{team.name}</h1>
-            <div className="members">
-              <span>Members</span>
-              { team.members.map((member) => <Member key={member.username} member={member} team={team} />) }
-            </div>
-            <div className='invite'>
-              <span className='invite-title'>Share this link to invite others to your team</span>
-              <div className='invite-link'>
-                <span>http://localhost:5173/team/join/{team.teamId}</span>
-                <button className='copyBtn' onClick={copyLink}>Copy</button>
-              </div>
-            </div>
-            { team.isLeader ? <button onClick={deleteTeam} className="deleteTeam">Delete Team</button> : <button onClick={leaveTeam} className="leaveTeam">Leave Team</button> }
+      : <>{ team.message
+        ? <div id="main">
+            <h2>Team not found</h2>
           </div>
-        </div>
+        : <div id="main">
+            <div id="team">
+              <h1>{team.name}</h1>
+              <div className="members">
+                <span>Members</span>
+                { team.members.map((member) => <Member key={member.username} member={member} team={team} />) }
+              </div>
+              <div className='invite'>
+                <span className='invite-title'>Share this link to invite others to your team</span>
+                <div className='invite-link'>
+                  <span>http://localhost:5173/team/join/{team.teamId}</span>
+                  <button className='copyBtn' onClick={copyLink}>Copy</button>
+                </div>
+              </div>
+              { team.isLeader ? <button onClick={deleteTeam} className="deleteTeam">Delete Team</button> : <button onClick={leaveTeam} className="leaveTeam">Leave Team</button> }
+            </div>
+          </div>
+        }</>
       }
     </div>
   )
