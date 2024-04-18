@@ -48,9 +48,9 @@ function Suggest() {
       <div className="join">
         <h2>Join a team</h2>
         <div id="joinTeam" className="form">
-          <label htmlFor="teamLink">Enter team ID </label>
+          <label htmlFor="teamLink">Enter team code </label>
           <input type="text" id="teamLink" />
-          <button>Join</button>
+          <button onClick={joinTeam}>Join</button>
         </div>
       </div>
       <div className="create">
@@ -76,6 +76,20 @@ async function createTeam() {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ name: teamName }),
+    credentials: 'include'
+  })
+  .then(res => {
+    if(res.ok) {
+      window.location.reload()
+    }
+  })
+}
+
+async function joinTeam() {
+  const URL = 'http://localhost:2000/api/team/join/' + document.getElementById('teamLink').value
+
+  await fetch(URL, {
+    method: 'POST',
     credentials: 'include'
   })
   .then(res => {
