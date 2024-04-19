@@ -1,4 +1,3 @@
-
 import { useContext } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AuthContext from "./context/AuthContext.jsx";
@@ -10,8 +9,9 @@ import JoinTeam from './pages/team/join/Join';
 import Signin from "./pages/signin/Signin";
 import Signup from "./pages/signup/Signup";
 import Tournament from './pages/tournament/Tournament';
-import Profile from './pages/profile/Profile.jsx'; // Added from dev branch
-import Host from './pages/host/host'; // Added from dev branch
+import Profile from './pages/profile/Profile.jsx';
+import Host from './pages/host/host';
+import Manage from './pages/manage/Manage';
 
 import '/src/styles/index.css';
 
@@ -36,8 +36,9 @@ function App() {
       <Route path='/team' element={<Team />} />
       <Route path='/team/view' element={<ViewTeam />} />
       <Route path='/team/join/:teamCode' element={<JoinTeam />} />
-      <Route path='/tournament' element={<Tournament />} />
+      <Route path='/tournament/:UUID?' element={<Tournament />} />
       <Route path='/host' element={<Host />} />
+      <Route path='/tournament/:UUID/manage' element={<Manage />} />
     </Routes>
   );
 }

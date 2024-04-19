@@ -1,6 +1,6 @@
 function Tournament(obj) {
   obj=obj.obj
-  let tournamentLink = `/tournament/?UUID=${obj.UUID}`
+  let tournamentLink = `/tournament/${obj.UUID}`
   return (
     <div className="tournament">
       <h3 className="title"><a href={tournamentLink}>{obj.title}</a></h3>
