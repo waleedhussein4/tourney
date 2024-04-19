@@ -1,0 +1,68 @@
+#Manage {
+  height: 100%;
+}
+
+#Manage #container {
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 50pt);
+  color: white;
+  width: 100%;
+}
+
+#Manage .loadingText {
+  color: white;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#Manage h1 {
+  padding: 1rem;
+}
+
+#Manage .attributes {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  padding: 1rem;
+}
+
+#Manage .attribute {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+  align-items: top;
+  width: max(40%, 250pt);
+}
+
+#Manage .attribute>h3 {
+  width: 100pt;
+}
+
+#Manage .attribute .content {
+  border: 1pt solid white;
+  padding: 0.3em;
+  font-size: 0.9em;
+  height: 100%;
+  flex: 1;
+}
+
+#Manage .updates-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+#Manage .pencil,
+#Manage .pencil-placeholder {
+  height: 1.5em;
+  width: 1.5em;
+}
+
+#Manage .pencil:hover {
+  cursor: pointer;
+}

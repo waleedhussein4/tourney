@@ -6,9 +6,8 @@ import Nav from "/src/components/Nav.jsx";
 import alpha_x from "/src/assets/alpha-x.svg";
 import Brackets from "./components/Brackets";
 import BattleRoyale from "./components/BattleRoyale";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-const paramUUID = new URLSearchParams(window.location.search).get("UUID");
 const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
 const teamsURL = "https://api.npoint.io/06c398320417bddefa14";
 const submitApplicationURL = "http://localhost:2000/api/tournement/tournament/submitApplication";
@@ -19,6 +18,8 @@ function Tournament() {
   const { loggedIn } = useContext(AuthContext);
 
   const navigate = useNavigate();
+
+  const { UUID } = useParams();
 
   const [tournament, setTournament] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -44,13 +45,17 @@ function Tournament() {
     displayApplicationPopup();
   };
 
+  const handleManage = () => {
+    console.log("Managing tournament");
+    navigate(`/tournament/${UUID}/manage`);
+  };
+
   const fetchTournamentData = async () => {
     await fetch(
       tournamentURL +
         "?" +
         new URLSearchParams({
-          UUID: paramUUID,
-          // test: "hello",
+          UUID: UUID,
         }),
       {
         method: "GET",
@@ -145,11 +150,12 @@ function Tournament() {
     } else {
       button = <></>;
     }
-  } else {
+  }
+  if(isHost) {
     button = (
       <button
         className="btn btn-manage"
-        onClick={() => console.log("Manage tournament")}
+        onClick={handleManage}
       >
         Manage
       </button>
@@ -242,7 +248,7 @@ function Tournament() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        tournament: paramUUID,
+        tournament: UUID,
         team: chosenTeam,
       }),
     }).then((res) => {
@@ -263,7 +269,7 @@ function Tournament() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        tournament: paramUUID,
+        tournament: UUID,
       }),
     }).then((res) => {
       if (res.ok) {
@@ -302,7 +308,7 @@ function Tournament() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        tournament: paramUUID,
+        tournament: UUID,
         application: application,
       }),
       credentials: "include",
