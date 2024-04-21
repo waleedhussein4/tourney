@@ -6,7 +6,8 @@
   background-color: black;
   display: flex;
   flex-direction: column;
-  height: calc(100% - 50pt);
+  max-height: fit-content;
+  min-height: calc(100% - 50pt);
   color: white;
   width: 100%;
 }
@@ -27,8 +28,9 @@
 #Manage .attributes {
   display: flex;
   flex-direction: column;
-  gap: 1em;
+  gap: 1.3em;
   padding: 1rem;
+  max-height: 100%;
 }
 
 #Manage .attribute {
@@ -46,8 +48,7 @@
 #Manage .attribute .content {
   border: 1pt solid white;
   padding: 0.3em;
-  font-size: 0.9em;
-  height: 100%;
+  min-height: 100%;
   flex: 1;
 }
 
@@ -65,4 +66,76 @@
 
 #Manage .pencil:hover {
   cursor: pointer;
+}
+
+#Manage .popup {
+  border: 2pt solid white;
+  position: absolute;
+  background-color: black;
+  color: white;
+  padding: 1em;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1em;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 260pt;
+}
+
+#Manage .popup input {
+  width: 100%;
+  padding: 0.1em;
+}
+
+#Manage .popup button {
+  width: fit-content;
+  padding: 0.5em;
+}
+
+#Manage .popup button:hover {
+  cursor: pointer;
+}
+
+#Manage .popup .error {
+  color: var(--color-red);
+}
+
+#Manage .buttonsWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+}
+
+#Manage .buttonsWrapper button {
+  background-color: var(--color-red);
+  color: white;
+  height: 100%;
+  border: none;
+  padding: 1pt;
+  display: none;
+}
+
+#Manage button:hover {
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+#Manage .participants .content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+
+#Manage .participants .participant {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.2em;
+  height: 2em;
 }
