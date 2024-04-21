@@ -11,19 +11,19 @@
   max-width: 100%;
 }
 
-.carousel__container::-webkit-scrollbar {
+::-webkit-scrollbar {
   height: 10pt;
 }
 
-.carousel__container::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: black; 
 }
  
-.carousel__container::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background: #888; 
 }
 
-.carousel__container::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
   background: #555; 
 }
 
