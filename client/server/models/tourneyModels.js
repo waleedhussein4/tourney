@@ -47,6 +47,12 @@ const tournamentSchema = new Schema(
         ref: "User",
       },
     ],
+    acceptedTeams: [
+      {
+        type: Schema.Types.String,
+        ref: "Team",
+      },
+    ],
     updates: [
       {
         date: { type: Date },
@@ -61,7 +67,7 @@ const tournamentSchema = new Schema(
     ],
     applications: [
       {
-        user: { type: String },
+        UUID: { type: String },
         application: [
           {
             label: { type: String },
