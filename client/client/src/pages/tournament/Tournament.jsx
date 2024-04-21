@@ -9,7 +9,7 @@ import BattleRoyale from "./components/BattleRoyale";
 import { useNavigate, useParams } from "react-router-dom";
 
 const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
-const teamsURL = "https://api.npoint.io/06c398320417bddefa14";
+const teamsURL = "http://localhost:2000/api/team/user";
 const submitApplicationURL = "http://localhost:2000/api/tournement/tournament/submitApplication";
 const joinAsSoloURL = "http://localhost:2000/api/tournement/tournament/joinAsSolo";
 const joinAsTeamURL = "http://localhost:2000/api/tournement/tournament/joinAsTeam";
@@ -42,7 +42,11 @@ function Tournament() {
 
   const handleApply = () => {
     console.log("Applying for tournament");
-    displayApplicationPopup();
+    if (tournament.teamSize > 1) {
+      displayTeamApplicationPopup();
+    } else {
+      displaySoloApplicationPopup();
+    }
   };
 
   const handleManage = () => {
@@ -67,6 +71,8 @@ function Tournament() {
     )
       .then((res) => res.json())
       .then((data) => {
+        // data.accessibility = "open"
+        // data.teamSize = 1
         setTournament(data);
         setIsLoading(false);
         setIsHost(data.isHost);
@@ -77,7 +83,9 @@ function Tournament() {
   };
 
   const fetchTeams = async () => {
-    await fetch(teamsURL)
+    await fetch(teamsURL,{
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => {
         setTeams(data);
@@ -98,12 +106,20 @@ function Tournament() {
     document.querySelector(".joinPopup").style.display = "none";
   }
 
-  function displayApplicationPopup() {
-    document.querySelector(".applicationPopup").style.display = "flex";
+  function displaySoloApplicationPopup() {
+    document.querySelector(".soloApplicationPopup").style.display = "flex";
   }
 
-  function hideApplicationPopup() {
-    document.querySelector(".applicationPopup").style.display = "none";
+  function hideSoloApplicationPopup() {
+    document.querySelector(".soloApplicationPopup").style.display = "none";
+  }
+
+  function displayTeamApplicationPopup() {
+    document.querySelector(".teamApplicationPopup").style.display = "flex";
+  }
+
+  function hideTeamApplicationPopup() {
+    document.querySelector(".teamApplicationPopup").style.display = "none";
   }
 
   let status = <></>;
@@ -185,7 +201,7 @@ function Tournament() {
             <div>Loading teams ...</div>
           ) : (
             teams.map((team) => (
-              <div onClick={chooseTeam} key={team.UUID} data-uuid={team.UUID}>
+              <div className={`isValidTeam-${team.members.length==tournament.teamSize}`} onClick={chooseTeam} key={team.UUID} data-uuid={team.UUID}>
                 {team.name}
               </div>
             ))
@@ -201,14 +217,53 @@ function Tournament() {
     );
   }
 
-  function ApplicationPopup() {
+  function SoloApplicationPopup() {
     return (
-      <div className="applicationPopup">
-        <img onClick={hideApplicationPopup} src={alpha_x} alt="" />
+      <div className="soloApplicationPopup">
+        <img onClick={hideSoloApplicationPopup} src={alpha_x} alt="" />
         <h1>Apply</h1>
-        <div className="applicationPopup-application">
+        <div className="application">
           {application.map((field) => (
-            <div key={field.name}>
+            <div className="field" key={field.name}>
+              <label htmlFor={`application-${field.name}`}>{field.name}</label>
+              <input type="text" id={`application-${field.name}`} />
+            </div>
+          ))}
+        </div>
+        <div className="soloApplicationPopup-error"></div>
+        <button
+          className="btn btn-primary joinPopup-confirm"
+          onClick={submitApplication}
+        >
+          Submit Application
+        </button>
+      </div>
+    );
+  }
+
+  function TeamApplicationPopup() {
+    return (
+      <div className="teamApplicationPopup">
+        <img onClick={hideTeamApplicationPopup} src={alpha_x} alt="" />
+        <h1>Apply</h1>
+        <div className="application">
+          <div className="info">
+            <h3>Choose Team</h3>
+            <p>Your chosen team must have exactly {tournament.teamSize} players.</p>
+          </div>
+          <div className="teams">
+            {isLoadingTeams ? (
+              <div>Loading teams ...</div>
+            ) : (
+              teams.map((team) => (
+                <div className={`isValidTeam-${team.members.length==tournament.teamSize} team`} onClick={chooseTeam} key={team.UUID} data-uuid={team.UUID}>
+                  {team.name}
+                </div>
+              ))
+            )}
+          </div>
+          {application.map((field) => (
+            <div className="field" key={field.name}>
               <label htmlFor={`application-${field.name}`}>{field.name}</label>
               <input type="text" id={`application-${field.name}`} />
             </div>
@@ -216,7 +271,7 @@ function Tournament() {
         </div>
         <div className="applicationPopup-error"></div>
         <button
-          className="btn btn-primary joinPopup-confirm"
+          className="btn btn-primary teamApplicationPopup-confirm"
           onClick={submitApplication}
         >
           Submit Application
@@ -229,6 +284,10 @@ function Tournament() {
     let div = e.target;
     let uuid = div.dataset.uuid;
     chosenTeam.uuid = uuid;
+
+    if(div.classList.contains('isValidTeam-false')) {
+      // return;
+    }
 
     try {
       document.querySelector(".selectedTeam").classList.remove("selectedTeam");
@@ -251,9 +310,10 @@ function Tournament() {
         tournament: UUID,
         team: chosenTeam,
       }),
+      credentials: "include",
     }).then((res) => {
       if (res.ok) {
-        window.location.href = res.url;
+        navigate(0)
       } else {
         console.log(res);
       }
@@ -271,9 +331,10 @@ function Tournament() {
       body: JSON.stringify({
         tournament: UUID,
       }),
+      credentials: "include",
     }).then((res) => {
       if (res.ok) {
-        window.location.href = res.url;
+        navigate(0)
       } else {
         console.log(res);
       }
@@ -283,8 +344,8 @@ function Tournament() {
   async function submitApplication() {
     console.log("Submitting application...");
 
-    let form = document.querySelector(".applicationPopup-application");
-    let fields = form.childNodes;
+    let form = document.querySelector(".application");
+    let fields = form.querySelectorAll('.field');
     if (!validateForm(fields)) {
       document.querySelector(".applicationPopup-error").innerHTML =
         "You must fill all fields.";
@@ -300,6 +361,18 @@ function Tournament() {
       application.push({ label, input });
     });
 
+    let selectedTeam
+    try {
+      selectedTeam = form.querySelector('.selectedTeam')
+      if(!selectedTeam) {
+        throw new Error();
+      }
+    } catch (e) {
+      document.querySelector(".applicationPopup-error").innerHTML =
+        "You must choose a team.";
+      return;
+    }
+
     console.log(application);
 
     await fetch(submitApplicationURL, {
@@ -310,13 +383,17 @@ function Tournament() {
       body: JSON.stringify({
         tournament: UUID,
         application: application,
+        team: selectedTeam.innerText,
       }),
       credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.Location) {
-          window.location.href = data.Location;
+        if (data.error) {
+          document.querySelector(".applicationPopup-error").innerHTML = data.error;
+        }
+        else {
+          navigate(0)
         }
       });
   }
@@ -410,7 +487,10 @@ function Tournament() {
       </div>
       {tournament.teamSize == 1 ? <SoloPopup /> : <TeamPopup />}
       {tournament.accessibility == "application required" ? (
-        <ApplicationPopup />
+        <>
+        {tournament.teamSize == 1 && <SoloApplicationPopup />}
+        {tournament.teamSize > 1 && <TeamApplicationPopup />}
+        </>
       ) : (
         <></>
       )}
