@@ -17,7 +17,7 @@ const createTournament = async (req, res) => {
       category,
       startDate,
       endDate,
-      enrolledUsers: [],
+      enrolledParticipants: [],
       entryFee,
       earnings: {}, // Initialize as empty; adjust according to your logic
       maxCapacity,
@@ -309,6 +309,13 @@ const handleApplicationSubmission = async (req, res) => {
     return res.status(404).json({ error: 'No such tournament' });
   }
 
+  // find team by name (name is unique but its not the id. the UUID is unique so treat name like any other attribute)
+  const team = await Team.findOne({ name: req.body.team });
+
+  if (team.members.length != tournament.teamSize) {
+    return res.status(400).json({ error: 'Your chosen team must have exactly ' + tournament.teamSize + ' members.' })
+  }
+
   const userUUID = req.user;
 
   let dbApplication = tournament.application
@@ -333,56 +340,122 @@ const handleApplicationSubmission = async (req, res) => {
     }
   }
 
-  // check if user already applied
-  let alreadyApplied = false
-  tournament.applications.forEach(app => {
-    if(app.user == userUUID) {
-      alreadyApplied = true
+  // check if already applied
+  if(team) {
+    // check if team already applied
+    let alreadyApplied = false
+    tournament.applications.forEach(app => {
+      if(app.UUID == team._id) {
+        alreadyApplied = true
+      }
+    })
+    if(alreadyApplied) {
+      return res.status(400).json({ error: 'Team already applied' })
     }
-  })
-  if(alreadyApplied) {
-    return res.status(400).json({ error: 'User already applied' })
+  }
+  else {
+    // check if user already applied
+    let alreadyApplied = false
+    tournament.applications.forEach(app => {
+      if(app.UUID == userUUID) {
+        alreadyApplied = true
+      }
+    })
+    if(alreadyApplied) {
+      return res.status(400).json({ error: 'User already applied' })
+    }
   }
 
   // tournament must have capacity available
-  if (tournament.enrolledUsers.length + 1 > tournament.maxCapacity) {
-    return res.status(404).json({ error: 'Invalid request' })
+  if (tournament.enrolledParticipants.length * tournament.teamSize + 1 > tournament.maxCapacity) {
+    return res.status(404).json({ error: 'No capacity available' })
   }
 
   // tournament must not have started
   if (tournament.hasStarted) {
-    return res.status(404).json({ error: 'Invalid request' })
+    return res.status(404).json({ error: 'Tournament has started' })
   }
 
-  // user must not already be part of tournament
-  if (tournament.enrolledUsers.includes(userUUID)) {
-    return res.status(404).json({ error: 'Invalid request' })
-  }
-
-  // user must not be host
-  if (tournament.host == userUUID) {
-    return res.status(404).json({ error: 'Invalid request' })
-  }
-
-  // add application to applications
-  Tournament.updateOne(
-    { _id: req.body.tournament },
-    { $push: { applications: {user: userUUID, application: userApplication} } }
-  )
-  .then(result => {
-    if (result.nModified === 0) {
-      console.log('No tournament was updated');
-    } else {
-      console.log('Application added to applications array successfully');
+  // applicant must not already be part of tournament
+  function isUserOrTeamEnrolled(userUUID, teamName) {
+    if (userUUID) {
+      const userExists = tournament.enrolledParticipants.some(participant => participant.players.some(player => player.UUID === userUUID));
+      console.log('User exists:', userExists);
+      if (userExists) {
+        return true;
+      }
     }
-  })
-  .catch(error => {
-    console.error('Error updating tournament:', error);
-  });
 
-  // redirect to view tournament page
-  res.send({'Location': 'http://localhost:5173/tournament/?UUID=' + tournament.UUID})
-  return res.end()
+    // Check if teamName is provided
+    if (teamName) {
+      const teamExists = tournament.enrolledParticipants.some(participant => participant.teamName === teamName);
+      console.log('Team exists:', teamExists);
+      if (teamExists) {
+        return true;
+      }
+    }
+
+    // If neither user nor team exists
+    return false;
+    }
+  
+  if (isUserOrTeamEnrolled(userUUID, req.body.team)) {
+    return res.status(404).json({ error: 'You are already enrolled in this tournament.' })
+  }
+
+  // must not be host
+  function isTeamHost(userUUID) {
+    if (userUUID == tournament.host) return true
+
+    if (team) {
+      team.members.forEach(member => {
+        if (member == tournament.host) return true
+      })
+    }
+
+    // If neither user nor team exists
+    return false;
+  }
+
+  if (isTeamHost(userUUID)) {
+    return res.status(404).json({ error: 'Hosts cannot join their own tournaments.' })
+  }
+
+  if(team) {
+    // add team to applications
+    Tournament.updateOne(
+      { _id
+      : req.body.tournament },
+      { $push: { applications: {UUID: team._id, application: userApplication, team} } }
+    )
+    .then(result => {
+      if (result.nModified === 0) {
+        console.log('No tournament was updated');
+      } else {
+        console.log('Application added to applications array successfully');
+      }
+    })
+    .catch(error => {
+      console.error('Error updating tournament:', error);
+    });
+  }
+  else {
+    // add application to applications
+    Tournament.updateOne(
+      { _id: req.body.tournament },
+      { $push: { applications: {UUID: userUUID, application: userApplication} } }
+    )
+    .then(result => {
+      if (result.nModified === 0) {
+        console.log('No tournament was updated');
+      } else {
+        console.log('Application added to applications array successfully');
+      }
+    })
+    .catch(error => {
+      console.error('Error updating tournament:', error);
+    });
+  }
 }
 
 const handleJoinAsSolo = async (req, res) => {
@@ -401,7 +474,7 @@ const handleJoinAsSolo = async (req, res) => {
   }
 
   // tournament must have capacity available
-  if (tournament.enrolledUsers.length + 1 > tournament.maxCapacity) {
+  if (tournament.enrolledParticipants.length * tournament.teamSize + 1 > tournament.maxCapacity) {
     return res.status(404).json({ error: 'Invalid request' })
   }
 
@@ -604,6 +677,11 @@ const editStartDate = async (req, res) => {
     return res.status(400).json({ error: 'Start date is in the past' });
   }
 
+  // ensure start date is before end date
+  if (startDate > tournament.endDate) {
+    return res.status(400).json({ error: 'Start date is after end date' });
+  }
+
   // validate date format in javascript
   if (isNaN(Date.parse(startDate))) {
     return res.status(400).json({ error: 'Invalid date format' });
@@ -646,6 +724,11 @@ const editEndDate = async (req, res) => {
     return res.status(400).json({ error: 'End date is in the past' });
   }
 
+  // ensure end date is after start date
+  if (endDate < tournament.startDate) {
+    return res.status(400).json({ error: 'End date is before start date' });
+  }
+
   // validate date format in javascript
   if (isNaN(Date.parse(endDate))) {
     return res.status(400).json({ error: 'Invalid date format' });
@@ -664,6 +747,84 @@ const editEndDate = async (req, res) => {
   }
 }
 
+const getManageTournamentDisplayData = async (req, res) => {
+    
+  try {
+    const UUID = req.query.UUID;
+    if (!UUID) {
+      return res.status(400).json({ error: 'UUID parameter is missing' });
+    }
+
+    const userUUID = req.user;
+
+    const tournament = await Tournament.findById(UUID);
+    if (!tournament) {
+      return res.status(404).json({ error: 'Tournament not found' });
+    }
+
+    const isHost = (tournament.host == userUUID)
+
+    // await generateAndAddUsersToTournament(UUID, 50);
+
+    async function getUserByUsername(username) {
+      try {
+        // Find the user document by username
+        const user = await User.findOne({ username });
+        return user; // Return the user document
+      } catch (error) {
+        console.error('Error finding user by username:', error);
+        throw error; // Throw the error for handling elsewhere
+      }
+    }
+
+    // Transform the data
+    const transformedData = await Promise.all(tournament.enrolledParticipants.map(async (participant) => {
+      const players = await Promise.all(participant.players.map(async (player) => {
+        const user = await getUserByUsername(player.UUID);
+        return {
+          username: user ? user.username : null,
+          score: player.score,
+          eliminated: player.eliminated
+        };
+      }));
+
+      return {
+        teamName: participant.teamName,
+        players: players
+      };
+    }));
+
+    res.status(200).json({
+      hasStarted: tournament.hasStarted,
+      accessibility: tournament.accessibility,
+      title: tournament.title,
+      description: tournament.description,
+      category: tournament.category,
+      type: tournament.type,
+      teamSize: tournament.teamSize,
+      entryFee: tournament.entryFee,
+      maxCapacity: tournament.maxCapacity,
+      earnings: tournament.earnings,
+      host: tournament.host,
+      isAccepted: tournament.acceptedUsers.includes(userUUID),
+      updates: tournament.updates,
+      isHost: isHost,
+      application: tournament.application,
+      hasApplied: ((tournament.applications).map(app => app.user)).includes(userUUID),
+      data: {
+        enrolledParticipants: transformedData,
+      },
+      hasStarted: tournament.hasStarted,
+      startDate: tournament.startDate,
+      endDate: tournament.endDate,
+      applications: tournament.applications
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+}
+
 module.exports = {
   createTournament,
   getTournamentById,
@@ -677,7 +838,8 @@ module.exports = {
   editTitle,
   editDescription,
   editStartDate,
-  editEndDate
+  editEndDate,
+  getManageTournamentDisplayData
 };
 
   
