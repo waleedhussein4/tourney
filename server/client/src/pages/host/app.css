@@ -1,7 +1,6 @@
  #Host {
     min-height: 100vh;
     margin: 0;
-    font-family: Roboto;
     background-image: url('../../assets/futuristic-threshold-with-reflections-on-wall-and-floor-free-video.jpg'); /* Update with correct image path */
     background-size: cover;
     animation: slideBackground 20s linear infinite;
@@ -10,6 +9,7 @@
   #Host #container {
     width: 100%;
     padding: 20px;
+    font-family: Roboto;
     background-color: rgba(255, 255, 255, 0.7); /* Adjust transparency if needed */
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
