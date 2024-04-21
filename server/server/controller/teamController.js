@@ -16,8 +16,17 @@ function generateAlphanumericId(length) {
 
 const createTeam = async (req, res) => {
   const { name } = req.body;
+
   if (name.length < 3) {
     return res.status(400).json({ message: "Team name must be at least 3 characters long" });
+  }
+
+  // make sure team name is not taken
+  const teamExists = await Team.findOne
+    ({ name
+    });
+  if (teamExists) {
+    return res.status(400).json({ message: "Team name is already taken" });
   }
 
   const uniqueMembers = new Set(); // Use a Set to avoid duplicates
