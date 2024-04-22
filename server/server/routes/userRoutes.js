@@ -20,7 +20,7 @@ router.get('/profile', auth, profile)
 router.post("/payment", paymentProcess);
 
 // become host route that updates isHost to true
-router.patch("/becomehost", becomeHost);
+router.post("/becomehost", auth,  becomeHost);
 
 
 module.exports = router;
