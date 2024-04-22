@@ -825,6 +825,47 @@ const getManageTournamentDisplayData = async (req, res) => {
   }
 }
 
+const images = new Map();
+images.set('fortnite',"https://m.media-amazon.com/images/M/MV5BOGY3ZjM3NWUtMWNiMi00OTcwLWIxN2UtMjNhMDhmZWRlNzRkXkEyXkFqcGdeQXVyNjMxNzQ2NTQ@._V1_.jpg")
+images.set('counter strike',"https://static.displate.com/857x1200/displate/2023-06-12/6e217abc7f5bb5d0dc56e68752193a11_5c51574f5f2f216f9ef25a0d08fa6400.jpg")
+images.set('tennis',"https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/2013_Australian_Open_-_Guillaume_Rufin.jpg/800px-2013_Australian_Open_-_Guillaume_Rufin.jpg")
+images.set('league of legends',"https://cdn1.epicgames.com/offer/24b9b5e323bc40eea252a10cdd3b2f10/EGS_LeagueofLegends_RiotGames_S2_1200x1600-905a96cea329205358868f5871393042")
+images.set('football',"https://upload.wikimedia.org/wikipedia/commons/4/42/Football_in_Bloomington%2C_Indiana%2C_1995.jpg")
+images.set('basketball',"https://static.owayo-cdn.com/newhp/img/magazin/basketballstatistikEN/basketball-statistics-670.jpg")
+images.set('valorant',"https://m.media-amazon.com/images/M/MV5BNmNhM2NjMTgtNmIyZC00ZmVjLTk4YWItZmZjNGY2NThiNDhkXkEyXkFqcGdeQXVyODU4MDU1NjU@._V1_FMjpg_UX1000_.jpg")
+
+
+const getRandomTournaments = (tournament) => {
+  // Shuffle array using Durstenfeld shuffle algorithm for randomization
+  for (let i = tournaments.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = tournaments[i];
+    tournaments[i] = tournaments[j];
+    tournaments[j] = temp;
+  }
+
+  // Select the first 10 tournaments after shuffling
+  const selectedTournaments = tournaments.slice(0, 10);
+
+  // Format each tournament for the front end
+  const formattedTournaments = selectedTournaments.map(tournament => ({
+    UUID: tournament.UUID,
+    title: tournament.title,
+    description: tournament.description,
+    images: images.get(tournament.category)
+  }));
+
+
+  return formattedTournaments;
+};
+
+const getTrendingTournaments = async (req,res) => {
+  const tournaments = await Tournament.find({})
+  const RandomTournaments = getRandomTournaments(tournaments)
+  return res.json(RandomTournaments)
+}
+
+
 module.exports = {
   createTournament,
   getTournamentById,
@@ -839,7 +880,8 @@ module.exports = {
   editDescription,
   editStartDate,
   editEndDate,
-  getManageTournamentDisplayData
+  getManageTournamentDisplayData,
+  getTrendingTournaments
 };
 
   
