@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./app.css";
 import Nav from "../../components/Nav";
 
@@ -10,6 +10,7 @@ export default function Host() {
   const [typeSpec, setTypeSpec] = useState(false);
   const [describeVal , setDescribeVal] = useState('');
   const [describeError , setDescribeError] = useState(false);
+  const [describeError2 , setDescribeError2] = useState(false);
   const describeRef = useRef(null);
   const [selectedGame, setSelectedGame] = useState("");
   const [soloOrTeam, setSoloOrTeam] = useState("");
@@ -39,6 +40,7 @@ export default function Host() {
   const [selectGameError , setSelectGameError] = useState(false);
   const selectedGameRef = useRef(null);
   const divPrizeRankRef = useRef(null);
+  const [categories , setCategories] = useState([]);
   const [selectedEntryError , setSelectedEntryError]= useState(false);
   const handleAddInfo = () => {
     if (infoCounter <= 5) {
@@ -95,11 +97,23 @@ export default function Host() {
       setBtnIsDisplayed(false);
     }
   };
-  const handleDescribeChange=(event)=>{
-   setDescribeVal(event.target.value);
-   setDescribeError(false);
-   describeRef.current.style.border = "";
+  const handleDescribeChange = (event) => {
+    setDescribeVal(event.target.value);
+    setDescribeError(false);
+    describeRef.current.style.border = "";
+    const inputText = event.target.value;
+    
+  
+    if (inputText.length <= 200) {
+      setDescribeVal(inputText);
+      setDescribeError2(false);
+    } else {
+     
+      const truncatedText = inputText.slice(0, 200);
+      setDescribeVal(truncatedText);
+      setDescribeError2(true);
   }
+};
 
   const handleTypeChange = (event) => {
     setSelectedType(event.target.value);
@@ -123,13 +137,29 @@ export default function Host() {
     setSoloOrTeam(event.target.value);
     setTeamTypeError(false);
     teamTypeRef.current.style.border = '';
-    if (event.target.value !== "solo") {
+    if (event.target.value !== "1") {
       setStringPerTeam("(per team)");
     } else {
       setStringPerTeam("");
     }
   };
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("http://localhost:2000/api/tournement/getTournamentCategories");
+        if (!response.ok) {
+          throw new Error("Failed to fetch categories");
+        }
+        const data = await response.json();
+        setCategories(data); 
+        console.log(data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
 
+    fetchCategories();
+  }, []);
   const handleMaxParticipants = (event) => {
     setMaxParticipants(event.target.value);
     setParticipantsError(false);
@@ -212,8 +242,6 @@ export default function Host() {
       setSelectedEntryError(true);
     }
   };
-
-
   return (
     <div id="Host">
       <Nav />
@@ -266,25 +294,33 @@ export default function Host() {
             <hr className="custom-line" />
             <div id="specification" style={{ display: specIsDisplayed ? 'block' : 'none' }}>
               <div className="form-group">
-                <h2>Description:</h2>
+               <div id="divDesc"> <h2>Description:</h2>(up to 200 characters)</div>
               <span id="teamTypeError" style={{ display: describeError ? 'block' : 'none' }}>
                    Please fill out this field</span>
                 <textarea ref={describeRef} onChange={handleDescribeChange} value={describeVal} placeholder="Please describe your tournament.
 Include any unique rules, what participants can expect, and why they should join. Be as detailed as possible to attract the right participants."></textarea>
+ {describeError2 && <p style={{ color: 'red' }}>Maximum word limit exceeded (200 characters).</p>}
               </div>
               <hr
 className="custom-line"></hr>
 <div className="form-group">
-<h2>Choose game:</h2>
+<h2>Choose category:</h2>
 <span id="teamTypeError" style={{ display: selectGameError ? 'block' : 'none' }}>
 Please fill out this field</span>
-<select ref={selectedGameRef} id="selectGame" name="game" defaultValue="" value={selectedGame} onChange={handleSelectChange}>
-<option value="" disabled hidden>Select Game</option>
-{games.map((game) => (
-<option key={game.id} value={game.id}>
-{game.name}
-</option>
-))}
+<select
+  ref={selectedGameRef}
+  id="selectGame"
+  name="game"
+  defaultValue=""
+  value={selectedGame}
+  onChange={handleSelectChange}
+>
+  <option value="" disabled hidden>Select a category</option>
+  {categories.map((category) => (
+    <option key={category.id} value={category.id}>
+      {category.name}
+    </option>
+  ))}
 </select>
 </div>
 <div className="form-group" id="participantNumber" style={{ display: typeSpec ? 'none' : 'block' }}>
@@ -311,26 +347,22 @@ Please fill out this field
 <option value="256">256</option>
 </select>
 </div>
+
 <div className="form-group">
-<h2>Teams type:</h2>
+<h2>Teams size:</h2>
 <span id="teamTypeError" style={{ display: teamTypeError ? 'block' : 'none' }}>
 Please fill out this field
 </span>
-<select ref={teamTypeRef} defaultValue="" onChange={handleTeamChange}>
-<option value="" disabled hidden>Select an option</option>
-<option value="solo" >solo</option>
-<option value="team of 2">team of 2</option>
-<option value="team of 3">team of 3</option>
-<option value="team of 4">team of 4</option>
-<option value="team of 5">team of 5</option>
-</select>
+<input type="number" ref={teamTypeRef} defaultValue="" onChange={handleTeamChange}/>
 </div>
+
 <div className="form-group">
 <h2>Entry fee ($) {stringPerTeam}:</h2>
 <span id="teamTypeError" style={{ display: entryFeeError ? 'block' : 'none' }}>
                    Please fill out this field</span>
 <input type="number" id="entryFee" name="entryFee" value={entryFee} onChange={handleEntryFeeChange} ref={entryFeeRef}/>
 </div>
+
 <div className="form-group" style={{ display: typeSpec ? 'block' : 'none' }}>
 <h2>Winner Prize:</h2>
 <span id="teamTypeError" style={{ display: winnerPrizeError ? 'block' : 'none' }}>
