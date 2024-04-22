@@ -201,3 +201,7 @@
     font-size: small;
     color: red;
   }
+  #Host #divDesc{
+    display: flex;
+    align-items: center;
+  }
