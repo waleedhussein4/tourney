@@ -12,6 +12,17 @@ const getCredits = async (req, res) => {
   }
 };
 
+const getTotalCredits = async (req, res) => {
+  try {
+    const userId = req.user; // Assuming you're using auth middleware to get user ID
+    const user = await User.findById(userId);
+    res.status(200).json({ credits: user.credits });
+  } catch (error) {
+    console.error('Error getting total credits:', error);
+    res.status(500).json({ message: 'Error getting total credits' });
+  }
+};
+
 const createCredit = async (req, res) => {
   const { name, totalCredits, price } = req.body;
   try {
@@ -62,6 +73,7 @@ const purchaseCredit = async (req, res) => {
 
 module.exports = {
   getCredits,
+  getTotalCredits,
   createCredit,
   deleteCredit,
   purchaseCredit,
