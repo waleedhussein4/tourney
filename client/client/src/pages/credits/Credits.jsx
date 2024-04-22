@@ -9,11 +9,12 @@ const Credits = () => {
   const navigate = useNavigate();
 
   const fetchData = async () => {
+    console.log('fetching')
     const response = await fetch(
       "http://localhost:2000/api/purchase/getProducts"
     )
-      .then((res) => res.json())
-      .then((data) => setCredits(data));
+    .then((res) => res.json())
+    .then((data) => setCredits(data));
     return response;
   };
 
