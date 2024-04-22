@@ -15,6 +15,10 @@ const tournamentSchema = new Schema(
     category: { type: String, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
+    prize:[
+      
+      {type: Number, require:true}
+    ],
     enrolledParticipants: [
       {
         teamName: { type: String },
