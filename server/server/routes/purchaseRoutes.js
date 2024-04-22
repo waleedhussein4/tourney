@@ -9,7 +9,7 @@ router.post('/createTestProducts', auth, createTestProducts)
 
 router.post('/:paramID', auth, purchase);
 
-router.post('/getProducts', getProducts);
+router.get('/getProducts', getProducts);
 
 
 
