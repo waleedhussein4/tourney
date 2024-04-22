@@ -19,4 +19,26 @@ const auth = async (req, res, next) => {
   }
 }
 
-module.exports = auth
+const getAuth = async (req, res, next) => {
+  try {
+    const token = req.cookies.token
+  
+    if(!token) {
+      req.user = null
+      return next()
+    }
+    
+    const { _id } = jwt.verify(token, process.env.SECRET)
+
+    const user = await User.findOne({ _id }).select('_id')
+    req.user = _id
+    next()
+
+  } catch (error) {
+    console.log(error)
+    req.user = null
+    next()
+  }
+}
+
+module.exports = { auth, getAuth };

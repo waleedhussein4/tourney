@@ -13,7 +13,7 @@ function CarouselItems(props) {
 
 function CarouselItem(data) {
   return (
-    <a href={`/tournament/?UUID=${data.UUID}`}>
+    <a key={data.UUID} href={`/tournament/${data.UUID}`}>
       <div className="carousel-item">
         <img
           className="carousel-item__img"
