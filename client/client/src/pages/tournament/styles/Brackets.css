@@ -1,0 +1,99 @@
+.brackets-container {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.brackets-container h1 {
+  margin-top: 5%;
+  color: #fff;
+}
+
+.team-table {
+  margin-top: 20px;
+  width: 100%;
+  background-color: #1b8a35;
+}
+
+.team-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.team-table th,
+.team-table td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #ccc;
+}
+
+.team-table th {
+  background-color: #f8f8f8;
+}
+
+.team-table td {
+  background-color: #fafafa;
+}
+
+.team-table button {
+  padding: 5px 10px;
+  background-color: #4caf50; /* Green */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.team-table button:hover {
+  background-color: #45a049;
+}
+
+/* Ensure the popup styles are included as previously defined */
+
+.team-user-list-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  width: 320px;
+  border-radius: 10px;
+  color: #333;
+}
+
+.team-user-list-popup h2 {
+  color: #333;
+  font-size: 22px;
+}
+
+.team-user-list-popup ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.team-user-list-popup li {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.team-user-list-popup button {
+  display: block;
+  margin-top: 20px;
+  width: 100%;
+  padding: 10px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.team-user-list-popup button:hover {
+  background-color: #1b8a35;
+}

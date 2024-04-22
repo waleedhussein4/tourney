@@ -23,7 +23,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2em;
 }
 
 #ViewTeam .leaveTeam, .deleteTeam {
@@ -62,7 +61,7 @@
 
 #ViewTeam .crown {
   height: 1em;
-  margin-right: 8pt;
+  margin-left: 8pt;
 }
 
 #ViewTeam .name {
@@ -88,4 +87,35 @@
 #ViewTeam button:hover {
   cursor: pointer;
   opacity: 0.8;
+}
+
+#ViewTeam .invite {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  width: 100%;
+}
+
+#ViewTeam .invite-title {
+  font-weight: bold;
+}
+
+#ViewTeam .invite-link {
+  width: 100%;
+  font-size: 1.2rem;
+  border: 1pt solid white;
+  width: fit-content;
+  padding: 0.35em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+}
+
+#ViewTeam .invite-link button {
+  background-color: white;
+  color: var(--color-tertiary);
+  border: none;
+  padding: 3pt;
 }
