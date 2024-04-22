@@ -97,3 +97,8 @@
 .team-user-list-popup button:hover {
   background-color: #1b8a35;
 }
+
+.eliminated {
+  text-decoration: line-through;
+  color: var(--color-red);
+}

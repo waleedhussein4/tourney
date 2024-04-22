@@ -79,6 +79,7 @@ function Tournament() {
         setApplicationAccepted(data.isAccepted);
         setApplication(data.application);
         setHasApplied(data.hasApplied);
+        console.log(data)
       });
   };
 
@@ -452,7 +453,7 @@ function Tournament() {
                     : "Team size: Solo"}
                 </p>
                 <p className="tournament-capacity">
-                  Capacity: {tournament.data.enrolledParticipants.length}/
+                  Capacity: {tournament.enrolledParticipants?.length || tournament.enrolledTeams?.length}/
                   {tournament.maxCapacity}
                 </p>
                 <p className="tournament-entryFee">
