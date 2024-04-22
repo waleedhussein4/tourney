@@ -14,6 +14,8 @@ import Profile from "./pages/profile/Profile.jsx";
 import Host from "./pages/host/host";
 import Manage from "./pages/manage/Manage";
 
+import BecomeHost from "./pages/BecomeHost/BecomeHost";
+
 import "/src/styles/index.css";
 import Credits from "./pages/credits/Credits.jsx";
 
@@ -31,6 +33,7 @@ function App() {
       {loggedIn === true && (
         <>
           <Route path="/profile" element={<Profile />} />
+          
         </>
       )}
       <Route path="/" element={<Home />} />
@@ -43,6 +46,7 @@ function App() {
       <Route path="/host" element={<Host />} />
       <Route path="/tournament/:UUID/manage" element={<Manage />} />
       <Route path="/credits" element={<Credits />} />
+      <Route path="/become-host" element={<BecomeHost />} />
     </Routes>
   );
 }
