@@ -5,6 +5,7 @@ const cors = require('cors');
 const app = express();
 const touneyRoute = require('./routes/tourneyRoutes');
 const userRoute = require('./routes/userRoutes');
+const purchaseRoute = require('./routes/purchaseRoutes')
 const teamRoute = require('./routes/teamRoutes');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser')
@@ -22,6 +23,7 @@ app.use(cookieParser())
 //route
 app.use('/api/tournement',touneyRoute);
 app.use('/api/user',userRoute);
+app.use('/api/purchase', purchaseRoute)
 app.use('/api/team',teamRoute);
 
 app.all('*', (req, res) => { 
