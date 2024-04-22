@@ -28,24 +28,37 @@ function Purchase() {
       headers: {
         "Content-Type": "application/json"
       },
+      credentials: 'include',
       body: JSON.stringify([
         {
           id: '1',
-          name: 'Vbucks 1',
-          description: 'Buy a small amount of vbucks for the in-game store',
-          price: 10
+          name: 'Bronze Package',
+          amount: 5,
+          price: 5
         },
         {
           id: '2',
-          name: 'Vbucks 2',
-          description: 'Buy a medium amount of vbucks for the in-game store',
-          price: 15
+          name: 'Silver Package',
+          amount: 10,
+          price: 10
         },
         {
           id: '3',
-          name: 'Vbucks 3',
-          description: 'Buy a large amount of vbucks for the in-game store',
-          price: 25
+          name: 'Gold Package',
+          amount: 20,
+          price: 20
+        },
+        {
+          id: '4',
+          name: 'Diamond Package',
+          amount: 50,
+          price: 50
+        },
+        {
+          id: '5',
+          name: 'Ultra Package',
+          amount: 100,
+          price: 100
         }
       ])
     })
@@ -72,8 +85,39 @@ function Purchase() {
     })
   }
 
+  const purchaseItem = async () => {
+    const URL = 'http://localhost:2000/api/purchase'
+    const firstName = document.getElementById('input-firstName').value
+    const lastName = document.getElementById('input-lastName').value
+    const shippingAddress = document.getElementById('input-shippingAddress').value
+    const creditCardNumber = document.getElementById('input-creditCardNumber').value
+    const ccv = document.getElementById('input-ccv').value
+
+    await fetch(`${URL}/${product}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        shippingAddress,
+        creditCardNumber,
+        ccv
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log(data)
+      navigate('/')
+      navigate(0)
+    })
+  
+  }
+
   useEffect(() => {
-    // createTestProducts()
+    createTestProducts()
     getItem()
   }, [])
 
@@ -116,10 +160,10 @@ function Purchase() {
             <h3>Your item</h3>
             <div className="item-info">
               <div className='item-name'>{item.name}</div>
-              <div className='item-description'>{item.description}</div>
-              <div className='item-price'>{item.totalPrice}</div>
+              <div className='item-description'>Amount: {item.amount} credits</div>
+              <div className='item-price'>${item.price}</div>
             </div>
-            <button id='submit'>Continue</button>
+            <button id='submit' onClick={purchaseItem}>Continue</button>
           </div>
 
         </div>
