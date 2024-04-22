@@ -380,7 +380,7 @@ Please fill out this field
 <h2>Winner Prize:</h2>
 <span id="teamTypeError" style={{ display: winnerPrizeError ? 'block' : 'none' }}>
                    Please fill out this field</span>
-<input type="number" id="earning" name="earnings" placeholder="Enter a prize" value={winnerPrize} onChange={handleWinningPrize} ref={winnerPrizeRef}/>
+<input type="number" id="earning" name="earnings" placeholder="Enter a prize" value={winnerPrize} onChange={handleWinningPrize} ref={winnerPrizeRef} min={0}/>
 </div>
 <div ref={divPrizeRankRef} id="form-rank" style={{ display: typeSpec ? 'none' : 'block' }}>
 <h2>Prize by rank :</h2>
