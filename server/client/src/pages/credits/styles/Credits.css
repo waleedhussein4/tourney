@@ -1,0 +1,64 @@
+#Credits {
+  background-color: black;
+  height: 100%;
+}
+
+.credits-page {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.credits-page h1 {
+  font-size: 48px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.credits-page p {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.credit-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.credit-card {
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.credit-card h2 {
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: black;
+}
+
+.credit-card p {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: black;
+}
+
+.credit-card button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--color-tertiary);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.credit-card button:hover {
+  background-color: var(--color-tertiary-light);
+}
