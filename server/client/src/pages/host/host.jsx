@@ -16,9 +16,9 @@ export default function Host() {
   const [soloOrTeam, setSoloOrTeam] = useState("");
   const [stringPerTeam, setStringPerTeam] = useState("");
   const [inputPrizes, setInputPrizes] = useState([]);
-  const [rankCounter, setRankCounter] = useState(1);
+  const [rankCounter, setRankCounter] = useState(0);
   const [numberOfBrackets, setNumberOfBrackets] = useState('');
-  const [maxParticipants, setMaxParticipants] = useState('');
+  const [maxParticipants, setMaxParticipants] = useState(0);
   const maxParticipantsRef = useRef(null);
   const [entryFee , setEntryFee] = useState('');
   const [entryFeeError , setEntryFeeError]=useState(false);
@@ -42,38 +42,44 @@ export default function Host() {
   const divPrizeRankRef = useRef(null);
   const [categories , setCategories] = useState([]);
   const [selectedEntryError , setSelectedEntryError]= useState(false);
+  const [isValidated2 , setIsValidated2] = useState(true);
   const handleAddInfo = () => {
     if (infoCounter <= 5) {
-      setAdditionalInfoList([...additionalInfoList, <div key={additionalInfoList.length}>* <input type="text" ref={additionalInfoRef} /></div>]);
+      const newInfo = (
+        <div key={infoCounter}>
+          * <input type="text" ref={additionalInfoRef} />
+        </div>
+      );
+      setAdditionalInfoList([...additionalInfoList, newInfo]);
       setInfoCounter(infoCounter + 1);
     }
   };
-
-  const handleRemoveInfo = () => {
-    if (infoCounter >= 2) {
-      const newList = [...additionalInfoList];
-      newList.pop();
-      setAdditionalInfoList(newList);
-      setInfoCounter(infoCounter - 1);
-    }
+  
+  const handleRemoveInfo = (indexToRemove) => {
+    const newList = additionalInfoList.filter((_, index) => index !== indexToRemove);
+    setAdditionalInfoList(newList);
+    setInfoCounter(infoCounter - 1);
   };
 
   const handleAddRank = () => {
-    if (rankCounter <= maxParticipants) {
+    if (rankCounter < maxParticipants) {
       if (!isValidated) {
         setIsValidated(true);
       }
+      const demoRankCounter = rankCounter + 1;
       setInputPrizes([
         ...inputPrizes,
         <div key={inputPrizes.length}>
-          {rankCounter} <input type="number" placeholder="Enter a prize" />
+          {demoRankCounter} <input type="number" placeholder="Enter a prize" />
         </div>,
       ]);
       setRankCounter(rankCounter + 1);
+      
     } else {
       console.log('Rank counter exceeded max number');
       setIsValidated(false);
     }
+    setIsValidated2(true);
   };
 
   const handleRemoveRank = () => {
@@ -85,9 +91,10 @@ export default function Host() {
       if (!isValidated) {
         setIsValidated(true);
       }
-    }
+     
+        }
+        setIsValidated2(true);
   };
-  
   
   const handleClick = () => {
     if (!isDisplayed) {
@@ -164,6 +171,7 @@ export default function Host() {
     setMaxParticipants(event.target.value);
     setParticipantsError(false);
     maxParticipantsRef.current.style.border = "";
+    
   };
 
   useEffect(() => {
@@ -221,7 +229,7 @@ export default function Host() {
       setBracketsError(true);
       bracketRef.current.style.border = '2px solid red';
     }
-    if(maxParticipants=== ""){
+    if(maxParticipants=== "" || maxParticipants=== 0){
       setParticipantsError(true);
       maxParticipantsRef.current.style.border = "2px solid red";
     }if (numberOfBrackets==="" && maxParticipants==="" ){
@@ -240,6 +248,11 @@ export default function Host() {
     if(selectedEntryMode===""){
       e.preventDefault();
       setSelectedEntryError(true);
+    }
+    if(rankCounter>maxParticipants){
+      e.preventDefault();
+      setIsValidated2(false);
+      
     }
   };
   return (
@@ -318,7 +331,7 @@ Please fill out this field</span>
   <option value="" disabled hidden>Select a category</option>
   {categories.map((category) => (
     <option key={category.id} value={category.id}>
-      {category.name}
+      {category.charAt(0).toUpperCase() + category.slice(1)}
     </option>
   ))}
 </select>
@@ -328,7 +341,7 @@ Please fill out this field</span>
 <span id="teamTypeError" style={{ display: participantsError ? 'block' : 'none' }}>
 Please fill out this field
 </span>
-<input type="number" id="capacity" name="capacity" value={maxParticipants} onChange={handleMaxParticipants} ref={maxParticipantsRef} />
+<input type="number" id="capacity" name="capacity" value={maxParticipants} onChange={handleMaxParticipants} ref={maxParticipantsRef} min={0}/>
 </div>
 <div className="form-group" id="bracketNumber" style={{ display: typeSpec ? 'block' : 'none' }}>
 <h2>Number of brackets:</h2>
@@ -353,14 +366,14 @@ Please fill out this field
 <span id="teamTypeError" style={{ display: teamTypeError ? 'block' : 'none' }}>
 Please fill out this field
 </span>
-<input type="number" ref={teamTypeRef} defaultValue="" onChange={handleTeamChange}/>
+<input type="number" ref={teamTypeRef} defaultValue="" onChange={handleTeamChange} min={0}/>
 </div>
 
 <div className="form-group">
 <h2>Entry fee ($) {stringPerTeam}:</h2>
 <span id="teamTypeError" style={{ display: entryFeeError ? 'block' : 'none' }}>
                    Please fill out this field</span>
-<input type="number" id="entryFee" name="entryFee" value={entryFee} onChange={handleEntryFeeChange} ref={entryFeeRef}/>
+<input type="number" id="entryFee" name="entryFee" value={entryFee} onChange={handleEntryFeeChange} ref={entryFeeRef} min={0}/>
 </div>
 
 <div className="form-group" style={{ display: typeSpec ? 'block' : 'none' }}>
@@ -377,6 +390,7 @@ Please fill out this field
 <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddRank() }} value="Add Rank" />
 <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleRemoveRank() }} value="Remove Rank" />
 {isValidated ? null : <div id="rankError">if you wish to add more prize rank, you should increase the number of participants above!</div>}
+{isValidated2 ? null : <div id="rankError">If you wish to continue, you should remove ranks until they equal the number of participants.</div>}
 </div>
 <div id="form-app">
 <h2>Tourney entry mode:</h2>
@@ -407,10 +421,14 @@ Application Required
 <div id="form-app" style={{ display: additionalInfoRequired ? 'block' : 'none' }}>
 <h4>Please fill in any additional questions or information requests you have for applicants</h4>
 {additionalInfoList.map((input, index) => (
-<div key={index}>{input}</div>
+<div key={index}>{input}
+<button type="button" onClick={() => handleRemoveInfo(index)}>
+      Delete
+      </button>
+</div>
 ))}
 <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddInfo() }} value="Add question/request" />
-<input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleRemoveInfo() }} value="Remove question/request" />
+
 </div>
 <footer>
 <input type="submit" value="Create" />
