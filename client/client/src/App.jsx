@@ -8,6 +8,7 @@ import ViewTeam from './pages/team/view/View';
 import JoinTeam from './pages/team/join/Join';
 import Signin from "./pages/signin/Signin";
 import Signup from "./pages/signup/Signup";
+import Purchase from './pages/purchase/Purchase.jsx'
 import Tournament from './pages/tournament/Tournament';
 import Profile from './pages/profile/Profile.jsx';
 import Host from './pages/host/host';
@@ -35,6 +36,7 @@ function App() {
       <Route path='/tournaments' element={<Tournaments />} />
       <Route path='/team' element={<Team />} />
       <Route path='/team/view' element={<ViewTeam />} />
+      <Route path='/purchase/:product?' element={<Purchase />} />
       <Route path='/team/join/:teamCode' element={<JoinTeam />} />
       <Route path='/tournament/:UUID?' element={<Tournament />} />
       <Route path='/host' element={<Host />} />
