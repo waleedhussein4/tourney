@@ -1,7 +1,26 @@
+import { useEffect, useState } from "react";
 import Carousel from "./Carousel";
 import { Link } from "react-router-dom";
 
 function Main() {
+
+  const [trendingTournaments, setTrendingTOurnaments] = useState([])
+
+  const getTrendingTournaments = async () => {
+
+    const URL = 'http://localhost:2000/api/tournement/getTrendingTournaments';
+    await fetch(URL)
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data)
+      setTrendingTOurnaments(data)
+    })
+  }
+
+  useEffect(() => {
+    getTrendingTournaments();
+  }, []);
+
   return (
     <div id="main">
       <div className="about">
@@ -20,7 +39,6 @@ function Main() {
           begin!
         </p>
       </div>
-      <input id='home-search' type="text" placeholder="Search tournaments by title, category, description..." />
       <div id='suggest-join'>
         <div className="description">
           <h2>Bracket Tournaments</h2>
@@ -34,68 +52,7 @@ function Main() {
       </div>
       <Carousel
         title="Trending"
-        data={[
-          {
-            UUID: '89b72cfe-0b87-4395-8230-8e8e1f571cb7',
-            title: "Fortnite FNCS",
-            description: "March Solo Cash Cup",
-            image: "https://m.media-amazon.com/images/M/MV5BOGY3ZjM3NWUtMWNiMi00OTcwLWIxN2UtMjNhMDhmZWRlNzRkXkEyXkFqcGdeQXVyNjMxNzQ2NTQ@._V1_.jpg"
-          },
-          {
-            UUID: '4a265b77-fd44-47ca-a3b9-6238454e0f6d',
-            title: "Counter Strike Gold Championship",
-            description: "The highly anticipated annual tournament",
-            image: "https://static.displate.com/857x1200/displate/2023-06-12/6e217abc7f5bb5d0dc56e68752193a11_5c51574f5f2f216f9ef25a0d08fa6400.jpg"
-          }, 
-          {
-            UUID: '0c431807-b67f-4f7f-a2d0-89c062935074',
-            title: "Tennis Skirmish Casual",
-            description: "BBQ after!",
-            image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/2013_Australian_Open_-_Guillaume_Rufin.jpg/800px-2013_Australian_Open_-_Guillaume_Rufin.jpg"
-          }, 
-          {
-            UUID: '018a76ca-ae36-46f5-96e6-d3d2a13e17a1',
-            title: "League of Legends Practice",
-            description: "Casual games for training",
-            image: "https://cdn1.epicgames.com/offer/24b9b5e323bc40eea252a10cdd3b2f10/EGS_LeagueofLegends_RiotGames_S2_1200x1600-905a96cea329205358868f5871393042"
-          },
-          {
-            UUID: '12360807-b081-48da-8546-d2f7fd4b0e6f',
-            title: "Football Junior U18 Cup",
-            description: "Local football tournament, hosted by IC",
-            image: "https://upload.wikimedia.org/wikipedia/commons/4/42/Football_in_Bloomington%2C_Indiana%2C_1995.jpg"
-          },
-          {
-            UUID: 'ac809167-d0bb-4dfb-85f6-04704da9edc9',
-            title: "Basketball Freethrow Games",
-            description: "Basketball minigames with a high reward",
-            image: "https://static.owayo-cdn.com/newhp/img/magazin/basketballstatistikEN/basketball-statistics-670.jpg"
-          },
-          {
-            UUID: 'c7c0f4e8-849e-4c5d-ace7-946c92147af5',
-            title: "Valorant Scouting Skirmish",
-            description: "Prove your worth in this official pro tournament",
-            image: "https://m.media-amazon.com/images/M/MV5BNmNhM2NjMTgtNmIyZC00ZmVjLTk4YWItZmZjNGY2NThiNDhkXkEyXkFqcGdeQXVyODU4MDU1NjU@._V1_FMjpg_UX1000_.jpg"
-          },
-          {
-            UUID: '62d2dc82-5664-4e0f-8cf5-3634a84ab27a',
-            title: "League of Legends World Cup",
-            description: "Join the greatest teams in LoL history",
-            image: "https://cdn1.epicgames.com/offer/24b9b5e323bc40eea252a10cdd3b2f10/EGS_LeagueofLegends_RiotGames_S2_1200x1600-905a96cea329205358868f5871393042"
-          },
-          {
-            UUID: 'a5db7a62-3f62-485e-a83d-1d66f13ea9f8',
-            title: "CS2 Rookie Cup",
-            description: "The starting point of all beginners",
-            image: "https://static.displate.com/857x1200/displate/2023-06-12/6e217abc7f5bb5d0dc56e68752193a11_5c51574f5f2f216f9ef25a0d08fa6400.jpg"
-          },  
-          {
-            UUID: 'ab878297-d793-4595-af2e-7661aecc42ef',
-            title: "Tennis Olympics",
-            description: "Spectate the greatest annual tennis competition",
-            image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/2013_Australian_Open_-_Guillaume_Rufin.jpg/800px-2013_Australian_Open_-_Guillaume_Rufin.jpg"
-          }, 
-        ]}
+        data={trendingTournaments}
       />
     </div>
   );
