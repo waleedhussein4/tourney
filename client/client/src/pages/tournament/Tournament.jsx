@@ -95,7 +95,9 @@ function Tournament() {
 
   useEffect(() => {
     fetchTournamentData();
-    fetchTeams();
+    if(loggedIn) {
+      fetchTeams();
+    }
   }, []);
 
   function displayJoinPopup() {
