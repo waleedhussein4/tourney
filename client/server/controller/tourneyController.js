@@ -42,36 +42,32 @@ const newTournament = new Tournament({
   endDate: new Date("2024-02-29T10:02:10.959Z"),
   hasStarted: false,
   hasEnded: false,
-  enrolledParticipants: [
+  enrolledTeams: [
     {
       teamName: "Team 1",
       players: [
         {
           UUID: "9410f264-0bef-4516-b3ea-661c575490f2",
-          score: 0,
-          eliminated: false
         },
         {
-          UUID: "9410f264-0bef-4516-b3ea-661c575490f2",
-          score: 0,
-          eliminated: false
+          UUID: "9410f264-0bef-4516-b3ea-661c575492f2",
         }
-      ]
+      ],
+      score: 0,
+      eliminated: true
     },
     {
       teamName: "Team 2",
       players: [
         {
-          UUID: "9410f264-0bef-4516-b3ea-661c575690f2",
-          score: 0,
-          eliminated: false
+          UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
         },
         {
-          UUID: "9410f264-0bef-4516-b3ea-661c575690f2",
-          score: 0,
-          eliminated: false
+          UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
         }
-      ]
+      ],
+      score: 0,
+      eliminated: false
     }
   ],
   entryFee: 5.5,
@@ -226,6 +222,7 @@ const getTournamentDisplayData = async (req, res) => {
     
   try {
     const UUID = req.query.UUID;
+    console.log(UUID)
     if (!UUID) {
       return res.status(400).json({ error: 'UUID parameter is missing' });
     }
@@ -252,23 +249,33 @@ const getTournamentDisplayData = async (req, res) => {
       }
     }
 
-    // Transform the data
-    const transformedData = await Promise.all(tournament.enrolledParticipants.map(async (participant) => {
-      const players = await Promise.all(participant.players.map(async (player) => {
-        const user = await getUserByUsername(player.UUID);
+    const transformEnrolledUsers = await Promise.all(tournament.enrolledUsers.map(async (user) => {
+      const userDoc = await User.findById(user.UUID);
+      return {
+        username: userDoc ? userDoc.username : null,
+        score: user.score,
+        eliminated: user.eliminated
+      };
+    })); 
+    console.log('transformEnrolledUsers:', transformEnrolledUsers)
+
+    async function transformEnrolledTeams(originalEnrolledTeams) {
+      const transformedEnrolledTeams = await Promise.all(originalEnrolledTeams.map(async team => {
+        const players = await Promise.all(team.players.map(async player => {
+          const user = await User.findById(player.UUID);
+          return { username: 'x' }; // Assuming 'username' is the field in the user document containing the username
+        }));
         return {
-          username: user ? user.username : null,
-          score: player.score,
-          eliminated: player.eliminated
+          teamName: team.teamName,
+          players: players,
+          score: team.score,
+          eliminated: team.eliminated
         };
       }));
-
-      return {
-        teamName: participant.teamName,
-        players: players
-      };
-    }));
-
+      return transformedEnrolledTeams;
+    }
+    const transformedEnrolledTeams = await transformEnrolledTeams(tournament.enrolledTeams);
+    console.log('transformEnrolledTeams:', transformedEnrolledTeams)
 
     res.status(200).json({
       hasStarted: tournament.hasStarted,
@@ -287,9 +294,8 @@ const getTournamentDisplayData = async (req, res) => {
       isHost: isHost,
       application: tournament.application,
       hasApplied: ((tournament.applications).map(app => app.user)).includes(userUUID),
-      data: {
-        enrolledParticipants: transformedData,
-      },
+      enrolledUsers: transformEnrolledUsers,
+      enrolledTeams: transformedEnrolledTeams,
       hasStarted: tournament.hasStarted,
       startDate: tournament.startDate,
       endDate: tournament.endDate,
@@ -367,8 +373,15 @@ const handleApplicationSubmission = async (req, res) => {
   }
 
   // tournament must have capacity available
-  if (tournament.enrolledParticipants.length * tournament.teamSize + 1 > tournament.maxCapacity) {
-    return res.status(404).json({ error: 'No capacity available' })
+  if(team) {
+    if (tournament.enrolledTeams.length + 1 > tournament.maxCapacity) {
+      return res.status(404).json({ error: 'No capacity available' })
+    }
+  }
+  else {
+    if (tournament.enrolledUsers.length + 1 > tournament.maxCapacity) {
+      return res.status(404).json({ error: 'No capacity available' })
+    }
   }
 
   // tournament must not have started
@@ -376,31 +389,26 @@ const handleApplicationSubmission = async (req, res) => {
     return res.status(404).json({ error: 'Tournament has started' })
   }
 
-  // applicant must not already be part of tournament
-  function isUserOrTeamEnrolled(userUUID, teamName) {
-    if (userUUID) {
-      const userExists = tournament.enrolledParticipants.some(participant => participant.players.some(player => player.UUID === userUUID));
-      console.log('User exists:', userExists);
-      if (userExists) {
-        return true;
-      }
-    }
-
-    // Check if teamName is provided
-    if (teamName) {
-      const teamExists = tournament.enrolledParticipants.some(participant => participant.teamName === teamName);
-      console.log('Team exists:', teamExists);
-      if (teamExists) {
-        return true;
-      }
-    }
-
-    // If neither user nor team exists
-    return false;
-    }
-  
-  if (isUserOrTeamEnrolled(userUUID, req.body.team)) {
+  function isUserEnrolled(userUUID) {
+    const userExists = tournament.enrolledUsers().some(participant => participant.UUID === userUUID);
+    return userExists;
+  }
+  if(isUserEnrolled(userUUID)) {
     return res.status(404).json({ error: 'You are already enrolled in this tournament.' })
+  }
+
+  function isTeamMemberEnrolled(team) {
+    for (let member of team.members) {
+      for (let enrolledTeam of tournament.enrolledTeams) {
+        if (enrolledTeam.players.includes(member)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  if(isTeamMemberEnrolled(team)) {
+    return res.status(404).json({ error: 'One of the team members is already enrolled in the tournament' })
   }
 
   // must not be host
@@ -466,15 +474,13 @@ const handleJoinAsSolo = async (req, res) => {
     return res.status(404).json({ error: 'No such tournament' });
   }
 
-  const userUUID = req.user;
-
   // tournament must be solo
   if (tournament.teamSize != 1) {
     return res.status(404).json({ error: 'Invalid request' })
   }
 
   // tournament must have capacity available
-  if (tournament.enrolledParticipants.length * tournament.teamSize + 1 > tournament.maxCapacity) {
+  if (tournament.enrolledUsers.length * tournament.teamSize + 1 > tournament.maxCapacity) {
     return res.status(404).json({ error: 'Invalid request' })
   }
 
@@ -484,19 +490,25 @@ const handleJoinAsSolo = async (req, res) => {
   }
 
   // user must not already be part of tournament
-  if (tournament.enrolledUsers.includes(userUUID)) {
+  if ((tournament.enrolledUsers.map(user => user.UUID)).includes(userUUID)) {
     return res.status(404).json({ error: 'Invalid request' })
   }
 
   // user must not be host
-  if (tournament.host == userUUID) {
+  if (tournament.host == req.user) {
     return res.status(404).json({ error: 'Invalid request' })
+  }
+
+  const newUser = {
+    UUID: req.user,
+    score: 0,
+    eliminated: false
   }
 
   // Add user to enrolled users
   Tournament.updateOne(
     { _id: req.body.tournament },
-    { $push: { enrolledUsers: userUUID } }
+    { $push: { enrolledUsers: newUser } }
   )
   .then(result => {
     if (result.nModified === 0) {
@@ -526,15 +538,13 @@ const handleJoinAsTeam = async (req, res) => {
     return res.status(404).json({ error: 'No such team' });
   }
 
-  const userUUID = req.user;
-
   // required team size must match provided team size
   if (tournament.teamSize != team.members.length) {
     return res.status(404).json({ error: 'Invalid request' })
   }
 
   // tournament must have capacity available
-  if ((tournament.enrolledUsers.length + tournament.teamSize) > tournament.maxCapacity) {
+  if ((tournament.enrolledTeams.length + tournament.teamSize) > tournament.maxCapacity) {
     return res.status(404).json({ error: 'Invalid request' })
   }
 
@@ -547,7 +557,7 @@ const handleJoinAsTeam = async (req, res) => {
   function isTeamMemberEnrolled(team, enrolledTeams) {
     for (let member of team.members) {
       for (let enrolledTeam of enrolledTeams) {
-        if (enrolledTeam.members.includes(member)) {
+        if (enrolledTeam.players.includes(member)) {
           return true;
         }
       }
@@ -563,10 +573,17 @@ const handleJoinAsTeam = async (req, res) => {
     return res.status(404).json({ error: 'Tournament host cannot join tournament' })
   }
 
+  const enrolledTeam = {
+    teamName: team.name,
+    players: team.members.map(member => ({ UUID: member })),
+    score: 0, // Initial score
+    eliminated: false, // Not eliminated initially
+  };
+
   // Add team to enrolledTeams
   Tournament.updateOne(
     { _id: req.body.tournament },
-    { $push: { enrolledTeams: team } }
+    { $push: { enrolledTeams: enrolledTeam } }
   )
   .then(result => {
     if (result.nModified === 0) {
@@ -580,7 +597,7 @@ const handleJoinAsTeam = async (req, res) => {
   });
 
   // redirect to view tournament page
-  res.writeHead(302, {'Location': 'http://localhost:5173/tournament/?UUID=' + tournament.UUID})
+  res.writeHead(302, {'Location': 'http://localhost:5173/tournament/' + tournament.UUID})
   return res.end()
 }
 
