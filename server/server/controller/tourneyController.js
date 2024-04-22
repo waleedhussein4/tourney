@@ -865,6 +865,11 @@ const getTrendingTournaments = async (req,res) => {
   return res.json(RandomTournaments)
 }
 
+const getTournamentCategories = async (req,res) => {
+  const categories = ["fortnite","counter strike","tennis","league of legends","football","basketball","valorant"]
+  return res.json(categories)
+}
+
 
 module.exports = {
   createTournament,
@@ -881,7 +886,8 @@ module.exports = {
   editStartDate,
   editEndDate,
   getManageTournamentDisplayData,
-  getTrendingTournaments
+  getTrendingTournaments,
+  getTournamentCategories
 };
 
   
