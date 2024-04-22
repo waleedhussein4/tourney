@@ -1,5 +1,5 @@
 const express = require('express');
-const {createTournament, getTournamentById, getAllTournaments, updateTournament, deleteTournament, getTournamentDisplayData, handleApplicationSubmission, handleJoinAsSolo, handleJoinAsTeam, editTitle, editDescription, editStartDate, editEndDate, getManageTournamentDisplayData} = require('../controller/tourneyController');
+const {createTournament, getTournamentById, getAllTournaments, updateTournament, deleteTournament, getTournamentDisplayData, handleApplicationSubmission, handleJoinAsSolo, handleJoinAsTeam, editTitle, editDescription, editStartDate, editEndDate, getManageTournamentDisplayData,getTrendingTournaments} = require('../controller/tourneyController');
 const router = express();
 const { auth, getAuth } = require("../middleware/requireAuth")
 
@@ -26,6 +26,8 @@ router.post('/tournament/editDescription', auth, editDescription)
 router.post('/tournament/editStartDate', auth, editStartDate)
 
 router.post('/tournament/editEndDate', auth, editEndDate)
+
+router.get('/getTrendingTournaments',getTrendingTournaments)
 
 //delete
 router.delete('/',deleteTournament);
