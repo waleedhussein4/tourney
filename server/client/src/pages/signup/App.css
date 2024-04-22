@@ -34,15 +34,15 @@
 
 #Signup .container-center input[type="text"],
 #Signup .container-center input[type="password"] {
-  margin-bottom: 10px;
-  border: 2px solid #8c8888;
-  border-radius: 5px;
-  outline: none;
+  padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    width: calc( 100% - 10px);
+    outline: none;
   transition: border-color 0.3s;
-  width: calc(100% - 10px);
-  height: 25px;
-  background-color: aliceblue;
-  padding: 5px;
 }
 
 #Signup .container-center input[type="checkbox"] {
@@ -57,7 +57,7 @@
   font-size: small;
 }
 
-#Signup #error {
+#Signup .error {
   color: red;
   text-align: center;
   font-size: small;
