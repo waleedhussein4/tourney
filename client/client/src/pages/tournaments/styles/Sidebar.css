@@ -90,20 +90,20 @@
   background-color: rgb(34, 34, 34);
 }
 
-::-webkit-scrollbar {
+#Tournaments ::-webkit-scrollbar {
   width: 10px;
   height: 100%;
 }
 
-::-webkit-scrollbar-track {
+#Tournaments ::-webkit-scrollbar-track {
   background: black; 
 }
  
-::-webkit-scrollbar-thumb {
+#Tournaments ::-webkit-scrollbar-thumb {
   background: #888; 
 }
 
-::-webkit-scrollbar-thumb:hover {
+#Tournaments ::-webkit-scrollbar-thumb:hover {
   background: #555; 
 }
 
