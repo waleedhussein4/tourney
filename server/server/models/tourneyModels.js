@@ -15,7 +15,17 @@ const tournamentSchema = new Schema(
     category: { type: String, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    enrolledParticipants: [
+    enrolledUsers: [
+      {
+        UUID: {
+          type: Schema.Types.String,
+          ref: "User"
+        },
+        score: { type: Number },
+        eliminated: { type: Boolean },
+      }
+    ],
+    enrolledTeams: [
       {
         teamName: { type: String },
         players: [
@@ -23,10 +33,46 @@ const tournamentSchema = new Schema(
             UUID: {
               type: Schema.Types.String,
               ref: "User"
-            },
-            score: { type: Number },
-            eliminated: { type: Boolean },
+            }
           }
+        ],
+        score: { type: Number },
+        eliminated: { type: Boolean },
+      }
+    ],
+    // enrolledParticipants: [
+    //   {
+    //     teamName: { type: String },
+    //     players: [
+    //       {
+    //         UUID: {
+    //           type: Schema.Types.String,
+    //           ref: "User"
+    //         },
+    //         score: { type: Number },
+    //         eliminated: { type: Boolean },
+    //       }
+    //     ],
+    //   },
+    // ],
+    rounds: [
+      {
+        title: { type: String },
+        seeds: [
+          {
+            id: { type: Number },
+            teamName: { type: String },
+            players: [
+              {
+                UUID: {
+                  type: Schema.Types.String,
+                  ref: "User"
+                },
+                score: { type: Number },
+                eliminated: { type: Boolean },
+              }
+            ],
+          },
         ],
       },
     ],
