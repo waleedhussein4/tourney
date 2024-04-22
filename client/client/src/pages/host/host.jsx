@@ -13,7 +13,7 @@ export default function Host() {
   const [describeError2 , setDescribeError2] = useState(false);
   const describeRef = useRef(null);
   const [selectedGame, setSelectedGame] = useState("");
-  const [soloOrTeam, setSoloOrTeam] = useState("");
+  const [teamSize, setTeamSize] = useState("");
   const [stringPerTeam, setStringPerTeam] = useState("");
   const [inputPrizes, setInputPrizes] = useState([]);
   const [rankCounter, setRankCounter] = useState(0);
@@ -150,7 +150,7 @@ export default function Host() {
   };
 
   const handleTeamChange = (event) => {
-    setSoloOrTeam(event.target.value);
+  setTeamSize(event.target.value);
     setTeamTypeError(false);
     teamTypeRef.current.style.border = '';
     if (event.target.value !== "1") {
@@ -217,7 +217,7 @@ export default function Host() {
     { id: 3, name: "Game 3" },
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     if(describeVal ===""){
       e.preventDefault();
       setDescribeError(true);
@@ -228,7 +228,7 @@ export default function Host() {
       setSelectGameError(true);
       selectedGameRef.current.style.border="2px solid red";
     }
-    if (soloOrTeam === "") {
+    if (teamSize === "") {
       e.preventDefault();
       setTeamTypeError(true);
       teamTypeRef.current.style.border = '2px solid red';
@@ -266,6 +266,33 @@ export default function Host() {
     if(titleVal ===""){
       setTitleError(true);
       titleRef.current.style.border = "2px solid red";
+    }
+    const formData = {
+      description: describeVal,
+      type: selectedType,
+      category: selectedGame,
+      teamSize: teamSize,
+      entryFee: entryFee,
+      prize: winnerPrize,
+      application: selectedEntryMode
+    };
+    try{
+      const response = await fetch ('http://localhost:2000/api/tournement',{
+       method:'POST',
+       headers: {
+        'Content-Type': 'application/json',
+       },
+       body: JSON.stringify(formData)
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create tournament');
+      }
+  
+      // Handle successful response (optional)
+      console.log('Tournament created successfully!');
+    }catch (error) {
+      console.error('Error creating tournament:', error);
+      // Handle error (e.g., show error message to the user)
     }
   };
   return (
@@ -385,7 +412,7 @@ Please fill out this field
 <span id="teamTypeError" style={{ display: teamTypeError ? 'block' : 'none' }}>
 Please fill out this field
 </span>
-<input type="number" ref={teamTypeRef} defaultValue="" onChange={handleTeamChange} min={0}/>
+<input type="number" ref={teamTypeRef} defaultValue="" value={teamSize} onChange={handleTeamChange} min={0}/>
 </div>
 
 <div className="form-group">
