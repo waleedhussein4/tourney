@@ -1,6 +1,6 @@
-/* eslint-disable react/prop-types */
-import "../styles/Brackets.css";
 import { useState } from "react";
+import { Bracket } from "react-brackets";
+import "../styles/Brackets.css";
 
 const TeamUserListPopup = ({ teamName, players, onClose }) => {
   const safePlayers = players || [];
@@ -12,10 +12,12 @@ const TeamUserListPopup = ({ teamName, players, onClose }) => {
       <ul>
         {safePlayers.map((player) => (
           <li
-            key={player._id || `unknown-${Math.random()}`}
-            onClick={() => (window.location.href = `/profile/${player._id}`)}
+            key={player.username || `unknown-${Math.random()}`}
+            onClick={() =>
+              (window.location.href = `/profile/${player.username}`)
+            }
           >
-            {player.username || player.email || "Unknown User"}
+            {player.username || "Unknown User"}
           </li>
         ))}
       </ul>
@@ -24,84 +26,169 @@ const TeamUserListPopup = ({ teamName, players, onClose }) => {
   );
 };
 
-const Brackets = ({ tournament }) => {
-  const [isTeamPopupOpen, setIsTeamPopupOpen] = useState(false);
+const staticParticipants = [
+  {
+    teamName: "Alpha Eagles",
+    players: [
+      { username: "EagleOne", score: 10, eliminated: false },
+      { username: "EagleTwo", score: 8, eliminated: false },
+    ],
+  },
+  {
+    teamName: "Beta Wolves",
+    players: [
+      { username: "WolfLeader", score: 9, eliminated: false },
+      { username: "LoneWolf", score: 7, eliminated: false },
+    ],
+  },
+  {
+    teamName: "Gamma Sharks",
+    players: [
+      { username: "SharkFin", score: 5, eliminated: false },
+      { username: "GreatWhite", score: 6, eliminated: false },
+    ],
+  },
+  {
+    teamName: "Delta Tigers",
+    players: [
+      { username: "TigerClaw", score: 8, eliminated: false },
+      { username: "JungleKing", score: 7, eliminated: false },
+    ],
+  },
+  {
+    teamName: "Epsilon Raptors",
+    players: [
+      { username: "RaptorEye", score: 10, eliminated: false },
+      { username: "DinoDash", score: 6, eliminated: false },
+    ],
+  },
+  {
+    teamName: "Zeta Bulls",
+    players: [
+      { username: "BullCharge", score: 9, eliminated: false },
+      { username: "RedHorn", score: 7, eliminated: false },
+    ],
+  },
+  {
+    teamName: "Eta Lions",
+    players: [
+      { username: "LionRoar", score: 8, eliminated: false },
+      { username: "ManeMan", score: 5, eliminated: false },
+    ],
+  },
+  {
+    teamName: "Theta Knights",
+    players: [
+      { username: "KnightShade", score: 6, eliminated: false },
+      { username: "CastleGuard", score: 7, eliminated: false },
+    ],
+  },
+];
+
+const Brackets = () => {
   const [selectedTeam, setSelectedTeam] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-  const participants = tournament?.data?.enrolledParticipants || [];
-
-  const totalRounds = Math.ceil(Math.log2(Math.max(participants.length, 1)));
-
-  // Placeholder for non-existent participants to even out the brackets
-  while (Math.pow(2, totalRounds) !== participants.length) {
-    participants.push({ username: "TBA" });
-  }
-
-  // Handling team check and popup logic
-  const isTeam = (participant) => participant && "teamName" in participant;
-
-  const handleCompetitorClick = (competitor) => {
-    if (competitor && isTeam(competitor)) {
-      setSelectedTeam({ ...competitor, players: competitor.players || [] });
-      setIsTeamPopupOpen(true);
-    } else {
-      console.log("Redirect to user profile:", competitor.username);
-    }
+  const handleTeamClick = (teamName) => {
+    const team = staticParticipants.find((t) => t.teamName === teamName);
+    setSelectedTeam(team);
+    setIsPopupOpen(true);
   };
 
   const handlePopupClose = () => {
-    setIsTeamPopupOpen(false);
+    setIsPopupOpen(false);
     setSelectedTeam(null);
   };
 
+  // Define the rounds and matches
+  const rounds = [
+    {
+      title: "Quarter Finals",
+      seeds: [
+        {
+          id: 1,
+          teams: [{ name: "Alpha Eagles" }, { name: "Beta Wolves" }],
+          onClick: (match) => setSelectedTeam(match),
+        },
+        {
+          id: 2,
+          teams: [{ name: "Gamma Sharks" }, { name: "Delta Tigers" }],
+          onClick: (match) => setSelectedTeam(match),
+        },
+        {
+          id: 3,
+          teams: [{ name: "Epsilon Raptors" }, { name: "Zeta Bulls" }],
+          onClick: (match) => setSelectedTeam(match),
+        },
+        {
+          id: 4,
+          teams: [{ name: "Eta Lions" }, { name: "Theta Knights" }],
+          onClick: (match) => setSelectedTeam(match),
+        },
+      ],
+    },
+    {
+      title: "Semi Finals",
+      seeds: [
+        {
+          id: 1,
+          teams: [{ name: "TBA" }, { name: "TBA" }],
+          onClick: (match) => setSelectedTeam(match),
+        },
+        {
+          id: 2,
+          teams: [{ name: "TBA" }, { name: "TBA" }],
+          onClick: (match) => setSelectedTeam(match),
+        },
+      ],
+    },
+    {
+      title: "Final",
+      seeds: [
+        {
+          id: 1,
+          teams: [{ name: "TBA" }, { name: "TBA" }],
+          onClick: (match) => setSelectedTeam(match),
+        },
+      ],
+    },
+  ];
+
   return (
-    <div
-      className="brackets"
-      onWheel={(e) => (e.currentTarget.scrollLeft += e.deltaY * 1.5)}
-    >
-      {participants.length ? (
-        Array.from({ length: totalRounds }).map((_, roundIndex) => (
-          <div key={roundIndex} className={`round round-${roundIndex}`}>
-            {Array.from({
-              length: Math.pow(2, totalRounds - roundIndex - 1),
-            }).map((_, matchIndex) => (
-              <div key={matchIndex} className="match">
-                <div
-                  className="competitor"
-                  onClick={() =>
-                    handleCompetitorClick(participants[matchIndex * 2])
-                  }
-                >
-                  {participants[matchIndex * 2].teamName || "Unknown"}
-                </div>
-                <div
-                  className="competitor"
-                  onClick={() =>
-                    handleCompetitorClick(participants[matchIndex * 2 + 1])
-                  }
-                >
-                  {participants[matchIndex * 2 + 1].teamName || "Unknown"}
-                </div>
-                {roundIndex !== totalRounds - 1 && (
-                  <div
-                    className="connector"
-                    style={{ "--round": roundIndex + 1 }}
-                  ></div>
-                )}
-              </div>
-            ))}
-          </div>
-        ))
-      ) : (
-        <div>No Matches / No Enrolled Users yet</div>
-      )}
-      {isTeamPopupOpen && (
+    <div className="brackets-container">
+      <Bracket rounds={rounds} />
+      {isPopupOpen && selectedTeam && (
         <TeamUserListPopup
-          teamName={selectedTeam.teamName || "Unknown Team"}
+          teamName={selectedTeam.teamName}
           players={selectedTeam.players}
           onClose={handlePopupClose}
         />
       )}
+      <h1>Competing Teams</h1>
+      <div className="team-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Team Name</th>
+              <th>Number of Players</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {staticParticipants.map((team) => (
+              <tr key={team.teamName}>
+                <td>{team.teamName}</td>
+                <td>{team.players.length}</td>
+                <td>
+                  <button onClick={() => handleTeamClick(team.teamName)}>
+                    View Players
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
