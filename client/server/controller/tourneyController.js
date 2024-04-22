@@ -835,7 +835,7 @@ images.set('basketball',"https://static.owayo-cdn.com/newhp/img/magazin/basketba
 images.set('valorant',"https://m.media-amazon.com/images/M/MV5BNmNhM2NjMTgtNmIyZC00ZmVjLTk4YWItZmZjNGY2NThiNDhkXkEyXkFqcGdeQXVyODU4MDU1NjU@._V1_FMjpg_UX1000_.jpg")
 
 
-const getRandomTournaments = (tournament) => {
+const getRandomTournaments = (tournaments) => {
   // Shuffle array using Durstenfeld shuffle algorithm for randomization
   for (let i = tournaments.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -852,7 +852,7 @@ const getRandomTournaments = (tournament) => {
     UUID: tournament.UUID,
     title: tournament.title,
     description: tournament.description,
-    images: images.get(tournament.category)
+    image: images.get(tournament.category)
   }));
 
 
