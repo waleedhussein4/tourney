@@ -1,0 +1,134 @@
+#Purchase {
+  display: flex;
+  flex-direction: column;
+  color: white;
+  height: 100%;
+}
+
+#Purchase .container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1em;
+  align-items: center;
+  background-color: black;
+  flex: 1;
+  padding: 2em;
+}
+
+#Purchase .purchase-screen {
+  border: 2px solid white;
+  padding: 1em;
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  width: 70%;
+  gap: 2em;
+}
+
+#Purchase .user-input {
+  flex: 2;
+  padding: 0.5em;
+  display: flex;
+  flex-direction: column;
+}
+
+#Purchase .user-input h3 {
+  text-align: center;
+  margin-bottom: 1.5em;
+  font-size: 1rem;
+}
+
+#Purchase .input-fields {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1em;
+}
+
+#Purchase .input-fields input {
+  padding: 0.3em;
+  border: none;
+}
+
+#Purchase .input-name {
+  width: 100%;
+  display: flex;
+  gap: 0.5em;
+}
+
+#Purchase .input-name * {
+  flex: 1;
+}
+
+#Purchase .input-creditCard {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+#Purchase #creditCardType {
+  width: 15%;
+  background-color: white;
+  padding: 0.3em;
+  color: black;
+  user-select: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-right: 2px solid black;
+}
+
+#Purchase #input-creditCardNumber {
+  flex: 75%;
+}
+
+#Purchase #input-ccv {
+  width: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-left: 2px solid black;
+}
+
+#Purchase .info {
+  flex: 1;
+  padding: 0.5em;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start
+}
+
+#Purchase .info h3 {
+  text-align: center;
+  margin-bottom: 1.5em;
+  font-size: 1rem;
+}
+
+#Purchase .info .item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+#Purchase .info .item-name {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+#Purchase #submit {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  text-transform: uppercase;
+  transition: all 0.2s ease-in-out;
+  background-color: #28a745;
+  color: #fff;
+  margin-top: auto;
+}
+
+#Purchase #submit:hover {
+  background-color: #ddd;
+}
