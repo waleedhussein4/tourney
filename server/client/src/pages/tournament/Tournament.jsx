@@ -93,11 +93,20 @@ function Tournament() {
       });
   };
 
+  const fetchTournamentCategories = async () => {
+    await fetch('http://localhost:2000/api/tournement/getTournamentCategories')
+    .then(res => res.json())
+    .then(data => {
+      console.log(data);
+    })
+  }
+
   useEffect(() => {
     fetchTournamentData();
     if(loggedIn) {
       fetchTeams();
     }
+    fetchTournamentCategories();
   }, []);
 
   function displayJoinPopup() {
@@ -469,7 +478,7 @@ function Tournament() {
             </div>
 
             <div className="tournament-content">
-              {tournament.type === "brackets" ? (
+              {tournament.type === "battle royale" ? (
                 <Brackets tournament={tournament} />
               ) : (
                 <BattleRoyale tournament={tournament} />

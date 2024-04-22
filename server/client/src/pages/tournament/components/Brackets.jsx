@@ -170,7 +170,7 @@ const Brackets = () => {
           <thead>
             <tr>
               <th>Team Name</th>
-              <th>Number of Players</th>
+              {/* <th>Number of Players</th> */}
               <th>Details</th>
             </tr>
           </thead>
@@ -178,7 +178,7 @@ const Brackets = () => {
             {staticParticipants.map((team) => (
               <tr key={team.teamName}>
                 <td>{team.teamName}</td>
-                <td>{team.players.length}</td>
+                {/* <td>{team.players.length}</td> */}
                 <td>
                   <button onClick={() => handleTeamClick(team.teamName)}>
                     View Players
