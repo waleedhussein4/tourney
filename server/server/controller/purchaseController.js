@@ -19,8 +19,10 @@ async function getProductById(productId) {
 }
 
 const getProducts = async (req, res) => {
+  console.log('Fetching products...')
   try {
     const products = await Product.find({}).select('id name description price -_id');
+    console.log('Products:', products)
     return res.status(200).json(products); // Send the products as JSON response
   } catch (error) {
     console.error('Error occurred while fetching products:', error);
