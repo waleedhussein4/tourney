@@ -205,3 +205,6 @@
     display: flex;
     align-items: center;
   }
+  #Host .additionalInfo{
+    display: flex;
+  }
