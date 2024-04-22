@@ -43,6 +43,15 @@ export default function Host() {
   const [categories , setCategories] = useState([]);
   const [selectedEntryError , setSelectedEntryError]= useState(false);
   const [isValidated2 , setIsValidated2] = useState(true);
+  const [titleError , setTitleError]= useState(false);
+  const [titleVal , setTitleVal] = useState('');
+  const titleRef = useRef(null)
+  const handleTitleChange = (e)=>{
+    setTitleVal(e.target.value);
+    setTitleError(false);
+    titleRef.current.style.border = "";
+  }
+  
   const handleAddInfo = () => {
     if (infoCounter <= 5) {
       const newInfo = (
@@ -254,6 +263,10 @@ export default function Host() {
       setIsValidated2(false);
       
     }
+    if(titleVal ===""){
+      setTitleError(true);
+      titleRef.current.style.border = "2px solid red";
+    }
   };
   return (
     <div id="Host">
@@ -306,6 +319,12 @@ export default function Host() {
             </div>
             <hr className="custom-line" />
             <div id="specification" style={{ display: specIsDisplayed ? 'block' : 'none' }}>
+            <div className="form-group">
+                <h2>Title:</h2>
+              <span id="teamTypeError" style={{ display: titleError ? 'block' : 'none' }}>
+                   Please fill out this field</span>
+                <input type="text" ref={titleRef} onChange={handleTitleChange} value={titleVal} placeholder="Please add a title"/>
+                </div>
               <div className="form-group">
                <div id="divDesc"> <h2>Description:</h2>(up to 200 characters)</div>
               <span id="teamTypeError" style={{ display: describeError ? 'block' : 'none' }}>
