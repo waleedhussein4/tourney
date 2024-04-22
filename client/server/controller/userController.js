@@ -93,19 +93,19 @@ const paymentProcess = async (req, res) => {
 
 // become host route that updates isHost to true
 const becomeHost = async (req, res) => {
-  // get the user id from the token
  
   try {
     console.log("in try for become host");
     // find the user
     const user = await User.findById(req.user);
-    // update the user
+    console.log(user.isHost, "user.isHost")
+
     user.isHost = true;
     await user.save();
-    return res.status(200);
+
+    res.status(200).json({ message: "Success" })
   } catch (error) {
-    return res.status(400).json({ error: error.message });
-    console.log("error");
+    res.status(400).json({ error: error.message });
   }
 };
 
