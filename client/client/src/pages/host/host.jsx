@@ -56,6 +56,7 @@ export default function Host() {
 
 
   useEffect(() => {
+    console.log('hi')
     const checkHostStatus = async () => {
       try {
         const response = await fetch('http://localhost:2000/api/user/isHost', { credentials: 'include' });
@@ -75,7 +76,7 @@ export default function Host() {
     };
 
     checkHostStatus();
-  }, [navigate]);
+  }, []);
 
 
   const handleTitleChange = (e) => {
@@ -192,6 +193,7 @@ export default function Host() {
     }
   };
   useEffect(() => {
+    if(isLoading) return;
     const fetchCategories = async () => {
       try {
         const response = await fetch("http://localhost:2000/api/tournement/getTournamentCategories");
@@ -207,7 +209,7 @@ export default function Host() {
     };
 
     fetchCategories();
-  }, []);
+  }, [isLoading]);
   const handleMaxParticipants = (event) => {
     setMaxParticipants(event.target.value);
     setParticipantsError(false);
@@ -216,6 +218,7 @@ export default function Host() {
   };
 
   useEffect(() => {
+    if(isLoading) return;
     if (!isValidated) {
       maxParticipantsRef.current.style.border = '2px solid red';
       const timer = setTimeout(() => {
@@ -225,6 +228,7 @@ export default function Host() {
       maxParticipantsRef.current.style.border = '';
     }
   }, [isValidated]);
+
   const handleEntryFeeChange = (event) => {
     setEntryFee(event.target.value);
     setEntryFeeError(false);
@@ -328,196 +332,200 @@ export default function Host() {
     }
   };
   return (
+    <>
     {
-      isLoading?<h1>Loading...</h1>
-        ; <div id="Host">
-    <Nav />
-    <div id="container">
-      <div className="content-container">
-        <h1>Create a Tournament</h1>
-        <div id="page-description">
-          Create and manage thrilling tournaments on our platform. Choose between classic bracket-style tournaments or action-packed battle royals. Customize rules, seeding, and formats for an unforgettable gaming experience!
-        </div>
-        <hr className="custom-line" />
-        <div id="btnTournament">
-          <button
-            id="createTournament"
-            onClick={handleClick}
-            style={{ display: btnIsDisplayed ? "block" : "none" }}
-          >
-            Press here to create your tournament
-          </button>
-        </div>
-      </div>
-      <div id="main" style={{ display: isDisplayed ? "block" : "none" }}>
-        <form onSubmit={handleSubmit}>
-          <div id="type">
-            <h2>Choose tourney type</h2>
-            <div id="chooseType">
-              <label>
-                Bracket:
-                <input
-                  type="radio"
-                  id="Bracket"
-                  name="type"
-                  value="Bracket"
-                  checked={selectedType === "Bracket"}
-                  onChange={handleTypeChange}
-                />
-              </label>
-              <label>
-                Battle Royale:
-                <input
-                  type="radio"
-                  id="battleRoyale"
-                  name="type"
-                  value="BattleRoyale"
-                  checked={selectedType === "BattleRoyale"}
-                  onChange={handleTypeChange}
-                />
-              </label>
+      isLoading
+      ? <h1>Loading...</h1>
+      : <div id="Host">
+        <Nav />
+        <div id="container">
+          <div className="content-container">
+            <h1>Create a Tournament</h1>
+            <div id="page-description">
+              Create and manage thrilling tournaments on our platform. Choose between classic bracket-style tournaments or action-packed battle royals. Customize rules, seeding, and formats for an unforgettable gaming experience!
             </div>
-          </div>
-          <hr className="custom-line" />
-          <div id="specification" style={{ display: specIsDisplayed ? 'block' : 'none' }}>
-            <div className="form-group">
-              <h2>Title:</h2>
-              <span id="teamTypeError" style={{ display: titleError ? 'block' : 'none' }}>
-                Please fill out this field</span>
-              <input type="text" ref={titleRef} onChange={handleTitleChange} value={titleVal} placeholder="Please add a title" />
-            </div>
-            <div className="form-group">
-              <div id="divDesc"> <h2>Description:</h2>(up to 200 characters)</div>
-              <span id="teamTypeError" style={{ display: describeError ? 'block' : 'none' }}>
-                Please fill out this field</span>
-              <textarea ref={describeRef} onChange={handleDescribeChange} value={describeVal} placeholder="Please describe your tournament.
-Include any unique rules, what participants can expect, and why they should join. Be as detailed as possible to attract the right participants."></textarea>
-              {describeError2 && <p style={{ color: 'red' }}>Maximum word limit exceeded (200 characters).</p>}
-            </div>
-            <hr
-              className="custom-line"></hr>
-            <div className="form-group">
-              <h2>Choose category:</h2>
-              <span id="teamTypeError" style={{ display: selectGameError ? 'block' : 'none' }}>
-                Please fill out this field</span>
-              <select
-                ref={selectedGameRef}
-                id="selectGame"
-                name="game"
-                defaultValue=""
-                value={selectedGame}
-                onChange={handleSelectChange}
+            <hr className="custom-line" />
+            <div id="btnTournament">
+              <button
+                id="createTournament"
+                onClick={handleClick}
+                style={{ display: btnIsDisplayed ? "block" : "none" }}
               >
-                <option value="" disabled hidden>Select a category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                  </option>
-                ))}
-              </select>
+                Press here to create your tournament
+              </button>
             </div>
-            <div className="form-group" id="participantNumber" style={{ display: typeSpec ? 'none' : 'block' }}>
-              <h2>Maximum Number of Participants:</h2>
-              <span id="teamTypeError" style={{ display: participantsError ? 'block' : 'none' }}>
-                Please fill out this field
-              </span>
-              <input type="number" id="capacity" name="capacity" value={maxParticipants} onChange={handleMaxParticipants} ref={maxParticipantsRef} min={0} />
-            </div>
-            <div className="form-group" id="bracketNumber" style={{ display: typeSpec ? 'block' : 'none' }}>
-              <h2>Number of brackets:</h2>
-              <span id="teamTypeError" style={{ display: bracketsError ? 'block' : 'none' }}>
-                Please fill out this field
-              </span>
-              <select ref={bracketRef} id="selectBracket" name="nbofbrackets" defaultValue="" onChange={handleNbBracketsChange}>
-                <option value="" disabled hidden>Select a number</option>
-                <option value="2">2</option>
-                <option value="4">4</option>
-                <option value="8">8</option>
-                <option value="16">16</option>
-                <option value="32">32</option>
-                <option value="64">64</option>
-                <option value="128">128</option>
-                <option value="256">256</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <h2>Teams size:</h2>
-              <span id="teamTypeError" style={{ display: teamTypeError ? 'block' : 'none' }}>
-                Please fill out this field
-              </span>
-              <input type="number" ref={teamTypeRef} defaultValue="" value={teamSize} onChange={handleTeamChange} min={0} />
-            </div>
-
-            <div className="form-group">
-              <h2>Entry fee ($) {stringPerTeam}:</h2>
-              <span id="teamTypeError" style={{ display: entryFeeError ? 'block' : 'none' }}>
-                Please fill out this field</span>
-              <input type="number" id="entryFee" name="entryFee" value={entryFee} onChange={handleEntryFeeChange} ref={entryFeeRef} min={0} />
-            </div>
-
-            <div className="form-group" style={{ display: typeSpec ? 'block' : 'none' }}>
-              <h2>Winner Prize:</h2>
-              <span id="teamTypeError" style={{ display: winnerPrizeError ? 'block' : 'none' }}>
-                Please fill out this field</span>
-              <input type="number" id="earning" name="earnings" placeholder="Enter a prize" value={winnerPrize} onChange={handleWinningPrize} ref={winnerPrizeRef} min={0} />
-            </div>
-            <div ref={divPrizeRankRef} id="form-rank" style={{ display: typeSpec ? 'none' : 'block' }}>
-              <h2>Prize by rank :</h2>
-              {inputPrizes.map((input, index) => (
-                <div key={index}>{input}</div>
-              ))}
-              <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddRank() }} value="Add Rank" />
-              <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleRemoveRank() }} value="Remove Rank" />
-              {isValidated ? null : <div id="rankError">if you wish to add more prize rank, you should increase the number of participants above!</div>}
-              {isValidated2 ? null : <div id="rankError">If you wish to continue, you should remove ranks until they equal the number of participants.</div>}
-            </div>
-            <div id="form-app">
-              <h2>Tourney entry mode:</h2>
-              <span id="teamTypeError" style={{ display: selectedEntryError ? 'block' : 'none' }}>
-                Please fill out this field</span>
-              <label>
-                <input type="radio"
-                  id="openField"
-                  name="publicity"
-                  value="Open"
-                  checked={selectedEntryMode === "Open"}
-                  onChange={handleEntry}
-                />
-                Open
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  id="applicationRequired"
-                  name="publicity"
-                  value="Application Required"
-                  checked={selectedEntryMode === "Application Required"}
-                  onChange={handleEntry}
-                />
-                Application Required
-              </label>
-            </div>
-            <div id="form-app" style={{ display: additionalInfoRequired ? 'block' : 'none' }}>
-              <h4>Please fill in any additional questions or information requests you have for applicants</h4>
-              {additionalInfoList.map((input, index) => (
-                <div key={index}>{input}
-                  <button type="button" onClick={() => handleRemoveInfo(index)}>
-                    Delete
-                  </button>
-                </div>
-              ))}
-              <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddInfo() }} value="Add question/request" />
-
-            </div>
-            <footer>
-              <input type="submit" value="Create" />
-            </footer>
           </div>
-        </form>
+          <div id="main" style={{ display: isDisplayed ? "block" : "none" }}>
+            <form onSubmit={handleSubmit}>
+              <div id="type">
+                <h2>Choose tourney type</h2>
+                <div id="chooseType">
+                  <label>
+                    Bracket:
+                    <input
+                      type="radio"
+                      id="Bracket"
+                      name="type"
+                      value="Bracket"
+                      checked={selectedType === "Bracket"}
+                      onChange={handleTypeChange}
+                    />
+                  </label>
+                  <label>
+                    Battle Royale:
+                    <input
+                      type="radio"
+                      id="battleRoyale"
+                      name="type"
+                      value="BattleRoyale"
+                      checked={selectedType === "BattleRoyale"}
+                      onChange={handleTypeChange}
+                    />
+                  </label>
+                </div>
+              </div>
+              <hr className="custom-line" />
+              <div id="specification" style={{ display: specIsDisplayed ? 'block' : 'none' }}>
+                <div className="form-group">
+                  <h2>Title:</h2>
+                  <span id="teamTypeError" style={{ display: titleError ? 'block' : 'none' }}>
+                    Please fill out this field</span>
+                  <input type="text" ref={titleRef} onChange={handleTitleChange} value={titleVal} placeholder="Please add a title" />
+                </div>
+                <div className="form-group">
+                  <div id="divDesc"> <h2>Description:</h2>(up to 200 characters)</div>
+                  <span id="teamTypeError" style={{ display: describeError ? 'block' : 'none' }}>
+                    Please fill out this field</span>
+                  <textarea ref={describeRef} onChange={handleDescribeChange} value={describeVal} placeholder="Please describe your tournament.
+    Include any unique rules, what participants can expect, and why they should join. Be as detailed as possible to attract the right participants."></textarea>
+                  {describeError2 && <p style={{ color: 'red' }}>Maximum word limit exceeded (200 characters).</p>}
+                </div>
+                <hr
+                  className="custom-line"></hr>
+                <div className="form-group">
+                  <h2>Choose category:</h2>
+                  <span id="teamTypeError" style={{ display: selectGameError ? 'block' : 'none' }}>
+                    Please fill out this field</span>
+                  <select
+                    ref={selectedGameRef}
+                    id="selectGame"
+                    name="game"
+                    defaultValue=""
+                    value={selectedGame}
+                    onChange={handleSelectChange}
+                  >
+                    <option value="" disabled hidden>Select a category</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group" id="participantNumber" style={{ display: typeSpec ? 'none' : 'block' }}>
+                  <h2>Maximum Number of Participants:</h2>
+                  <span id="teamTypeError" style={{ display: participantsError ? 'block' : 'none' }}>
+                    Please fill out this field
+                  </span>
+                  <input type="number" id="capacity" name="capacity" value={maxParticipants} onChange={handleMaxParticipants} ref={maxParticipantsRef} min={0} />
+                </div>
+                <div className="form-group" id="bracketNumber" style={{ display: typeSpec ? 'block' : 'none' }}>
+                  <h2>Number of brackets:</h2>
+                  <span id="teamTypeError" style={{ display: bracketsError ? 'block' : 'none' }}>
+                    Please fill out this field
+                  </span>
+                  <select ref={bracketRef} id="selectBracket" name="nbofbrackets" defaultValue="" onChange={handleNbBracketsChange}>
+                    <option value="" disabled hidden>Select a number</option>
+                    <option value="2">2</option>
+                    <option value="4">4</option>
+                    <option value="8">8</option>
+                    <option value="16">16</option>
+                    <option value="32">32</option>
+                    <option value="64">64</option>
+                    <option value="128">128</option>
+                    <option value="256">256</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <h2>Teams size:</h2>
+                  <span id="teamTypeError" style={{ display: teamTypeError ? 'block' : 'none' }}>
+                    Please fill out this field
+                  </span>
+                  <input type="number" ref={teamTypeRef} defaultValue="" value={teamSize} onChange={handleTeamChange} min={0} />
+                </div>
+
+                <div className="form-group">
+                  <h2>Entry fee ($) {stringPerTeam}:</h2>
+                  <span id="teamTypeError" style={{ display: entryFeeError ? 'block' : 'none' }}>
+                    Please fill out this field</span>
+                  <input type="number" id="entryFee" name="entryFee" value={entryFee} onChange={handleEntryFeeChange} ref={entryFeeRef} min={0} />
+                </div>
+
+                <div className="form-group" style={{ display: typeSpec ? 'block' : 'none' }}>
+                  <h2>Winner Prize:</h2>
+                  <span id="teamTypeError" style={{ display: winnerPrizeError ? 'block' : 'none' }}>
+                    Please fill out this field</span>
+                  <input type="number" id="earning" name="earnings" placeholder="Enter a prize" value={winnerPrize} onChange={handleWinningPrize} ref={winnerPrizeRef} min={0} />
+                </div>
+                <div ref={divPrizeRankRef} id="form-rank" style={{ display: typeSpec ? 'none' : 'block' }}>
+                  <h2>Prize by rank :</h2>
+                  {inputPrizes.map((input, index) => (
+                    <div key={index}>{input}</div>
+                  ))}
+                  <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddRank() }} value="Add Rank" />
+                  <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleRemoveRank() }} value="Remove Rank" />
+                  {isValidated ? null : <div id="rankError">if you wish to add more prize rank, you should increase the number of participants above!</div>}
+                  {isValidated2 ? null : <div id="rankError">If you wish to continue, you should remove ranks until they equal the number of participants.</div>}
+                </div>
+                <div id="form-app">
+                  <h2>Tourney entry mode:</h2>
+                  <span id="teamTypeError" style={{ display: selectedEntryError ? 'block' : 'none' }}>
+                    Please fill out this field</span>
+                  <label>
+                    <input type="radio"
+                      id="openField"
+                      name="publicity"
+                      value="Open"
+                      checked={selectedEntryMode === "Open"}
+                      onChange={handleEntry}
+                    />
+                    Open
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      id="applicationRequired"
+                      name="publicity"
+                      value="Application Required"
+                      checked={selectedEntryMode === "Application Required"}
+                      onChange={handleEntry}
+                    />
+                    Application Required
+                  </label>
+                </div>
+                <div id="form-app" style={{ display: additionalInfoRequired ? 'block' : 'none' }}>
+                  <h4>Please fill in any additional questions or information requests you have for applicants</h4>
+                  {additionalInfoList.map((input, index) => (
+                    <div key={index}>{input}
+                      <button type="button" onClick={() => handleRemoveInfo(index)}>
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                  <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddInfo() }} value="Add question/request" />
+
+                </div>
+                <footer>
+                  <input type="submit" value="Create" />
+                </footer>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
-    </div>
-  </div> }
+    }
+    </>
   )
 }
 
