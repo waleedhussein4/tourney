@@ -93,19 +93,32 @@ const paymentProcess = async (req, res) => {
 
 // become host route that updates isHost to true
 const becomeHost = async (req, res) => {
- 
   try {
-    console.log("in try for become host");
-    // find the user
-    const user = await User.findById(req.user);
-    console.log(user.isHost, "user.isHost")
-    user.credits -=20;
-    user.isHost = true;
-    await user.save();
+      console.log("in try for become host");
+      // Find the user by ID stored in req.user
+      const user = await User.findById(req.user);
+      console.log(user.isHost, "user.isHost");
 
-    res.status(200).json({ message: "Success" })
+      // Check if the user already is a host to prevent unnecessary operations
+      if (user.isHost) {
+          return res.status(400).json({ message: "You are already a host." });
+      }
+
+      // Check if the user has enough credits
+      if (user.credits < 20) {
+          return res.status(400).json({ message: "Not enough credits to become a host." });
+      }
+
+      // Deduct 20 credits and set as host
+      user.credits -= 20;  // Deduct the credits
+      user.isHost = true;  // Set the user as a host
+      await user.save();  // Save the updated user object to the database
+
+      // Respond with success
+      res.status(200).json({ message: "Congratulations! You are now a Tourney Host!" });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+      console.error("Error in becoming host:", error);
+      res.status(500).json({ error: error.message });
   }
 };
 
@@ -125,4 +138,21 @@ const profile = async (req, res) => {
   }
 }
 
-module.exports = { signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile }
+const getisHost = async (req, res) => {
+
+  try {
+      // Assuming `req.user.id` is available and contains the user's ID
+      const user = await User.findById(req.user);
+
+    console.log(user.isHost)
+
+      // If the user is found and the isHost property exists
+      return res.json({ isHost: user.isHost }); 
+      
+  } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: "Error accessing user data" });
+  }
+}
+
+module.exports = { signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile, getisHost }
