@@ -14,16 +14,17 @@ function Manage() {
   const navigate = useNavigate();
 
   const [tournament, setTournament] = useState({});
+  const [tournamentType, setTournamentType] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchTournamentData = async () => {
     const URL = `http://localhost:2000/api/tournement/tournament/manage`
     await fetch(
       URL +
-        "?" +
-        new URLSearchParams({
-          UUID: UUID,
-        }),
+      "?" +
+      new URLSearchParams({
+        UUID: UUID,
+      }),
       {
         method: "GET",
         headers: {
@@ -35,6 +36,7 @@ function Manage() {
       .then((res) => res.json())
       .then((data) => {
         setTournament(data);
+        setTournamentType(data.type);
         setIsLoading(false);
         console.log(data)
       });
@@ -44,7 +46,7 @@ function Manage() {
     fetchTournamentData();
   }, []);
 
-  
+
   function formatDate(dateString) {
     const date = new Date(dateString);
 
@@ -71,9 +73,9 @@ function Manage() {
   function EditButton({ onclick }) {
     return (
       <>
-        { tournament.hasStarted
-        ? <div className="pencil-placeholder"></div>
-        : <img className='pencil' src={pencil} onClick={onclick} />
+        {tournament.hasStarted
+          ? <div className="pencil-placeholder"></div>
+          : <img className='pencil' src={pencil} onClick={onclick} />
         }
       </>
     )
@@ -97,11 +99,11 @@ function Manage() {
           title: newTitle,
         }),
       })
-      .then((res) => {
-        if (res.ok) {
-          navigate(0)
-        }
-      })
+        .then((res) => {
+          if (res.ok) {
+            navigate(0)
+          }
+        })
     }
   }
 
@@ -145,27 +147,60 @@ function Manage() {
   }
 
   const handleEditDescription = async () => {
-    const newDescription = prompt('Enter new description:');
+    const newDescription = document.getElementById('newDescription').value;
+    const popup = document.getElementById('editDescriptionPopup');
+    popup.remove();
 
-    if (newDescription) {
-      const URL = `http://localhost:2000/api/tournement/tournament/editDescription`
-      await fetch(URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          UUID: UUID,
-          description: newDescription,
-        }),
-      })
+    const URL = `http://localhost:2000/api/tournement/tournament/editDescription`
+    await fetch(URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        UUID: UUID,
+        description: newDescription,
+      }),
+    })
       .then((res) => {
         if (res.ok) {
           navigate(0)
         }
       })
-    }
+  }
+
+  const handleEditDescriptionInputChange = () => {
+    return
+  }
+
+  const showEditDescriptionPopup = () => {
+    let popup = document.createElement('div');
+    popup.id = 'editDescriptionPopup';
+    popup.classList.add('popup');
+
+    let h2 = document.createElement('h2');
+    h2.innerHTML = 'Edit Description';
+    let input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'newDescription';
+    input.onchange = handleEditDescriptionInputChange
+    let button = document.createElement('button');
+    button.innerHTML = 'Confirm';
+    button.onclick = handleEditDescription;
+    let cancel = document.createElement('button');
+    cancel.innerHTML = 'Cancel';
+    cancel.onclick = () => popup.remove();
+    let error = document.createElement('span')
+    error.classList.add('error')
+
+    popup.appendChild(h2);
+    popup.appendChild(input);
+    popup.appendChild(button);
+    popup.appendChild(cancel);
+    popup.appendChild(error);
+
+    document.getElementById('Manage').appendChild(popup);
   }
 
   const handleEditStartDate = async () => {
@@ -186,11 +221,11 @@ function Manage() {
           startDate: newStartDate,
         }),
       })
-      .then((res) => {
-        if (res.ok) {
-          navigate(0)
-        }
-      })
+        .then((res) => {
+          if (res.ok) {
+            navigate(0)
+          }
+        })
     }
   }
 
@@ -262,11 +297,11 @@ function Manage() {
           endDate: newEndDate,
         }),
       })
-      .then((res) => {
-        if (res.ok) {
-          navigate(0)
-        }
-      })
+        .then((res) => {
+          if (res.ok) {
+            navigate(0)
+          }
+        })
     }
   }
 
@@ -319,12 +354,71 @@ function Manage() {
     document.getElementById('Manage').appendChild(popup);
   }
 
+  const showPostUpdatePopup = () => {
+    let popup = document.createElement('div');
+    popup.id = 'postUpdatePopup';
+    popup.classList.add('popup');
+
+    let h2 = document.createElement('h2');
+    h2.innerHTML = 'Post Update';
+    let input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'newUpdate';
+    let button = document.createElement('button');
+    button.innerHTML = 'Confirm';
+    button.onclick = handlePostUpdate;
+    let cancel = document.createElement('button');
+    cancel.innerHTML = 'Cancel';
+    cancel.onclick = () => popup.remove();
+    let error = document.createElement('span')
+    error.classList.add('error')
+
+    popup.appendChild(h2);
+    popup.appendChild(input);
+    popup.appendChild(button);
+    popup.appendChild(cancel);
+    popup.appendChild(error);
+
+    document.getElementById('Manage').appendChild(popup);
+  }
+
+  const handlePostUpdate = async () => {
+    const newUpdate = document.getElementById('newUpdate').value;
+    if (newUpdate.length < 1) {
+      document.querySelector('#postUpdatePopup .error').innerText = 'You must enter an update';
+      return
+    }
+
+    const popup = document.getElementById('postUpdatePopup');
+    popup.remove();
+
+    if (newUpdate) {
+      const URL = `http://localhost:2000/api/tournement/tournament/postUpdate`
+      await fetch(URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          UUID: UUID,
+          update: newUpdate,
+        }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            navigate(0)
+          }
+        })
+    }
+  }
+
   function showButton(event) {
     console.log(event.target)
     let buttons = event.target.querySelectorAll('.buttonsWrapper button')
     Array.from(buttons).forEach(btn => btn.style.display = 'inline-block')
   }
-  
+
   function hideButton(event) {
     console.log(event.target)
     let buttons = event.target.querySelectorAll('.buttonsWrapper button')
@@ -356,9 +450,9 @@ function Manage() {
     let popup = document.createElement('div');
     popup.id = 'viewApplicationPopup';
     popup.classList.add('popup');
-    // it should show the application data with a button to accept or reject the application
-    // show the application data
-    const application = tournament.applications[event.target.parentElement.parentElement.getAttribute('key')];
+
+    const parent = event.target.parentElement.parentElement
+    const application = tournament.applications.map(app => app.UUID === parent.dataset.uuid ? app : null).filter(app => app !== null)[0]
     console.log(application)
 
     let h2 = document.createElement('h2');
@@ -370,6 +464,227 @@ function Manage() {
     let cancel = document.createElement('button');
     cancel.innerHTML = 'Cancel';
     cancel.onclick = () => popup.remove();
+    let buttons = document.createElement('div');
+    buttons.classList.add('buttons');
+    buttons.appendChild(button);
+    buttons.appendChild(button2);
+    buttons.appendChild(cancel);
+
+    let content = document.createElement('div');
+    content.classList.add('content');
+    content.innerHTML = `
+      <p>${application.teamName}</p>
+      <ul>
+        ${application.application.map(app => `<li>${app.label}: ${app.input}</li>`).join('')}
+      </ul>
+    `
+    popup.appendChild(h2);
+    popup.appendChild(content)
+    popup.appendChild(buttons);
+    document.getElementById('Manage').appendChild(popup);
+  }
+
+  const handleAcceptApplication = async (event) => {
+    const parent = event.target.parentElement.parentElement
+    const application = tournament.applications.map(app => app.UUID === parent.dataset.uuid ? app : null).filter(app => app !== null)[0]
+    const uuid = application.UUID
+    const URL = `http://localhost:2000/api/tournement/tournament/acceptApplication`
+    await fetch(URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        tournamentUUID: UUID,
+        applicationUUID: uuid,
+      }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          navigate(0)
+        }
+      })
+  }
+
+  const handleRejectApplication = async (event) => {
+    const parent = event.target.parentElement.parentElement
+    const application = tournament.applications.map(app => app.UUID === parent.dataset.uuid ? app : null).filter(app => app !== null)[0]
+    const uuid = application.UUID
+    const URL = `http://localhost:2000/api/tournement/tournament/rejectApplication`
+    await fetch(URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        tournamentUUID: UUID,
+        applicationUUID: uuid,
+      }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          navigate(0)
+        }
+      })
+  }
+
+  const SoloParticipants = () => {
+    return (
+      <>
+        {
+          tournament.enrolledUsers.map((participant, i) =>
+            <div className='participant' key={i}>
+              <span className='name'>
+                {participant.username}
+              </span>
+              <span className="score">
+                Score: {participant.score}
+              </span>
+              <span className="eliminationStatus">
+                {participant.eliminated ? 'Eliminated' : 'Active'}
+              </span>
+            </div>
+          )
+        }
+      </>
+    )
+  }
+
+  const TeamParticipants = () => {
+    return (
+      <>
+        {
+          tournament.enrolledTeams.map((team, i) =>
+            <div className='participant' key={i}>
+              <span className='name'>
+                {team.teamName}
+              </span>
+              <span className="score">
+                Score: {team.score}
+              </span>
+              <span className="eliminationStatus">
+                {team.eliminated ? 'Eliminated' : 'Active'}
+              </span>
+            </div>
+          )
+        }
+      </>
+    )
+  }
+
+  const handleEditTeamParticipants = async () => {
+    const popup = document.getElementById('editParticipantsPopup');
+    popup.remove();
+
+    const URL = `http://localhost:2000/api/tournement/editTeamParticipants`
+    await fetch(URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        UUID: UUID,
+        participants: tournament.enrolledTeams,
+      }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          navigate(0)
+        }
+      })
+  }
+
+  function editTeam(team) {
+    // Here you can implement your logic to edit the team's score and elimination status
+    const newScore = prompt(`Enter new score for ${team.teamName}:`, team.score);
+    const newEliminated = confirm(`Is ${team.teamName} eliminated?`);
+
+    // Update team object with new values
+    team.score = parseInt(newScore);
+    team.eliminated = newEliminated;
+
+    // remove the popup
+    document.getElementById('editParticipantsPopup').remove();
+
+    // Re-render teams with updated data
+    showEditTeamParticipantsPopup(); 
+  }
+
+  const showEditTeamParticipantsPopup = () => {
+    console.log(tournament.enrolledTeams)
+    let popup = document.createElement('div');
+    popup.id = 'editParticipantsPopup';
+    popup.classList.add('popup');
+
+    let h2 = document.createElement('h2');
+    h2.innerHTML = 'Edit Participants';
+
+    const teamsContainer = document.createElement('div');
+    teamsContainer.classList.add('teams-container');
+
+    tournament.enrolledTeams.forEach(team => {
+      const teamDiv = document.createElement('div');
+      teamDiv.classList.add('team');
+
+      const nameDiv = document.createElement('div');
+      nameDiv.classList.add('team-name');
+      nameDiv.textContent = team.teamName;
+
+      const infoDiv = document.createElement('div');
+      infoDiv.classList.add('team-info');
+      infoDiv.textContent = `Score: ${team.score}, Eliminated: ${team.eliminated ? 'Yes' : 'No'}`;
+
+      const editButton = document.createElement('button');
+      editButton.textContent = 'Edit';
+      editButton.classList.add('edit-button');
+      editButton.onclick = () => editTeam(team);
+
+      teamDiv.appendChild(nameDiv);
+      teamDiv.appendChild(infoDiv);
+      teamDiv.appendChild(editButton);
+
+      teamsContainer.appendChild(teamDiv);
+    });
+
+    const confirmButton = document.createElement('button');
+    confirmButton.textContent = 'Confirm';
+    confirmButton.classList.add('confirm-button');
+    confirmButton.onclick = () => handleEditTeamParticipants();
+
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Cancel';
+    cancelButton.classList.add('cancel-button');
+    cancelButton.onclick = () => popup.remove();
+
+    popup.appendChild(h2);
+    popup.appendChild(teamsContainer);
+    popup.appendChild(confirmButton);
+    popup.appendChild(cancelButton);
+
+    document.getElementById('Manage').appendChild(popup);
+  }
+
+  const Applications = () => {
+    if (tournament.applications.length === 0) {
+      return <span>No applications yet</span>
+    }
+    return (
+      tournament.applications.map((application, i) =>
+        <div data-uuid={application.UUID} className={`application ${application.UUID}`} onMouseEnter={showButton} onMouseLeave={hideButton} key={i}>
+          <span className='name'>
+            {application.teamName || application.players[0].username}
+          </span>
+          <div className="buttonsWrapper">
+            <button className="viewApplicationButton" onClick={handleViewApplication}>View</button>
+            <button className="acceptApplicationButton" onClick={handleAcceptApplication}>Accept</button>
+            <button className="rejectApplication" onClick={handleRejectApplication}>Reject</button>
+          </div>
+        </div>
+      )
+    )
   }
 
   return (
@@ -377,122 +692,88 @@ function Manage() {
       <Nav />
       <div id="container">
         {isLoading
-        ? (
-          <h1 className="loadingText">Loading tournament ...</h1>
-        )
-        : (
-          <>
-            <h1>{`${tournament.title}`}</h1>
-            <div className="attributes">
-              {/* <h2>Attributes</h2> */}
-              <div className="attribute editable title">
-                <h3>Title</h3>
-                <div className='content'>{tournament.title}</div>
-                <EditButton onclick={showEditTitlePopup} />
-              </div>
-              <div className="attribute editable description">
-                <h3>Description</h3>
-                <div className='content'>{tournament.description}</div>
-                <EditButton onclick={handleEditDescription} />
-              </div>
-              <div className="attribute category">
-                <h3>Category</h3>
-                <div className='content'>{tournament.category}</div>
-                <div className="pencil-placeholder"></div>
-              </div>
-              <div className="attribute editable startDate">
-                <h3>Start Date</h3>
-                <div className='content'>{formatDate(tournament.startDate)}</div>
-                <EditButton onclick={showEditStartDatePopup} />
-              </div>
-              <div className="attribute editable endDate">
-                <h3>End Date</h3>
-                <div className='content'>{formatDate(tournament.endDate)}</div>
-                <EditButton onclick={showEditEndDatePopup} />
-              </div>
-              <div className="attribute earnings">
-                <h3>Earnings</h3>
-                <div className='content'>{Object.entries(tournament.earnings).map(([index, value]) => (<div key={index}> {index}: {value} </div>))}</div>
-                <div className="pencil-placeholder"></div>
-              </div>
-              <div className="attribute maxCapacity">
-                <h3>Max Capacity</h3>
-                <div className='content'>{tournament.maxCapacity}</div>
-                <div className="pencil-placeholder"></div>
-              </div>
-              {/* <div className="attribute editable participants">
-                <h3>Participants</h3>
-                <div className='content'>
-                  {
-                    tournament.data.enrolledParticipants.map((participant,i) =>
-                      <div className='participant' onMouseEnter={showButton} onMouseLeave={hideButton} key={i}>
-                        <span className='name'>
-                          {participant.teamName || participant.players[0].username}
-                        </span>
-                        { !tournament.hasStarted &&
-                          <div className="buttonsWrapper">
-                            <button className="removeParticipantButton" onClick={handleRemoveParticipant}>Remove</button>
-                          </div>
-                        } 
-                      </div>
-                    )
-                  }
+          ? (
+            <h1 className="loadingText">Loading tournament ...</h1>
+          )
+          : (
+            <>
+              <h1>{`${tournament.title}`}</h1>
+              <div className="attributes">
+                {/* <h2>Attributes</h2> */}
+                <div className="attribute editable title">
+                  <h3>Title</h3>
+                  <div className='content'>{tournament.title}</div>
+                  <EditButton onclick={showEditTitlePopup} />
                 </div>
-                <div className="pencil-placeholder"></div>
-              </div> */}
-              <div className="attribute editable participants">
-                <h3>Participants</h3>
-                <div className='content'>
-                  {
-                    tournament.data.enrolledParticipants.map((participant,i) =>
-                      <div className='participant' key={i}>
-                        <span className='name'>
-                          {participant.teamName || participant.players[0].username}
-                        </span>
-                      </div>
-                    )
-                  }
+                <div className="attribute editable description">
+                  <h3>Description</h3>
+                  <div className='content'>{tournament.description}</div>
+                  <EditButton onclick={showEditDescriptionPopup} />
                 </div>
-                <div className="pencil-placeholder"></div>
-              </div>
-              <div className="attribute accessibility">
-                <h3>Accessibility</h3>
-                <div className='content'>{tournament.accessibility}</div>
-                <div className="pencil-placeholder"></div>
-              </div>
-              {/* <div className="attribute editable applications">
-                <h3>Applications</h3>
-                <div className='content'>
-                  {
-                    tournament.applications.map((application,i) =>
-                      <div className='application' onMouseEnter={showButton} onMouseLeave={hideButton} key={i}>
-                        <span className='name'>
-                          {application.teamName || application.players[0].username}
-                        </span>
-                        <div className="buttonsWrapper">
-                          <button className="viewApplicationButton" onClick={handleViewApplication}>View</button>
+                <div className="attribute category">
+                  <h3>Category</h3>
+                  <div className='content'>{tournament.category}</div>
+                  <div className="pencil-placeholder"></div>
+                </div>
+                <div className="attribute editable startDate">
+                  <h3>Start Date</h3>
+                  <div className='content'>{formatDate(tournament.startDate)}</div>
+                  <EditButton onclick={showEditStartDatePopup} />
+                </div>
+                <div className="attribute editable endDate">
+                  <h3>End Date</h3>
+                  <div className='content'>{formatDate(tournament.endDate)}</div>
+                  <EditButton onclick={showEditEndDatePopup} />
+                </div>
+                <div className="attribute earnings">
+                  <h3>Earnings</h3>
+                  <div className='content'>{Object.entries(tournament.earnings).map(([index, value]) => (<div key={index}> {index}: {value} </div>))}</div>
+                  <div className="pencil-placeholder"></div>
+                </div>
+                <div className="attribute maxCapacity">
+                  <h3>Max Capacity</h3>
+                  <div className='content'>{tournament.maxCapacity}</div>
+                  <div className="pencil-placeholder"></div>
+                </div>
+                <div className="attribute editable participants">
+                  <h3>Participants</h3>
+                  <div className='content'>
+                    {tournament.enrolledUsers.length === 0 && tournament.enrolledTeams.length > 0 && <TeamParticipants />}
+                    {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length > 0 && <SoloParticipants />}
+                    {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length === 0 && <span>No participants yet</span>}
+                  </div>
+                  <EditButton onclick={tournament.teamSize == 1 ? showEditTeamParticipantsPopup : showEditTeamParticipantsPopup} />
+                </div>
+                <div className="attribute accessibility">
+                  <h3>Accessibility</h3>
+                  <div className='content'>{tournament.accessibility}</div>
+                  <div className="pencil-placeholder"></div>
+                </div>
+                <div className="attribute editable applications">
+                  <h3>Applications</h3>
+                  <div className='content'>
+                    <Applications />
+                  </div>
+                  <div className="pencil-placeholder"></div>
+                </div>
+                <div className="attribute editable updates">
+                  <h3>Updates</h3>
+                  <div className="wrapper">
+                    <div className='content updates-wrapper'>
+                      {tournament.updates.map((update, i) => (
+                        <div key={i}>
+                          <h4>{formatDate(update.date)}</h4>
+                          <p>{update.content}</p>
                         </div>
-                      </div>
-                    )
-                  }
-                </div>
-                <div className="pencil-placeholder"></div>
-              </div> */}
-              <div className="attribute editable updates">
-                <h3>Updates</h3>
-                <div className='content updates-wrapper'>
-                  {tournament.updates.map((update, i) => (
-                    <div key={i}>
-                      <h4>{formatDate(update.date)}</h4>
-                      <p>{update.content}</p>
+                      ))}
                     </div>
-                  ))}
+                    <button className='postUpdateButton' onClick={showPostUpdatePopup}>Post Update</button>
+                  </div>
+                  <div className="pencil-placeholder"></div>
                 </div>
-                <EditButton onclick={() => console.log('edit')} />
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
       </div>
     </div>
   );

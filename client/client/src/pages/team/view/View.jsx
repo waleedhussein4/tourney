@@ -24,7 +24,7 @@ function App() {
     .then(data => {
       setTeam(data)
       setLoadingTeam(false)
-      console.log(data.message)
+      console.log(data)
     })
   }
 
