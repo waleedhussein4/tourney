@@ -1,5 +1,5 @@
 const express = require('express');
-const {signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile} = require('../controller/userController');
+const {signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile, getisHost} = require('../controller/userController');
 const router = express.Router();
 const { auth } = require("../middleware/requireAuth")
 
@@ -22,5 +22,6 @@ router.post("/payment", paymentProcess);
 // become host route that updates isHost to true
 router.post("/becomehost", auth, becomeHost);
 
+router.get('/isHost', auth, getisHost);
 
 module.exports = router;
