@@ -33,7 +33,7 @@ function Nav() {
         <img id="logo-nav" src={LOGO1} alt="Logo" />
       </Link>
       <div id="options">
-        <a href="/become-host">Host</a>
+        <a href="/host">Host</a>
         <a href="/tournaments/">Compete</a>
         <a href="/team/">Teams</a>
         <a href="/credits/">Buy Credits</a>
