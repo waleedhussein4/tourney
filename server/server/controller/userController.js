@@ -99,7 +99,7 @@ const becomeHost = async (req, res) => {
     // find the user
     const user = await User.findById(req.user);
     console.log(user.isHost, "user.isHost")
-
+    user.credits -=20;
     user.isHost = true;
     await user.save();
 
