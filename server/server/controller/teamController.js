@@ -60,6 +60,8 @@ const getTeam = async (req, res) => {
       "username email"
     );
 
+    console.log(team._id)
+
     // check if user is part of team
     if (!team.members.some(member => member._id === req.user)) {
       return res.status(400).json({ message: "User is not part of the team" });
