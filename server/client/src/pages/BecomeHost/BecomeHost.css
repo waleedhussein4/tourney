@@ -1,10 +1,10 @@
-.overall-container {
+#BecomeHost .overall-container {
     text-align: center;
     width: 100%;
     padding-top: 20px;
 }
 
-.become-host-container {
+#BecomeHost .become-host-container {
     margin: 0 auto;
     padding: 20px;
     max-width: 600px;
@@ -12,28 +12,28 @@
     background-color: #fff; /* Adds background color for emphasis */
 }
 
-.title {
+#BecomeHost .title {
     font-size: 24px;
     margin-bottom: 20px;
 }
 
-.highlight {
+#BecomeHost .highlight {
     color: #f0b429;
     font-weight: bold;
 }
 
-.description {
+#BecomeHost .description {
     margin-bottom: 20px;
     font-size: 16px; /* Ensuring readability */
 }
 
-.price-info {
+#BecomeHost .price-info {
     font-size: 18px;
     margin-bottom: 20px;
     font-weight: bold;
 }
 
-.become-host-btn {
+#BecomeHost .become-host-btn {
     background-color: #4CAF50;
     color: white;
     border: none;
@@ -43,6 +43,6 @@
     border-radius: 5px; /* Adds rounded corners for aesthetics */
 }
 
-.become-host-btn:hover {
+#BecomeHost .become-host-btn:hover {
     background-color: #45a049; /* Darker shade on hover for interaction feedback */
 }
