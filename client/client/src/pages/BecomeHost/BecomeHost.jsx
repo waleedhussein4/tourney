@@ -55,27 +55,30 @@ const BecomeHost = () => {
   };
 
   return (
-    <div className="overall-container">
-      <Nav />
-      <div className="become-host-container">
-        <h1 className="title">Become a <span className="highlight">Tourney Host</span> Today!</h1>
-        <p className="description">
-          As a host, you will have the power to create and manage your own tournaments,
-          engage with a large community of gamers, and much more.
-          Step up your game and start your hosting journey now!
-        </p>
-        <p className="price-info">
-          The price: <strong>20 credits</strong>
-        </p>
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          <button onClick={checkCreditsAndBecomeHost} className="become-host-btn">
-            Let's do it!
-          </button>
-        )}
+    <div id="BecomeHost">
+      <div className="overall-container">
+        <Nav />
+        <div className="become-host-container">
+          <h1 className="title">Become a <span className="highlight">Tourney Host</span> Today!</h1>
+          <p className="description">
+            As a host, you will have the power to create and manage your own tournaments,
+            engage with a large community of gamers, and much more.
+            Step up your game and start your hosting journey now!
+          </p>
+          <p className="price-info">
+            The price: <strong>20 credits</strong>
+          </p>
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <button onClick={checkCreditsAndBecomeHost} className="become-host-btn">
+              Let's do it!
+            </button>
+          )}
+        </div>
       </div>
     </div>
+    
   );
 };
 

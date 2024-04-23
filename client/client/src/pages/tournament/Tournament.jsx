@@ -24,6 +24,7 @@ function Tournament() {
   const [tournament, setTournament] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [isHost, setIsHost] = useState(false);
+  const [isJoined, setIsJoined] = useState(false);
   const [applicationAccepted, setApplicationAccepted] = useState(false);
   const [teams, setTeams] = useState([]);
   const [isLoadingTeams, setIsLoadingTeams] = useState(true);
@@ -76,6 +77,7 @@ function Tournament() {
         setTournament(data);
         setIsLoading(false);
         setIsHost(data.isHost);
+        setIsJoined(data.isJoined);
         setApplicationAccepted(data.isAccepted);
         setApplication(data.application);
         setHasApplied(data.hasApplied);
@@ -91,6 +93,7 @@ function Tournament() {
       .then((data) => {
         setTeams(data);
         setIsLoadingTeams(false);
+        console.log(data)
       });
   };
 
@@ -104,8 +107,11 @@ function Tournament() {
 
   useEffect(() => {
     fetchTournamentData();
-    if(loggedIn) {
+    try {
       fetchTeams();
+    }
+    catch (e) {
+      console.log(e);
     }
     fetchTournamentCategories();
   }, []);
@@ -146,6 +152,10 @@ function Tournament() {
     );
   }
 
+  if(tournament.isJoined) {
+    status = <div className="tournament-status">You have joined this tournament</div>;
+  }
+
   let button;
 
   if (!loggedIn) {
@@ -156,7 +166,7 @@ function Tournament() {
     );
   } else if (hasApplied && !applicationAccepted) {
     button = <></>;
-  } else if (!isHost) {
+  } else if (!isHost && !isJoined) {
     if (!tournament.hasStarted && tournament.accessibility === "open") {
       button = (
         <button className="btn btn-primary" onClick={handleJoin}>
@@ -179,7 +189,7 @@ function Tournament() {
       button = <></>;
     }
   }
-  if(isHost) {
+  else if (isHost){
     button = (
       <button
         className="btn btn-manage"

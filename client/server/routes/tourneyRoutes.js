@@ -1,5 +1,5 @@
 const express = require('express');
-const {createTournament, getTournamentById, getAllTournaments, updateTournament, deleteTournament, getTournamentDisplayData, handleApplicationSubmission, handleJoinAsSolo, handleJoinAsTeam, editTitle, editDescription, editStartDate, editEndDate, getManageTournamentDisplayData,getTrendingTournaments, getTournamentCategories,response,updateScore} = require('../controller/tourneyController');
+const {createTournament, getTournamentById, getAllTournaments, updateTournament, deleteTournament, getTournamentDisplayData, handleApplicationSubmission, handleJoinAsSolo, handleJoinAsTeam, editTitle, editDescription, editStartDate, editEndDate, getManageTournamentDisplayData,getTrendingTournaments, getTournamentCategories,updateScores, acceptApplication, rejectApplication, postUpdate, editSoloParticipants, editTeamParticipants} = require('../controller/tourneyController');
 const router = express();
 const { auth, getAuth } = require("../middleware/requireAuth")
 
@@ -45,7 +45,22 @@ router.get('/getTrendingTournaments', getTrendingTournaments)
 router.get('/getTournamentCategories', getTournamentCategories)
 
 
-router.post('/updateScore', updateScore)
+router.post('/tournament/acceptApplication', auth, acceptApplication)
+
+
+router.post('/tournament/rejectApplication', auth, rejectApplication)
+
+
+router.post('/tournament/postUpdate', auth, postUpdate)
+
+
+router.post('/updateScores', auth, updateScores)
+
+
+router.post('/editSoloParticipants', auth, editSoloParticipants)
+
+
+router.post('/editTeamParticipants', auth, editTeamParticipants)
 
 
 //delete
@@ -53,7 +68,7 @@ router.delete('/',deleteTournament);
 
 
 //update
-router.patch('/',updateTournament);
+router.patch('/', updateTournament);
 
 
 module.exports = router;
