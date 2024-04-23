@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
 import '../styles/Brackets.css';
 
@@ -49,112 +49,112 @@ const CustomSeed = ({seed, breakpoint, roundIndex, seedIndex}) => {
 
 const BracketsComponent = ({ tournament }) => {
 
-  tournament.enrolledTeams = [
-    {
-      teamName: "Team 1",
-      players: [
-        {
-          UUID: "9410f264-0bef-4516-b3ea-661c575490f2",
-        },
-        {
-          UUID: "9410f264-0bef-4516-b3ea-661c575492f2",
-        }
-      ],
-      score: 0,
-      eliminated: true
-    },
-    {
-      teamName: "Team 2",
-      players: [
-        {
-          UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
-        },
-        {
-          UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
-        }
-      ],
-      score: 0,
-      eliminated: false
-    },
-    {
-      teamName: "Team 3",
-      players: [
-        {
-          UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
-        },
-        {
-          UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
-        }
-      ],
-      score: 0,
-      eliminated: false
-    },
-    {
-      teamName: "Team 4",
-      players: [
-        {
-          UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
-        },
-        {
-          UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
-        }
-      ],
-      score: 0,
-      eliminated: false
-    },
-    {
-      teamName: "Team 5",
-      players: [
-        {
-          UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
-        },
-        {
-          UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
-        }
-      ],
-      score: 0,
-      eliminated: false
-    },
-    {
-      teamName: "Team 6",
-      players: [
-        {
-          UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
-        },
-        {
-          UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
-        }
-      ],
-      score: 0,
-      eliminated: false
-    },
-    {
-      teamName: "Team 7",
-      players: [
-        {
-          UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
-        },
-        {
-          UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
-        }
-      ],
-      score: 0,
-      eliminated: false
-    },
-    {
-      teamName: "Team 8",
-      players: [
-        {
-          UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
-        },
-        {
-          UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
-        }
-      ],
-      score: 0,
-      eliminated: false
-    }
-  ]
+  // tournament.enrolledTeams = [
+  //   {
+  //     teamName: "Team 1",
+  //     players: [
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3ea-661c575490f2",
+  //       },
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3ea-661c575492f2",
+  //       }
+  //     ],
+  //     score: 0,
+  //     eliminated: true
+  //   },
+  //   {
+  //     teamName: "Team 2",
+  //     players: [
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
+  //       },
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
+  //       }
+  //     ],
+  //     score: 0,
+  //     eliminated: false
+  //   },
+  //   {
+  //     teamName: "Team 3",
+  //     players: [
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
+  //       },
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
+  //       }
+  //     ],
+  //     score: 0,
+  //     eliminated: false
+  //   },
+  //   {
+  //     teamName: "Team 4",
+  //     players: [
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
+  //       },
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
+  //       }
+  //     ],
+  //     score: 0,
+  //     eliminated: false
+  //   },
+  //   {
+  //     teamName: "Team 5",
+  //     players: [
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
+  //       },
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
+  //       }
+  //     ],
+  //     score: 0,
+  //     eliminated: false
+  //   },
+  //   {
+  //     teamName: "Team 6",
+  //     players: [
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
+  //       },
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
+  //       }
+  //     ],
+  //     score: 0,
+  //     eliminated: false
+  //   },
+  //   {
+  //     teamName: "Team 7",
+  //     players: [
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
+  //       },
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
+  //       }
+  //     ],
+  //     score: 0,
+  //     eliminated: false
+  //   },
+  //   {
+  //     teamName: "Team 8",
+  //     players: [
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
+  //       },
+  //       {
+  //         UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
+  //       }
+  //     ],
+  //     score: 0,
+  //     eliminated: false
+  //   }
+  // ]
 
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -221,6 +221,7 @@ const BracketsComponent = ({ tournament }) => {
     return rounds;
   };
 
+  console.log(tournament.enrolledTeams, "tournament.enrolledTeams")
   const rounds = generateRoundsFromTeams(tournament.enrolledTeams);
 
   return (
