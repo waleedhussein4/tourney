@@ -396,9 +396,8 @@ export default function Host() {
                   <div id="divDesc"> <h2>Description:</h2>(up to 200 characters)</div>
                   <span id="teamTypeError" style={{ display: describeError ? 'block' : 'none' }}>
                     Please fill out this field</span>
-                  <textarea ref={describeRef} onChange={handleDescribeChange} value={describeVal} placeholder="Please describe your tournament.
-    Include any unique rules, what participants can expect, and why they should join. Be as detailed as possible to attract the right participants."></textarea>
-                  {describeError2 && <p style={{ color: 'red' }}>Maximum word limit exceeded (200 characters).</p>}
+                  <textarea ref={describeRef} onChange={handleDescribeChange} value={describeVal} placeholder="Please describe your tournament.Include any unique rules, what participants can expect, and why they should join. Be as detailed as possible to attract the right participants."></textarea>
+                  {describeError2 ?<p style={{ color: 'red' }}>Maximum word limit exceeded (200 characters).</p>:<p>{describeVal.length}/200</p>}
                 </div>
                 <hr
                   className="custom-line"></hr>
