@@ -151,7 +151,9 @@ async function deleteTeam() {
 }
 
 async function leaveTeam() {
+  console.log('leaving team')
   const URL = 'http://localhost:2000/api/team/leave/' + paramUUID
+  console.log(URL)
 
   await fetch(URL, {
     method: 'POST',
