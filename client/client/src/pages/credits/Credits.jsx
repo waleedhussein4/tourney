@@ -23,9 +23,9 @@ const Credits = () => {
   }, []);
 
   const handleBuyClick = (creditId) => {
-    // Implement logic to redirect to payment page with credit value
+    
     console.log(`Buying ${creditId} credits`);
-    // edit this based on the payment processing page route
+    
     navigate(`/purchase/${creditId}`);
   };
 
@@ -52,7 +52,7 @@ const Credits = () => {
     <div id="Credits">
       <Nav />
       <div className="credits-page">
-        <h1>Get Credits</h1>
+        <h1>Buy Credits</h1>
         <p>Purchase credits to use on the platform.</p>
         <div className="credit-cards">
           {credits.map((credit) => (
