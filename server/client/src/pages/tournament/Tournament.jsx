@@ -469,12 +469,12 @@ function Tournament() {
                 <p className="tournament-entryFee">
                   Entry Fee: ${tournament.entryFee}
                 </p>
-                <div className="tournament-earnings">
+                {/* <div className="tournament-earnings">
                   Earnings:
                   <p>1st: ${tournament.earnings[1]}</p>
                   <p>2nd: ${tournament.earnings[2]}</p>
                   <p>3rd: ${tournament.earnings[3]}</p>
-                </div>
+                </div> */}
                 <p className="tournament-accessibility">
                   {tournament.accessibility != "open"
                     ? tournament.accessibility.replace(/(^\w|\s\w)/g, (m) =>
