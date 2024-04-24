@@ -40,51 +40,15 @@ const tournamentSchema = new Schema(
         eliminated: { type: Boolean },
       }
     ],
-    // enrolledParticipants: [
-    //   {
-    //     teamName: { type: String },
-    //     players: [
-    //       {
-    //         UUID: {
-    //           type: Schema.Types.String,
-    //           ref: "User"
-    //         },
-    //         score: { type: Number },
-    //         eliminated: { type: Boolean },
-    //       }
-    //     ],
-    //   },
-    // ],
-    rounds: [
-      {
-        title: { type: String },
-        seeds: [
-          {
-            id: { type: Number },
-            teamName: { type: String },
-            players: [
-              {
-                UUID: {
-                  type: Schema.Types.String,
-                  ref: "User"
-                },
-                score: { type: Number },
-                eliminated: { type: Boolean },
-              }
-            ],
-          },
-        ],
-      },
+    matches: [
+      { type: String }
     ],
     entryFee: { type: Number, required: true },
-    earnings: {
-      1: { type: Number },
-      2: { type: Number },
-      3: { type: Number },
-    },
+    earnings: { type: Object },
     maxCapacity: { type: Number, required: true },
     accessibility: { type: String, required: true },
     hasStarted: { type: Boolean },
+    hasEnded: { type: Boolean },
     description: { type: String },
     teamSize: { type: Number },
     acceptedUsers: [
@@ -105,7 +69,6 @@ const tournamentSchema = new Schema(
         content: { type: String },
       },
     ],
-    isHost: { type: Boolean },
     application: [
       {
         name: { type: String },
