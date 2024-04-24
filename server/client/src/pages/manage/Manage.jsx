@@ -892,6 +892,28 @@ function Manage() {
       })
   }
 
+  const Earnings = () => {
+    if (tournament.type === 'brackets') {
+      return (
+        <>
+          {tournament.earnings}
+        </>
+      )
+    }
+    else {
+      return (
+        <>
+          {tournament.earnings.map((earning, i) =>
+            <div key={i}>
+              <span>{i}</span>
+              <span>{earning}</span>
+            </div>
+          )}
+        </>
+      )
+    }
+  }
+
   return (
     <div id="Manage">
       <Nav />
@@ -932,7 +954,7 @@ function Manage() {
                 </div>
                 <div className="attribute earnings">
                   <h3>Earnings</h3>
-                  <div className='content'>{Object.entries(tournament.earnings).map(([index, value]) => (<div key={index}> {index}: {value} </div>))}</div>
+                  <div className='content'><Earnings /></div>
                   <div className="pencil-placeholder"></div>
                 </div>
                 <div className="attribute maxCapacity">
