@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from 'react-router-dom'; //j
 import "./app.css";
 import Nav from "../../components/Nav";
-
+import { AuthContextProvider } from "../../context/AuthContext";
 
 
 export default function Host() {
@@ -56,6 +56,7 @@ export default function Host() {
   const [prizeRankError , setPrizeRankError] = useState(false);
 
   useEffect(() => {
+    console.log("hello");
     console.log('hi')
     const checkHostStatus = async () => {
       try {
@@ -317,23 +318,23 @@ export default function Host() {
     if(selectedType==="Bracket"){
     var formData = {
       title:titleVal,
+      host:data.user,
       description: describeVal,
       type: selectedType,
       category: selectedGame,
       teamSize: teamSize,
       entryFee: entryFee,
-      earnings: {"1": winnerPrize},
       accessibility: selectedEntryMode
     };}
     else{
       var formData = {
         title:titleVal,
+        host:data.user,
         description: describeVal,
         type: selectedType,
         category: selectedGame,
         teamSize: teamSize,
         entryFee: entryFee,
-        earnings: {"1":inputPrizes[0] , "2":inputPrizes[1] , "3":inputPrizes[2]},
         accessibility: selectedEntryMode
       };
     }
