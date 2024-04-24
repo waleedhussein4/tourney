@@ -1,14 +1,12 @@
-/* Home.css */
-
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
 :root {
-  --primary-color: #000000; /* Deep black for background */
-  --accent-color: #1a8a34; /* Dark green for CTAs and highlights */
-  --highlight-color: #2bc44b; /* Lighter green for emphasis */
-  --text-color: #ffffff; /* White for primary text */
-  --subtext-color: #cccccc; /* Light grey for less important text */
-  --animation-duration: 0.5s; /* Standard duration for animations */
+  --primary-color: #000000; 
+  --accent-color: #1a8a34; 
+  --highlight-color: #2bc44b; 
+  --text-color: #ffffff; 
+  --subtext-color: #cccccc; 
+  --animation-duration: 0.5s; 
 }
 
 body, html {
@@ -19,14 +17,14 @@ body, html {
   height: 100%;
   width: 100%;
   overflow-y: auto; /* Scroll vertical */
-  overflow-x: hidden; /* Hide horizontal scroll */
+  overflow-x: hidden; /* Hide horiz scroll */
 }
 
 h1, h2, h3, button {
   font-family: 'Orbitron', sans-serif;
 }
 
-#Home { /* Changed id to match JSX */
+#Home { 
   font-family: 'Roboto', sans-serif;
   color: var(--text-color);
   background-color: var(--primary-color);

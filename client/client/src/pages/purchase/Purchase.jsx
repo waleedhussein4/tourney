@@ -124,12 +124,9 @@ function Purchase() {
   return (
     <div id="Purchase">
       <Nav />
-      { !isLoading && <div className="container">
-
+      {!isLoading && <div className="container">
         <h1>Checkout</h1>
-
         <div className="purchase-screen">
-
           <div className="user-input">
             <h3>Payment</h3>
             <div className="input-fields">
@@ -146,30 +143,33 @@ function Purchase() {
                   value={ccValue}
                   placeholder='Credit Card Number'
                   onChange={e => {
-                    const value = e.target.value
-                    setccValue(formatCreditCard(value))
-                    setccType(getCreditCardType(value))
+                    const value = e.target.value.replace(/\D/g, ''); 
+                    setccValue(formatCreditCard(value)); 
+                    setccType(getCreditCardType(value)); 
                   }}
+                  required
                 />
-                <input id='input-ccv' type="text" placeholder="123" maxLength="3" required />
+                <input id='input-ccv' type="text" placeholder="CCV" maxLength="3" required />
               </div>
             </div>
           </div>
-
           <div className="info">
             <h3>Your item</h3>
             <div className="item-info">
-              <div className='item-name'>{item.name}</div>
-              <div className='item-description'>Amount: {item.amount} credits</div>
-              <div className='item-price'>${item.price}</div>
+              <div className="item-name">{item.name}</div>
+              <div className="item-description">Amount: {item.amount} credits</div>
+              <div className="item-price">Price: ${item.price}</div>
             </div>
-            <button id='submit' onClick={purchaseItem}>Continue</button>
+            <div className="total-highlight">
+              <span>Total Cost: ${item.price}</span>
+            </div>
+            <button id="submit" onClick={purchaseItem}>Continue</button>
           </div>
-
         </div>
-      </div> }
+      </div>}
     </div>
-  )
+  );
+  
 }
 
 export default Purchase
