@@ -44,7 +44,7 @@ function Signup() {
       <div className="container">
         <div className="container-center">
           <form onSubmit={handleSubmit}>
-            <h2>Signup</h2>
+            <h2>Sign up</h2>
             <p>Email</p>
             <input type="text" id="email" placeholder='Enter an email' onChange={(e)=>setEmail(e.target.value)}></input>
             <p>Username</p>
@@ -53,12 +53,12 @@ function Signup() {
             <input type="password" placeholder='Enter a password' id="password" onChange={(e)=>setPassword(e.target.value)}></input>
             <p>Confirm Password</p>
             <input type="password" id="confirmPassword" placeholder='Confirm your password'onChange={(e)=>setConfirmPassword(e.target.value)} ></input>
-            <input type="submit" disabled={isLoading} value="Signup" id='submit'></input>
+            <input type="submit" disabled={isLoading} value="Create Account" id='submit'></input>
             {error && <div className='error'>{error}</div>}
           </form>
         
           <div className="error" ref={myDiv}></div>
-          <span id="account">Already have an account? <a href="/signin/">Login</a></span>
+          <span id="account">Already have an account? <a href="/signin/">Sign In</a></span>
         </div>
       </div>
     </div>

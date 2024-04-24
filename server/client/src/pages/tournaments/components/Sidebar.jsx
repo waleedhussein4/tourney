@@ -36,30 +36,30 @@ function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTour
       <span className='filters-header'>Search</span>
       <form id="filters">
         <div id='filter-search' className="filter" data-name="search">
-          <span className="name">Search</span>
+          <span className="name">Enter Tourney Name / ID</span>
           <input id='searchbar' type="search" placeholder='ID, title...' name='search' />
         </div>
         <div id='filter-category' className="filter" data-name="category">
-          <span className="name">Category</span>
+          <span className="name">Enter Sport / E-Sport</span>
           <input id='filter-category-input' type="text" placeholder='Search' />
           <div id="category-search-results"></div>
         </div>
         <div id='filter-entryFee' className="filter" data-name="entryFee">
-          <span className="name">Entry Fee</span>
+          <span className="name">Set Entry Fee</span>
           <div className="slider"></div>
           <div className="valueDisplay">
             <div className="minInput">
-              <span>Min: </span>
+              <span>Minimum: </span>
               <input className="value-min" />
             </div>
             <div className="maxInput">
-              <span>Max: </span>
+              <span>Maximum: </span>
               <input className="value-max" />
             </div>
           </div>
         </div>
         <div id="filter-type" className="filter" data-name="type">
-          <span className="name">Type</span>
+          <span className="name">Select Tourney Type</span>
           <div className="radio">
             <div className="radio-item">
               <input id='radio-anyType' type="radio" name='type' value="Any" defaultChecked={true} readOnly={true} />
@@ -76,7 +76,7 @@ function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTour
           </div>
         </div>
         <div id="filter-accessibility" className="filter" data-name="accessibility">
-          <span className="name">Accessibility</span>
+          <span className="name">Select Accessibility</span>
           <div className="radio">
             <div className="radio-item">
               <input id='radio-anyAccessibility' type="radio" name='accessibility' value="Any" defaultChecked={true} readOnly={true} />
