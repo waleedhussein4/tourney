@@ -87,10 +87,10 @@ function Manage() {
     return formattedDate;
   }
 
-  function EditButton({ onclick }) {
+  function EditButton({ canBeEditedAfterStart, onclick }) {
     return (
       <>
-        {tournament.hasStarted
+        {tournament.hasStarted && !canBeEditedAfterStart
           ? <div className="pencil-placeholder"></div>
           : <img className='pencil' src={pencil} onClick={onclick} />
         }
@@ -949,7 +949,7 @@ function Manage() {
                       {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length === 0 && <span>No participants yet</span>}
                       {/* <SoloParticipants /> */}
                     </div>
-                    <EditButton onclick={tournament.teamSize == 1 ? showEditSoloParticipantsPopup : showEditTeamParticipantsPopup} />
+                    <EditButton canBeEditedAfterStart={true} onclick={tournament.teamSize == 1 ? showEditSoloParticipantsPopup : showEditTeamParticipantsPopup} />
                   </div>)}
                 <div className="attribute accessibility">
                   <h3>Accessibility</h3>

@@ -250,8 +250,12 @@
   width: fit-content;
 }
 
-#Manage .controlBottons {
+#Manage .controlButtons {
   display: flex;
   flex-direction: row;
   gap: 1em;
+}
+
+#Manage .controlButtons .error {
+  color: var(--color-red);
 }
