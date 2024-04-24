@@ -780,7 +780,16 @@ function Manage() {
 
   const MatchesEditor = () => {
 
-    const totalMatches = tournament.enrolledTeams.length / 2;
+    var matchesInFirstRound = Math.ceil(tournament.enrolledTeams.length / 2);
+    var totalMatches = matchesInFirstRound;
+
+    // Calculate the total number of matches
+    while (matchesInFirstRound > 1) {
+      matchesInFirstRound = Math.ceil(matchesInFirstRound / 2);
+      totalMatches += matchesInFirstRound;
+    }
+
+    console.log('totalMatches: ', totalMatches)
     console.log(totalMatches)
     let matches = tournament.matches
     for (let i = 0; i < totalMatches; i++) {
