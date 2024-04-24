@@ -445,12 +445,12 @@ function Tournament() {
                 <p className="tournament-description">
                   {tournament.description}
                 </p>
-                {/* <p className="tournament-category">
+                <p className="tournament-category">
                   Category:{" "}
                   {tournament.category.replace(/(^\w|\s\w)/g, (m) =>
                     m.toUpperCase()
                   )}
-                </p> */}
+                </p>
                 {/* <p className="tournament-type">
                   Format:{" "}
                   {tournament.type.replace(/(^\w|\s\w)/g, (m) =>
@@ -489,7 +489,7 @@ function Tournament() {
             </div>
 
             <div className="tournament-content">
-              {tournament.type === "battle royale" ? (
+              {tournament.type === "brackets" ? (
                 <Brackets tournament={tournament} />
               ) : (
                 <BattleRoyale tournament={tournament} />
