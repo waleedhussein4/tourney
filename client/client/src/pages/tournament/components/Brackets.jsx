@@ -39,8 +39,10 @@ const CustomSeed = ({seed, breakpoint, roundIndex, seedIndex}) => {
     <Seed mobileBreakpoint={breakpoint} style={{ fontSize: 12 }}>
       <SeedItem>
         <div>
-          <SeedTeam className={seed.teams[0].eliminated && 'eliminated' }>{seed.teams[0]?.name || 'NO TEAM '}</SeedTeam>
-          <SeedTeam className={seed.teams[1].eliminated && 'eliminated' }>{seed.teams[1]?.name || 'NO TEAM '}</SeedTeam>
+          <SeedTeam className={seed.teams[0].eliminated && 'eliminated' }>{seed.teams[0]?.name || 'TBA '}</SeedTeam>
+          <SeedTeam className={seed.teams[1].eliminated && 'eliminated' }>{seed.teams[1]?.name || 'TBA '}</SeedTeam>
+          {/* <SeedTeam>{seed.teams[0]?.name || 'NO TEAM '}</SeedTeam>
+          <SeedTeam>{seed.teams[1]?.name || 'NO TEAM '}</SeedTeam> */}
         </div>
       </SeedItem>
     </Seed>
@@ -190,8 +192,8 @@ const BracketsComponent = ({ tournament }) => {
           console.log(team1, team2, "team1, team2")
           roundMatches.push({
             teams: [
-              { name: team1?.teamName || '', eliminated: (tournament.matches[matches] != team1?.teamName || '') },
-              { name: team2?.teamName || '', eliminated: (tournament.matches[matches] != team2?.teamName || '') }
+              { name: team1?.teamName || '', eliminated: (tournament.matches[matches] === team2?.teamName) },
+              { name: team2?.teamName || '', eliminated: (tournament.matches[matches] === team1?.teamName) }
             ],
             onClick: () => { }
           });

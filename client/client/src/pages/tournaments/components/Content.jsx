@@ -2,7 +2,7 @@
 import Tournament from './Tournament';
 import { useCallback, useEffect } from 'react';
 
-const URL = 'https://api.npoint.io/62625fd6706d67650348'
+const URL = 'http://localhost:2000/api/tournement/'
 
 function Content({tournaments, setTournaments, filters, setFilters, filteredTourneys, setFilteredTourneys}) {
 
