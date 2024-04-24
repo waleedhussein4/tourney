@@ -16,7 +16,7 @@ const createTournament = async (req, res) => {
     const newTournament = await Tournament.create({
             _id: id,
             UUID: id,
-            host : "4ea78afa-f234-4731-b94a-8b482b688dab",
+            host : req.user,
             title: title,
             teamSize : teamSize, 
             description: description,
@@ -205,14 +205,14 @@ const deleteTournament = async (req, res) => {
 const getTournamentDisplayData = async (req, res) => {
 
 
-  // delete all tournaments
-  await Tournament.deleteMany({})
-    .then(result => {
-      console.log(`${result.deletedCount} tournaments deleted successfully.`);
-    })
-    .catch(error => {
-      console.error('Error deleting tournaments:', error);
-    });
+  // // delete all tournaments
+  // await Tournament.deleteMany({})
+  //   .then(result => {
+  //     console.log(`${result.deletedCount} tournaments deleted successfully.`);
+  //   })
+  //   .catch(error => {
+  //     console.error('Error deleting tournaments:', error);
+  //   });
 
 
   // Delete the tournament document with the specified ID
@@ -229,26 +229,26 @@ const getTournamentDisplayData = async (req, res) => {
   // });
 
 
-  // create new tournament
-  await newTournament.save()
-    .then(savedTournament => {
-      console.log('Tournament saved successfully:', savedTournament);
-    })
-    .catch(error => {
-      console.error('Error saving tournament:', error);
-    });
+  // // create new tournament
+  // await newTournament.save()
+  //   .then(savedTournament => {
+  //     console.log('Tournament saved successfully:', savedTournament);
+  //   })
+  //   .catch(error => {
+  //     console.error('Error saving tournament:', error);
+  //   });
 
   // print all tournaments
-  // Tournament.find({}).exec()
-  // .then(tournaments => {
-  //   tournaments.forEach(tournament => {
-  //     console.log(tournament);
-  //     console.log("Type of id: ", typeof(tournament._id))
-  //   });
-  // })
-  // .catch(error => {
-  //   console.error('Error fetching tournaments:', error);
-  // });
+  Tournament.find({}).exec()
+  .then(tournaments => {
+    tournaments.forEach(tournament => {
+      console.log(tournament);
+      console.log("Type of id: ", typeof(tournament._id))
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching tournaments:', error);
+  });
 
 
   // Tournament.updateOne(
