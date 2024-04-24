@@ -41,9 +41,9 @@ function Nav() {
       <div id="account">
         { loggedIn === true && 
           <div id='profile'>
-            <Link to="/profile">
+            {/* <Link to="/profile">
               <img src={profilePic} alt="Profile Icon" className="profilePic" />
-            </Link>
+            </Link> */}
             <div className="user-info">
               <span className="username">{username}</span>
               <span className='user-credits'>Credits: {credits}</span>
