@@ -124,8 +124,7 @@ const getTeamsByUser = async (req, res) => {
     const teams = await Team.find({
       $or: [
         { members: userId },
-        { leader: userId },
-        { createdBy: userId }
+        { leader: userId }
       ]
     }).populate('members', 'username email');  // Optionally populate member details
 
@@ -268,18 +267,23 @@ const deleteTeam = async (req, res) => {
 };
 
 const leaveTeam = async (req, res) => {
+  console.log('in leave team')
   try {
     const team = await Team.findOne({ _id: req.params.UUID })
       .populate("leader", "username email")
       .populate("members", "username email");
-    if (!team.members.includes(req.user._id)) {
+
+    console.log(team)
+    console.log(req.user)
+    if (!(team.members.map(member => member._id)).includes(req.user)) {
       return res.status(400).json({ message: "User is not a member" });
     }
-    if (team.leader._id === req.user._id) {
+    if (team.leader._id === req.user) {
       return res.status(400).json({ message: "Leader cannot leave team" });
     }
-    team.members = team.members.filter((m) => m._id !== req.user._id);
+    team.members = team.members.filter((m) => m._id !== req.user);
     await team.save();
+
     res.status(200).json({ message: "Team left successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
