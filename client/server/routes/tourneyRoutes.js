@@ -9,7 +9,7 @@ router.get('/', auth, getAllTournaments);
 
 
 //new tourney
-router.post('/', auth, createTournament);
+router.post('/', createTournament);
 
 
 router.get('/tournament', getAuth, getTournamentDisplayData)
