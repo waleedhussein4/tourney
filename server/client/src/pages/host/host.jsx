@@ -2,15 +2,16 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from 'react-router-dom'; //j
 import "./app.css";
 import Nav from "../../components/Nav";
+import { AuthContext } from "../../context/AuthContext";
 
-
+//const { user } = useContext(AuthContext);  // Assuming your auth context provides user details
 
 export default function Host() {
   const navigate = useNavigate();
   const [isHost, setIsHost] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [isDisplayed, setIsDisplayed] = useState(false);
+  const [isDisplayed, setIsDisplayed] = useState(true);
   const [btnIsDisplayed, setBtnIsDisplayed] = useState(true);
   const [specIsDisplayed, setSpecIsDisplayed] = useState(false);
   const [selectedType, setSelectedType] = useState("");
@@ -53,9 +54,10 @@ export default function Host() {
   const [titleError, setTitleError] = useState(false);
   const [titleVal, setTitleVal] = useState('');
   const titleRef = useRef(null)
-
+  const [prizeRankError , setPrizeRankError] = useState(false);
 
   useEffect(() => {
+    console.log("hello");
     console.log('hi')
     const checkHostStatus = async () => {
       try {
@@ -122,6 +124,8 @@ export default function Host() {
       setIsValidated(false);
     }
     setIsValidated2(true);
+    setPrizeRankError(false);
+    divPrizeRankRef.current.style.border = "";
   };
 
   const handleRemoveRank = () => {
@@ -139,12 +143,8 @@ export default function Host() {
   };
 
   const handleClick = () => {
-    if (!isDisplayed) {
       setIsDisplayed(true);
-    }
-    if (btnIsDisplayed) {
       setBtnIsDisplayed(false);
-    }
   };
   const handleDescribeChange = (event) => {
     setDescribeVal(event.target.value);
@@ -254,6 +254,8 @@ export default function Host() {
   ];
 
   const handleSubmit = async (e) => {
+    e.preventDefault(); // This stops the form from submitting traditionally
+    console.log("handleSubmit is triggered");
     if (describeVal === "") {
       e.preventDefault();
       setDescribeError(true);
@@ -288,7 +290,13 @@ export default function Host() {
     if (winnerPrize === "") {
       setWinnerPrizeError(true);
       winnerPrizeRef.current.style.border = "2px solid red";
-
+    
+    }
+    if(inputPrizes.length===0){
+      divPrizeRankRef.current.style.border= "2px solid red";
+      setPrizeRankError(true);
+    }if(winnerPrize === "" && inputPrizes.length===0){
+      e.preventDefault();
     }
     if (selectedEntryMode === "") {
       e.preventDefault();
@@ -300,28 +308,52 @@ export default function Host() {
 
     }
     if (titleVal === "") {
+      e.preventDefault();
       setTitleError(true);
       titleRef.current.style.border = "2px solid red";
     }
-    const formData = {
+    else{
+
+    if(selectedType==="Bracket"){
+    var formData = {
+      title:titleVal,
+      teamSize: teamSize,
       description: describeVal,
       type: selectedType,
       category: selectedGame,
-      teamSize: teamSize,
       entryFee: entryFee,
-      prize: winnerPrize,
-      application: selectedEntryMode
-    };
+      accessibility: selectedEntryMode,
+      maxCapacity : numberOfBrackets
+    };}
+    else{
+      var formData = {
+        title:titleVal,
+        description: describeVal,
+        type: selectedType,
+        category: selectedGame,
+        teamSize: teamSize,
+        entryFee: entryFee,
+        accessibility: selectedEntryMode,
+        maxCapacity:maxParticipants
+      };
+    }
     try {
+      console.log("hi");
       const response = await fetch('http://localhost:2000/api/tournement', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
+        credentials: 'include'
       });
       if (!response.ok) {
         throw new Error('Failed to create tournament');
+      }
+
+      if(response.ok){
+        const data = await response.json()
+        navigate("/tournament/"+ data.UUID)
       }
 
       // Handle successful response (optional)
@@ -329,7 +361,7 @@ export default function Host() {
     } catch (error) {
       console.error('Error creating tournament:', error);
       // Handle error (e.g., show error message to the user)
-    }
+    }}
   };
   return (
     <>
@@ -348,7 +380,7 @@ export default function Host() {
             <div id="btnTournament">
               <button
                 id="createTournament"
-                onClick={handleClick}
+                onClick={() => setIsDisplayed(true)}
                 style={{ display: btnIsDisplayed ? "block" : "none" }}
               >
                 Press here to create your tournament
@@ -396,9 +428,8 @@ export default function Host() {
                   <div id="divDesc"> <h2>Description:</h2>(up to 200 characters)</div>
                   <span id="teamTypeError" style={{ display: describeError ? 'block' : 'none' }}>
                     Please fill out this field</span>
-                  <textarea ref={describeRef} onChange={handleDescribeChange} value={describeVal} placeholder="Please describe your tournament.
-    Include any unique rules, what participants can expect, and why they should join. Be as detailed as possible to attract the right participants."></textarea>
-                  {describeError2 && <p style={{ color: 'red' }}>Maximum word limit exceeded (200 characters).</p>}
+                  <textarea ref={describeRef} onChange={handleDescribeChange} value={describeVal} placeholder="Please describe your tournament.Include any unique rules, what participants can expect, and why they should join. Be as detailed as possible to attract the right participants."></textarea>
+                  {describeError2 ?<p style={{ color: 'red' }}>Maximum word limit exceeded (200 characters).</p>:<p>{describeVal.length}/200</p>}
                 </div>
                 <hr
                   className="custom-line"></hr>
@@ -410,7 +441,6 @@ export default function Host() {
                     ref={selectedGameRef}
                     id="selectGame"
                     name="game"
-                    defaultValue=""
                     value={selectedGame}
                     onChange={handleSelectChange}
                   >
@@ -452,7 +482,7 @@ export default function Host() {
                   <span id="teamTypeError" style={{ display: teamTypeError ? 'block' : 'none' }}>
                     Please fill out this field
                   </span>
-                  <input type="number" ref={teamTypeRef} defaultValue="" value={teamSize} onChange={handleTeamChange} min={0} />
+                  <input type="number" ref={teamTypeRef} value={teamSize} onChange={handleTeamChange} min={0} />
                 </div>
 
                 <div className="form-group">
@@ -473,10 +503,11 @@ export default function Host() {
                   {inputPrizes.map((input, index) => (
                     <div key={index}>{input}</div>
                   ))}
-                  <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddRank() }} value="Add Rank" />
-                  <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleRemoveRank() }} value="Remove Rank" />
+                  <input type="button" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddRank() }} value="Add Rank" />
+                  <input type="button" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleRemoveRank() }} value="Remove Rank" />
                   {isValidated ? null : <div id="rankError">if you wish to add more prize rank, you should increase the number of participants above!</div>}
                   {isValidated2 ? null : <div id="rankError">If you wish to continue, you should remove ranks until they equal the number of participants.</div>}
+                  {prizeRankError ?<div id="rankError">If you wish to continue, you should at least offer a prize to the first-place winner.</div>:null}
                 </div>
                 <div id="form-app">
                   <h2>Tourney entry mode:</h2>
