@@ -1,17 +1,31 @@
 #Tournaments #sidebar {
-  background-color: var(--color-primary);
-  color: white;
-  height: calc(100vh - 50pt);
+  background-color: var(--accent-color);
+  color: var(--text-color);
+  height: 100%;
   display: flex;
   flex-direction: column;
   padding: 1em;
   gap: 1em;
+  width: 30%;
+  border-radius: 10px; /* Add border-radius for rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add box-shadow for depth */
 }
 
-#Tournaments #searchbar {
-  padding: 0.6em;
-  width: 100%
-}
+  #Tournaments #sidebar {
+    width: 100%; /* Make the sidebar take full width on smaller screens */
+    margin-bottom: 20px; /* Add margin at the bottom */
+  }
+
+
+  #Tournaments #searchbar {
+    padding: 0.6em;
+    width: 100%;
+    border: none; /* Remove border */
+    border-radius: 5px; /* Add border-radius */
+    background-color: var(--primary-color); /* Use primary color for background */
+    color: var(--text-color); /* Use text color for text */
+    font-size: 1em; /* Adjust font size */
+  }
 
 #Tournaments #searchbar:focus {
   outline: none;
@@ -21,11 +35,18 @@
   font-weight: 700;
   font-size: 1.2em;
   text-align: center;
+  color: black; /* Use highlight color for header */
+  margin-bottom: 0.5em; /* Add margin bottom for spacing */
 }
 
 #Tournaments #filter-category-input {
   padding: 0.6em;
-  width: 100%
+  width: 100%;
+  border: none; /* Remove border */
+  border-radius: 5px; /* Add border-radius */
+  background-color: var(--primary-color); /* Use primary color for background */
+  color: var(--text-color); /* Use text color for text */
+  font-size: 1em; /* Adjust font size */
 }
 
 #Tournaments #filter-category-input:focus {
@@ -153,4 +174,31 @@
 
 #Tournaments .valueDisplay input {
   width: 4em;
+}
+
+#Tournaments #type-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+#Tournaments #type-buttons .type-button,
+#Tournaments #accessibility-buttons .accessibility-button {
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#Tournaments #type-buttons .type-button:hover,
+#Tournaments #accessibility-buttons .accessibility-button:hover {
+  background-color: var(--highlight-color);
+  color: var(--text-color);
+}
+
+#Tournaments #type-buttons .type-button.active,
+#Tournaments #accessibility-buttons .accessibility-button.active {
+  background-color: var(--highlight-color);
+  color: var(--text-color);
 }

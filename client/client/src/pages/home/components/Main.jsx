@@ -1,25 +1,41 @@
+
+
+
 import { useEffect, useState } from "react";
 import Carousel from "./Carousel";
 import { Link } from "react-router-dom";
 
 function Main() {
-
-  const [trendingTournaments, setTrendingTOurnaments] = useState([])
+  const [trendingTournaments, setTrendingTournaments] = useState([]);
+  const [bracketDescription, setBracketDescription] = useState("");
+  const [battleRoyaleDescription, setBattleRoyaleDescription] = useState("");
 
   const getTrendingTournaments = async () => {
-
     const URL = 'http://localhost:2000/api/tournement/getTrendingTournaments';
     await fetch(URL)
     .then((res) => res.json())
     .then((data) => {
-      console.log(data)
-      setTrendingTOurnaments(data)
-    })
+      setTrendingTournaments(data);
+    });
   }
-
+  
   useEffect(() => {
     getTrendingTournaments();
   }, []);
+
+
+  const fetchDescriptions = async () => {
+    const mockBracketDescription = "Experience organized competition at its finest with our bracket tourneys, showcasing skillful matchups and strategic gameplay.";
+    const mockBattleRoyaleDescription = "Embark on thrilling survival challenges in our battle royale tourneys, where only the most skilled emerge victorious in intense showdowns.";
+    setBracketDescription(mockBracketDescription);
+    setBattleRoyaleDescription(mockBattleRoyaleDescription);
+  }
+
+  useEffect(() => {
+    fetchDescriptions();
+  }, []);
+
+
 
   return (
     <div id="main">
@@ -39,22 +55,28 @@ function Main() {
           begin!
         </p>
       </div>
-      <div id='suggest-join'>
-        <div className="description">
-          <h2>Bracket Tournaments</h2>
-          <span>Random description of bracket tournaments to entice the user to click on the button on the right</span>
+      <div className="tournament-container">
+        <div className="bracket">
+          <div className="description">
+            <h2>Bracket Tourneys</h2>
+            <p>{bracketDescription}</p>
+          </div>
         </div>
-        <Link to={'/tournaments'} className="browseBtn">BROWSE</Link>
-        <div className="description">
-          <h2>Battle Royale Tournaments</h2>
-          <span>Random description of battle Royale tournaments to entice the user to click on the button on the right</span>
+        <div className="battle-royale">
+          <div className="description">
+            <h2>Battle Royale Tourneys</h2>
+            <p>{battleRoyaleDescription}</p>
+          </div>
         </div>
       </div>
-      <Carousel
-        title="Trending"
-        data={trendingTournaments}
-      />
-    </div>
+      <div className="browse-container">
+        <Link to={'/tournaments'} className="browseBtn">BROWSE</Link>
+      </div>
+        <Carousel
+         title="Trending"
+         data={trendingTournaments}
+        />
+      </div>
   );
 }
 
