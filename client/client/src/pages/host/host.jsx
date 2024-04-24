@@ -336,7 +336,7 @@ export default function Host() {
       maxCapacity : numberOfBrackets
     };}
     else{
-      var formData = {
+      formData = {
         title:titleVal,
         description: describeVal,
         type: selectedType,

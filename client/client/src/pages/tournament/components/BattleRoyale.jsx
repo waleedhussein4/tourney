@@ -3,16 +3,18 @@ const BattleRoyale = ({ tournament }) => {
 
   let members
 
-  if(tournament.enrolledUsers) {
+  if(tournament.enrolledUsers && tournament.enrolledTeams.length === 0) {
+    console.log('enrolledUsers')
     members = tournament.enrolledUsers.map((competitor, index) => (
-      <li key={competitor.UUID}>
-        <span>{index + 1}. {competitor.UUID.username} <span className="user-eliminated">{competitor.eliminated ? 'Eliminated' : ''}</span></span>
+      <li key={index}>
+        <span>{index + 1}. {competitor.username} <span className="user-eliminated">{competitor.eliminated ? 'Eliminated' : ''}</span></span>
         <span>{competitor.score}</span>
       </li>
     ));
   }
 
-  if(tournament.enrolledTeams) {
+  if(tournament.enrolledTeams && tournament.enrolledUsers.length === 0) {
+    console.log('enrolledTeams')
     members = tournament.enrolledTeams.map((competitor, index) => (
       <li key={competitor.teamName}>
         <span>{index + 1}. {competitor.teamName} <span className="user-eliminated">{competitor.eliminated ? 'Eliminated' : ''}</span></span>
