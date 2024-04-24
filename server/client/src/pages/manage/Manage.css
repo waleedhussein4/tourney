@@ -226,3 +226,32 @@
 #Manage #editParticipantsPopup {
   width: fit-content;
 }
+
+#Manage #matchesEditor {
+  display: flex;
+  flex-direction: column;
+}
+
+#Manage #matchesEditor .matches {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+#Manage #matchesEditor .matches .match {
+  display: flex;
+  flex-direction: row;
+  gap: 3em;
+  align-items: center;
+  width: fit-content;
+}
+
+#Manage #matchesEditor button {
+  width: fit-content;
+}
+
+#Manage .controlBottons {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
