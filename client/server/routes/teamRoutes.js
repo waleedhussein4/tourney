@@ -24,7 +24,7 @@ router.get("/view/:UUID/members", auth, getTeamMembers); // Get list of team mem
 router.post("/join/:teamId", auth, joinTeam); // Join a team by ID
 router.post("/changeLeader/:UUID", auth, changeLeader); // Change team leader, checks membership
 router.post("/kick/:UUID", auth, kickMember); // Kick a member from the team, checks membership
-router.post("/delete/:UUID", auth, deleteTeam); // Delete a team, checks membership
+router.delete("/delete/:UUID", auth, deleteTeam); // Delete a team, checks membership
 router.post("/leave/:UUID", auth, leaveTeam); // Leave a team
 
 module.exports = router;
