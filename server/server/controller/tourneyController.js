@@ -12,18 +12,42 @@ const createTournament = async (req, res) => {
   console.log(req.body)
   const id = uuidv4();
   console.log(id)
-  if (description.length > 200) {
-    res.status(400).send("Description is more than 200 chars")
-  }
+  // let errors = [];
 
-  if (teamSize === 0) {
-    res.status(400).send("Can't be an empty team")
-  }
+  //   if (description && description.length > 200) {
+  //       errors.push("Description is more than 200 chars.");
+  //   }
+
+    if (parseInt(teamSize) === 0) {
+        errors.push("Can't be an empty team.");
+    }
+
+  //   // if (typeof teamSize === 'string') {
+  //   //     errors.push("Team size must be an integer.");
+  //   // }
+
+  //   if (earnings !== undefined && earnings <= -1) {
+  //       errors.push("Earnings must be positive.");
+  //   }
+  //   console.log(typeof entryFee)
+  //   // if (typeof entryFee === 'string') {
+  //   //     errors.push("Entry fee must be an integer.");
+  //   // }
+
+  //   if (typeof type !== 'string') {
+  //       errors.push("Type must be a string.");
+  //   }
+    console.log(errors)
+    if (errors.length > 0) {
+        return res.status(400).send({ errors });
+    }
 
   let newTournament
-
   try {
+    console.log(teamSize)
     if (type === "Bracket") {
+      if(parseInt(teamSize) === 1){
+        console.log("in if")
       newTournament = await Tournament.create({
         _id: id,
         UUID: id,
@@ -41,7 +65,7 @@ const createTournament = async (req, res) => {
         enrolledUsers: [],
         entryFee: entryFee,
         earnings: earnings,
-        maxCapacity: maxCapacity,
+        maxCapacity: maxCapacity*teamSize,
         accessibility: accessibility,
         matches: [],
         updates: [],
@@ -49,12 +73,41 @@ const createTournament = async (req, res) => {
         acceptedUsers: [],
         acceptedTeams: [],
         applications: []
-      })
+      })}
+      console.log('iseeu')
+      if(parseInt(teamSize) > 1){
+        newTournament = await Tournament.create({
+          _id: id,
+          UUID: id,
+          host: req.user,
+          title: title,
+          teamSize: teamSize,
+          description: description,
+          type: type.toLowerCase(),
+          category: category.toLowerCase(),
+          startDate: "2024-04-24T02:09:13.636+00:00",
+          endDate: "2024-02-29T10:02:10.959+00:00",
+          hasStarted: false,
+          hasEnded: false,
+          enrolledTeams: [],
+          enrolledUsers: [],
+          entryFee: entryFee,
+          earnings: earnings,
+          maxCapacity: maxCapacity*teamSize,
+          accessibility: accessibility,
+          matches: [],
+          updates: [],
+          application: [],
+          acceptedUsers: [],
+          acceptedTeams: [],
+          applications: []
+        })}
     };
-
+    console.log(newTournament)
     if (type === "Battle Royale") {
-      if (teamSize === 1) {
-        let newTournament = await Tournament.create({
+      console.log('battle royALE')
+      if (parseInt(teamSize) === 1) {
+        newTournament = await Tournament.create({
           _id: id,
           UUID: id,
           host: req.user,
@@ -79,8 +132,8 @@ const createTournament = async (req, res) => {
           applications: []
         })
       }
-      if (teamSize >= 2) {
-        let newTournament = await Tournament.create({
+      if (parseInt(teamSize) >= 2) {
+        newTournament = await Tournament.create({
           _id: id,
           UUID: id,
           host: req.user,
@@ -108,6 +161,7 @@ const createTournament = async (req, res) => {
     }
     res.status(200).json(newTournament);
   } catch (error) {
+    console.log("wrro")
     res.status(400).json({ error: error.message });
   }
 };
