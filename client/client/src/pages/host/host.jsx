@@ -344,10 +344,16 @@ export default function Host() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
+        credentials: 'include'
       });
       if (!response.ok) {
         throw new Error('Failed to create tournament');
+      }
+
+      if(response.ok){
+        const data = await response.json()
+        navigate("/tournament/"+data.UUID)
       }
 
       // Handle successful response (optional)
