@@ -455,8 +455,10 @@ function Manage() {
     h2.innerHTML = 'Application';
     let button = document.createElement('button');
     button.innerHTML = 'Accept';
+    button.onclick = () => handleAcceptApplication(event);
     let button2 = document.createElement('button');
     button2.innerHTML = 'Reject';
+    button2.onclick = () => handleRejectApplication(event);
     let cancel = document.createElement('button');
     cancel.innerHTML = 'Cancel';
     cancel.onclick = () => popup.remove();
