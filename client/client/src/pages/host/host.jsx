@@ -292,7 +292,7 @@ export default function Host() {
       winnerPrizeRef.current.style.border = "2px solid red";
     
     }
-    if(inputPrizes.length===0 || inputPrizes[0].input.value===""){
+    if(inputPrizes.length===0){
       divPrizeRankRef.current.style.border= "2px solid red";
       setPrizeRankError(true);
     }if(winnerPrize === "" && inputPrizes.length===0){
@@ -353,7 +353,7 @@ export default function Host() {
 
       if(response.ok){
         const data = await response.json()
-        navigate("/tournament/"+data.UUID)
+        navigate("/tournament/"+ data.UUID)
       }
 
       // Handle successful response (optional)
