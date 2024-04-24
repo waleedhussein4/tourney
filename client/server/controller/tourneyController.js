@@ -8,13 +8,15 @@ const generateAndAddUsersToTournament = require('./tester');
 
 // Create a new tournament
 const createTournament = async (req, res) => {
-  const { title, type, teamSize,category,description, entryFee, maxCapacity, accessibility, applicationRequirements } = req.body;
+  const { title, teamSize, description, type, category, entryFee, accessibility,maxCapacity} = req.body;
+  console.log(req.body)
+  console.log(req.user)
   const id = uuidv4();
   try {
     const newTournament = await Tournament.create({
             _id: id,
             UUID: id,
-            host : req.user,
+            host : "4ea78afa-f234-4731-b94a-8b482b688dab",
             title: title,
             teamSize : teamSize, 
             description: description,
