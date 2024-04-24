@@ -44,7 +44,7 @@ function Signin() {
             <form onSubmit={handleSubmit}>
               <h2>Login</h2>
               <label htmlFor="username">Username or email</label>
-              <input type="text" id="username" placeholder="Enter a username or an email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <input type="text" id="username" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
               <label htmlFor="password">Password</label>
               <input type="password" id="password" placeholder="Enter a password" value={pass} onChange={(e) => setPass(e.target.value)} />
               <div id="rememberPassword">
