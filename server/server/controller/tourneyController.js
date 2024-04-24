@@ -9,6 +9,7 @@ const generateAndAddUsersToTournament = require('./tester');
 // Create a new tournament
 const createTournament = async (req, res) => {
   let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity } = req.body;
+  console.log('Earnings: ' + earnings)
   category = category.toLowerCase();
   accessibility = accessibility.toLowerCase();
   type = type.toLowerCase();
@@ -221,11 +222,11 @@ const newTournament = new Tournament({
     }
   ],
   entryFee: 5.5,
-  earnings: {
-    "1": 200,
-    "2": 100,
-    "3": 75
-  },
+  earnings: [
+    200,
+    100,
+    50
+  ],
   maxCapacity: 100,
   accessibility: "application required",
   updates: [{
@@ -253,6 +254,148 @@ const newTournament = new Tournament({
   applications: [],
   matches: []
 });
+
+async function createTournaments() {
+
+  // delete all tournaments
+  await Tournament.deleteMany({})
+    .then(result => {
+      console.log(`${result.deletedCount} tournaments deleted successfully.`);
+    })
+    .catch(error => {
+      console.error('Error deleting tournaments:', error);
+    });
+
+  let tournaments = [];
+
+  let tournament1 = new Tournament({
+    _id: "89b50cfe-0b87-4395-8230-8e8e1f571cb7",
+    UUID: "89b50cfe-0b87-4395-8230-8e8e1f571cb7",
+    host: "e1236c52-1db6-4524-9dc3-25a030b6b61e", // soumi7
+    title: "Football Tournament",
+    teamSize: 2,
+    description: "A fun football tournament.",
+    type: "battle royale",
+    category: "football",
+    startDate: new Date("2024-05-05T22:50:00.000Z"),
+    endDate: new Date("2024-05-10T17:30:00.000Z"),
+    hasStarted: false,
+    hasEnded: false,
+    enrolledTeams: [
+    ],
+    entryFee: 0,
+    earnings: [
+      0
+    ],
+    maxCapacity: 100,
+    accessibility: "application required",
+    updates: [{
+      date: new Date("2024-02-29T10:01:31.474Z"),
+      content: "Tournament Started"
+    },
+    {
+      date: new Date("2024-02-29T10:02:10.959Z"),
+      content: "First Round Complete"
+    }
+    ],
+    application: [
+      {
+        name: "Player names"
+      },
+      {
+        name: "Player ages"
+      }
+    ],
+    acceptedUsers: [],
+    acceptedTeams: [],
+    applications: [],
+    matches: []
+  })
+
+  await tournament1.save()
+    .then(savedTournament => {
+      console.log('Tournament saved successfully:', savedTournament);
+    })
+    .catch(error => {
+      console.error('Error saving tournament:', error);
+    });
+
+
+  // let tournament2 = new Tournament({
+  //   _id: "10b72cfe-0b87-4395-8230-8e8e1f571cb7",
+  //   UUID: "89b72cfe-0b87-4395-8230-8e8e1f571cb7",
+  //   host: "d6cab22f-b734-4ad9-b43e-cde81a82b62b", // Waleed00
+  //   title: "Fortnite Duo Cup",
+  //   teamSize: 2,
+  //   description: "Enter the description of the tournament here. The length must be limited to 200 characters on the backend.",
+  //   type: "battle royale",
+  //   category: "fortnite",
+  //   startDate: new Date("2024-02-29T10:01:31.474Z"),
+  //   endDate: new Date("2024-02-29T10:02:10.959Z"),
+  //   hasStarted: false,
+  //   hasEnded: false,
+  //   enrolledTeams: [
+  //     {
+  //       teamName: "Team 1",
+  //       players: [
+  //         {
+  //           UUID: "9410f264-0bef-4516-b3ea-661c575490f2",
+  //         },
+  //         {
+  //           UUID: "9410f264-0bef-4516-b3ea-661c575492f2",
+  //         }
+  //       ],
+  //       score: 0,
+  //       eliminated: true
+  //     },
+  //     {
+  //       teamName: "Team 2",
+  //       players: [
+  //         {
+  //           UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
+  //         },
+  //         {
+  //           UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
+  //         }
+  //       ],
+  //       score: 0,
+  //       eliminated: false
+  //     }
+  //   ],
+  //   entryFee: 5.5,
+  //   earnings: {
+  //     "1": 200,
+  //     "2": 100,
+  //     "3": 75
+  //   },
+  //   maxCapacity: 100,
+  //   accessibility: "application required",
+  //   updates: [{
+  //     date: new Date("2024-02-29T10:01:31.474Z"),
+  //     content: "Tournament Started"
+  //   },
+  //   {
+  //     date: new Date("2024-02-29T10:02:10.959Z"),
+  //     content: "First Round Complete"
+  //   }
+  //   ],
+  //   application: [
+  //     {
+  //       name: "Name"
+  //     },
+  //     {
+  //       name: "Age"
+  //     },
+  //     {
+  //       name: "Epic Games Username"
+  //     }
+  //   ],
+  //   acceptedUsers: [],
+  //   acceptedTeams: [],
+  //   applications: [],
+  //   matches: []
+  // });
+}
 
 
 // Get all tournaments
@@ -314,6 +457,8 @@ const deleteTournament = async (req, res) => {
 // get tournament data for the tournament page
 const getTournamentDisplayData = async (req, res) => {
 
+  // await createTournaments()
+
 
   // delete all tournaments
   // await Tournament.deleteMany({})
@@ -349,16 +494,16 @@ const getTournamentDisplayData = async (req, res) => {
   //   });
 
   // print all tournaments
-  Tournament.find({}).exec()
-    .then(tournaments => {
-      tournaments.forEach(tournament => {
-        console.log(tournament);
-        console.log("Type of id: ", typeof (tournament._id))
-      });
-    })
-    .catch(error => {
-      console.error('Error fetching tournaments:', error);
-    });
+  // Tournament.find({}).exec()
+  //   .then(tournaments => {
+  //     tournaments.forEach(tournament => {
+  //       console.log(tournament);
+  //       console.log("Type of id: ", typeof (tournament._id))
+  //     });
+  //   })
+  //   .catch(error => {
+  //     console.error('Error fetching tournaments:', error);
+  //   });
 
 
   // Tournament.updateOne(
@@ -399,6 +544,7 @@ const getTournamentDisplayData = async (req, res) => {
     if (!tournament) {
       return res.status(404).json({ error: 'Tournament not found' });
     }
+    console.log('Tournament: ' + tournament)
 
 
     const isHost = (tournament.host == userUUID)
