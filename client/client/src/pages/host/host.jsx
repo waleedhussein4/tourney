@@ -53,7 +53,7 @@ export default function Host() {
   const [titleError, setTitleError] = useState(false);
   const [titleVal, setTitleVal] = useState('');
   const titleRef = useRef(null)
-
+  const [prizeRankError , setPrizeRankError] = useState(false);
 
   useEffect(() => {
     console.log('hi')
@@ -122,6 +122,8 @@ export default function Host() {
       setIsValidated(false);
     }
     setIsValidated2(true);
+    setPrizeRankError(false);
+    divPrizeRankRef.current.style.border = "";
   };
 
   const handleRemoveRank = () => {
@@ -288,7 +290,13 @@ export default function Host() {
     if (winnerPrize === "") {
       setWinnerPrizeError(true);
       winnerPrizeRef.current.style.border = "2px solid red";
-
+    
+    }
+    if(inputPrizes.length===0 || inputPrizes[0].input.value===""){
+      divPrizeRankRef.current.style.border= "2px solid red";
+      setPrizeRankError(true);
+    }if(winnerPrize === "" && inputPrizes.length===0){
+      e.preventDefault();
     }
     if (selectedEntryMode === "") {
       e.preventDefault();
@@ -300,19 +308,37 @@ export default function Host() {
 
     }
     if (titleVal === "") {
+      e.preventDefault();
       setTitleError(true);
       titleRef.current.style.border = "2px solid red";
     }
-    const formData = {
+    else{
+
+    if(selectedType==="Bracket"){
+    var formData = {
+      title:titleVal,
       description: describeVal,
       type: selectedType,
       category: selectedGame,
       teamSize: teamSize,
       entryFee: entryFee,
-      prize: winnerPrize,
-      application: selectedEntryMode
-    };
+      earnings: {"1": winnerPrize},
+      accessibility: selectedEntryMode
+    };}
+    else{
+      var formData = {
+        title:titleVal,
+        description: describeVal,
+        type: selectedType,
+        category: selectedGame,
+        teamSize: teamSize,
+        entryFee: entryFee,
+        earnings: {"1":inputPrizes[0] , "2":inputPrizes[1] , "3":inputPrizes[2]},
+        accessibility: selectedEntryMode
+      };
+    }
     try {
+      console.log("hi");
       const response = await fetch('http://localhost:2000/api/tournement', {
         method: 'POST',
         headers: {
@@ -329,7 +355,7 @@ export default function Host() {
     } catch (error) {
       console.error('Error creating tournament:', error);
       // Handle error (e.g., show error message to the user)
-    }
+    }}
   };
   return (
     <>
@@ -409,7 +435,6 @@ export default function Host() {
                     ref={selectedGameRef}
                     id="selectGame"
                     name="game"
-                    defaultValue=""
                     value={selectedGame}
                     onChange={handleSelectChange}
                   >
@@ -451,7 +476,7 @@ export default function Host() {
                   <span id="teamTypeError" style={{ display: teamTypeError ? 'block' : 'none' }}>
                     Please fill out this field
                   </span>
-                  <input type="number" ref={teamTypeRef} defaultValue="" value={teamSize} onChange={handleTeamChange} min={0} />
+                  <input type="number" ref={teamTypeRef} value={teamSize} onChange={handleTeamChange} min={0} />
                 </div>
 
                 <div className="form-group">
@@ -476,6 +501,7 @@ export default function Host() {
                   <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleRemoveRank() }} value="Remove Rank" />
                   {isValidated ? null : <div id="rankError">if you wish to add more prize rank, you should increase the number of participants above!</div>}
                   {isValidated2 ? null : <div id="rankError">If you wish to continue, you should remove ranks until they equal the number of participants.</div>}
+                  {prizeRankError ?<div id="rankError">If you wish to continue, you should at least offer a prize to the first-place winner.</div>:null}
                 </div>
                 <div id="form-app">
                   <h2>Tourney entry mode:</h2>
