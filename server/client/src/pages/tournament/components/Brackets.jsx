@@ -190,13 +190,13 @@ const BracketsComponent = ({ tournament }) => {
           console.log(team1, team2, "team1, team2")
           roundMatches.push({
             teams: [
-              { name: team1?.teamName || '', eliminated: (winners[matches] != team1?.teamName || '') },
-              { name: team2?.teamName || '', eliminated: (winners[matches] != team2?.teamName || '') }
+              { name: team1?.teamName || '', eliminated: (tournament.matches[matches] != team1?.teamName || '') },
+              { name: team2?.teamName || '', eliminated: (tournament.matches[matches] != team2?.teamName || '') }
             ],
             onClick: () => { }
           });
           // Assuming the first team always wins for demonstration; replace this logic with actual match results
-          const nextRoundWinner = winners[matches]
+          const nextRoundWinner = tournament.matches[matches]
           const findWinner = currentRoundTeams.find(team => team?.teamName === nextRoundWinner);
           nextRoundTeams.push(findWinner);
           matches++;

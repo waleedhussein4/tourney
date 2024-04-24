@@ -364,6 +364,7 @@
   height: 18%;
   font-size: 14px;
   color: #999;
+  overflow-y: auto;
 }
 
 #Tournament .battle-royale {
