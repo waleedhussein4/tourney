@@ -1,4 +1,5 @@
 #nav {
+  position: relative; 
   height: 50pt;
   width: 100%;
   padding: 1em 1em 1em 2em;
@@ -15,9 +16,11 @@
 }
 
 #nav #options {
+  position: absolute;  
+  left: 50%;           
+  transform: translateX(-50%); 
   display: flex;
-  flex-direction: row;
-  justify-content: space-around;
+  justify-content: center;
   gap: 5em;
 }
 
