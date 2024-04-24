@@ -42,24 +42,26 @@ function Signin() {
         <div className="container">
           <div className="container-center">
             <form onSubmit={handleSubmit}>
-              <h2>Login</h2>
-              <label htmlFor="username">Username or email</label>
+
+              <h2>Sign in</h2>
+              <label htmlFor="username">Email</label>
               <input type="text" id="username" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
               <label htmlFor="password">Password</label>
-              <input type="password" id="password" placeholder="Enter a password" value={pass} onChange={(e) => setPass(e.target.value)} />
+              <input type="password" id="password" placeholder="Enter your password" value={pass} onChange={(e) => setPass(e.target.value)} />
               <div id="rememberPassword">
                 <input type="checkbox" checked={rememberPassword} onChange={handleRememberPasswordChange} />
                 <label htmlFor="rememberPassword">Remember password</label>
               </div>
-              <input type="submit" value="Login" disabled={isLoading} className="submit" />
+              <input type="submit" value="Sign In" disabled={isLoading} className="submit" />
               {error && <div className="error">{error}</div>}
+              <div id="account">Don't have an account? <a href="/signup/" style={{ color: '#800080' }}>Sign up</a></div>
             </form>
-            <span id="account">Don't have an account? <a href="/signup/">Sign up</a></span>
           </div>
         </div>
       </div>
     </AuthContextProvider>
-  );
+);
+
 }
 
 export default Signin;

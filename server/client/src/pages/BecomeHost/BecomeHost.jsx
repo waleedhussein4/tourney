@@ -66,7 +66,7 @@ const BecomeHost = () => {
             Step up your game and start your hosting journey now!
           </p>
           <p className="price-info">
-            The price: <strong>20 credits</strong>
+            Price: <strong>20 credits</strong>
           </p>
           {loading ? (
             <p>Loading...</p>

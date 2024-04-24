@@ -244,7 +244,17 @@ export default function Host() {
     setSelectedEntryMode(event.target.value);
     setAdditionalInfoRequired(event.target.value === "Application Required");
     setSelectedEntryError(false);
+    
+    // Scroll to the bottom of the page if additional info is required
+    if (event.target.value === "Application Required") {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   };
+  
+  
 
 
   const games = [
