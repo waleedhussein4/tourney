@@ -38,6 +38,23 @@ function Manage() {
         setTournament(data);
         setTournamentType(data.type);
         setIsLoading(false);
+        // data.enrolledUsers = [
+        //   {
+        //     username: 'user1',
+        //     score: 10,
+        //     eliminated: false,
+        //   },
+        //   {
+        //     username: 'user2',
+        //     score: 20,
+        //     eliminated: false,
+        //   },
+        //   {
+        //     username: 'user3',
+        //     score: 30,
+        //     eliminated: true,
+        //   },
+        // ]
         console.log(data)
       });
   };
@@ -425,27 +442,6 @@ function Manage() {
     Array.from(buttons).forEach(btn => btn.style.display = 'none')
   }
 
-  // const handleRemoveParticipant = async (event) => {
-  //   const participant = event.target.parentElement.parentElement.querySelector('.name').innerText;
-  //   const URL = `http://localhost:2000/api/tournement/tournament/removeParticipant`
-  //   await fetch(URL, {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     credentials: "include",
-  //     body: JSON.stringify({
-  //       UUID: UUID,
-  //       participant: participant,
-  //     }),
-  //   })
-  //   .then((res) => {
-  //     if (res.ok) {
-  //       navigate(0)
-  //     }
-  //   })
-  // }
-
   const handleViewApplication = async (event) => {
     let popup = document.createElement('div');
     popup.id = 'viewApplicationPopup';
@@ -574,6 +570,99 @@ function Manage() {
     )
   }
 
+  const showEditSoloParticipantsPopup = () => {
+    let popup = document.createElement('div');
+    popup.id = 'editParticipantsPopup';
+    popup.classList.add('popup');
+
+    let h2 = document.createElement('h2');
+    h2.innerHTML = 'Edit Participants';
+
+    const participantsContainer = document.createElement('div');
+    participantsContainer.classList.add('participants-container');
+
+    tournament.enrolledUsers.forEach(user => {
+      const participantDiv = document.createElement('div');
+      participantDiv.classList.add('participant');
+
+      const nameDiv = document.createElement('div');
+      nameDiv.classList.add('participant-name');
+      nameDiv.textContent = user.username;
+
+      const infoDiv = document.createElement('div');
+      infoDiv.classList.add('participant-info');
+      infoDiv.textContent = `Score: ${user.score}, Eliminated: ${user.eliminated ? 'Yes' : 'No'}`;
+
+      const editButton = document.createElement('button');
+      editButton.textContent = 'Edit';
+      editButton.classList.add('edit-button');
+      editButton.onclick = () => editSolo(user);
+
+
+      participantDiv.appendChild(nameDiv);
+      participantDiv.appendChild(infoDiv);
+      participantDiv.appendChild(editButton);
+
+      participantsContainer.appendChild(participantDiv);
+    });
+
+    const confirmButton = document.createElement('button');
+    confirmButton.textContent = 'Confirm';
+    confirmButton.classList.add('confirm-button');
+    confirmButton.onclick = () => handleEditSoloParticipants();
+
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Cancel';
+    cancelButton.classList.add('cancel-button');
+    cancelButton.onclick = () => popup.remove();
+
+    popup.appendChild(h2);
+    popup.appendChild(participantsContainer);
+    popup.appendChild(confirmButton);
+    popup.appendChild(cancelButton);
+
+    document.getElementById('Manage').appendChild(popup);
+  }
+
+  const handleEditSoloParticipants = async () => {
+    const popup = document.getElementById('editParticipantsPopup');
+    popup.remove();
+
+    const URL = `http://localhost:2000/api/tournement/editSoloParticipants`
+    await fetch(URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        UUID: UUID,
+        participants: tournament.enrolledUsers,
+      }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          navigate(0)
+        }
+      })
+  }
+
+  function editSolo(user) {
+    // Here you can implement your logic to edit the user's score and elimination status
+    const newScore = prompt(`Enter new score for ${user.username}:`, user.score);
+    const newEliminated = confirm(`Is ${user.username} eliminated?`);
+
+    // Update user object with new values
+    user.score = parseInt(newScore);
+    user.eliminated = newEliminated;
+
+    // remove the popup
+    document.getElementById('editParticipantsPopup').remove();
+
+    // Re-render users with updated data
+    showEditSoloParticipantsPopup();
+  }
+
   const handleEditTeamParticipants = async () => {
     const popup = document.getElementById('editParticipantsPopup');
     popup.remove();
@@ -610,7 +699,7 @@ function Manage() {
     document.getElementById('editParticipantsPopup').remove();
 
     // Re-render teams with updated data
-    showEditTeamParticipantsPopup(); 
+    showEditTeamParticipantsPopup();
   }
 
   const showEditTeamParticipantsPopup = () => {
@@ -687,6 +776,122 @@ function Manage() {
     )
   }
 
+  const MatchesEditor = () => {
+
+    const totalMatches = tournament.enrolledTeams.length / 2;
+    console.log(totalMatches)
+    let matches = tournament.matches
+    for (let i = 0; i < totalMatches; i++) {
+      if (matches[i] === undefined) {
+        matches[i] = 'n/a'
+      }
+    }
+
+    const [editedMatches, setEditedMatches] = useState([...tournament.matches]);
+
+    const handleEdit = (index) => {
+      const newEditedMatches = [...editedMatches];
+      const editedMatch = prompt('Edit the string:', editedMatches[index]);
+      if (editedMatch !== null) {
+        newEditedMatches[index] = editedMatch;
+        setEditedMatches(newEditedMatches);
+      }
+    };
+
+    const handleSaveAll = async () => {
+      // Implement logic to save all edited strings
+      console.log('Save all edited strings:', editedMatches);
+
+      const URL = `http://localhost:2000/api/tournement/editMatches`
+      await fetch(URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          UUID: UUID,
+          matches: editedMatches,
+        }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            navigate(0)
+          }
+        })
+    };
+
+    return (
+      <div id='matchesEditor' className='attribute'>
+        <h3>Match Winners</h3>
+        <div className="matches">
+          {
+            editedMatches.map((match, i) =>
+              <div className='match' key={i}>
+                <span className="matchNumber">Match {i}</span>
+                <span className="matchWinner">{match}</span>
+                <button onClick={() => handleEdit(i)}>Edit</button>
+              </div>
+            )
+          }
+        </div>
+        <button onClick={handleSaveAll}>Save All</button>
+      </div>
+    )
+  }
+
+  const startTournament = async () => {
+    const URL = `http://localhost:2000/api/tournement/startTournament`
+    await fetch(URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        UUID: UUID,
+      }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          navigate(0)
+        }
+        else {
+          return res.json()
+        }
+      })
+      .then((data) => {
+        console.log(data)
+        document.querySelector('.controlButtons .error').innerText = data.error
+      })
+  }
+
+  const endTournament = async () => {
+    const URL = `http://localhost:2000/api/tournement/endTournament`
+    await fetch(URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        UUID: UUID,
+      }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          navigate(0)
+        }
+        else {
+          return res.json()
+        }
+      })
+      .then((data) => {
+        console.log(data)
+        document.querySelector('.controlButtons .error').innerText = data.error
+      })
+  }
+
   return (
     <div id="Manage">
       <Nav />
@@ -735,15 +940,17 @@ function Manage() {
                   <div className='content'>{tournament.maxCapacity}</div>
                   <div className="pencil-placeholder"></div>
                 </div>
-                <div className="attribute editable participants">
-                  <h3>Participants</h3>
-                  <div className='content'>
-                    {tournament.enrolledUsers.length === 0 && tournament.enrolledTeams.length > 0 && <TeamParticipants />}
-                    {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length > 0 && <SoloParticipants />}
-                    {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length === 0 && <span>No participants yet</span>}
-                  </div>
-                  <EditButton onclick={tournament.teamSize == 1 ? showEditTeamParticipantsPopup : showEditTeamParticipantsPopup} />
-                </div>
+                {tournamentType === 'battle royale' && (
+                  <div className="attribute editable participants">
+                    <h3>Participants</h3>
+                    <div className='content'>
+                      {tournament.enrolledUsers.length === 0 && tournament.enrolledTeams.length > 0 && <TeamParticipants />}
+                      {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length > 0 && <SoloParticipants />}
+                      {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length === 0 && <span>No participants yet</span>}
+                      {/* <SoloParticipants /> */}
+                    </div>
+                    <EditButton onclick={tournament.teamSize == 1 ? showEditSoloParticipantsPopup : showEditTeamParticipantsPopup} />
+                  </div>)}
                 <div className="attribute accessibility">
                   <h3>Accessibility</h3>
                   <div className='content'>{tournament.accessibility}</div>
@@ -771,6 +978,14 @@ function Manage() {
                   </div>
                   <div className="pencil-placeholder"></div>
                 </div>
+                {tournament.type === 'brackets' && <MatchesEditor />}
+              </div>
+              <div className="controlButtons">
+                {tournament.hasStarted
+                  ? <button onClick={endTournament} className="endTournament">End Tournament</button>
+                  : <button onClick={startTournament} className="startTournament">Start Tournament</button>
+                }
+                <div className="error"></div>
               </div>
             </>
           )}
