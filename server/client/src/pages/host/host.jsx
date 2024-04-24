@@ -2,15 +2,16 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from 'react-router-dom'; //j
 import "./app.css";
 import Nav from "../../components/Nav";
-import { AuthContextProvider } from "../../context/AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 
+//const { user } = useContext(AuthContext);  // Assuming your auth context provides user details
 
 export default function Host() {
   const navigate = useNavigate();
   const [isHost, setIsHost] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [isDisplayed, setIsDisplayed] = useState(false);
+  const [isDisplayed, setIsDisplayed] = useState(true);
   const [btnIsDisplayed, setBtnIsDisplayed] = useState(true);
   const [specIsDisplayed, setSpecIsDisplayed] = useState(false);
   const [selectedType, setSelectedType] = useState("");
@@ -142,12 +143,8 @@ export default function Host() {
   };
 
   const handleClick = () => {
-    if (!isDisplayed) {
       setIsDisplayed(true);
-    }
-    if (btnIsDisplayed) {
       setBtnIsDisplayed(false);
-    }
   };
   const handleDescribeChange = (event) => {
     setDescribeVal(event.target.value);
@@ -257,6 +254,8 @@ export default function Host() {
   ];
 
   const handleSubmit = async (e) => {
+    e.preventDefault(); // This stops the form from submitting traditionally
+    console.log("handleSubmit is triggered");
     if (describeVal === "") {
       e.preventDefault();
       setDescribeError(true);
@@ -318,10 +317,10 @@ export default function Host() {
     if(selectedType==="Bracket"){
     var formData = {
       title:titleVal,
+      teamSize: teamSize,
       description: describeVal,
       type: selectedType,
       category: selectedGame,
-      teamSize: teamSize,
       entryFee: entryFee,
       accessibility: selectedEntryMode,
       maxCapacity : numberOfBrackets
@@ -375,7 +374,7 @@ export default function Host() {
             <div id="btnTournament">
               <button
                 id="createTournament"
-                onClick={handleClick}
+                onClick={() => setIsDisplayed(true)}
                 style={{ display: btnIsDisplayed ? "block" : "none" }}
               >
                 Press here to create your tournament
@@ -498,8 +497,8 @@ export default function Host() {
                   {inputPrizes.map((input, index) => (
                     <div key={index}>{input}</div>
                   ))}
-                  <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddRank() }} value="Add Rank" />
-                  <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleRemoveRank() }} value="Remove Rank" />
+                  <input type="button" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddRank() }} value="Add Rank" />
+                  <input type="button" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleRemoveRank() }} value="Remove Rank" />
                   {isValidated ? null : <div id="rankError">if you wish to add more prize rank, you should increase the number of participants above!</div>}
                   {isValidated2 ? null : <div id="rankError">If you wish to continue, you should remove ranks until they equal the number of participants.</div>}
                   {prizeRankError ?<div id="rankError">If you wish to continue, you should at least offer a prize to the first-place winner.</div>:null}
