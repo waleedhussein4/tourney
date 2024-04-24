@@ -5,7 +5,7 @@ const { auth, getAuth } = require("../middleware/requireAuth")
 
 
 //tournaments
-router.get('/', auth, getAllTournaments);
+router.get('/', getAllTournaments);
 
 
 //new tourney
