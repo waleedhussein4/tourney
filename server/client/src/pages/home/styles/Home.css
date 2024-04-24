@@ -1,92 +1,190 @@
-#Home .search_icon {
-  width: 16px;
-  height: 16px;
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+:root {
+  --primary-color: #000000; 
+  --accent-color: #1a8a34; 
+  --highlight-color: #2bc44b; 
+  --text-color: #ffffff; 
+  --subtext-color: #cccccc; 
+  --animation-duration: 0.5s; 
+}
+
+body, html {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  height: 100%;
+  width: 100%;
+  overflow-y: auto; /* Scroll vertical */
+  overflow-x: hidden; /* Hide horiz scroll */
+}
+
+h1, h2, h3, button {
+  font-family: 'Orbitron', sans-serif;
+}
+
+#Home { 
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-color);
+  background-color: var(--primary-color);
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #Home .about {
-  width: 70%;
-  height: 50%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
   text-align: center;
-  margin-top: 3em;
-  gap: 2em;
+  gap: 1em;
+  padding: 4em 0;
 }
 
-#Home .about h1{
-  color: white;
-  text-align: center;
-  font-weight: lighter;
-  font-size: 50px;
-
-}
-
-#Home .about p{
-  color: white;
-  font-size: 20px;
-  font-weight: normal;
-}
-
-#Home .about .slogan {
-  text-align: center;
-  color: white;
-  font-size: 50px;
+#Home .about h1 {
+  color: var(--accent-color);
+  font-size: 5em;
+  text-transform: uppercase;
   font-weight: bold;
+  letter-spacing: 2px;
+  margin: 0;
+  animation: slideInFromLeft 1s ease-in-out;
+}
+
+#Home .about p {
+  font-size: 1.25em;
+  max-width: 800px;
+  margin: auto;
+}
+
+#Home .slogan {
+  font-size: 2.5em;
+  font-weight: bold;
+  margin-top: 1em;
 }
 
 #Home #main {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 7em;
   align-items: center;
-  background-color: black;
+  gap: 4em;
+  padding: 2em 0;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
 }
 
-#Home #home-search {
-  width: 90%;
-  background-color: white;
-  border: 2pt solid white;
-  border-radius: 4pt;
-  padding: 0.5em;
-  font-size: 1.1em;
+#Home .tournament-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4em;
+}
+#Home .trending-title {
+  color: var(--text-color);
+  background-color: var(--primary-color);
+  text-align: left; /* Align text to the left */
+  font-size: 2rem;
+  padding: 1rem 2.5%;
+  width: 95%;
+  position: sticky;
+  top: 0;
+  left: 0 !important; /* Align the title to the left */
+  z-index: 10;
 }
 
-#Home #suggest-join {
-  width: 90%;
-  color: white;
-  display: flex;
-  flex-direction: row;
-  gap: 3em;
-  align-items: center;
-  justify-content: space-between;
-}
 
-#Home .description {
+
+#Home .bracket,
+#Home .battle-royale {
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
-  line-height: 1.5em;
+  align-items: center;
+  gap: 1em;
+}
+
+#Home .bracket img,
+#Home .battle-royale img {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease-in-out;
+}
+
+#Home .bracket img:hover,
+#Home .battle-royale img:hover {
+  transform: scale(1.1);
+}
+
+#Home .bracket .description,
+#Home .battle-royale .description {
+background-color: rgba(255, 255, 255, 0.1);
+backdrop-filter: blur(10px);
+padding: 1.5em;
+border-radius: 20px;
+border: 2px solid var(--accent-color);
+font-size: 1em;
+color: var(--text-color);
+max-width: 80%;
+text-align: center;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#Home .bracket {
+grid-column: 1;
+}
+
+#Home .battle-royale {
+grid-column: 2;
 }
 
 #Home .browseBtn {
-  height: fit-content;
-  width: fit-content;
-  padding: 1em;
-  background-color: #eee;
-  color: #666;
-  text-decoration: none; /* Remove underline */
+padding: 0.8em 2em;
+background-color: var(--highlight-color);
+color: var(--text-color);
+border-radius: 30px;
+text-transform: uppercase;
+font-weight: bold;
+letter-spacing: 1px;
+transition: background-color 0.3s, transform 0.3s;
+margin-top: 2em;
 }
 
 #Home .browseBtn:hover {
-  opacity: 0.9;
-  cursor: pointer;
-  background-color: #ddd;
+background-color: var(--accent-color);
+transform: scale(1.05);
+cursor: pointer;
 }
 
-#Home .browseBtn:hover {
-  opacity: 0.9;
-  cursor: pointer;
-  background-color: #ddd;
+@media (max-width: 768px) {
+#Home .about h1 {
+font-size: 3em;
+}
+
+#Home .slogan {
+font-size: 1.5em;
+}
+
+#Home .section img {
+width: 150px;
+height: 150px;
+}
+
+#Home .section .description {
+font-size: 0.9em;
+}
+}
+
+/* Keyframe Animations */
+@keyframes slideInFromLeft {
+from {
+transform: translateX(-50%);
+opacity: 0;
+}
+to {
+transform: translateX(0);
+opacity: 1;
+}
 }
