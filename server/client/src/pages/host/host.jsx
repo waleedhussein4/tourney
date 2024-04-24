@@ -318,24 +318,24 @@ export default function Host() {
     if(selectedType==="Bracket"){
     var formData = {
       title:titleVal,
-      host:data.user,
       description: describeVal,
       type: selectedType,
       category: selectedGame,
       teamSize: teamSize,
       entryFee: entryFee,
-      accessibility: selectedEntryMode
+      accessibility: selectedEntryMode,
+      maxCapacity : numberOfBrackets
     };}
     else{
       var formData = {
         title:titleVal,
-        host:data.user,
         description: describeVal,
         type: selectedType,
         category: selectedGame,
         teamSize: teamSize,
         entryFee: entryFee,
-        accessibility: selectedEntryMode
+        accessibility: selectedEntryMode,
+        maxCapacity:maxParticipants
       };
     }
     try {

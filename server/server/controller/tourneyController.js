@@ -8,23 +8,36 @@ const generateAndAddUsersToTournament = require('./tester');
 
 // Create a new tournament
 const createTournament = async (req, res) => {
-  const { title, type, teamSize,category,description, startDate, endDate, teamData, entryFee, maxCapacity, accessibility, applicationRequirements } = req.body;
+  const { title, type, teamSize,category,description, entryFee, maxCapacity, accessibility, applicationRequirements } = req.body;
   const id = uuidv4();
   try {
     const newTournament = await Tournament.create({
             _id: id,
             UUID: id,
-            host : id,
+            host : req.user,
             title: title,
             teamSize : teamSize, 
             description: description,
             type: type,
             category: category,
-            startDate: new Date(startDate),
-            endDate: new Date(endDate),
+            startDate: "2024-04-24T02:09:13.636+00:00",
+            endDate: "2024-02-29T10:02:10.959+00:00",
             hasStarted: false,
             hasEnded: false,
-            enrolledTeams: teamData,
+            enrolledTeams: [
+              {
+                teamName: "Team 1",
+                players: [
+                  {
+                    UUID: "9410f264-0bef-4516-b3ea-661c575490f2",
+                  },
+                  {
+                    UUID: "9410f264-0bef-4516-b3ea-661c575492f2",
+                  }
+                ],
+                score: 0,
+                eliminated: true
+              },],
             entryFee: entryFee,
             earnings: {
                 "1": 200,
@@ -34,7 +47,18 @@ const createTournament = async (req, res) => {
             maxCapacity: maxCapacity,
             accessibility: accessibility,
             updates: [],
-            application: applicationRequirements,
+            application: [
+              {
+                name: "Name"
+              },
+              {
+                name: "Age"
+              },
+              {
+                name: "Epic Games Username"
+              }
+            ],
+          
             acceptedUsers: [],
             applications: []
     });
