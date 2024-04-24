@@ -8,7 +8,16 @@ const generateAndAddUsersToTournament = require('./tester');
 
 // Create a new tournament
 const createTournament = async (req, res) => {
-  const { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity } = req.body;
+  let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity } = req.body;
+  category = category.toLowerCase();
+  accessibility = accessibility.toLowerCase();
+  type = type.toLowerCase();
+  if (type === "bracket") {
+    type = "brackets"
+  }
+  if (type === "battleroyale") {
+    type = "battle royale"
+  }
   console.log(req.body)
   const id = uuidv4();
   console.log(id)
@@ -18,64 +27,36 @@ const createTournament = async (req, res) => {
   //       errors.push("Description is more than 200 chars.");
   //   }
 
-    if (parseInt(teamSize) === 0) {
-        errors.push("Can't be an empty team.");
-    }
+  if (parseInt(teamSize) === 0) {
+    errors.push("Can't be an empty team.");
+  }
 
   //   // if (typeof teamSize === 'string') {
   //   //     errors.push("Team size must be an integer.");
   //   // }
 
-  //   if (earnings !== undefined && earnings <= -1) {
-  //       errors.push("Earnings must be positive.");
-  //   }
-  //   console.log(typeof entryFee)
-  //   // if (typeof entryFee === 'string') {
-  //   //     errors.push("Entry fee must be an integer.");
-  //   // }
+  // if (earnings !== undefined && earnings <= -1) {
+  //     errors.push("Earnings must be positive.");
+  // }
+  // console.log(typeof entryFee)
+  // // if (typeof entryFee === 'string') {
+  // //     errors.push("Entry fee must be an integer.");
+  // // }
 
-  //   if (typeof type !== 'string') {
-  //       errors.push("Type must be a string.");
-  //   }
-    console.log(errors)
-    if (errors.length > 0) {
-        return res.status(400).send({ errors });
-    }
+  // if (typeof type !== 'string') {
+  //     errors.push("Type must be a string.");
+  // }
+  // console.log(errors)
+  // if (errors.length > 0) {
+  //     return res.status(400).send({ errors });
+  // }
 
   let newTournament
   try {
-    console.log(teamSize)
-    if (type === "Bracket") {
-      if(parseInt(teamSize) === 1){
+    console.log('teamsize: ' + teamSize)
+    if (type === "brackets") {
+      if (parseInt(teamSize) === 1) {
         console.log("in if")
-      newTournament = await Tournament.create({
-        _id: id,
-        UUID: id,
-        host: req.user,
-        title: title,
-        teamSize: teamSize,
-        description: description,
-        type: type.toLowerCase(),
-        category: category.toLowerCase(),
-        startDate: "2024-04-24T02:09:13.636+00:00",
-        endDate: "2024-02-29T10:02:10.959+00:00",
-        hasStarted: false,
-        hasEnded: false,
-        enrolledTeams: [],
-        enrolledUsers: [],
-        entryFee: entryFee,
-        earnings: earnings,
-        maxCapacity: maxCapacity*teamSize,
-        accessibility: accessibility,
-        matches: [],
-        updates: [],
-        application: [],
-        acceptedUsers: [],
-        acceptedTeams: [],
-        applications: []
-      })}
-      console.log('iseeu')
-      if(parseInt(teamSize) > 1){
         newTournament = await Tournament.create({
           _id: id,
           UUID: id,
@@ -93,7 +74,7 @@ const createTournament = async (req, res) => {
           enrolledUsers: [],
           entryFee: entryFee,
           earnings: earnings,
-          maxCapacity: maxCapacity*teamSize,
+          maxCapacity: maxCapacity * teamSize,
           accessibility: accessibility,
           matches: [],
           updates: [],
@@ -101,10 +82,40 @@ const createTournament = async (req, res) => {
           acceptedUsers: [],
           acceptedTeams: [],
           applications: []
-        })}
+        })
+      }
+      console.log('iseeu')
+      if (parseInt(teamSize) > 1) {
+        newTournament = await Tournament.create({
+          _id: id,
+          UUID: id,
+          host: req.user,
+          title: title,
+          teamSize: teamSize,
+          description: description,
+          type: type.toLowerCase(),
+          category: category.toLowerCase(),
+          startDate: "2024-04-24T02:09:13.636+00:00",
+          endDate: "2024-02-29T10:02:10.959+00:00",
+          hasStarted: false,
+          hasEnded: false,
+          enrolledTeams: [],
+          enrolledUsers: [],
+          entryFee: entryFee,
+          earnings: earnings,
+          maxCapacity: maxCapacity * teamSize,
+          accessibility: accessibility,
+          matches: [],
+          updates: [],
+          application: [],
+          acceptedUsers: [],
+          acceptedTeams: [],
+          applications: []
+        })
+      }
     };
-    console.log(newTournament)
-    if (type === "Battle Royale") {
+    console.log('type: ' + type.toLowerCase())
+    if (type.toLowerCase() === "battle royale") {
       console.log('battle royALE')
       if (parseInt(teamSize) === 1) {
         newTournament = await Tournament.create({
@@ -159,6 +170,7 @@ const createTournament = async (req, res) => {
         })
       }
     }
+    console.log('newTournament: ' + newTournament)
     res.status(200).json(newTournament);
   } catch (error) {
     console.log("wrro")
@@ -754,7 +766,7 @@ const handleJoinAsSolo = async (req, res) => {
 
 
   // user must not already be part of tournament
-  if ((tournament.enrolledUsers.map(user => user.UUID)).includes(userUUID)) {
+  if ((tournament.enrolledUsers.map(user => user.UUID)).includes(req.user)) {
     return res.status(404).json({ error: 'Invalid request' })
   }
 
@@ -1534,32 +1546,32 @@ const startTournament = async (req, res) => {
 
   const tournament = await Tournament.findOne({ _id: UUID });
   if (!tournament) {
-    return res.status(404).json({error:'Tournament not found'});
+    return res.status(404).json({ error: 'Tournament not found' });
   }
 
   // check if user is host
   if (tournament.host != req.user) {
-    return res.status(401).json({error:'Unauthorized'});
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   // ensure tournament hasnt started
   if (tournament.hasStarted) {
-    return res.status(400).json({error:'Tournament has already started'});
+    return res.status(400).json({ error: 'Tournament has already started' });
   }
 
   // ensure tournament hasnt ended
   if (tournament.hasEnded) {
-    return res.status(400).json({error:'Tournament has already ended'});
+    return res.status(400).json({ error: 'Tournament has already ended' });
   }
 
   // ensure startDate has passed
   if (tournament.startDate > new Date()) {
-    return res.status(400).json({error:'Expected tournament start date has not yet been reached.'});
+    return res.status(400).json({ error: 'Expected tournament start date has not yet been reached.' });
   }
 
   // ensure tournament has enough participants
   if (tournament.enrolledUsers?.length == tournament.maxCapacity || tournament.enrolledTeams?.length == tournament.maxCapacity) {
-    return res.status(400).json({error:'Not enough participants'});
+    return res.status(400).json({ error: 'Not enough participants' });
   }
 
   // start tournament
@@ -1574,34 +1586,34 @@ const endTournament = async (req, res) => {
 
   const tournament = await Tournament.findOne({ _id: UUID });
   if (!tournament) {
-    return res.status(404).json({ error: 'Tournament not found'});
+    return res.status(404).json({ error: 'Tournament not found' });
   }
 
   // check if user is host
   if (tournament.host != req.user) {
-    return res.status(401).json({ error: 'Unauthorized'});
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   // ensure tournament has started
   if (!tournament.hasStarted) {
-    return res.status(400).json({error:'Tournament has not started'});
+    return res.status(400).json({ error: 'Tournament has not started' });
   }
 
   // ensure tournament hasnt ended
   if (tournament.hasEnded) {
-    return res.status(400).json({ error: 'Tournament has already ended'});
+    return res.status(400).json({ error: 'Tournament has already ended' });
   }
 
   // ensure endDate has passed
   if (tournament.endDate > new Date()) {
-    return res.status(400).json({ error: 'Expected tournament end date has not yet been reached.'});
+    return res.status(400).json({ error: 'Expected tournament end date has not yet been reached.' });
   }
 
   // end tournament
   tournament.hasEnded = true;
   await tournament.save();
 
-  res.status(200).json({message:'Tournament ended'});
+  res.status(200).json({ message: 'Tournament ended' });
 }
 
 module.exports = {
