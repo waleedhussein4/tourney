@@ -1413,6 +1413,11 @@ const startTournament = async (req, res) => {
     return res.status(400).json({error:'Tournament has already ended'});
   }
 
+  // ensure startDate has passed
+  if (tournament.startDate > new Date()) {
+    return res.status(400).json({error:'Expected tournament start date has not yet been reached.'});
+  }
+
   // ensure tournament has enough participants
   if (tournament.enrolledUsers?.length == tournament.maxCapacity || tournament.enrolledTeams?.length == tournament.maxCapacity) {
     return res.status(400).json({error:'Not enough participants'});
