@@ -8,11 +8,18 @@ const generateAndAddUsersToTournament = require('./tester');
 
 // Create a new tournament
 const createTournament = async (req, res) => {
-  const { title, teamSize, description, type, category, entryFee, accessibility,maxCapacity} = req.body;
+  const { title, teamSize, description, type, category, entryFee, earnings, accessibility,maxCapacity} = req.body;
   console.log(req.body)
-  console.log(req.user)
   const id = uuidv4();
+  if(description.length > 200){
+     res.status(400).send("Description is more than 200 chars")
+  }
+
+  if(teamSize ===0){
+    res.status(400).send("Can't be an empty team")
+  }
   try {
+    if(type === "Bracket"){
     const newTournament = await Tournament.create({
             _id: id,
             UUID: id,
@@ -26,46 +33,75 @@ const createTournament = async (req, res) => {
             endDate: "2024-02-29T10:02:10.959+00:00",
             hasStarted: false,
             hasEnded: false,
-            enrolledTeams: [
-              {
-                teamName: "Team 1",
-                players: [
-                  {
-                    UUID: "9410f264-0bef-4516-b3ea-661c575490f2",
-                  },
-                  {
-                    UUID: "9410f264-0bef-4516-b3ea-661c575492f2",
-                  }
-                ],
-                score: 0,
-                eliminated: true
-              },],
+            enrolledTeams: [],
+            enrolledUsers:[],
             entryFee: entryFee,
-            earnings: {
-                "1": 200,
-                "2": 100,
-                "3": 75
-            },
+            earnings: earnings,
             maxCapacity: maxCapacity,
             accessibility: accessibility,
+            matches:[],
             updates: [],
-            application: [
-              {
-                name: "Name"
-              },
-              {
-                name: "Age"
-              },
-              {
-                name: "Epic Games Username"
-              }
-            ],
-          
+            application: [],
+            acceptedUsers: [],
+            acceptedTeams:[],
+            applications: []
+    })};
+
+    if(type === "Battle Royale"){
+        if(teamSize === 1){
+          const newTournament = await Tournament.create({
+            _id: id,
+            UUID: id,
+            host : req.user,
+            title: title,
+            teamSize : teamSize, 
+            description: description,
+            type: type,
+            category: category,
+            startDate: "2024-04-24T02:09:13.636+00:00",
+            endDate: "2024-02-29T10:02:10.959+00:00",
+            hasStarted: false,
+            hasEnded: false,
+            enrolledUsers:[],
+            entryFee: entryFee,
+            earnings: earnings,
+            maxCapacity: maxCapacity,
+            accessibility: accessibility,
+            matches:[],
+            updates: [],
+            application: [],
             acceptedUsers: [],
             applications: []
-    });
+    })
+        }
+    if(teamSize >=2){
+      const newTournament = await Tournament.create({
+        _id: id,
+        UUID: id,
+        host : req.user,
+        title: title,
+        teamSize : teamSize, 
+        description: description,
+        type: type,
+        category: category,
+        startDate: "2024-04-24T02:09:13.636+00:00",
+        endDate: "2024-02-29T10:02:10.959+00:00",
+        hasStarted: false,
+        hasEnded: false,
+        enrolledTeams:[],
+        entryFee: entryFee,
+        earnings: earnings,
+        maxCapacity: maxCapacity,
+        accessibility: accessibility,
+        matches:[],
+        updates: [],
+        application: [],
+        acceptedTeams: [],
+        applications: []
+    })
+    }}
     res.status(200).json(newTournament);
-  } catch (error) {
+   }catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
