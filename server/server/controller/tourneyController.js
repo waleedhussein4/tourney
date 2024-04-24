@@ -321,80 +321,141 @@ async function createTournaments() {
     });
 
 
-  // let tournament2 = new Tournament({
-  //   _id: "10b72cfe-0b87-4395-8230-8e8e1f571cb7",
-  //   UUID: "89b72cfe-0b87-4395-8230-8e8e1f571cb7",
-  //   host: "d6cab22f-b734-4ad9-b43e-cde81a82b62b", // Waleed00
-  //   title: "Fortnite Duo Cup",
-  //   teamSize: 2,
-  //   description: "Enter the description of the tournament here. The length must be limited to 200 characters on the backend.",
-  //   type: "battle royale",
-  //   category: "fortnite",
-  //   startDate: new Date("2024-02-29T10:01:31.474Z"),
-  //   endDate: new Date("2024-02-29T10:02:10.959Z"),
-  //   hasStarted: false,
-  //   hasEnded: false,
-  //   enrolledTeams: [
-  //     {
-  //       teamName: "Team 1",
-  //       players: [
-  //         {
-  //           UUID: "9410f264-0bef-4516-b3ea-661c575490f2",
-  //         },
-  //         {
-  //           UUID: "9410f264-0bef-4516-b3ea-661c575492f2",
-  //         }
-  //       ],
-  //       score: 0,
-  //       eliminated: true
-  //     },
-  //     {
-  //       teamName: "Team 2",
-  //       players: [
-  //         {
-  //           UUID: "9410f264-0bef-4516-b3e4-661c575690f2",
-  //         },
-  //         {
-  //           UUID: "9410f264-0bef-4516-b3e2-661c575692f2",
-  //         }
-  //       ],
-  //       score: 0,
-  //       eliminated: false
-  //     }
-  //   ],
-  //   entryFee: 5.5,
-  //   earnings: {
-  //     "1": 200,
-  //     "2": 100,
-  //     "3": 75
-  //   },
-  //   maxCapacity: 100,
-  //   accessibility: "application required",
-  //   updates: [{
-  //     date: new Date("2024-02-29T10:01:31.474Z"),
-  //     content: "Tournament Started"
-  //   },
-  //   {
-  //     date: new Date("2024-02-29T10:02:10.959Z"),
-  //     content: "First Round Complete"
-  //   }
-  //   ],
-  //   application: [
-  //     {
-  //       name: "Name"
-  //     },
-  //     {
-  //       name: "Age"
-  //     },
-  //     {
-  //       name: "Epic Games Username"
-  //     }
-  //   ],
-  //   acceptedUsers: [],
-  //   acceptedTeams: [],
-  //   applications: [],
-  //   matches: []
-  // });
+  let tournament2 = new Tournament({
+    _id: "15b72cfe-0b87-4395-8230-8e8e1f571cb7",
+    UUID: "15b72cfe-0b87-4395-8230-8e8e1f571cb7",
+    host: "d6cab22f-b734-4ad9-b43e-cde81a82b62b", // Waleed00
+    title: "Fortnite Duo Cup",
+    teamSize: 2,
+    description: "The ultimate Fortnite duo championship. High stakes. High rewards. Only the best will emerge victorious",
+    type: "brackets",
+    category: "fortnite",
+    startDate: new Date("2024-04-23T17:30:00.000Z"),
+    endDate: new Date("2024-05-01T19:30:00.000Z"),
+    hasStarted: false,
+    hasEnded: false,
+    enrolledTeams: [
+      {
+        teamName: "Team 1",
+        players: [
+          {
+            UUID: "9410f265-0bef-4516-b3ea-661c575490f2",
+          },
+          {
+            UUID: "9410f267-0bef-4516-b3ea-661c575492f2",
+          }
+        ],
+        score: 0,
+        eliminated: false
+      },
+      {
+        teamName: "Team 2",
+        players: [
+          {
+            UUID: "9410f244-0bef-4516-b3e4-661c575690f2",
+          },
+          {
+            UUID: "9410f2a4-0bef-4516-b3e2-661c575692f2",
+          }
+        ],
+        score: 0,
+        eliminated: false
+      },
+      {
+        teamName: "Team 3",
+        players: [
+          {
+            UUID: "9410f264-0beg-4516-b3e4-661c575690f2",
+          },
+          {
+            UUID: "9410f264-0bzf-4516-b3e2-661c575692f2",
+          }
+        ],
+        score: 0,
+        eliminated: false
+      },
+      {
+        teamName: "Team 4",
+        players: [
+          {
+            UUID: "9410f264-0bef-4z16-b3e4-661c575690f2",
+          },
+          {
+            UUID: "9410f264-0bef-4516-b3e2-66xc575692f2",
+          }
+        ],
+        score: 0,
+        eliminated: false
+      },
+      {
+        teamName: "Team 5",
+        players: [
+          {
+            UUID: "9410f264-0bef-4516-b3e4-661c57b690f2",
+          },
+          {
+            UUID: "9410f264-0bef-4516-b3e2-661c575692l2",
+          }
+        ],
+        score: 0,
+        eliminated: false
+      },
+      {
+        teamName: "Team 6",
+        players: [
+          {
+            UUID: "9410f264-0bef-4516-b3e4-66hc575690f2",
+          },
+          {
+            UUID: "9410f264-0beh-4516-b3e2-661c575692f2",
+          }
+        ],
+        score: 0,
+        eliminated: false
+      },
+      {
+        teamName: "Team 7",
+        players: [
+          {
+            UUID: "9410f264-0bef-45m6-b3e4-661c575690f2",
+          },
+          {
+            UUID: "9410f264-0bef-4y16-b3e2-661c575692f2",
+          }
+        ],
+        score: 0,
+        eliminated: false
+      }
+    ],
+    entryFee: 5,
+    earnings: 50,
+    maxCapacity: 16,
+    accessibility: "application required",
+    updates: [],
+    application: [
+      {
+        name: "Names"
+      },
+      {
+        name: "Ages"
+      },
+      {
+        name: "Epic Games Usernames"
+      }
+    ],
+    acceptedUsers: [],
+    acceptedTeams: [],
+    applications: [],
+    matches: []
+  });
+
+  await tournament2.save()
+  .then(savedTournament => {
+    console.log('Tournament saved successfully:', savedTournament);
+  })
+  .catch(error => {
+    console.error('Error saving tournament:', error);
+  });
 }
 
 
@@ -1479,13 +1540,15 @@ const acceptApplication = async (req, res) => {
     return res.status(404).send('Tournament not found');
   }
 
+  // console.log('tournament:', tournament)
+
   // check if user is host
   if (tournament.host != req.user) {
     return res.status(401).send('Unauthorized');
   }
 
-  application = tournament.applications.find(app => app.UUID === applicationUUID);
-  console.log(application)
+  const application = tournament.applications.find(app => app.UUID === applicationUUID);
+  // console.log('application:', application)
   if (!application) {
     return res.status(404).send('Application not found');
   }
@@ -1493,6 +1556,7 @@ const acceptApplication = async (req, res) => {
   // add team to acceptedTeams
   const team = await Team.findOne({ _id: application.UUID });
   if (team) {
+    // console.log('pushed team uuid to acceptedTeams')
     tournament.acceptedTeams.push(team._id);
   }
   // add user to acceptedUsers
