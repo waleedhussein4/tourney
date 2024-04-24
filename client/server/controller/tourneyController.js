@@ -183,7 +183,9 @@ const newTournament = new Tournament({
     }
   ],
   acceptedUsers: [],
-  applications: []
+  acceptedTeams: [],
+  applications: [],
+  matches: []
 });
 
 
@@ -247,7 +249,7 @@ const deleteTournament = async (req, res) => {
 const getTournamentDisplayData = async (req, res) => {
 
 
-  // // delete all tournaments
+  // delete all tournaments
   // await Tournament.deleteMany({})
   //   .then(result => {
   //     console.log(`${result.deletedCount} tournaments deleted successfully.`);
@@ -271,7 +273,7 @@ const getTournamentDisplayData = async (req, res) => {
   // });
 
 
-  // // create new tournament
+  // create new tournament
   // await newTournament.save()
   //   .then(savedTournament => {
   //     console.log('Tournament saved successfully:', savedTournament);
@@ -446,10 +448,8 @@ const getTournamentDisplayData = async (req, res) => {
       // if team members include userUUID return true
 
       const enrolledTeams = tournament.enrolledTeams
-      console.log(enrolledTeams)
       for (let i = 0; i < enrolledTeams.length; i++) {
         const team = enrolledTeams[i]
-        console.log(team)
         if ((team.players.map(player => player.UUID)).includes(userUUID)) {
           return true
         }
@@ -458,7 +458,6 @@ const getTournamentDisplayData = async (req, res) => {
     }
     const isJoinedSolo = await checkIsJoinedSolo()
     const isJoinedTeam = await checkIsJoinedTeam()
-    console.log('isJoinedSolo', isJoinedSolo, 'isJoinedTeam', isJoinedTeam)
     const isJoined = isJoinedSolo || isJoinedTeam
 
     res.status(200).json({
@@ -483,7 +482,8 @@ const getTournamentDisplayData = async (req, res) => {
       hasStarted: tournament.hasStarted,
       startDate: tournament.startDate,
       endDate: tournament.endDate,
-      isJoined: isJoined
+      isJoined: isJoined,
+      matches: tournament.matches
     });
   } catch (error) {
     console.error(error);
@@ -1153,7 +1153,8 @@ const getManageTournamentDisplayData = async (req, res) => {
       hasStarted: tournament.hasStarted,
       startDate: tournament.startDate,
       endDate: tournament.endDate,
-      applications: transformedApps
+      applications: transformedApps,
+      matches: tournament.matches
     });
   } catch (error) {
     console.error(error);
@@ -1343,6 +1344,53 @@ const postUpdate = async (req, res) => {
 }
 
 const editSoloParticipants = async (req, res) => {
+  const { UUID, participants } = req.body;
+
+  const tournament = await Tournament.findOne({ _id: UUID });
+  if (!tournament) {
+    return res.status(404).send('Tournament not found');
+  }
+
+  // check if user is host
+  if (tournament.host != req.user) {
+    return res.status(401).send('Unauthorized');
+  }
+
+  // ensure tournament has started
+  // if (!tournament.hasStarted) {
+  //   return res.status(400).send('Tournament has not started');
+  // }
+
+  // ensure tournament is solo based
+  // if (tournament.teamSize != 1) {
+  //   return res.status(400).send('Tournament is not solo based');
+  // }
+
+  try {
+    // Create an array of update operations for each participant
+    const updateOperations = participants.map(participantData => ({
+      updateOne: {
+        filter: { _id: UUID, "enrolledUsers.UUID": participantData.UUID },
+        update: {
+          $set: {
+            "enrolledUsers.$.score": participantData.score,
+            "enrolledUsers.$.eliminated": participantData.eliminated
+          }
+        }
+      }
+    }));
+
+    // Execute all update operations in bulk
+    const result = await Tournament.bulkWrite(updateOperations);
+
+    console.log(result)
+
+    console.log(`${result.modifiedCount} participants in tournament '${UUID}' updated successfully.`);
+  } catch (error) {
+    console.error(`Error updating participants in tournament '${UUID}':`, error);
+  }
+
+  res.status(200).send('Participants updated');
 }
 
 const editTeamParticipants = async (req, res) => {
@@ -1394,6 +1442,113 @@ const editTeamParticipants = async (req, res) => {
   res.status(200).send('Participants updated');
 }
 
+const editMatches = async (req, res) => {
+  const { UUID, matches } = req.body;
+
+  const tournament = await Tournament.findOne({ _id: UUID });
+  if (!tournament) {
+    return res.status(404).send('Tournament not found');
+  }
+
+  // check if user is host
+  if (tournament.host != req.user) {
+    return res.status(401).send('Unauthorized');
+  }
+
+  // ensure tournament has started
+  // if (!tournament.hasStarted) {
+  //   return res.status(400).send('Tournament has not started');
+  // }
+
+  // ensure its brackets tournament
+  // if (tournament.type != 'brackets') {
+  //   return res.status(400).send('Tournament is not brackets based');
+  // }
+
+  try {
+    tournament.matches = matches
+    await tournament.save()
+  } catch (error) {
+    console.error(`Error updating matches in tournament '${UUID}':`, error);
+  }
+
+  res.status(200).send('Matches updated');
+}
+
+const startTournament = async (req, res) => {
+  const { UUID } = req.body;
+
+  const tournament = await Tournament.findOne({ _id: UUID });
+  if (!tournament) {
+    return res.status(404).json({error:'Tournament not found'});
+  }
+
+  // check if user is host
+  if (tournament.host != req.user) {
+    return res.status(401).json({error:'Unauthorized'});
+  }
+
+  // ensure tournament hasnt started
+  if (tournament.hasStarted) {
+    return res.status(400).json({error:'Tournament has already started'});
+  }
+
+  // ensure tournament hasnt ended
+  if (tournament.hasEnded) {
+    return res.status(400).json({error:'Tournament has already ended'});
+  }
+
+  // ensure startDate has passed
+  if (tournament.startDate > new Date()) {
+    return res.status(400).json({error:'Expected tournament start date has not yet been reached.'});
+  }
+
+  // ensure tournament has enough participants
+  if (tournament.enrolledUsers?.length == tournament.maxCapacity || tournament.enrolledTeams?.length == tournament.maxCapacity) {
+    return res.status(400).json({error:'Not enough participants'});
+  }
+
+  // start tournament
+  tournament.hasStarted = true;
+  await tournament.save();
+
+  res.status(200).json({ message: 'Tournament started' });
+}
+
+const endTournament = async (req, res) => {
+  const { UUID } = req.body;
+
+  const tournament = await Tournament.findOne({ _id: UUID });
+  if (!tournament) {
+    return res.status(404).json({ error: 'Tournament not found'});
+  }
+
+  // check if user is host
+  if (tournament.host != req.user) {
+    return res.status(401).json({ error: 'Unauthorized'});
+  }
+
+  // ensure tournament has started
+  if (!tournament.hasStarted) {
+    return res.status(400).json({error:'Tournament has not started'});
+  }
+
+  // ensure tournament hasnt ended
+  if (tournament.hasEnded) {
+    return res.status(400).json({ error: 'Tournament has already ended'});
+  }
+
+  // ensure endDate has passed
+  if (tournament.endDate > new Date()) {
+    return res.status(400).json({ error: 'Expected tournament end date has not yet been reached.'});
+  }
+
+  // end tournament
+  tournament.hasEnded = true;
+  await tournament.save();
+
+  res.status(200).json({message:'Tournament ended'});
+}
 
 module.exports = {
   createTournament,
@@ -1417,7 +1572,10 @@ module.exports = {
   rejectApplication,
   postUpdate,
   editSoloParticipants,
-  editTeamParticipants
+  editTeamParticipants,
+  editMatches,
+  startTournament,
+  endTournament
 };
 
 
