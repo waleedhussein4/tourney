@@ -1,91 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
+
+/* General body styling */
 #Signup body {
   margin: 0;
   padding: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(to left, #000000, #434343); /* Refined dark gradient similar to sign-in */
+  color: #FFFFFF;
 }
 
+/* Container styling */
 #Signup .container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-image: url("./assets/abstract-digital-grid-vector-black-background_53876-111550.avif");
+  background: none;
 }
 
 #Signup .container-center {
-  background-image: url("./assets/abstract-digital-grid-vector-black-background_53876-111550.avif");
-  border-radius: 6px;
-  width: 400px;
-  padding: 20px;
-  border: 1px solid whitesmoke;
+  background:  rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(15px);
+  border-radius: 12px;
+  width: 450px; /* Adjusted width to match sign-in */
+  padding: 40px; /* Increased padding for better spacing */
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
+/* Typography and layout enhancements */
 #Signup .container-center h2 {
-  color: #03fcff;
+  font-size: 28px; /* Enhanced title size */
+  color: #00FF76; /* Vibrant green for a modern look, replace #03fcff */
   text-align: center;
-  margin-top: 0;
+  margin-bottom: 20px; /* Increased spacing for a cleaner layout */
 }
 
-#Signup .container-center p {
-  color: white;
-  font-size: small;
-  margin: 10px 0;
-}
-
+/* Input field styling */
 #Signup .container-center input[type="text"],
 #Signup .container-center input[type="password"] {
-  padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-    margin-bottom: 10px;
-    width: calc( 100% - 10px);
-    outline: none;
-  transition: border-color 0.3s;
+  padding: 15px;
+  margin-top: 10px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-color: #ffffff20;
+  color: #FFFFFF;
+  width: calc(100% - 30px); /* Adjusted width */
+  font-size: 16px; /* Larger font size for readability */
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
+/* Input hover and focus states */
+#Signup .container-center input[type="text"]:hover, 
+#Signup .container-center input[type="password"]:hover,
+#Signup .container-center input[type="text"]:focus, 
+#Signup .container-center input[type="password"]:focus {
+  border-color: #00FF76; /* Coherent vibrant green */
+  box-shadow: 0 0 10px #00FF76; /* Added glow effect for interaction feedback */
+}
+
+/* Checkbox styling */
 #Signup .container-center input[type="checkbox"] {
   margin-top: 10px;
   margin-right: 5px;
-  background-color: aliceblue;
-  
+  background-color: #ffffff20; /* Adjusted for consistency */
 }
 
-#Signup #rememberPassword {
-  color: whitesmoke;
-  font-size: small;
-}
-
+/* Error styling */
 #Signup .error {
-  color: red;
-  text-align: center;
-  font-size: small;
+  color: #FF6347; /* Visible and alerting color for errors */
+  font-size: 14px; /* Scaled up for clarity */
   background-color: rgba(255, 0, 0, 0.1);
-  padding: 5px;
+  padding: 10px;
   margin-bottom: 10px;
 }
 
+/* Submit button styling */
 #Signup input[type="submit"] {
-  background-color: whitesmoke;
-  margin-top: 15px;
-  border-radius: 5px;
-  font-size: small;
-  color: gray;
-  width: calc(100% - 10px);
-  border: none;
-  height: 35px;
+  background-color: #00FF76; /* Bright green for visual impact */
+  color: black; /* High contrast for legibility */
+  font-weight: 700; /* Bold weight for prominence */
+  height: 50px; /* Increased height for better interaction */
+  width: 100%; /* Full width for a more professional look */
+  font-size: 18px; /* Enhanced font size */
+  border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 #Signup input[type="submit"]:hover {
-  background-color: #03fcff;
+  background-color: #029b46; /* Darker green on hover for depth */
+  transform: scale(1.05); /* Slight enlargement on hover for emphasis */
 }
 
+/* Links styling */
 #Signup a {
-  color: whitesmoke;
-}
-
-#Signup #account{
-  color: whitesmoke;
+  color: #00FF76; /* Adjusted to match vibrant green */
 }

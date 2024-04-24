@@ -1,7 +1,7 @@
 #Host {
   min-height: 100vh;
   margin: 0;
-  background-color: #000000; /* Pure black background */
+  background-color: #000000; 
   background-size: cover;
   animation: slideBackground 20s linear infinite;
 }
@@ -11,10 +11,10 @@
   padding: 20px;
   font-family: Roboto;
   padding-bottom: 150px;
-  background-color: rgba(255, 255, 255, 0.1); /* Light translucent overlay for contrast */
+  background-color: rgba(255, 255, 255, 0.1); 
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Darker shadow for depth */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); 
 }
 
 
@@ -22,27 +22,27 @@
   font-size: 42px; 
   font-weight: 700;
   text-align: center;
-  color: #ffffff; /* Changed to white */
+  color: #ffffff; 
 }
 
 #Host #page-description {
   margin-top: 10px; 
   font-size: 18px; 
   line-height: 1.5; 
-  color: #cccccc; /* Changed to light grey */
+  color: #cccccc; 
   text-align: center;
 }
 
 #Host .custom-line {
   border: none;
   height: 3px; 
-  background-color: #2bc44b; /* Changed to lighter green for emphasis */
+  background-color: #2bc44b; 
   margin: 20px 0;
 }
 
 #Host #createTournament {
   padding: 15px 30px; 
-  background-color: #1a8a34; /* Dark green */
+  background-color: #1a8a34; 
   font-size: large;
   color: white;
   border: none;
@@ -53,7 +53,7 @@
 }
 
 #Host #createTournament:hover {
-  background-color: #2bc44b; /* Lighter green on hover */
+  background-color: #2bc44b; 
 }
 
 #Host #createTournament:active {
@@ -69,7 +69,7 @@
 
 #Host #type h2 {
   font-size: 27px;
-  color: #ffffff; /* Changed to white */
+  color: #ffffff; 
 }
 
 #Host #chooseType {
@@ -85,7 +85,7 @@
 
 #Host #chooseType label {
   cursor: pointer;
-  color: #cccccc; /* Changed to light grey */
+  color: #cccccc; 
 }
 
 #Host #specification {
@@ -125,7 +125,7 @@
   bottom: 0;
   width: 100%;
   padding: 0;
-  background-color: #000000; /* Deep black */
+  background-color: #000000; 
   color: white;
   text-align: center;
   margin:0 -20px; 
@@ -134,7 +134,7 @@
 #Host footer input[type="submit"] {
   padding: 15px 0; 
   width: 100%;
-  background-color: #1a8a34; /* Dark green */
+  background-color: #1a8a34; 
   font-size: large;
   color: white;
   border: none;
