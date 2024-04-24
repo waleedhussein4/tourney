@@ -2,24 +2,41 @@ const Tournament = require('../models/tourneyModels');
 const Team = require('../models/teamModels');
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 const generateAndAddUsersToTournament = require('./tester');
 
 
 // Create a new tournament
 const createTournament = async (req, res) => {
-  const { UUID, title, description, category, teamSize, entryFee, prize, applications } = req.body;
-
-
+  const { host, title, type, category,description, startDate, endDate, teamData, entryFee, maxCapacity, accessibility, applicationRequirements } = req.body;
+  const id = uuidv4();
   try {
     const newTournament = await Tournament.create({
-      UUID,
-      title,
-      description,
-      category,
-      teamSize,
-      entryFee,
-      prize,
-      applications
+            _id: id,
+            UUID: id,
+            host,
+            title: title,
+            teamSize: 2, // Assuming team size is fixed
+            description: description,
+            type: type,
+            category: category,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+            hasStarted: false,
+            hasEnded: false,
+            enrolledTeams: teamData,
+            entryFee: entryFee,
+            earnings: {
+                "1": 200,
+                "2": 100,
+                "3": 75
+            },
+            maxCapacity: maxCapacity,
+            accessibility: accessibility,
+            updates: [],
+            application: applicationRequirements,
+            acceptedUsers: [],
+            applications: []
     });
     res.status(200).json(newTournament);
   } catch (error) {
