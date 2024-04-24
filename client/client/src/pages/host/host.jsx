@@ -332,6 +332,7 @@ export default function Host() {
       type: selectedType,
       category: selectedGame,
       entryFee: entryFee,
+      earnings:winnerPrize,
       accessibility: selectedEntryMode,
       maxCapacity : numberOfBrackets
     };}
@@ -343,6 +344,7 @@ export default function Host() {
         category: selectedGame,
         teamSize: teamSize,
         entryFee: entryFee,
+        earnings:winnerPrize,
         accessibility: selectedEntryMode,
         maxCapacity:maxParticipants
       };
