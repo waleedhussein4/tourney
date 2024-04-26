@@ -1,0 +1,77 @@
+#Credits {
+  background-color: #121212; /* Slightly off-black for a softer look */
+  height: 100%;
+  color: #ffffff; /* Ensures all text is white by default */
+}
+
+.credits-page {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.credits-page h1 {
+  font-size: 48px;
+  margin-bottom: 10px;
+  font-weight: 700; /* Added weight for emphasis */
+  text-transform: uppercase; /* Styling the header to stand out */
+  letter-spacing: 2px; /* Spacing out the letters for a touch of elegance */
+}
+
+.credits-page p {
+  font-size: 18px; /* Adjusted for better readability */
+  margin-bottom: 20px;
+  max-width: 800px; /* Constrain the width to enhance readability */
+  text-align: center; /* Ensures text is centered for aesthetics */
+  opacity: 0.8; /* Slightly transparent for a subtler appearance */
+}
+
+.credit-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Increased gap for better spacing */
+  justify-content: center; /* Centers the cards within the container */
+}
+
+.credit-card {
+  background-color: #1c1c1c; /* Dark cards for contrast against the text */
+  padding: 20px;
+  border-radius: 8px; /* More pronounced radius for a modern look */
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Subtle shadows for depth */
+  transition: transform 0.3s ease-in-out; /* Smooth transition for interaction */
+}
+
+.credit-card:hover {
+  transform: translateY(-10px); /* Lifts card on hover for a dynamic effect */
+}
+
+.credit-card h2 {
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: #e2dede; /* Light grey for a soft contrast */
+}
+
+.credit-card p {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #cccccc; /* Lighter grey for details */
+}
+
+.credit-card button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #2bc44b; /* Vibrant green for primary action */
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.credit-card button:hover {
+  background-color: #1a8a34; /* Darker green on hover */
+  transform: scale(1.1); /* Enlarge button slightly on hover */
+}

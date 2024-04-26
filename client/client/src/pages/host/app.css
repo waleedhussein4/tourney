@@ -1,0 +1,255 @@
+#Host {
+  min-height: 100vh;
+  margin: 0;
+  background-color: #000000; 
+  background-size: cover;
+  animation: slideBackground 20s linear infinite;
+}
+
+#Host #container {
+  width: 100%;
+  padding: 20px;
+  font-family: Roboto;
+  padding-bottom: 150px;
+  background-color: rgba(255, 255, 255, 0.1); 
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); 
+}
+
+
+#Host h1 {
+  font-size: 42px; 
+  font-weight: 700;
+  text-align: center;
+  color: #ffffff; 
+}
+
+#Host #page-description {
+  margin-top: 10px; 
+  font-size: 18px; 
+  line-height: 1.5; 
+  color: #cccccc; 
+  text-align: center;
+}
+
+#Host .custom-line {
+  border: none;
+  height: 3px; 
+  background-color: #2bc44b; 
+  margin: 20px 0;
+}
+
+#Host #createTournament {
+  padding: 15px 30px; 
+  background-color: #1a8a34; 
+  font-size: large;
+  color: white;
+  border: none;
+  border-radius: 8px; 
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%; 
+}
+
+#Host #createTournament:hover {
+  background-color: #2bc44b; 
+}
+
+#Host #createTournament:active {
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2); 
+}
+
+#Host #type {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+}
+
+#Host #type h2 {
+  font-size: 27px;
+  color: #ffffff; 
+}
+
+#Host #chooseType {
+  font-size: larger;
+  margin-top: 10px;
+}
+
+#Host #chooseType input[type="radio"] {
+  margin: 0px 5px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+#Host #chooseType label {
+  cursor: pointer;
+  color: #cccccc; 
+}
+
+#Host #specification {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#Host #specification #participantNumber, #Host #specification #bracketNumber {
+  display: none;
+}
+
+#Host .form-group {
+  width: 100%; 
+  margin: 10px;
+}
+
+#Host .form-group textarea {
+  margin-top: 10px;
+  padding: 5px;
+  width: calc(50% - 20px);
+  height: 120px;
+  border-radius: 8px;
+}
+
+#Host .form-group input[type="number"], #Host .form-group select {
+  width: calc(30% - 20px); 
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+#Host footer {
+  position: absolute; 
+  bottom: 0;
+  width: 100%;
+  padding: 0;
+  background-color: #000000; 
+  color: white;
+  text-align: center;
+  margin:0 -20px; 
+}
+
+#Host footer input[type="submit"] {
+  padding: 15px 0; 
+  width: 100%;
+  background-color: #1a8a34; 
+  font-size: large;
+  color: white;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#Host footer input[type="submit"]:hover {
+  background-color: #2bc44b; /* Lighter green on hover */
+}
+
+#Host footer input[type="submit"]:active {
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2); 
+}
+
+#Host .submitRank-App {
+  padding: 8px 16px;
+  background-color: #1a8a34; /* Dark green */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 3px;
+}
+
+#Host .submitRank-App:hover {
+  background-color: #2bc44b; /* Lighter green on hover */
+}
+
+#Host #form-rank {
+  width: calc(30% - 20px); 
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+#Host #form-rank input[type="number"] {
+  width: calc(80% - 20px); 
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+#Host #rankError {
+  color: red;
+  font-size: small;
+}
+
+#Host #form-app {
+  width: calc(50% - 20px); 
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+#Host #form-app input[type="text"] {
+  width: calc(80% - 20px); 
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+#Host #infoDiv, #Host #tourneyMode, #Host #divDesc, #Host .additionalInfo {
+  display: flex;
+  align-items: center;
+}
+
+#Host #tourneyMode {
+  justify-content: center;
+}
+
+#Host #form-app label {
+  font-size: large;
+  vertical-align: middle;
+  margin: 0 10px 0 10px;
+  cursor: pointer;
+}
+
+#Host #form-app input[type="radio"] {
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+#Host #teamTypeError {
+  font-size: small;
+  color: red;
+}
+
+#Host #divDesc {
+  display: flex;
+  align-items: center;
+}
+
+#Host .additionalInfo {
+  display: flex;
+}
+
+#Host .form-group input[type="text"] {
+  width: calc(30% - 20px); 
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
