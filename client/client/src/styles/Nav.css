@@ -1,0 +1,80 @@
+#nav {
+  position: relative; 
+  height: 50pt;
+  width: 100%;
+  padding: 1em 1em 1em 2em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
+  background-color: var(--color-primary);
+  border-bottom: 1pt solid white;
+}
+
+#nav #logo-nav {
+  height: 40pt;
+}
+
+#nav #options {
+  position: absolute;  
+  left: 50%;           
+  transform: translateX(-50%); 
+  display: flex;
+  justify-content: center;
+  gap: 5em;
+}
+
+#nav a {
+  text-decoration: none; 
+  color: var(--color-tertiary);
+}
+
+#nav #menu {
+  width: 26pt;
+}
+
+#nav .profilePic{
+  width: 60px;
+  padding: 10px;
+  border-radius: 30px;
+}
+
+#nav .profilePic:hover {
+  opacity: 0.9;
+}
+
+#nav #profile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.5em;
+}
+
+#nav .user-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5pt;
+  min-height: 100%;
+}
+
+#nav .user-credits {
+  color: rgba(255, 255, 255, 0.77);
+  font-size: 0.8em;
+}
+
+#nav .username {
+  color: white;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+#nav #profile #btn-logout {
+  color: var(--color-tertiary);
+}
+
+#nav #profile #btn-logout:hover {
+  opacity: 0.9;
+  cursor: pointer;
+}

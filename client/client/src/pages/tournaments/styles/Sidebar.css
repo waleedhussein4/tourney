@@ -1,0 +1,204 @@
+#Tournaments #sidebar {
+  background-color: var(--accent-color);
+  color: var(--text-color);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1em;
+  gap: 1em;
+  width: 30%;
+  border-radius: 10px; /* Add border-radius for rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add box-shadow for depth */
+}
+
+  #Tournaments #sidebar {
+    width: 100%; /* Make the sidebar take full width on smaller screens */
+    margin-bottom: 20px; /* Add margin at the bottom */
+  }
+
+
+  #Tournaments #searchbar {
+    padding: 0.6em;
+    width: 100%;
+    border: none; /* Remove border */
+    border-radius: 5px; /* Add border-radius */
+    background-color: var(--primary-color); /* Use primary color for background */
+    color: var(--text-color); /* Use text color for text */
+    font-size: 1em; /* Adjust font size */
+  }
+
+#Tournaments #searchbar:focus {
+  outline: none;
+}
+
+#Tournaments .filters-header {
+  font-weight: 700;
+  font-size: 1.2em;
+  text-align: center;
+  color: black; /* Use highlight color for header */
+  margin-bottom: 0.5em; /* Add margin bottom for spacing */
+}
+
+#Tournaments #filter-category-input {
+  padding: 0.6em;
+  width: 100%;
+  border: none; /* Remove border */
+  border-radius: 5px; /* Add border-radius */
+  background-color: var(--primary-color); /* Use primary color for background */
+  color: var(--text-color); /* Use text color for text */
+  font-size: 1em; /* Adjust font size */
+}
+
+#Tournaments #filter-category-input:focus {
+  outline: none;
+}
+
+#Tournaments #category-search-results {
+  background-color: black;
+  border: 2px solid green;
+  width: calc(30% - 2em);
+  
+  max-height: 200pt;
+
+  overflow-y: auto;
+  position: absolute;
+  
+  display: none;
+  color: black;
+}
+
+#Tournaments #category-search-results::after {
+  display: none;
+}
+
+#Tournaments .category-search-result {
+  background-color: black;
+  height: 75pt;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#Tournaments .category-search-result:hover {
+  cursor: pointer;
+  background-color: rgb(34, 34, 34);
+}
+
+#Tournaments .category-search-result-img {
+  height: 100%;
+  width: 50pt;
+}
+
+#Tournaments .category-search-result-img img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+#Tournaments .category-search-result>p {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  color: var(--color-tertiary);
+  flex: 1;
+  text-align: center;
+  font-size: 1.2em;
+}
+
+#Tournaments .active-category {
+  background-color: rgb(34, 34, 34);
+}
+
+#Tournaments ::-webkit-scrollbar {
+  width: 10px;
+  height: 100%;
+}
+
+#Tournaments ::-webkit-scrollbar-track {
+  background: black; 
+}
+ 
+#Tournaments ::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+#Tournaments ::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
+#Tournaments #filters {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1em;
+  user-select: none;
+  flex: 1;
+}
+
+#Tournaments .filter .name {
+  font-weight: 600;
+  font-size: 1.1em;
+  margin-bottom: 0.2e;
+}
+
+#Tournaments .radio {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+#Tournaments .radio-item {
+  display: flex;
+  flex-direction: row;
+  gap: 0.2em;
+  justify-content: center;
+  align-items: center;
+  height: 1em;
+}
+
+#Tournaments .valueDisplay {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+#Tournaments .valueDisplay>* {
+  display: flex;
+  flex-direction: row;
+  gap: 0.1em;
+  justify-content: center;
+  align-items: center;
+}
+
+#Tournaments .valueDisplay input {
+  width: 4em;
+}
+
+#Tournaments #type-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+#Tournaments #type-buttons .type-button,
+#Tournaments #accessibility-buttons .accessibility-button {
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#Tournaments #type-buttons .type-button:hover,
+#Tournaments #accessibility-buttons .accessibility-button:hover {
+  background-color: var(--highlight-color);
+  color: var(--text-color);
+}
+
+#Tournaments #type-buttons .type-button.active,
+#Tournaments #accessibility-buttons .accessibility-button.active {
+  background-color: var(--highlight-color);
+  color: var(--text-color);
+}
