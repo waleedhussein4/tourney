@@ -1,0 +1,39 @@
+:root {
+  font-family: Raleway;
+  font-size: 14px;
+  --color-primary: black;
+  --color-secondary: darkgray;
+  --color-tertiary: rgb(0, 169, 73);
+  --color-red: rgb(165, 14, 14);
+  --color-green: #28a745;
+}
+
+@font-face {
+  font-family: Raleway;
+  src: url('/src/assets/fonts/Raleway/Raleway-VariableFont_wght.ttf');
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  background-image: url(../assets/body1.jpeg);
+  background-repeat:no-repeat ;
+  background-attachment:fixed ;
+  background-position:center ;
+  background-size:cover ;
+}
+
+#root {
+  height: 100%;
+}

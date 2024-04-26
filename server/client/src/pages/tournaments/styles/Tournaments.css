@@ -1,0 +1,153 @@
+/* Tournaments.css */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap');
+
+:root {
+  --primary-color: #121212; /* Dark grey for background */
+  --accent-color: #1db954; /* Green for CTAs and highlights */
+  --highlight-color: #2bc44b; /* Light green for emphasis */
+  --text-color: #ffffff; /* White for primary text */
+  --subtext-color: #aaaaaa; /* Grey for secondary text */
+  --card-bg-color: #1e1e1e; /* Card background color */
+  --card-border-color: #333333; /* Card border color */
+  --card-border-hover-color: #1a8a34; /* Card border color on hover */
+  --animation-duration: 0.3s; /* Smooth transitions for hover effects */
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--primary-color);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+
+#Tournaments {
+  display: row;
+  flex-wrap: wrap;
+  flex-direction: row;
+  grid-template-columns: 1fr;
+
+
+}
+
+#Tournaments #nav {
+  flex: 1 0 auto;
+}
+
+#Tournaments #sidebar {
+  /* flex: 0.2; */
+  width: 30%;
+}
+
+#Tournaments #tournaments {
+  display: row;
+  gap: 1.5em;
+  overflow: hidden;
+  overflow-y: auto;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  padding: 0.5em;
+  
+}
+
+
+#content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+#content h1 {
+  color: var(--text-color);
+}
+
+#tournaments {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  width: 100%;
+  justify-content: space-between;
+}
+
+.tournament {
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--card-border-color);
+  border-radius: 8px;
+  padding: 15px;
+  color: var(--text-color);
+  transition: border-color var(--animation-duration) ease-in-out;
+}
+
+.tournament:hover {
+  border-color: var(--card-border-hover-color);
+}
+
+.tournament .title a {
+  display: block;
+  font-family: 'Roboto Slab', serif;
+  color: var(--accent-color);
+  font-size: 18px;
+  margin-bottom: 10px;
+  text-decoration: none;
+}
+
+.tournament .content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--subtext-color);
+}
+
+.tournament .content span {
+  display: block; /* Each span will be on a new line */
+  margin-bottom: 5px;
+}
+
+.tournament .view {
+  display: block;
+  text-align: center;
+  background-color: var(--accent-color);
+  color: var(--primary-color);
+  padding: 10px;
+  margin-top: 15px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color var(--animation-duration) ease;
+}
+
+.tournament .view:hover {
+  background-color: var(--highlight-color);
+}
+
+
+#sidebar {
+  width: 30%;
+  padding: 20px;
+  background-color: var(--accent-color);
+  border-radius: 8px;
+  margin-right: 20px; /* Add margin to create space between sidebar and tournaments */
+}
+
+@media (max-width: 768px) {
+  #sidebar {
+    width: 100%; /* Make sidebar take full width on smaller screens */
+    margin-bottom: 20px; /* Add margin at the bottom to create space */
+    margin-right: 0; /* Remove right margin on smaller screens */
+  }
+}
+
+
+@media (max-width: 768px) {
+  #tournaments {
+    grid-template-columns: 1fr;
+  }
+
+  .tournament .title a {
+    font-size: 16px;
+  }
+
+  .tournament .content {
+    font-size: 13px;
+  }
+}
