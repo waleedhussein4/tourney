@@ -1,0 +1,145 @@
+/* BecomeHost.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Orbitron:wght@500&display=swap');
+
+:root {
+  --primary-color: #000000; 
+  --accent-color: #1a8a34; 
+  --highlight-color: #2bc44b; 
+  --text-color: #ffffff; 
+  --subtext-color: #cccccc; 
+  --animation-duration: 0.5s; 
+}
+
+body, html {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden; /* Prevent horizontl scroll */
+}
+
+h1, h2, h3, button {
+  font-family: 'Orbitron', sans-serif;
+}
+
+#BecomeHost {
+  animation: fadeIn var(--animation-duration) ease;
+}
+
+#BecomeHost .overall-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+#BecomeHost .become-host-container {
+  max-width: 700px;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.05); 
+  backdrop-filter: blur(10px); 
+  padding: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--accent-color);
+  text-align: center;
+  animation: popIn var(--animation-duration) ease;
+}
+
+#BecomeHost .title {
+  font-size: 48px;
+  margin-bottom: 10px;
+  color: var(--text-color);
+  animation: slideInFromLeft var(--animation-duration) ease;
+}
+
+#BecomeHost .highlight {
+  color: var(--highlight-color);
+}
+
+#BecomeHost .description, #BecomeHost .price-info {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: var(--subtext-color);
+  animation: slideInFromRight var(--animation-duration) ease;
+}
+
+#BecomeHost .price-info {
+  font-weight: bold;
+  background-color: var(--accent-color);
+  color: var(--text-color);
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+#BecomeHost .become-host-btn {
+  background-color: var(--highlight-color);
+  color: var(--text-color);
+  font-size: 20px;
+  padding: 15px 40px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s, background-color 0.3s;
+  animation: pulse var(--animation-duration) infinite alternate;
+}
+
+#BecomeHost .become-host-btn:hover {
+  transform: translateY(-3px);
+  background-color: #1a8a34; /* Dark green hover */
+}
+
+@media (max-width: 768px) {
+  #BecomeHost .overall-container,
+  #BecomeHost .become-host-container {
+    padding: 20px;
+  }
+
+  #BecomeHost .title {
+    font-size: 36px;
+  }
+
+  #BecomeHost .description, #BecomeHost .price-info {
+    font-size: 18px;
+  }
+
+  #BecomeHost .become-host-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 18px;
+  }
+}
+
+/* Keyframes for animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  @keyframes slideInFromLeft {
+    from { transform: translateX(-50%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes slideInFromRight {
+    from { transform: translateX(50%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes pulse {
+    from { transform: scale(1); box-shadow: 0 4px 15px var(--accent-color); }
+    to { transform: scale(1.05); box-shadow: 0 5px 20px var(--accent-color); }
+  }
+  
