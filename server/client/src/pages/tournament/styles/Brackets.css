@@ -3,11 +3,16 @@
   padding: 20px;
   box-sizing: border-box;
   height: 80%;
+  overflow: auto;
 }
 
 .brackets-container h1 {
   margin-top: 5%;
   color: #fff;
+}
+
+.brackets-container .tba {
+  color: var(--color-secondary);
 }
 
 .team-table {
