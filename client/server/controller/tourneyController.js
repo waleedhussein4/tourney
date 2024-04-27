@@ -8,7 +8,7 @@ const generateAndAddUsersToTournament = require('./tester');
 
 // Create a new tournament
 const createTournament = async (req, res) => {
-  let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity } = req.body;
+  let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity,applications } = req.body;
   console.log('Earnings: ' + earnings)
   category = category.toLowerCase();
   accessibility = accessibility.toLowerCase();
@@ -28,9 +28,9 @@ const createTournament = async (req, res) => {
   //       errors.push("Description is more than 200 chars.");
   //   }
 
-  if (parseInt(teamSize) === 0) {
-    errors.push("Can't be an empty team.");
-  }
+  // if (parseInt(teamSize) === 0) {
+  //   errors.push("Can't be an empty team.");
+  // }
 
   //   // if (typeof teamSize === 'string') {
   //   //     errors.push("Team size must be an integer.");
@@ -79,10 +79,10 @@ const createTournament = async (req, res) => {
           accessibility: accessibility,
           matches: [],
           updates: [],
-          application: [],
+          //application: [],
           acceptedUsers: [],
           acceptedTeams: [],
-          applications: []
+          applications: applications
         })
       }
       console.log('iseeu')
@@ -111,7 +111,7 @@ const createTournament = async (req, res) => {
           application: [],
           acceptedUsers: [],
           acceptedTeams: [],
-          applications: []
+          applications: applications 
         })
       }
     };
