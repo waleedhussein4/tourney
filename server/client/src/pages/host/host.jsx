@@ -39,7 +39,7 @@ export default function Host() {
   const [additionalInfoRequired, setAdditionalInfoRequired] = useState(false);
   const [additionalInfoList, setAdditionalInfoList] = useState([]);
   const [infoCounter, setInfoCounter] = useState(1);
-  const additionalInfoRef = useRef(null);
+  const additionalInfoRef = useRef([]);
   const [teamTypeError, setTeamTypeError] = useState(false);
   const teamTypeRef = useRef(null);
   const [bracketsError, setBracketsError] = useState(false);
@@ -89,20 +89,28 @@ export default function Host() {
 
   const handleAddInfo = () => {
     if (infoCounter <= 5) {
-      const newInfo = (
-        <div key={infoCounter}>
-          * <input type="text" ref={additionalInfoRef} />
-        </div>
-      );
-      setAdditionalInfoList([...additionalInfoList, newInfo]);
-      setInfoCounter(infoCounter + 1);
+      const newRef = React.createRef();
+      additionalInfoRef.current[infoCounter] = newRef;
+  
+      const newInfo = {
+        key: infoCounter,
+        ref: newRef,
+        question: `Question ${infoCounter}`  // Make sure this is correctly assigned
+      };
+  
+      setAdditionalInfoList(prevList => {
+        const newList = [...prevList, newInfo];
+        console.log("Updated additionalInfoList:", newList);
+        return newList;
+      });
+      setInfoCounter(prevCounter => prevCounter + 1);
+      console.log("Added new info", newInfo);
     }
   };
-
+  
   const handleRemoveInfo = (indexToRemove) => {
-    const newList = additionalInfoList.filter((_, index) => index !== indexToRemove);
-    setAdditionalInfoList(newList);
-    setInfoCounter(infoCounter - 1);
+    setAdditionalInfoList(currentList => currentList.filter((_, index) => index !== indexToRemove));
+    additionalInfoRef.current.splice(indexToRemove, 1);
   };
 
   const handleAddRank = () => {
@@ -266,6 +274,15 @@ export default function Host() {
   const handleSubmit = async (e) => {
     e.preventDefault(); // This stops the form from submitting traditionally
     console.log("handleSubmit is triggered");
+    const applications = additionalInfoRef.current.map((ref, index) => {
+      const info = additionalInfoList[index]; // Capture the item at current index
+      if (ref.current && info) { // Check both ref and info are not undefined
+        return { question: info.question, answer: ref.current.value };
+      }
+      return null;
+    }).filter(item => item !== null);
+
+    console.log("Applications data :", applications)
     if (describeVal === "") {
       e.preventDefault();
       setDescribeError(true);
@@ -334,7 +351,8 @@ export default function Host() {
       entryFee: entryFee,
       earnings:winnerPrize,
       accessibility: selectedEntryMode,
-      maxCapacity : numberOfBrackets
+      maxCapacity : numberOfBrackets,
+      applications : applications
     };}
     else{
       formData = {
@@ -350,7 +368,7 @@ export default function Host() {
       };
     }
     try {
-      console.log("hi");
+      console.log("hi :" + formData);
       const response = await fetch('http://localhost:2000/api/tournement', {
         method: 'POST',
         headers: {
@@ -549,14 +567,15 @@ export default function Host() {
                 </div>
                 <div id="form-app" style={{ display: additionalInfoRequired ? 'block' : 'none' }}>
                   <h4>Please fill in any additional questions or information requests you have for applicants</h4>
-                  {additionalInfoList.map((input, index) => (
-                    <div key={index}>{input}
+                  {additionalInfoList.map((info,index) => (
+                    <div key={info.key}>
+                      <input type="text" ref={info.ref} placeholder={info.question}/>
                       <button type="button" onClick={() => handleRemoveInfo(index)}>
                         Delete
                       </button>
                     </div>
                   ))}
-                  <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddInfo() }} value="Add question/request" />
+                  <input type="button" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddInfo() }} value="Add question/request" />
 
                 </div>
                 <footer>
