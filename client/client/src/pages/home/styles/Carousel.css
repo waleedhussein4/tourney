@@ -12,7 +12,8 @@
 }
 
 ::-webkit-scrollbar {
-  height: 10pt;
+  height: 6pt;
+  width: 6pt;
 }
 
 ::-webkit-scrollbar-track {
@@ -20,7 +21,7 @@
 }
  
 ::-webkit-scrollbar-thumb {
-  background: #888; 
+  background: var(--color-secondary); 
 }
 
 ::-webkit-scrollbar-thumb:hover {

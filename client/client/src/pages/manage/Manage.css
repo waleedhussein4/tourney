@@ -250,6 +250,10 @@
   width: fit-content;
 }
 
+#Manage #matchesEditor .error {
+  color: var(--color-red);
+}
+
 #Manage .controlButtons {
   display: flex;
   flex-direction: row;
