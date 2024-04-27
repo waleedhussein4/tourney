@@ -1444,9 +1444,7 @@ images.set('league of legends', "https://cdn1.epicgames.com/offer/24b9b5e323bc40
 images.set('football', "https://upload.wikimedia.org/wikipedia/commons/4/42/Football_in_Bloomington%2C_Indiana%2C_1995.jpg")
 images.set('basketball', "https://static.owayo-cdn.com/newhp/img/magazin/basketballstatistikEN/basketball-statistics-670.jpg")
 images.set('valorant', "https://m.media-amazon.com/images/M/MV5BNmNhM2NjMTgtNmIyZC00ZmVjLTk4YWItZmZjNGY2NThiNDhkXkEyXkFqcGdeQXVyODU4MDU1NjU@._V1_FMjpg_UX1000_.jpg")
-
-
-
+images.set('rainbox six: siege', 'https://img.redbull.com/images/c_fill,g_auto,w_450,h_600/q_auto:low,f_auto/redbullcom/2019/02/14/5455aa48-c5fb-48e5-9d54-3d848c7c32a2/rainbow-six-sieges-operators-add-complexity-to-the-strategising')
 
 const getRandomTournaments = (tournaments) => {
   // Shuffle array using Durstenfeld shuffle algorithm for randomization
@@ -1483,7 +1481,7 @@ const getTrendingTournaments = async (req, res) => {
 }
 
 const getTournamentCategories = async (req, res) => {
-  const categories = ["fortnite", "counter strike", "tennis", "league of legends", "football", "basketball", "valorant"]
+  const categories = ["fortnite", "counter strike", "tennis", "league of legends", "football", "basketball", "valorant", "rainbox six: siege"]
   return res.json(categories)
 }
 
