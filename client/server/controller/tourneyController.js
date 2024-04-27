@@ -8,7 +8,7 @@ const generateAndAddUsersToTournament = require('./tester');
 
 // Create a new tournament
 const createTournament = async (req, res) => {
-  let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity,applications } = req.body;
+  let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity, applications } = req.body;
   console.log('Earnings: ' + earnings)
   category = category.toLowerCase();
   accessibility = accessibility.toLowerCase();
@@ -111,7 +111,7 @@ const createTournament = async (req, res) => {
           application: [],
           acceptedUsers: [],
           acceptedTeams: [],
-          applications: applications 
+          applications: applications
         })
       }
     };
@@ -500,12 +500,12 @@ async function createTournaments() {
   });
 
   await tournament3.save()
-  .then(savedTournament => {
-    console.log('Tournament saved successfully:', savedTournament);
-  })
-  .catch(error => {
-    console.error('Error saving tournament:', error);
-  });
+    .then(savedTournament => {
+      console.log('Tournament saved successfully:', savedTournament);
+    })
+    .catch(error => {
+      console.error('Error saving tournament:', error);
+    });
 }
 
 
@@ -1021,7 +1021,6 @@ const handleJoinAsSolo = async (req, res) => {
     return res.status(404).json({ error: 'Invalid request' })
   }
 
-
   // user must not already be part of tournament
   if ((tournament.enrolledUsers.map(user => user.UUID)).includes(req.user)) {
     return res.status(404).json({ error: 'Invalid request' })
@@ -1031,6 +1030,15 @@ const handleJoinAsSolo = async (req, res) => {
   if (tournament.host == req.user) {
     return res.status(404).json({ error: 'Invalid request' })
   }
+
+  // user must have enough credits to pay the entry fee
+  const user = await User.findOne({ _id: req.user });
+  if (user.credits < tournament.entryFee) {
+    return res.status(404).json({ error: 'Not enough credits' })
+  }
+
+  // deduct entry fee from user's credits
+  User.updateOne({ _id: req.user }, { $inc: { credits: -tournament.entryFee } })
 
   const newUser = {
     UUID: req.user,
@@ -1106,6 +1114,19 @@ const handleJoinAsTeam = async (req, res) => {
   // team members must not be host
   if (team.members.includes(tournament.host)) {
     return res.status(404).json({ error: 'Tournament host cannot join tournament' })
+  }
+
+  // team members must have enough credits to pay the entry fee
+  for (let member of team.members) {
+    const user = await User.findOne({ _id: member });
+    if (user.credits < tournament.entryFee) {
+      return res.status(404).json({ error: 'Not enough credits' })
+    }
+  }
+
+  // deduct credits from team members
+  for (let member of team.members) {
+    User.updateOne({ _id: member }, { $inc: { credits: -tournament.entryFee } })
   }
 
   const enrolledTeam = {
@@ -1779,15 +1800,42 @@ const editMatches = async (req, res) => {
     return res.status(401).send('Unauthorized');
   }
 
+  // ensure it is a brackets tournament
+  if (tournament.type != 'brackets') {
+    return res.status(400).send('Tournament is not brackets based');
+  }
+
+  // ensure winners are part of the tournament
+  if (tournament.teamSize == 1) {
+    for (let participant of matches) {
+
+      const user = await User.findOne({ username: participant });
+
+      if (!user) return res.status(404).json({ error: 'Match winners must be part of the tournament.' });
+
+    }
+  }
+
+  // ensure winners are part of the tournament
+  if (tournament.teamSize > 1) {
+    for (let participant of matches) {
+
+      const team = await Team.findOne({ name: participant });
+
+      if (!team) return res.status(404).json({ error: 'Match winners must be part of the tournament.' });
+
+    }
+  }
+
   // ensure tournament has started
-  // if (!tournament.hasStarted) {
-  //   return res.status(400).send('Tournament has not started');
-  // }
+  if (!tournament.hasStarted) {
+    return res.status(400).send('Tournament has not started');
+  }
 
   // ensure its brackets tournament
-  // if (tournament.type != 'brackets') {
-  //   return res.status(400).send('Tournament is not brackets based');
-  // }
+  if (tournament.type != 'brackets') {
+    return res.status(400).send('Tournament is not brackets based');
+  }
 
   try {
     tournament.matches = matches
@@ -1865,6 +1913,66 @@ const endTournament = async (req, res) => {
   // ensure endDate has passed
   if (tournament.endDate > new Date()) {
     return res.status(400).json({ error: 'Expected tournament end date has not yet been reached.' });
+  }
+
+  // give out earnings if solo bracket tournament
+  if (tournament.earnings && tournament.type == 'brackets' && tournament.teamSize == 1) {
+    const earnings = tournament.earnings;
+    const winnerUsername = tournament.matches[tournament.matches.length - 1];
+
+    // get user from username
+    const winner = await User.findOne({ username: winnerUsername });
+
+    // give earnings to winner
+    winner.credits += earnings;
+    await winner.save();
+  }
+
+  // give out earnings if team bracket tournament
+  if (tournament.earnings && tournament.type == 'brackets' && tournament.teamSize > 1) {
+    const earnings = tournament.earnings;
+    const winnerTeamName = tournament.matches[tournament.matches.length - 1];
+
+    // get team from teamName
+    const winner = await Team.findOne({ name: winnerTeamName });
+
+    // divide earnings among team members
+    const earningsPerMember = earnings / winner.members.length;
+    for (let member of winner.members) {
+      const user = await User.findOne({ _id: member });
+      user.credits += earningsPerMember;
+      await user.save();
+    }
+  }
+
+  // give out earnings if solo battle royale tournament
+  if (tournament.earnings && tournament.type == 'battle royale' && tournament.teamSize == 1) {
+    const earnings = tournament.earnings;
+    const usersSortedByScore = tournament.enrolledUsers.sort((a, b) => b.score - a.score);
+
+    earnings.forEach(async (earning, i) => {
+      const user = await User.findOne({ _id: usersSortedByScore[i].UUID });
+      user.credits += earning;
+      await user.save();
+    });
+  }
+
+  // give out earnings if team battle royale tournament
+  if (tournament.earnings && tournament.type == 'battle royale' && tournament.teamSize > 1) {
+    const earnings = tournament.earnings;
+    const teamsSortedByScore = tournament.enrolledTeams.sort((a, b) => b.score - a.score);
+
+    earnings.forEach(async (earning, i) => {
+      const team = await Team.findOne({ _id: teamsSortedByScore[i].UUID });
+
+      // divide earnings among team members
+      const earningsPerMember = earning / team.members.length;
+      for (let member of team.members) {
+        const user = await User.findOne({ _id: member });
+        user.credits += earningsPerMember;
+        await user.save();
+      }
+    });
   }
 
   // end tournament

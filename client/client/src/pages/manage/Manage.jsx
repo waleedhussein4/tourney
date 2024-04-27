@@ -38,23 +38,6 @@ function Manage() {
         setTournament(data);
         setTournamentType(data.type);
         setIsLoading(false);
-        // data.enrolledUsers = [
-        //   {
-        //     username: 'user1',
-        //     score: 10,
-        //     eliminated: false,
-        //   },
-        //   {
-        //     username: 'user2',
-        //     score: 20,
-        //     eliminated: false,
-        //   },
-        //   {
-        //     username: 'user3',
-        //     score: 30,
-        //     eliminated: true,
-        //   },
-        // ]
         console.log(data)
       });
   };
@@ -829,6 +812,11 @@ function Manage() {
           if (res.ok) {
             navigate(0)
           }
+          else {
+            res.json().then(data => {
+              document.querySelector('#matchesEditor .error').innerText = data.error
+            })
+          }
         })
     };
 
@@ -847,6 +835,7 @@ function Manage() {
           }
         </div>
         <button onClick={handleSaveAll}>Save All</button>
+        <span className="error"></span>
       </div>
     )
   }
