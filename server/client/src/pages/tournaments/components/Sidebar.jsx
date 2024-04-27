@@ -40,7 +40,7 @@ function Sidebar({tournaments, setTournaments, filters, setFilters, filteredTour
           <input id='searchbar' type="search" placeholder='ID, title...' name='search' />
         </div>
         <div id='filter-category' className="filter" data-name="category">
-          <span className="name">Enter Sport / E-Sport</span>
+          <span className="name">Category</span>
           <input id='filter-category-input' type="text" placeholder='Search' />
           <div id="category-search-results"></div>
         </div>
