@@ -4,7 +4,8 @@ import { AuthContext } from "/src/context/AuthContext";
 import "./styles/App.css";
 import Nav from "/src/components/Nav.jsx";
 import alpha_x from "/src/assets/alpha-x.svg";
-import Brackets from "./components/Brackets";
+import SoloBrackets from "./components/SoloBrackets";
+import TeamBrackets from "./components/TeamBrackets";
 import BattleRoyale from "./components/BattleRoyale";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -58,10 +59,10 @@ function Tournament() {
   const fetchTournamentData = async () => {
     await fetch(
       tournamentURL +
-        "?" +
-        new URLSearchParams({
-          UUID: UUID,
-        }),
+      "?" +
+      new URLSearchParams({
+        UUID: UUID,
+      }),
       {
         method: "GET",
         headers: {
@@ -86,23 +87,22 @@ function Tournament() {
   };
 
   const fetchTeams = async () => {
-    await fetch(teamsURL,{
+    await fetch(teamsURL, {
       credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
         setTeams(data);
         setIsLoadingTeams(false);
-        console.log(data)
       });
   };
 
   const fetchTournamentCategories = async () => {
     await fetch('http://localhost:2000/api/tournement/getTournamentCategories')
-    .then(res => res.json())
-    .then(data => {
-      console.log(data);
-    })
+      .then(res => res.json())
+      .then(data => {
+        console.log(data);
+      })
   }
 
   useEffect(() => {
@@ -152,7 +152,7 @@ function Tournament() {
     );
   }
 
-  if(tournament.isJoined) {
+  if (tournament.isJoined) {
     status = <div className="tournament-status">You have joined this tournament</div>;
   }
 
@@ -189,7 +189,7 @@ function Tournament() {
       button = <></>;
     }
   }
-  else if (isHost){
+  else if (isHost) {
     button = (
       <button
         className="btn btn-manage"
@@ -223,7 +223,7 @@ function Tournament() {
             <div>Loading teams ...</div>
           ) : (
             teams.map((team) => (
-              <div className={`isValidTeam-${team.members.length==tournament.teamSize}`} onClick={chooseTeam} key={team.UUID} data-uuid={team.UUID}>
+              <div className={`isValidTeam-${team.members.length == tournament.teamSize}`} onClick={chooseTeam} key={team.UUID} data-uuid={team.UUID}>
                 {team.name}
               </div>
             ))
@@ -278,7 +278,7 @@ function Tournament() {
               <div>Loading teams ...</div>
             ) : (
               teams.map((team) => (
-                <div className={`isValidTeam-${team.members.length==tournament.teamSize} team`} onClick={chooseTeam} key={team.UUID} data-uuid={team.UUID}>
+                <div className={`isValidTeam-${team.members.length == tournament.teamSize} team`} onClick={chooseTeam} key={team.UUID} data-uuid={team.UUID}>
                   {team.name}
                 </div>
               ))
@@ -307,7 +307,7 @@ function Tournament() {
     let uuid = div.dataset.uuid;
     chosenTeam.uuid = uuid;
 
-    if(div.classList.contains('isValidTeam-false')) {
+    if (div.classList.contains('isValidTeam-false')) {
       // return;
     }
 
@@ -386,7 +386,7 @@ function Tournament() {
     let selectedTeam
     try {
       selectedTeam = form.querySelector('.selectedTeam')
-      if(!selectedTeam) {
+      if (!selectedTeam) {
         throw new Error();
       }
     } catch (e) {
@@ -501,8 +501,8 @@ function Tournament() {
                 <p className="tournament-accessibility">
                   {tournament.accessibility != "open"
                     ? tournament.accessibility.replace(/(^\w|\s\w)/g, (m) =>
-                        m.toUpperCase()
-                      )
+                      m.toUpperCase()
+                    )
                     : ""}
                 </p>
                 <p className="tournament-startDate">
@@ -518,11 +518,9 @@ function Tournament() {
             </div>
 
             <div className="tournament-content">
-              {tournament.type === "brackets" ? (
-                <Brackets tournament={tournament} />
-              ) : (
-                <BattleRoyale tournament={tournament} />
-              )}
+              {tournament.type === "brackets" && tournament.teamSize === 1 && <SoloBrackets tournament={tournament} />}
+              {tournament.type === "brackets" && tournament.teamSize > 1 && <TeamBrackets tournament={tournament} />}
+              {tournament.type === "battle royale" && <BattleRoyale tournament={tournament} />}
 
               <div className="tournament-updates">
                 <h3>Updates</h3>
@@ -536,11 +534,12 @@ function Tournament() {
           </>
         )}
       </div>
-      {tournament.teamSize == 1 ? <SoloPopup /> : <TeamPopup />}
-      {tournament.accessibility == "application required" ? (
+      {tournament.teamSize == 1 && loggedIn && <SoloPopup />}
+      {tournament.teamSize > 1 && loggedIn && <TeamPopup />}
+      {tournament.accessibility == "application required" && loggedIn ? (
         <>
-        {tournament.teamSize == 1 && <SoloApplicationPopup />}
-        {tournament.teamSize > 1 && <TeamApplicationPopup />}
+          {tournament.teamSize == 1 && <SoloApplicationPopup />}
+          {tournament.teamSize > 1 && <TeamApplicationPopup />}
         </>
       ) : (
         <></>

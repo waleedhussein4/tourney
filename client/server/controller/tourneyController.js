@@ -450,6 +450,56 @@ async function createTournaments() {
   });
 
   await tournament2.save()
+    .then(savedTournament => {
+      console.log('Tournament saved successfully:', savedTournament);
+    })
+    .catch(error => {
+      console.error('Error saving tournament:', error);
+    });
+
+  let tournament3 = new Tournament({
+    _id: "15b72cfe-0b87-4395-8230-8e8e2f571cb7",
+    UUID: "15b72cfe-0b87-4395-8230-8e8e2f571cb7",
+    host: "d6cab22f-b734-4ad9-b43e-cde81a82b62b", // Waleed00
+    title: "Fortnite Solo Cup",
+    teamSize: 1,
+    description: "The ultimate Fortnite solo championship. High stakes. High rewards. Only the best will emerge victorious",
+    type: "brackets",
+    category: "fortnite",
+    startDate: new Date("2024-04-23T17:30:00.000Z"),
+    endDate: new Date("2024-05-01T19:30:00.000Z"),
+    hasStarted: false,
+    hasEnded: false,
+    enrolledUsers: [
+      {
+        UUID: "d6cab22f-b734-4ad9-b43e-cde81a82b62b",
+        score: 0,
+        eliminated: false
+      }
+    ],
+    entryFee: 5,
+    earnings: 50,
+    maxCapacity: 16,
+    accessibility: "application required",
+    updates: [],
+    application: [
+      {
+        name: "Names"
+      },
+      {
+        name: "Ages"
+      },
+      {
+        name: "Epic Games Usernames"
+      }
+    ],
+    acceptedUsers: [],
+    acceptedTeams: [],
+    applications: [],
+    matches: []
+  });
+
+  await tournament3.save()
   .then(savedTournament => {
     console.log('Tournament saved successfully:', savedTournament);
   })
