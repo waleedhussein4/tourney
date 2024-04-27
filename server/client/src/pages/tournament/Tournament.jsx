@@ -337,9 +337,35 @@ function Tournament() {
       if (res.ok) {
         navigate(0)
       } else {
-        console.log(res);
+        res.json().then(data => {
+          console.log(data);
+          if (data.error === "Not enough credits") {
+            displayNotEnoughCreditsPopup();
+          }
+        });
       }
     });
+  }
+
+  function NotEnoughCreditsPopup() {
+    return (
+      <div className="notEnoughCreditsPopup" style={{"display":"none"}}>
+        <img onClick={hideNotEnoughCreditsPopup} src={alpha_x} alt="" />
+        <h1>Not Enough Credits</h1>
+        <div className="notEnoughCreditsPopup-details">
+          { tournament.teamSize == 1 ? "You do not have enough credits to join this tournament." : "Each member of your team must have enough credits to pay for the entry fee."}
+        </div>
+        <button className="btn btn-primary notEnoughCreditsPopup-confirm">Ok</button>
+      </div>
+    );
+  }
+
+  function displayNotEnoughCreditsPopup() {
+    document.querySelector(".notEnoughCreditsPopup").style.display = "flex";
+  }
+
+  function hideNotEnoughCreditsPopup() {
+    document.querySelector(".notEnoughCreditsPopup").style.display = "none";
   }
 
   async function joinTournamentAsSolo() {
@@ -358,7 +384,12 @@ function Tournament() {
       if (res.ok) {
         navigate(0)
       } else {
-        console.log(res);
+        res.json().then(data => {
+          console.log(data);
+          if (data.error === "Not enough credits") {
+            displayNotEnoughCreditsPopup();
+          }
+        });
       }
     });
   }
@@ -486,8 +517,8 @@ function Tournament() {
                     : "Team size: Solo"}
                 </p>
                 <p className="tournament-capacity">
-                  Capacity: {tournament.enrolledParticipants?.length || tournament.enrolledTeams?.length}/
-                  {tournament.maxCapacity}
+                  Capacity: {tournament.enrolledUsers?.length * tournament.teamSize || tournament.enrolledTeams?.length * tournament.teamSize}/
+                  {tournament.maxCapacity} players
                 </p>
                 <p className="tournament-entryFee">
                   Entry Fee: ${tournament.entryFee}
@@ -544,6 +575,7 @@ function Tournament() {
       ) : (
         <></>
       )}
+      <NotEnoughCreditsPopup />
     </div>
   );
 }
