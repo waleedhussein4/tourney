@@ -225,6 +225,42 @@ export default function Host() {
 
   };
 
+  const subHostEarnings = async (winnerPrize) => {
+    console.log("Sending winnerPrize:", winnerPrize);
+    const response = await fetch('http://localhost:2000/api/user/removeEarn', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ winnerPrize: winnerPrize })
+    });
+  
+    if (response.ok) {
+      console.log('Success');
+    } else {
+      console.error('Failed to deduct credits');
+    }
+  };
+  
+  const checkCredits = async () => {
+    let creditResponse
+
+    await fetch('http://localhost:2000/api/user/profile', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data)
+      creditResponse = data
+    })
+    return creditResponse.credits
+  };
+
   useEffect(() => {
     if(isLoading) return;
     if (!isValidated) {
@@ -283,6 +319,19 @@ export default function Host() {
     }).filter(item => item !== null);
 
     console.log("Applications data :", applications)
+    if(winnerPrize <= checkCredits){
+      console.log("in earn")
+      subHostEarnings(winnerPrize);
+    }
+    // console.log(selectedType)
+    // if(selectedType === "BattleRoyale"){
+    //   console.log(winnerPrize)
+    //   let sum = 0;
+    //   console.log(sum)
+    //   if(sum<=checkCredits){
+    //     subHostEarnings(sum);
+    //   }
+    // }
     if (describeVal === "") {
       e.preventDefault();
       setDescribeError(true);
@@ -364,11 +413,12 @@ export default function Host() {
         entryFee: entryFee,
         earnings:winnerPrize,
         accessibility: selectedEntryMode,
-        maxCapacity:maxParticipants
+        maxCapacity:maxParticipants,
+        applications:ap
       };
     }
     try {
-      console.log("hi :" + formData);
+      console.log("formData :",formData);
       const response = await fetch('http://localhost:2000/api/tournement', {
         method: 'POST',
         headers: {
