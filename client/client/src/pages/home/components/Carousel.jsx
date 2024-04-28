@@ -2,12 +2,12 @@ import CarouselItems from './CarouselItems'
 
 import '../styles/Carousel.css'
 
-function Carousel(props) {
+function Carousel({ data, title }) {
   return (
     <section className="carousel">
-      <h2 className="categories__title">{props.title}</h2>
+      <h2 className="categories__title">{title}</h2>
       <div className="carousel__container">
-        <CarouselItems data={props.data} />
+        <CarouselItems data={data} />
       </div>
     </section>
   )

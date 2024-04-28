@@ -1,14 +1,15 @@
-
-
-
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Carousel from "./Carousel";
 import { Link } from "react-router-dom";
+import { AuthContext } from "/src/context/AuthContext";
 
 function Main() {
   const [trendingTournaments, setTrendingTournaments] = useState([]);
+  const [myTournaments, setMyTournaments] = useState([]);
   const [bracketDescription, setBracketDescription] = useState("");
   const [battleRoyaleDescription, setBattleRoyaleDescription] = useState("");
+
+  const { loggedIn } = useContext(AuthContext)
 
   const getTrendingTournaments = async () => {
     const URL = 'http://localhost:2000/api/tournement/getTrendingTournaments';
@@ -18,9 +19,27 @@ function Main() {
       setTrendingTournaments(data);
     });
   }
+
+  const getMyTournaments = async () => {
+    const URL = 'http://localhost:2000/api/tournement/getMyTournaments';
+    await fetch(URL,
+      {
+        credentials: 'include',
+      })
+    .then((res) => res.json())
+    .then((data) => {
+      setMyTournaments(data);
+    });
+  }
   
   useEffect(() => {
     getTrendingTournaments();
+    try {
+      getMyTournaments();
+    }
+    catch (e) {
+      console.log(e);
+    }
   }, []);
 
 
@@ -76,6 +95,10 @@ function Main() {
          title="Trending"
          data={trendingTournaments}
         />
+        {loggedIn && myTournaments.length > 0 && <Carousel
+          title="My Tournaments"
+          data={myTournaments}
+        />}
       </div>
   );
 }
