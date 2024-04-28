@@ -2,12 +2,12 @@ const User = require('../models/userModel')
 const jwt = require('jsonwebtoken')
 
 const createToken = (_id, expiry) => {
-  return jwt.sign({_id}, process.env.SECRET, { expiresIn: expiry })
+  return jwt.sign({ _id }, process.env.SECRET, { expiresIn: expiry })
 }
 
 // login a user
 const loginUser = async (req, res) => {
-  const {email, password, rememberPassword} = req.body
+  const { email, password, rememberPassword } = req.body
 
   try {
     console.log("in try for login")
@@ -15,44 +15,50 @@ const loginUser = async (req, res) => {
 
     // create a token
     let token = createToken(user._id, '1d')
-    if(rememberPassword) {
+    if (rememberPassword) {
       token = createToken(user._id, '30d')
     }
     // send token cookie
+    res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Path=/; SameSite=None; Secure`)
     res.status(200).cookie("token", token, {
-      httpOnly: true
+      httpOnly: true,
+      path: "/",
     }).send()
   } catch (error) {
-    res.status(400).json({error: error.message})
+    res.status(400).json({ error: error.message })
     console.log("error log")
   }
 }
 
 // signup a user
 const signupUser = async (req, res) => {
-  const {email, userName ,password} = req.body
+  const { email, userName, password } = req.body
 
   try {
     console.log("in try for signup")
-    const user = await User.signup(email,userName, password)
+    const user = await User.signup(email, userName, password)
 
     // create a token
     const token = createToken(user._id, '3d')
 
     // send token cookie
+    res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Path=/; SameSite=None; Secure`)
     res.status(200).cookie("token", token, {
-      httpOnly: true
+      httpOnly: true,
+      path: "/",
     }).send()
   } catch (error) {
-    res.status(400).json({error: error.message})
+    res.status(400).json({ error: error.message })
     console.log("error")
   }
 }
 
 const logoutUser = async (req, res) => {
   console.log('logout user')
+  res.setHeader('Set-Cookie', `token=${''}; HttpOnly; Path=/; SameSite=None; Secure`)
   res.cookie("token", "", {
     httpOnly: true,
+    path: "/",
     expires: new Date(0)
   }).send()
 }
@@ -60,12 +66,12 @@ const logoutUser = async (req, res) => {
 const loggedIn = async (req, res) => {
   try {
     const token = req.cookies.token
-    if(!token) return res.json(false)
+    if (!token) return res.json(false)
 
     jwt.verify(token, process.env.SECRET)
-    
+
     res.send(true)
-  } catch(error) {
+  } catch (error) {
     res.json(false)
   }
 }
@@ -94,31 +100,31 @@ const paymentProcess = async (req, res) => {
 // become host route that updates isHost to true
 const becomeHost = async (req, res) => {
   try {
-      console.log("in try for become host");
-      // Find the user by ID stored in req.user
-      const user = await User.findById(req.user);
-      console.log(user.isHost, "user.isHost");
+    console.log("in try for become host");
+    // Find the user by ID stored in req.user
+    const user = await User.findById(req.user);
+    console.log(user.isHost, "user.isHost");
 
-      // Check if the user already is a host to prevent unnecessary operations
-      if (user.isHost) {
-          return res.status(400).json({ message: "You are already a host." });
-      }
+    // Check if the user already is a host to prevent unnecessary operations
+    if (user.isHost) {
+      return res.status(400).json({ message: "You are already a host." });
+    }
 
-      // Check if the user has enough credits
-      if (user.credits < 20) {
-          return res.status(400).json({ message: "Not enough credits to become a host." });
-      }
+    // Check if the user has enough credits
+    if (user.credits < 20) {
+      return res.status(400).json({ message: "Not enough credits to become a host." });
+    }
 
-      // Deduct 20 credits and set as host
-      user.credits -= 20;  // Deduct the credits
-      user.isHost = true;  // Set the user as a host
-      await user.save();  // Save the updated user object to the database
+    // Deduct 20 credits and set as host
+    user.credits -= 20;  // Deduct the credits
+    user.isHost = true;  // Set the user as a host
+    await user.save();  // Save the updated user object to the database
 
-      // Respond with success
-      res.status(200).json({ message: "Congratulations! You are now a Tourney Host!" });
+    // Respond with success
+    res.status(200).json({ message: "Congratulations! You are now a Tourney Host!" });
   } catch (error) {
-      console.error("Error in becoming host:", error);
-      res.status(500).json({ error: error.message });
+    console.error("Error in becoming host:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -141,17 +147,17 @@ const profile = async (req, res) => {
 const getisHost = async (req, res) => {
 
   try {
-      // Assuming `req.user.id` is available and contains the user's ID
-      const user = await User.findById(req.user);
+    // Assuming `req.user.id` is available and contains the user's ID
+    const user = await User.findById(req.user);
 
     console.log(user.isHost)
 
-      // If the user is found and the isHost property exists
-      return res.json({ isHost: user.isHost }); 
-      
+    // If the user is found and the isHost property exists
+    return res.json({ isHost: user.isHost });
+
   } catch (error) {
-      console.log(error);
-      return res.status(500).json({ message: "Error accessing user data" });
+    console.log(error);
+    return res.status(500).json({ message: "Error accessing user data" });
   }
 }
 
