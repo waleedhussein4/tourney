@@ -508,10 +508,20 @@ async function createTournaments() {
     });
 }
 
-
 // Get all tournaments
 const getAllTournaments = async (req, res) => {
   const tournaments = await Tournament.find().sort({ createdAt: -1 });
+  res.status(200).json(tournaments);
+};
+
+const getPaginatedTournaments = async (req, res) => {
+  const { page } = req.params;
+  const options = {
+    page: parseInt(page) || 1,
+    limit: parseInt(3) || 3,
+  };
+
+  const tournaments = await Tournament.find().limit(options.limit).skip(options.limit * (options.page - 1));
   res.status(200).json(tournaments);
 };
 
@@ -1553,7 +1563,6 @@ const getMyTournaments = async (req, res) => {
       { "enrolledUsers.UUID": req.user },
       { "enrolledTeams.players.UUID": req.user }]
   });
-  console.log('Selected: ' + selectedTournaments)
 
   const formattedTournaments = selectedTournaments.map(tournament => ({
     UUID: tournament.UUID,
@@ -2000,6 +2009,7 @@ module.exports = {
   createTournament,
   getTournamentById,
   getAllTournaments,
+  getPaginatedTournaments,
   updateTournament,
   deleteTournament,
   getTournamentDisplayData,
