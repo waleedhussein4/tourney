@@ -1,3 +1,4 @@
+const Tournament = require('../models/tourneyModels')
 const User = require('../models/userModel')
 const jwt = require('jsonwebtoken')
 
@@ -161,4 +162,23 @@ const getisHost = async (req, res) => {
   }
 }
 
-module.exports = { signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile, getisHost }
+const subHostEarninhgs = async (req, res) => {
+  try{
+    const user = await User.findById(req.user);
+    const winnerPrize = req.body.winnerPrize; 
+    console.log(winnerPrize)
+    if(user.credits >= parseInt(winnerPrize)){
+      user.credits -=winnerPrize
+      await user.save()
+      return res.json({message:"deducted credits"})
+    }else{
+      return res.status(400).json({message: "Insufficient credits"});
+    }
+  } catch(error){
+    console.log(error);
+    return res.status(500).json({ message: "Error accessing user data" });
+    }
+
+}
+
+module.exports = { signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile, getisHost, subHostEarninhgs }
