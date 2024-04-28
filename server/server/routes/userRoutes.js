@@ -1,5 +1,5 @@
 const express = require('express');
-const {signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile, getisHost} = require('../controller/userController');
+const {signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile, getisHost,subHostEarninhgs} = require('../controller/userController');
 const router = express.Router();
 const { auth } = require("../middleware/requireAuth")
 
@@ -23,5 +23,7 @@ router.post("/payment", paymentProcess);
 router.post("/becomehost", auth, becomeHost);
 
 router.get('/isHost', auth, getisHost);
+
+router.post('/removeEarn',auth,subHostEarninhgs)
 
 module.exports = router;
