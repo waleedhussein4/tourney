@@ -650,13 +650,10 @@ const getTournamentDisplayData = async (req, res) => {
 
     const userUUID = req.user;
 
-
     const tournament = await Tournament.findById(UUID);
     if (!tournament) {
       return res.status(404).json({ error: 'Tournament not found' });
     }
-    console.log('Tournament: ' + tournament)
-
 
     const isHost = (tournament.host == userUUID)
 
@@ -1539,9 +1536,6 @@ const getRandomTournaments = (tournaments) => {
     image: images.get(tournament.category)
   }));
 
-
-
-
   return formattedTournaments;
 };
 
@@ -1549,6 +1543,26 @@ const getTrendingTournaments = async (req, res) => {
   const tournaments = await Tournament.find({})
   const RandomTournaments = getRandomTournaments(tournaments)
   return res.json(RandomTournaments)
+}
+
+const getMyTournaments = async (req, res) => {
+  // find tournaments where user is either the host or a participant
+  const selectedTournaments = await Tournament.find({
+    $or: [
+      { host: req.user },
+      { "enrolledUsers.UUID": req.user },
+      { "enrolledTeams.players.UUID": req.user }]
+  });
+  console.log('Selected: ' + selectedTournaments)
+
+  const formattedTournaments = selectedTournaments.map(tournament => ({
+    UUID: tournament.UUID,
+    title: tournament.title,
+    description: tournament.description,
+    image: images.get(tournament.category)
+  }));
+
+  return res.json(formattedTournaments)
 }
 
 const getTournamentCategories = async (req, res) => {
@@ -1998,6 +2012,7 @@ module.exports = {
   editEndDate,
   getManageTournamentDisplayData,
   getTrendingTournaments,
+  getMyTournaments,
   getTournamentCategories,
   updateScores,
   acceptApplication,
