@@ -10,6 +10,7 @@ export default function Host() {
   const navigate = useNavigate();
   const [isHost, setIsHost] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [additionalInfoData, setAdditionalInfoData] = useState([]);
 
   const [isDisplayed, setIsDisplayed] = useState(true);
   const [btnIsDisplayed, setBtnIsDisplayed] = useState(true);
@@ -39,7 +40,7 @@ export default function Host() {
   const [additionalInfoRequired, setAdditionalInfoRequired] = useState(false);
   const [additionalInfoList, setAdditionalInfoList] = useState([]);
   const [infoCounter, setInfoCounter] = useState(1);
-  const additionalInfoRef = useRef([]);
+  const additionalInfoRef = useRef(null);
   const [teamTypeError, setTeamTypeError] = useState(false);
   const teamTypeRef = useRef(null);
   const [bracketsError, setBracketsError] = useState(false);
@@ -86,55 +87,61 @@ export default function Host() {
     setTitleError(false);
     titleRef.current.style.border = "";
   }
-
+  
   const handleAddInfo = () => {
     if (infoCounter <= 5) {
-      const newRef = React.createRef();
-      additionalInfoRef.current[infoCounter] = newRef;
-  
-      const newInfo = {
-        key: infoCounter,
-        ref: newRef,
-        question: `Question ${infoCounter}`  // Make sure this is correctly assigned
-      };
-  
-      setAdditionalInfoList(prevList => {
-        const newList = [...prevList, newInfo];
-        console.log("Updated additionalInfoList:", newList);
-        return newList;
-      });
-      setInfoCounter(prevCounter => prevCounter + 1);
-      console.log("Added new info", newInfo);
+      const newInfo = (
+        <div key={infoCounter}>
+          * <input
+              type="text"
+              value={additionalInfoData[infoCounter] || ''}  // Use stored data if available
+              onChange={(e) => handleAdditionalInfoChange(infoCounter, e.target.value)}  // Update data on change
+            />
+          <button type="button" onClick={() => handleRemoveInfo(infoCounter)}>
+            Delete
+          </button>
+        </div>
+      );
+      setAdditionalInfoData([...additionalInfoData, '']);  // Add a new empty string to the data array
+    setInfoCounter(infoCounter + 1);
     }
   };
   
-  const handleRemoveInfo = (indexToRemove) => {
-    setAdditionalInfoList(currentList => currentList.filter((_, index) => index !== indexToRemove));
-    additionalInfoRef.current.splice(indexToRemove, 1);
+  
+  const handleAdditionalInfoChange = (index, value) => {
+    const updatedInfoData = [...additionalInfoData];
+    updatedInfoData[index] = value;  // Update the data at the specified index
+    setAdditionalInfoData(updatedInfoData);
   };
+  
 
+  const handleRemoveInfo = (indexToRemove) => {
+    const newList = additionalInfoData.filter((_, index) => index !== indexToRemove);
+    setAdditionalInfoData(newList);
+    setInfoCounter(infoCounter - 1);
+  };
+  
   const handleAddRank = () => {
     if (rankCounter < maxParticipants) {
       if (!isValidated) {
         setIsValidated(true);
       }
       const demoRankCounter = rankCounter + 1;
-      setInputPrizes([
-        ...inputPrizes,
-        <div key={inputPrizes.length}>
-          {demoRankCounter} <input type="number" placeholder="Enter a prize" />
-        </div>,
-      ]);
+      const newPrize = {
+        rank: demoRankCounter,
+        prize: '' // Initialize prize as an empty string
+      };
+      setInputPrizes([...inputPrizes, newPrize]);
       setRankCounter(rankCounter + 1);
-
     } else {
       console.log('Rank counter exceeded max number');
       setIsValidated(false);
     }
     setIsValidated2(true);
     setPrizeRankError(false);
-    divPrizeRankRef.current.style.border = "";
+    divPrizeRankRef.current.style.border = '';
   };
+  
 
   const handleRemoveRank = () => {
     if (rankCounter >= 2) {
@@ -149,6 +156,12 @@ export default function Host() {
     }
     setIsValidated2(true);
   };
+  const handlePrizeChange = (index, value) => {
+    const updatedPrizes = [...inputPrizes];
+    updatedPrizes[index].prize = value;
+    setInputPrizes(updatedPrizes);
+  };
+  
 
   const handleClick = () => {
       setIsDisplayed(true);
@@ -225,42 +238,6 @@ export default function Host() {
 
   };
 
-  const subHostEarnings = async (winnerPrize) => {
-    console.log("Sending winnerPrize:", winnerPrize);
-    const response = await fetch('http://localhost:2000/api/user/removeEarn', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ winnerPrize: winnerPrize })
-    });
-  
-    if (response.ok) {
-      console.log('Success');
-    } else {
-      console.error('Failed to deduct credits');
-    }
-  };
-  
-  const checkCredits = async () => {
-    let creditResponse
-
-    await fetch('http://localhost:2000/api/user/profile', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log(data)
-      creditResponse = data
-    })
-    return creditResponse.credits
-  };
-
   useEffect(() => {
     if(isLoading) return;
     if (!isValidated) {
@@ -310,28 +287,6 @@ export default function Host() {
   const handleSubmit = async (e) => {
     e.preventDefault(); // This stops the form from submitting traditionally
     console.log("handleSubmit is triggered");
-    const applications = additionalInfoRef.current.map((ref, index) => {
-      const info = additionalInfoList[index]; // Capture the item at current index
-      if (ref.current && info) { // Check both ref and info are not undefined
-        return { question: info.question, answer: ref.current.value };
-      }
-      return null;
-    }).filter(item => item !== null);
-
-    console.log("Applications data :", applications)
-    if(winnerPrize <= checkCredits){
-      console.log("in earn")
-      subHostEarnings(winnerPrize);
-    }
-    // console.log(selectedType)
-    // if(selectedType === "BattleRoyale"){
-    //   console.log(winnerPrize)
-    //   let sum = 0;
-    //   console.log(sum)
-    //   if(sum<=checkCredits){
-    //     subHostEarnings(sum);
-    //   }
-    // }
     if (describeVal === "") {
       e.preventDefault();
       setDescribeError(true);
@@ -401,7 +356,7 @@ export default function Host() {
       earnings:winnerPrize,
       accessibility: selectedEntryMode,
       maxCapacity : numberOfBrackets,
-      applications : applications
+      applications: additionalInfoData
     };}
     else{
       formData = {
@@ -411,14 +366,14 @@ export default function Host() {
         category: selectedGame,
         teamSize: teamSize,
         entryFee: entryFee,
-        earnings:winnerPrize,
+        earnings:inputPrizes,
         accessibility: selectedEntryMode,
         maxCapacity:maxParticipants,
-        applications:ap
-      };
-    }
+        applications: additionalInfoData
+    }}
     try {
-      console.log("formData :",formData);
+      console.log("hi");
+      console.log(formData);
       const response = await fetch('http://localhost:2000/api/tournement', {
         method: 'POST',
         headers: {
@@ -581,8 +536,15 @@ export default function Host() {
                 <div ref={divPrizeRankRef} id="form-rank" style={{ display: typeSpec ? 'none' : 'block' }}>
                   <h2>Prize by rank :</h2>
                   {inputPrizes.map((input, index) => (
-                    <div key={index}>{input}</div>
-                  ))}
+  <div key={index}>
+    {input.rank} <input
+      type="number"
+      placeholder="Enter a prize"
+      value={input.prize}
+      onChange={(e) => handlePrizeChange(index, e.target.value)}
+    />
+  </div>
+))}
                   <input type="button" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddRank() }} value="Add Rank" />
                   <input type="button" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleRemoveRank() }} value="Remove Rank" />
                   {isValidated ? null : <div id="rankError">if you wish to add more prize rank, you should increase the number of participants above!</div>}
@@ -616,16 +578,23 @@ export default function Host() {
                   </label>
                 </div>
                 <div id="form-app" style={{ display: additionalInfoRequired ? 'block' : 'none' }}>
-                  <h4>Please fill in any additional questions or information requests you have for applicants</h4>
-                  {additionalInfoList.map((info,index) => (
-                    <div key={info.key}>
-                      <input type="text" ref={info.ref} placeholder={info.question}/>
-                      <button type="button" onClick={() => handleRemoveInfo(index)}>
-                        Delete
-                      </button>
-                    </div>
-                  ))}
-                  <input type="button" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddInfo() }} value="Add question/request" />
+  <h4>Please fill in any additional questions or information requests you have for applicants</h4>
+  {additionalInfoData.map((info, index) => (
+    <div key={index}>
+      * <input
+        type="text"
+        value={info}
+        onChange={(e) => handleAdditionalInfoChange(index, e.target.value)}
+      />
+      <button type="button" onClick={() => handleRemoveInfo(index)}>
+        Delete
+      </button>
+    </div>
+  ))}
+  <input type="button" onClick={handleAddInfo} value="Add question/request" />
+
+
+                  <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddInfo() }} value="Add question/request" />
 
                 </div>
                 <footer>
@@ -640,4 +609,3 @@ export default function Host() {
     </>
   )
 }
-
