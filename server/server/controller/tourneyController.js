@@ -11,6 +11,13 @@ const createTournament = async (req, res) => {
   let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity, applications } = req.body;
   console.log('Earnings: ' + earnings)
   category = category.toLowerCase();
+  teamSize = parseInt(teamSize)
+  maxCapacity = parseInt(maxCapacity)
+  entryFee = parseInt(entryFee)
+  if(typeof earnings === 'string'){
+    console.log("in earnigs")
+    earnings = parseInt(earnings)
+  }
   accessibility = accessibility.toLowerCase();
   type = type.toLowerCase();
   if (type === "bracket") {
@@ -20,6 +27,7 @@ const createTournament = async (req, res) => {
     type = "battle royale"
   }
   console.log(req.body)
+  console.log(typeof applications)
   const id = uuidv4();
   console.log(id)
   // let errors = [];
@@ -65,8 +73,8 @@ const createTournament = async (req, res) => {
           title: title,
           teamSize: teamSize,
           description: description,
-          type: type.toLowerCase(),
-          category: category.toLowerCase(),
+          type: type,
+          category: category,
           startDate: "2024-04-24T02:09:13.636+00:00",
           endDate: "2024-02-29T10:02:10.959+00:00",
           hasStarted: false,
@@ -79,14 +87,14 @@ const createTournament = async (req, res) => {
           accessibility: accessibility,
           matches: [],
           updates: [],
-          //application: [],
           acceptedUsers: [],
           acceptedTeams: [],
-          applications: applications
+          application: applications,
+          applications:[]
         })
       }
-      console.log('iseeu')
       if (parseInt(teamSize) > 1) {
+        console.log('iseeu')
         newTournament = await Tournament.create({
           _id: id,
           UUID: id,
@@ -111,7 +119,7 @@ const createTournament = async (req, res) => {
           application: [],
           acceptedUsers: [],
           acceptedTeams: [],
-          applications: applications
+          application: applications
         })
       }
     };
@@ -139,7 +147,7 @@ const createTournament = async (req, res) => {
           accessibility: accessibility,
           matches: [],
           updates: [],
-          application: [],
+          application: applications,
           acceptedUsers: [],
           applications: []
         })
@@ -165,7 +173,7 @@ const createTournament = async (req, res) => {
           accessibility: accessibility,
           matches: [],
           updates: [],
-          application: [],
+          application: applications,
           acceptedTeams: [],
           applications: []
         })
