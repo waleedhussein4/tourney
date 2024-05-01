@@ -9,7 +9,7 @@ const generateAndAddUsersToTournament = require('./tester');
 // Create a new tournament
 const createTournament = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -528,7 +528,7 @@ async function createTournaments() {
 // Get all tournaments
 const getAllTournaments = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -542,7 +542,7 @@ const getAllTournaments = async (req, res) => {
 
 const getPaginatedTournaments = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -564,7 +564,7 @@ const getPaginatedTournaments = async (req, res) => {
 // Get a single tournament by ID
 const getTournamentById = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -588,7 +588,7 @@ const getTournamentById = async (req, res) => {
 // Update a tournament
 const updateTournament = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -614,7 +614,7 @@ const updateTournament = async (req, res) => {
 // Delete a tournament
 const deleteTournament = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -640,7 +640,7 @@ const deleteTournament = async (req, res) => {
 // get tournament data for the tournament page
 const getTournamentDisplayData = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -895,7 +895,7 @@ const getTournamentDisplayData = async (req, res) => {
 
 const handleApplicationSubmission = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1085,7 +1085,7 @@ const handleApplicationSubmission = async (req, res) => {
 
 const handleJoinAsSolo = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1164,7 +1164,7 @@ const handleJoinAsSolo = async (req, res) => {
 
 const handleJoinAsTeam = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1263,7 +1263,7 @@ const handleJoinAsTeam = async (req, res) => {
 
 const editTitle = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1309,7 +1309,7 @@ const editTitle = async (req, res) => {
 
 const editDescription = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1361,7 +1361,7 @@ const editDescription = async (req, res) => {
 
 const editStartDate = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1425,7 +1425,7 @@ const editStartDate = async (req, res) => {
 
 const editEndDate = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1489,7 +1489,7 @@ const editEndDate = async (req, res) => {
 
 const getManageTournamentDisplayData = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1694,7 +1694,7 @@ const getRandomTournaments = (tournaments) => {
 
 const getTrendingTournaments = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1709,7 +1709,7 @@ const getTrendingTournaments = async (req, res) => {
 
 const getMyTournaments = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1742,7 +1742,7 @@ const getTournamentCategories = async (req, res) => {
 
 const updateScores = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1796,7 +1796,7 @@ const updateScores = async (req, res) => {
 
 const acceptApplication = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1844,7 +1844,7 @@ const acceptApplication = async (req, res) => {
 
 const rejectApplication = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1878,7 +1878,7 @@ const rejectApplication = async (req, res) => {
 
 const postUpdate = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1910,7 +1910,7 @@ const postUpdate = async (req, res) => {
 
 const editSoloParticipants = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -1969,7 +1969,7 @@ const editSoloParticipants = async (req, res) => {
 
 const editTeamParticipants = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -2027,7 +2027,7 @@ const editTeamParticipants = async (req, res) => {
 
 const editMatches = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -2096,7 +2096,7 @@ const editMatches = async (req, res) => {
 
 const startTournament = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -2145,7 +2145,7 @@ const startTournament = async (req, res) => {
 
 const endTournament = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')

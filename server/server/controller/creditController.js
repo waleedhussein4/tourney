@@ -5,7 +5,7 @@ const { default: mongoose, ObjectID } = require("mongoose");
 
 const getCredits = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -23,7 +23,7 @@ const getCredits = async (req, res) => {
 
 const getTotalCredits = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -43,7 +43,7 @@ const getTotalCredits = async (req, res) => {
 
 const createCredit = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -67,7 +67,7 @@ const createCredit = async (req, res) => {
 
 const deleteCredit = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -86,7 +86,7 @@ const deleteCredit = async (req, res) => {
 
 const purchaseCredit = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
