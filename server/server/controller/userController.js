@@ -8,6 +8,15 @@ const createToken = (_id, expiry) => {
 
 // login a user
 const loginUser = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
   const { email, password, rememberPassword } = req.body
 
   try {
@@ -33,6 +42,15 @@ const loginUser = async (req, res) => {
 
 // signup a user
 const signupUser = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
   const { email, userName, password } = req.body
 
   try {
@@ -55,6 +73,15 @@ const signupUser = async (req, res) => {
 }
 
 const logoutUser = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
   console.log('logout user')
   res.setHeader('Set-Cookie', `token=${''}; HttpOnly; Path=/; SameSite=None; Secure`)
   res.cookie("token", "", {
@@ -65,13 +92,22 @@ const logoutUser = async (req, res) => {
 }
 
 const loggedIn = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
   try {
     const token = req.cookies.token
     if (!token) return res.json(false)
 
     jwt.verify(token, process.env.SECRET)
 
-    res.send(true)
+    res.json(true)
   } catch (error) {
     res.json(false)
   }
@@ -80,10 +116,16 @@ const loggedIn = async (req, res) => {
 // a payement route that will be used to make payments wether to purchase credits, become host or ... "/payment"
 // implement the payment process coming from the client side
 const paymentProcess = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
   console.log("in payment process");
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   try {
     console.log("in try for payment");
@@ -100,6 +142,15 @@ const paymentProcess = async (req, res) => {
 
 // become host route that updates isHost to true
 const becomeHost = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
   try {
     console.log("in try for become host");
     // Find the user by ID stored in req.user
@@ -130,6 +181,15 @@ const becomeHost = async (req, res) => {
 };
 
 const profile = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
   const userUUID = req.user
   try {
     console.log("in try for profile");
@@ -146,6 +206,15 @@ const profile = async (req, res) => {
 }
 
 const getisHost = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
 
   try {
     // Assuming `req.user.id` is available and contains the user's ID
@@ -163,21 +232,30 @@ const getisHost = async (req, res) => {
 }
 
 const subHostEarninhgs = async (req, res) => {
-  try{
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
+  try {
     const user = await User.findById(req.user);
-    const winnerPrize = req.body.winnerPrize; 
+    const winnerPrize = req.body.winnerPrize;
     console.log(winnerPrize)
-    if(user.credits >= parseInt(winnerPrize)){
-      user.credits -=winnerPrize
+    if (user.credits >= parseInt(winnerPrize)) {
+      user.credits -= winnerPrize
       await user.save()
-      return res.json({message:"deducted credits"})
-    }else{
-      return res.status(400).json({message: "Insufficient credits"});
+      return res.json({ message: "deducted credits" })
+    } else {
+      return res.status(400).json({ message: "Insufficient credits" });
     }
-  } catch(error){
+  } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Error accessing user data" });
-    }
+  }
 
 }
 
