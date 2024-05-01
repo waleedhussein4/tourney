@@ -69,11 +69,7 @@ const tournamentSchema = new Schema(
         content: { type: String },
       },
     ],
-    application: [
-      {
-        name: { type: String },
-      },
-    ],
+    application: [String],
     applications: [
       {
         UUID: { type: String },
