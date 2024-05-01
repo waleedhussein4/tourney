@@ -53,7 +53,7 @@ function App() {
               <div className='invite'>
                 <span className='invite-title'>Share this link to invite others to your team</span>
                 <div className='invite-link'>
-                  <span>http://localhost:5173/team/join/{team.teamId}</span>
+                  <span>https://tourneyhost.online/team/join/{team.teamId}</span>
                   <button className='copyBtn' onClick={copyLink}>Copy</button>
                 </div>
               </div>
