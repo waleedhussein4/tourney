@@ -4,7 +4,7 @@ const User = require('../models/userModel');
 // Function to get a product by ID from the database
 async function getProductById(productId) {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -29,7 +29,7 @@ async function getProductById(productId) {
 
 const getProducts = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -50,7 +50,7 @@ const getProducts = async (req, res) => {
 
 const getProduct = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -76,7 +76,7 @@ const getProduct = async (req, res) => {
 
 const purchase = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -108,7 +108,7 @@ const purchase = async (req, res) => {
 
 const createTestProducts = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')

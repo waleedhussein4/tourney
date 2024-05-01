@@ -9,7 +9,7 @@ const createToken = (_id, expiry) => {
 // login a user
 const loginUser = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -43,7 +43,7 @@ const loginUser = async (req, res) => {
 // signup a user
 const signupUser = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -74,7 +74,7 @@ const signupUser = async (req, res) => {
 
 const logoutUser = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -93,7 +93,7 @@ const logoutUser = async (req, res) => {
 
 const loggedIn = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -117,7 +117,7 @@ const loggedIn = async (req, res) => {
 // implement the payment process coming from the client side
 const paymentProcess = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -143,7 +143,7 @@ const paymentProcess = async (req, res) => {
 // become host route that updates isHost to true
 const becomeHost = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -182,7 +182,7 @@ const becomeHost = async (req, res) => {
 
 const profile = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -207,7 +207,7 @@ const profile = async (req, res) => {
 
 const getisHost = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -233,7 +233,7 @@ const getisHost = async (req, res) => {
 
 const subHostEarninhgs = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', 'https://tourneyhost.online')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
   // another common pattern
   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
