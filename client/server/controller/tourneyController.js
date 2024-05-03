@@ -19,11 +19,11 @@ const createTournament = async (req, res) => {
   )
   let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity, applications } = req.body;
   console.log('Earnings: ' + earnings)
-  category = category.toLowerCase();
+  category = category;
   teamSize = parseInt(teamSize)
   maxCapacity = parseInt(maxCapacity)
   entryFee = parseInt(entryFee)
-  if(typeof earnings === 'string'){
+  if (typeof earnings === 'string') {
     console.log("in earnigs")
     earnings = parseInt(earnings)
   }
@@ -99,7 +99,7 @@ const createTournament = async (req, res) => {
           acceptedUsers: [],
           acceptedTeams: [],
           application: applications,
-          applications:[]
+          applications: []
         })
       }
       if (parseInt(teamSize) > 1) {
@@ -112,7 +112,7 @@ const createTournament = async (req, res) => {
           teamSize: teamSize,
           description: description,
           type: type.toLowerCase(),
-          category: category.toLowerCase(),
+          category: category,
           startDate: "2024-04-24T02:09:13.636+00:00",
           endDate: "2024-02-29T10:02:10.959+00:00",
           hasStarted: false,
@@ -144,7 +144,7 @@ const createTournament = async (req, res) => {
           teamSize: teamSize,
           description: description,
           type: type.toLowerCase(),
-          category: category.toLowerCase(),
+          category: category,
           startDate: "2024-04-24T02:09:13.636+00:00",
           endDate: "2024-02-29T10:02:10.959+00:00",
           hasStarted: false,
@@ -170,7 +170,7 @@ const createTournament = async (req, res) => {
           teamSize: teamSize,
           description: description,
           type: type.toLowerCase(),
-          category: category.toLowerCase(),
+          category: category,
           startDate: "2024-04-24T02:09:13.636+00:00",
           endDate: "2024-02-29T10:02:10.959+00:00",
           hasStarted: false,
@@ -553,13 +553,140 @@ const getPaginatedTournaments = async (req, res) => {
   const { page } = req.params;
   const options = {
     page: parseInt(page) || 1,
-    limit: parseInt(3) || 3,
+    limit: parseInt(10) || 10,
   };
 
   const tournaments = await Tournament.find().limit(options.limit).skip(options.limit * (options.page - 1));
   res.status(200).json(tournaments);
 };
 
+// Function to calculate Jaro-Winkler distance between two strings
+function jaroWinklerDistance(s1, s2) {
+  const prefixMatchScale = 0.1;
+  const maxPrefixLength = 4;
+
+  if (s1 === s2) return 1;
+
+  const s1Length = s1.length;
+  const s2Length = s2.length;
+  const matchDistance = Math.floor(Math.max(s1Length, s2Length) / 2) - 1;
+
+  const s1Matches = new Array(s1Length).fill(false);
+  const s2Matches = new Array(s2Length).fill(false);
+
+  let matches = 0;
+  for (let i = 0; i < s1Length; i++) {
+    const start = Math.max(0, i - matchDistance);
+    const end = Math.min(i + matchDistance + 1, s2Length);
+
+    for (let j = start; j < end; j++) {
+      if (!s2Matches[j] && s1[i] === s2[j]) {
+        s1Matches[i] = true;
+        s2Matches[j] = true;
+        matches++;
+        break;
+      }
+    }
+  }
+
+  if (matches === 0) return 0;
+
+  let transpositions = 0;
+  let k = 0;
+  for (let i = 0; i < s1Length; i++) {
+    if (s1Matches[i]) {
+      while (!s2Matches[k]) k++;
+      if (s1[i] !== s2[k]) transpositions++;
+      k++;
+    }
+  }
+
+  const jaro = (matches / s1Length + matches / s2Length + (matches - transpositions / 2) / matches) / 3;
+
+  const prefixLength = Math.min(maxPrefixLength, Math.min(s1Length, s2Length));
+  let commonPrefix = 0;
+  for (let i = 0; i < prefixLength; i++) {
+    if (s1[i] === s2[i]) commonPrefix++;
+    else break;
+  }
+
+  const jaroWinkler = jaro + commonPrefix * prefixMatchScale * (1 - jaro);
+
+  return jaroWinkler;
+}
+
+async function findSimilarTournaments(query) {
+  const tournaments = await Tournament.find({});
+
+  const similarMatches = tournaments.filter(tournament => {
+    // Construct regular expression for the query
+    const regex = new RegExp(query, 'i'); // 'i' flag for case insensitivity
+
+    // Check if any field matches the regular expression
+    return regex.test(tournament.title) || regex.test(tournament.description) || regex.test(tournament.category) || regex.test(tournament.type);
+  }).map(tournament => tournament.title);
+
+  return similarMatches;
+}
+
+const getFilteredTournaments = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
+
+  try {
+    const { search, category, minEntryFee, maxEntryFee, type, accessibility } = req.body;
+
+    const query = {};
+
+    // Add criteria to the query if they are provided and not default
+    if (search) {
+      const similarMatches = await findSimilarTournaments(search);
+      query.$or = [
+        { title: { $in: similarMatches } }, // Search for similar titles
+        { description: { $in: similarMatches } }, // Search for similar descriptions
+        { category: { $in: similarMatches } }, // Search for similar categories
+        { type: { $in: similarMatches } } // Search for similar types
+      ];
+    }
+    if (category !== "All") {
+      query.category = category.toLowerCase();
+    }
+    if (minEntryFee !== "") {
+      query.entryFee = { $gte: minEntryFee };
+    }
+    if (maxEntryFee !== "") {
+      query.entryFee = { ...query.entryFee, $lte: maxEntryFee };
+    }
+    if (type !== "Any") {
+      query.type = type.toLowerCase();
+    }
+    if (accessibility !== "Any") {
+      query.accessibility = accessibility.toLowerCase();
+    }
+
+    const { page } = req.params;
+    const options = {
+      page: parseInt(page) || 1,
+      limit: parseInt(10) || 10,
+    };
+
+    const tournaments = await Tournament.find(query)
+      .limit(options.limit)
+      .skip(options.limit * (options.page - 1));
+
+    res.json(tournaments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
 
 // Get a single tournament by ID
 const getTournamentById = async (req, res) => {
@@ -1665,7 +1792,7 @@ images.set('league of legends', "https://cdn1.epicgames.com/offer/24b9b5e323bc40
 images.set('football', "https://upload.wikimedia.org/wikipedia/commons/4/42/Football_in_Bloomington%2C_Indiana%2C_1995.jpg")
 images.set('basketball', "https://static.owayo-cdn.com/newhp/img/magazin/basketballstatistikEN/basketball-statistics-670.jpg")
 images.set('valorant', "https://m.media-amazon.com/images/M/MV5BNmNhM2NjMTgtNmIyZC00ZmVjLTk4YWItZmZjNGY2NThiNDhkXkEyXkFqcGdeQXVyODU4MDU1NjU@._V1_FMjpg_UX1000_.jpg")
-images.set('rainbox six: siege', 'https://img.redbull.com/images/c_fill,g_auto,w_450,h_600/q_auto:low,f_auto/redbullcom/2019/02/14/5455aa48-c5fb-48e5-9d54-3d848c7c32a2/rainbow-six-sieges-operators-add-complexity-to-the-strategising')
+images.set('rainbow six: siege', 'https://img.redbull.com/images/c_fill,g_auto,w_450,h_600/q_auto:low,f_auto/redbullcom/2019/02/14/5455aa48-c5fb-48e5-9d54-3d848c7c32a2/rainbow-six-sieges-operators-add-complexity-to-the-strategising')
 
 const getRandomTournaments = (tournaments) => {
   // Shuffle array using Durstenfeld shuffle algorithm for randomization
@@ -1686,7 +1813,7 @@ const getRandomTournaments = (tournaments) => {
     UUID: tournament.UUID,
     title: tournament.title,
     description: tournament.description,
-    image: images.get(tournament.category)
+    image: images.get(tournament.category.toLowerCase())
   }));
 
   return formattedTournaments;
@@ -1729,15 +1856,24 @@ const getMyTournaments = async (req, res) => {
     UUID: tournament.UUID,
     title: tournament.title,
     description: tournament.description,
-    image: images.get(tournament.category)
+    image: images.get(tournament.category.toLowerCase())
   }));
 
   return res.json(formattedTournaments)
 }
 
 const getTournamentCategories = async (req, res) => {
-  const categories = ["fortnite", "counter strike", "tennis", "league of legends", "football", "basketball", "valorant", "rainbox six: siege"]
+  const categories = ["Fortnite", "Counter Strike", "Tennis", "League of Legends", "Football", "Basketball", "Valorant", "Rainbow Six: Siege"]
   return res.json(categories)
+}
+
+const getTournamentCategoriesWithImages = async (req, res) => {
+  const categories = ["Fortnite", "Counter Strike", "Tennis", "League of Legends", "Football", "Basketball", "Valorant", "Rainbow Six: Siege"]
+  const formattedCategories = categories.map(category => ({
+    name: category,
+    image: images.get(category.toLowerCase())
+  }));
+  return res.json(formattedCategories)
 }
 
 const updateScores = async (req, res) => {
@@ -2252,6 +2388,7 @@ module.exports = {
   getTournamentById,
   getAllTournaments,
   getPaginatedTournaments,
+  getFilteredTournaments,
   updateTournament,
   deleteTournament,
   getTournamentDisplayData,
@@ -2266,6 +2403,7 @@ module.exports = {
   getTrendingTournaments,
   getMyTournaments,
   getTournamentCategories,
+  getTournamentCategoriesWithImages,
   updateScores,
   acceptApplication,
   rejectApplication,
