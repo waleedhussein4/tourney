@@ -19,30 +19,35 @@ const TeamUserListPopup = ({ teamName, players, onClose }) => {
   );
 };
 
-const CustomSeed = ({ seed, breakpoint, roundIndex, seedIndex }) => {
-  // breakpoint passed to Bracket component
-  // to check if mobile view is triggered or not
-
-  // mobileBreakpoint is required to be passed down to a seed
-  console.log('Seed: ' + JSON.stringify(seed))
-  return (
-    <Seed mobileBreakpoint={breakpoint} style={{ fontSize: 12 }}>
-      <SeedItem>
-        <div>
-          <SeedTeam className={[seed.teams[0].eliminated && 'eliminated', !seed.teams[0]?.name && 'tba']}>{seed.teams[0]?.name || 'TBA '}</SeedTeam>
-          <SeedTeam className={[seed.teams[1].eliminated && 'eliminated', !seed.teams[1]?.name && 'tba']}>{seed.teams[1]?.name || 'TBA '}</SeedTeam>
-        </div>
-      </SeedItem>
-    </Seed>
-  );
-};
-
 const BracketsComponent = ({ tournament }) => {
+
+  const CustomSeed = ({ seed, breakpoint, roundIndex, seedIndex }) => {
+    // breakpoint passed to Bracket component
+    // to check if mobile view is triggered or not
+  
+    // mobileBreakpoint is required to be passed down to a seed
+    console.log('Seed: ' + JSON.stringify(seed))
+    return (
+      <Seed mobileBreakpoint={breakpoint} style={{ fontSize: 12 }}>
+        <SeedItem>
+          <div>
+            <SeedTeam onClick={handleTeamClick} className={['team', seed.teams[0].eliminated && 'eliminated', !seed.teams[0]?.name && 'tba']}>{seed.teams[0]?.name || 'TBA '}</SeedTeam>
+            <SeedTeam onClick={handleTeamClick} className={['team', seed.teams[1].eliminated && 'eliminated', !seed.teams[1]?.name && 'tba']}>{seed.teams[1]?.name || 'TBA '}</SeedTeam>
+          </div>
+        </SeedItem>
+      </Seed>
+    );
+  };
 
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-  const handleTeamClick = (teamName) => {
+  const handleTeamClick = (e) => {
+    if (e.target.classList.contains('tba')) {
+      return;
+    }
+    const teamName = e.target.innerText;
+    console.log('Team Clicked: ' + teamName)
     const team = tournament.enrolledTeams.find(t => t.teamName === teamName);
     setSelectedTeam(team);
     setIsPopupOpen(true);
