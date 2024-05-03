@@ -1,5 +1,5 @@
 const express = require('express');
-const { createTournament, getTournamentById, getAllTournaments, updateTournament, deleteTournament, getTournamentDisplayData, handleApplicationSubmission, handleJoinAsSolo, handleJoinAsTeam, editTitle, editDescription, editStartDate, editEndDate, getManageTournamentDisplayData, getTrendingTournaments, getTournamentCategories, updateScores, acceptApplication, rejectApplication, postUpdate, editSoloParticipants, editTeamParticipants, editMatches, startTournament, endTournament, getMyTournaments, getPaginatedTournaments } = require('../controller/tourneyController');
+const { createTournament, getTournamentById, getAllTournaments, updateTournament, deleteTournament, getTournamentDisplayData, handleApplicationSubmission, handleJoinAsSolo, handleJoinAsTeam, editTitle, editDescription, editStartDate, editEndDate, getManageTournamentDisplayData, getTrendingTournaments, getTournamentCategories, updateScores, acceptApplication, rejectApplication, postUpdate, editSoloParticipants, editTeamParticipants, editMatches, startTournament, endTournament, getMyTournaments, getPaginatedTournaments, getFilteredTournaments, getTournamentCategoriesWithImages } = require('../controller/tourneyController');
 const router = express();
 const { auth, getAuth } = require("../middleware/requireAuth")
 
@@ -10,6 +10,9 @@ router.get('/', getAllTournaments);
 
 // get paginated tournaments
 router.get('/getPaginatedTournaments/:page', getPaginatedTournaments);
+
+
+router.post('/getFilteredTournaments/:page', getFilteredTournaments);
 
 
 //new tourney
@@ -50,6 +53,9 @@ router.get('/getMyTournaments', auth, getMyTournaments)
 
 
 router.get('/getTournamentCategories', getTournamentCategories)
+
+
+router.get('/getTournamentCategoriesWithImages', getTournamentCategoriesWithImages)
 
 
 router.post('/tournament/acceptApplication', auth, acceptApplication)

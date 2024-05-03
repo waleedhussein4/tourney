@@ -8,14 +8,30 @@ import Content from './components/Content.jsx'
 function App() {
 
   const [tournaments, setTournaments] = useState([])
-  const [filters, setFilters] = useState([])
-  const [filteredTourneys, setFilteredTourneys] = useState([])
+  const [filters, setFilters] = useState()
   const [pageNumber, setPageNumber] = useState(1)
   const [hasMore, setHasMore] = useState(true)
 
   const fetchPaginatedData = async () => {
-    const URL = 'http://localhost:2000/api/tournement/getPaginatedTournaments/' + pageNumber
-    await fetch(URL)
+    if(!filters) {
+      return;
+    }
+    const URL = 'http://localhost:2000/api/tournement/getFilteredTournaments/' + pageNumber
+    await fetch(URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': 'http://localhost:5173'
+      },
+      body: JSON.stringify({
+        search: filters.search,
+        category: filters.category,
+        minEntryFee: filters.minEntryFee,
+        maxEntryFee: filters.maxEntryFee,
+        type: filters.type,
+        accessibility: filters.accessibility
+      })
+    })
       .then(res => res.json())
       .then(data => {
         if (data.length === 0) {
@@ -27,21 +43,16 @@ function App() {
 
   useEffect(() => {
     fetchPaginatedData()
-  }, [pageNumber])
+  }, [pageNumber, filters])
 
   return (
     <div id='Tournaments'>
       <Nav />
       <Sidebar
-        tournaments={tournaments}
-        setTournaments={setTournaments}
-        filters={filters}
         setFilters={setFilters}
-        filteredTourneys={filteredTourneys}
-        setFilteredTourneys={setFilteredTourneys}
       />
       <Content
-        filteredTourneys={filteredTourneys}
+        tournaments={tournaments}
       />
       {hasMore && <button onClick={() => { setPageNumber(pageNumber + 1) }} className="loadMore">Load More</button>}
     </div>
