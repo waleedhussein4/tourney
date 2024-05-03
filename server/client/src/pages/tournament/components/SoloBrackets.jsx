@@ -1,7 +1,13 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react';
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
 import '../styles/Brackets.css';
+
+const handlePlayerClick = (e) => {
+  if(e.target.classList.contains('tba')) {
+    return;
+  }
+  window.location.href = `/profile/${e.target.innerText}`;
+};
 
 const CustomSeed = ({ seed, breakpoint, roundIndex, seedIndex }) => {
   // breakpoint passed to Bracket component
@@ -13,8 +19,8 @@ const CustomSeed = ({ seed, breakpoint, roundIndex, seedIndex }) => {
     <Seed mobileBreakpoint={breakpoint} style={{ fontSize: 12 }}>
       <SeedItem>
         <div>
-          <SeedTeam className={[seed.users[0].eliminated && 'eliminated', !seed.users[0]?.username && 'tba']}>{seed.users[0]?.username || 'TBA '}</SeedTeam>
-          <SeedTeam className={[seed.users[1].eliminated && 'eliminated', !seed.users[1]?.username && 'tba']}>{seed.users[1]?.username || 'TBA '}</SeedTeam>
+          <SeedTeam onClick={handlePlayerClick} className={['player', seed.users[0].eliminated && 'eliminated', !seed.users[0]?.username && 'tba']}>{seed.users[0]?.username || 'TBA '}</SeedTeam>
+          <SeedTeam onClick={handlePlayerClick} className={['player', seed.users[1].eliminated && 'eliminated', !seed.users[1]?.username && 'tba']}>{seed.users[1]?.username || 'TBA '}</SeedTeam>
         </div>
       </SeedItem>
     </Seed>
