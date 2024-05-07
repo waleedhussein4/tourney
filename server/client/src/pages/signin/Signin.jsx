@@ -2,12 +2,16 @@
 import './App.css';
 import '/src/styles/index.css';
 import { AuthContextProvider } from '../../context/AuthContext';
-import { useState, useEffect } from 'react';
+import AuthContext from '../../context/AuthContext';
+import { useState, useEffect, useContext } from 'react';
 import { useLogin } from './useLogin';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function Signin() {
+
+  const { loggedIn } = useContext(AuthContext);
   let location = useLocation();
+  const navigate = useNavigate();
   
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
@@ -29,6 +33,9 @@ function Signin() {
   };
 
   useEffect(() => {
+    if(loggedIn) {
+      navigate('/');
+    }
     const rememberedPassword = localStorage.getItem('rememberedPassword');
     if (rememberedPassword) {
       setPass(rememberedPassword);

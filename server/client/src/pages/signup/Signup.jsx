@@ -1,11 +1,15 @@
 import './App.css'
 
-import { useRef, useState } from "react";
+import { AuthContext } from '../../context/AuthContext';
+import { useRef, useState, useContext, useEffect } from "react";
 import { useSignup } from "./useSignup";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function Signup() {
+
+  const { loggedIn } = useContext(AuthContext);
   let location = useLocation();
+  const navigate = useNavigate()
 
   const [email, setEmail] = useState('');
   const [userName, setUsername] = useState('');
@@ -38,6 +42,12 @@ function Signup() {
       await signup(email ,userName , password)
     }
   }
+
+  useEffect(() => {
+    if(loggedIn) {
+      navigate('/');
+    }
+  }, []);
 
   return (
     <div id="Signup">
