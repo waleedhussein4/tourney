@@ -3,11 +3,16 @@ const BattleRoyale = ({ tournament }) => {
 
   let members
 
+  const handleUserClick = (e) => {
+    console.log(`/profile/${e.target.dataset.username}`)
+    window.location.href = `/profile/${e.target.dataset.username}`;
+  };
+
   if(tournament.enrolledUsers && tournament.enrolledTeams.length === 0) {
     console.log('enrolledUsers')
     members = tournament.enrolledUsers.map((competitor, index) => (
       <li key={index}>
-        <span>{index + 1}. {competitor.username} <span className="user-eliminated">{competitor.eliminated ? 'Eliminated' : ''}</span></span>
+        <span data-username={competitor.username} className="user" onClick={handleUserClick}>{index + 1}. {competitor.username} <span className="user-eliminated">{competitor.eliminated ? 'Eliminated' : ''}</span></span>
         <span>{competitor.score}</span>
       </li>
     ));
