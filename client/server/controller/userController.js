@@ -223,7 +223,7 @@ const getisHost = async (req, res) => {
     console.log(user.isHost)
 
     // If the user is found and the isHost property exists
-    return res.json({ isHost: user.isHost });
+    return res.json(user.isHost);
 
   } catch (error) {
     console.log(error);

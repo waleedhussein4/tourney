@@ -71,7 +71,12 @@ function Tournament() {
         credentials: "include",
       }
     )
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          navigate('/page-not-found');
+        }
+        return res.json()
+      })
       .then((data) => {
         // data.accessibility = "open"
         // data.teamSize = 1
@@ -349,11 +354,11 @@ function Tournament() {
 
   function NotEnoughCreditsPopup() {
     return (
-      <div className="notEnoughCreditsPopup" style={{"display":"none"}}>
+      <div className="notEnoughCreditsPopup" style={{ "display": "none" }}>
         <img onClick={hideNotEnoughCreditsPopup} src={alpha_x} alt="" />
         <h1>Not Enough Credits</h1>
         <div className="notEnoughCreditsPopup-details">
-          { tournament.teamSize == 1 ? "You do not have enough credits to join this tournament." : "Each member of your team must have enough credits to pay for the entry fee."}
+          {tournament.teamSize == 1 ? "You do not have enough credits to join this tournament." : "Each member of your team must have enough credits to pay for the entry fee."}
         </div>
         <button className="btn btn-primary notEnoughCreditsPopup-confirm">Ok</button>
       </div>

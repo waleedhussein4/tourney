@@ -1,9 +1,12 @@
 import Nav from '../../components/Nav'; // Ensure this import path is correct
 import './BecomeHost.css';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import AuthContext from '../../context/AuthContext';
 
 const BecomeHost = () => {
+
+  const { loggedIn, isHost } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -19,11 +22,11 @@ const BecomeHost = () => {
       },
       credentials: 'include',
     })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log(data)
-      creditResponse = data
-    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data)
+        creditResponse = data
+      })
 
     if (creditResponse.credits >= 20) {
       const isUserSure = window.confirm('Are you sure you want to become a host for 20 credits?');
@@ -48,11 +51,24 @@ const BecomeHost = () => {
       })
       .then((res) => {
         if (res.ok) {
-          console.log('navigating')
           navigate("/")
         }
       })
   };
+
+  useEffect(() => {
+    if (loggedIn === undefined) return
+    if (!loggedIn) {
+      navigate('/signin')
+    }
+  }, [loggedIn])
+
+  useEffect(() => {
+    if (isHost === undefined) return
+    if (isHost) {
+      navigate('/host')
+    }
+  }, [isHost])
 
   return (
     <div id="BecomeHost">
@@ -78,7 +94,7 @@ const BecomeHost = () => {
         </div>
       </div>
     </div>
-    
+
   );
 };
 
