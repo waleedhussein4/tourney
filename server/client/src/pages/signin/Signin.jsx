@@ -6,6 +6,7 @@ import AuthContext from '../../context/AuthContext';
 import { useState, useEffect, useContext } from 'react';
 import { useLogin } from './useLogin';
 import { useLocation, useNavigate } from 'react-router-dom';
+import Nav from '../../components/Nav';
 
 function Signin() {
 
@@ -33,9 +34,6 @@ function Signin() {
   };
 
   useEffect(() => {
-    if(loggedIn) {
-      navigate('/');
-    }
     const rememberedPassword = localStorage.getItem('rememberedPassword');
     if (rememberedPassword) {
       setPass(rememberedPassword);
@@ -43,9 +41,17 @@ function Signin() {
     }
   }, []);
 
+  useEffect(() => {
+    if(loggedIn) {
+      navigate('/');
+      return;
+    }
+  }, [loggedIn])
+
   return (
     <AuthContextProvider>
       <div id="Signin">
+        <Nav />
         <div className="container">
           <div className="container-center">
             <form onSubmit={handleSubmit}>

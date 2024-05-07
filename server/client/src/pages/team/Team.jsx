@@ -3,11 +3,16 @@ import Main from './components/Main.jsx'
 
 import './styles/App.css'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
+import AuthContext from '../../context/AuthContext.jsx'
+import { useNavigate } from 'react-router-dom'
 
 const URL = 'http://localhost:2000/api/team/user'
 
 function Team() {
+
+  const { loggedIn } = useContext(AuthContext)
+  const navigate = useNavigate()
 
   const [teams, setTeams] = useState([])
   const [loadingTeams, setLoadingTeams] = useState(true)
@@ -26,6 +31,13 @@ function Team() {
   useEffect(() => {
     fetchTeams()
   }, [])
+
+  useEffect(() => {
+    if (loggedIn === undefined) return
+    if (!loggedIn) {
+      navigate('/signin')
+    }
+  }, [loggedIn])
 
   return (
     <div id='Team'>

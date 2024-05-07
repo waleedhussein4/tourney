@@ -1,6 +1,4 @@
-import { useContext } from "react";
-import { Routes, Route } from "react-router-dom";
-import AuthContext from "./context/AuthContext.jsx";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/home/Home";
 import Tournaments from "./pages/tournaments/Tournaments";
 import Team from "./pages/team/Team";
@@ -13,11 +11,11 @@ import Tournament from "./pages/tournament/Tournament";
 import Profile from "./pages/profile/Profile.jsx";
 import Host from "./pages/host/host";
 import Manage from "./pages/manage/Manage";
-
 import BecomeHost from "./pages/BecomeHost/BecomeHost";
+import Credits from "./pages/credits/Credits.jsx";
+import NotFound from "./pages/notfound/notfound";
 
 import "/src/styles/index.css";
-import Credits from "./pages/credits/Credits.jsx";
 
 function App() {
   return (
@@ -36,6 +34,8 @@ function App() {
       <Route path="/tournament/:UUID/manage" element={<Manage />} />
       <Route path="/credits" element={<Credits />} />
       <Route path="/become-host" element={<BecomeHost />} />
+      <Route path="/page-not-found" element={<NotFound />} />
+      <Route path="*" element={<Navigate to="/page-not-found" replace />} /> 
     </Routes>
   );
 }

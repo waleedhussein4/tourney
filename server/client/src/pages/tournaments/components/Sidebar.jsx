@@ -310,7 +310,7 @@ function Sidebar({ setFilters }) {
       <form id="filters">
         <div id='filter-search' className="filter" data-name="search">
           <span className="name">Search Tourneys</span>
-          <input autoComplete='off' id='searchbar' type="search" placeholder='ID, title...' name='search' />
+          <input autoComplete='off' id='searchbar' type="search" placeholder='Title, description, game, ...' name='search' />
         </div>
         <div id='filter-category' className="filter" data-name="category">
           <span className="name">Category</span>
