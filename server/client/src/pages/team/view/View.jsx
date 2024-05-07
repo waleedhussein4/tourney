@@ -4,10 +4,14 @@ import "./styles/App.css";
 import crown from "./assets/crown.webp";
 import { ConfirmationPopup } from "../../../components/ConfirmationPopup";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const paramUUID = new URLSearchParams(window.location.search).get("UUID");
 
 function App() {
+
+  const navigate = useNavigate();
+
   const [team, setTeam] = useState({});
   const [loadingTeam, setLoadingTeam] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -19,7 +23,12 @@ function App() {
       method: "GET",
       credentials: "include",
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          navigate("/page-not-found");
+        }
+        return res.json();
+      })
       .then((data) => {
         setTeam(data);
         setLoadingTeam(false);
@@ -38,45 +47,39 @@ function App() {
         <div id="main">
           <h1>LOADING ...</h1>
         </div>
-      ) : (
+      ) :
         <>
-          {team.message ? (
-            <div id="main">
-              <h2>Team not found</h2>
-            </div>
-          ) : (
-            <div id="main">
-              <div id="team">
-                <h1>{team.name}</h1>
-                <div className="members">
-                  <span>Members</span>
-                  {team.members.map((member) => (
-                    <Member key={member.username} member={member} team={team} />
-                  ))}
-                </div>
-                <div className="invite">
-                  <span className="invite-title">
-                    Share this link to invite others to your team
-                  </span>
-                  <div className="invite-link">
-                    <span>http://localhost:5173/team/join/{team.teamId}</span>
-                    <button className="copyBtn" onClick={copyLink}>
-                      Copy
-                    </button>
-                  </div>
-                </div>
-                {team.isLeader ? (
-                  <button onClick={deleteTeam} className="deleteTeam">
-                    Delete Team
-                  </button>
-                ) : (
-                  <button onClick={leaveTeam} className="leaveTeam">
-                    Leave Team
-                  </button>
-                )}
+          <div id="main">
+            <div id="team">
+              <h1>{team.name}</h1>
+              <div className="members">
+                <span>Members</span>
+                {team.members.map((member) => (
+                  <Member key={member.username} member={member} team={team} />
+                ))}
               </div>
+              <div className="invite">
+                <span className="invite-title">
+                  Share this link to invite others to your team
+                </span>
+                <div className="invite-link">
+                  <span>http://localhost:5173/team/join/{team.teamId}</span>
+                  <button className="copyBtn" onClick={copyLink}>
+                    Copy
+                  </button>
+                </div>
+              </div>
+              {team.isLeader ? (
+                <button onClick={deleteTeam} className="deleteTeam">
+                  Delete Team
+                </button>
+              ) : (
+                <button onClick={leaveTeam} className="leaveTeam">
+                  Leave Team
+                </button>
+              )}
             </div>
-          )}
+          </div>
           {showConfirmation && (
             <ConfirmationPopup
               message="Are you sure?"
@@ -88,7 +91,7 @@ function App() {
             />
           )}
         </>
-      )}
+      }
     </div>
   );
 }

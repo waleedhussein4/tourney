@@ -33,7 +33,12 @@ function Manage() {
         credentials: "include",
       }
     )
-      .then((res) => res.json())
+      .then((res) => {
+        if(!res.ok) {
+          navigate('/page-not-found')
+        }
+        return res.json()
+      })
       .then((data) => {
         setTournament(data);
         setTournamentType(data.type);
@@ -45,7 +50,6 @@ function Manage() {
   useEffect(() => {
     fetchTournamentData();
   }, []);
-
 
   function formatDate(dateString) {
     const date = new Date(dateString);

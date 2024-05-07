@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { useRef, useState, useContext, useEffect } from "react";
 import { useSignup } from "./useSignup";
 import { useLocation, useNavigate } from "react-router-dom";
+import Nav from '../../components/Nav';
 
 function Signup() {
 
@@ -46,11 +47,13 @@ function Signup() {
   useEffect(() => {
     if(loggedIn) {
       navigate('/');
+      return;
     }
-  }, []);
+  }, [loggedIn])
 
   return (
     <div id="Signup">
+      <Nav />
       <div className="container">
         <div className="container-center">
           <form onSubmit={handleSubmit}>
