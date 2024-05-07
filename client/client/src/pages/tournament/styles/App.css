@@ -441,3 +441,7 @@
 #Tournament .notEnoughCreditsPopup img:hover {
   cursor: pointer;
 }
+
+#Tournament .user-list .user:hover {
+  cursor: pointer;
+}
