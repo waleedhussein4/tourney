@@ -1261,7 +1261,7 @@ const handleJoinAsSolo = async (req, res) => {
   }
 
   // deduct entry fee from user's credits
-  User.updateOne({ _id: req.user }, { $inc: { credits: -tournament.entryFee } })
+  await User.updateOne({ _id: req.user }, { $inc: { credits: -tournament.entryFee } })
 
   const newUser = {
     UUID: req.user,
@@ -1358,7 +1358,7 @@ const handleJoinAsTeam = async (req, res) => {
 
   // deduct credits from team members
   for (let member of team.members) {
-    User.updateOne({ _id: member }, { $inc: { credits: -tournament.entryFee } })
+    await User.updateOne({ _id: member }, { $inc: { credits: -tournament.entryFee } })
   }
 
   const enrolledTeam = {
