@@ -1,11 +1,14 @@
 import Nav from "/src/components/Nav.jsx";
 import { formatCreditCard, getCreditCardType } from "cleave-zen";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ConfirmationPopup } from "../../components/ConfirmationPopup";
+import { AuthContext } from "../../context/AuthContext";
 import "./styles/Purchase.css";
 
 function Purchase() {
+
+  const { loggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const { product } = useParams();
@@ -93,6 +96,13 @@ function Purchase() {
     createTestProducts();
     getItem();
   }, []);
+
+  useEffect(() => {
+    if (loggedIn === undefined) return
+    if (!loggedIn) {
+      navigate('/signin')
+    }
+  }, [loggedIn])
 
   return (
     <>
