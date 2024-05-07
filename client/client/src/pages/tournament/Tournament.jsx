@@ -234,6 +234,7 @@ function Tournament() {
             ))
           )}
         </div>
+        <div className="joinPopup-error"></div>
         <button
           className="btn btn-primary joinPopup-confirm"
           onClick={joinTournamentAsTeam}
@@ -309,12 +310,13 @@ function Tournament() {
 
   function chooseTeam(e) {
     let div = e.target;
-    let uuid = div.dataset.uuid;
-    chosenTeam.uuid = uuid;
 
     if (div.classList.contains('isValidTeam-false')) {
-      // return;
+      return;
     }
+
+    let uuid = div.dataset.uuid;
+    chosenTeam.uuid = uuid;
 
     try {
       document.querySelector(".selectedTeam").classList.remove("selectedTeam");
@@ -327,6 +329,11 @@ function Tournament() {
 
   async function joinTournamentAsTeam() {
     console.log("Joining as team...");
+    // if theres no selected team, show error
+    if (!chosenTeam.uuid) {
+      document.querySelector(".joinPopup-error").innerHTML = "You must choose a team.";
+      return;
+    }
     hideJoinPopup();
     await fetch(joinAsTeamURL, {
       method: "POST",
@@ -358,9 +365,9 @@ function Tournament() {
         <img onClick={hideNotEnoughCreditsPopup} src={alpha_x} alt="" />
         <h1>Not Enough Credits</h1>
         <div className="notEnoughCreditsPopup-details">
-          {tournament.teamSize == 1 ? "You do not have enough credits to join this tournament." : "Each member of your team must have enough credits to pay for the entry fee."}
+          {tournament.teamSize == 1 ? "You do not have enough credits to pay for the entry fee." : "Each member of your team must have enough credits to pay for the entry fee."}
         </div>
-        <button className="btn btn-primary notEnoughCreditsPopup-confirm">Ok</button>
+        <button onClick={() => {navigate('/credits')}} className="btn btn-primary notEnoughCreditsPopup-confirm">Buy Credits</button>
       </div>
     );
   }
