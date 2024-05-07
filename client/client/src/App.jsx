@@ -20,22 +20,11 @@ import "/src/styles/index.css";
 import Credits from "./pages/credits/Credits.jsx";
 
 function App() {
-  const { loggedIn } = useContext(AuthContext);
-
   return (
     <Routes>
-      {loggedIn === false && (
-        <>
-          <Route path="/signin" element={<Signin />} />
-          <Route path="/signup" element={<Signup />} />
-        </>
-      )}
-      {loggedIn === true && (
-        <>
-          <Route path="/profile" element={<Profile />} />
-          
-        </>
-      )}
+      <Route path="/signin" element={<Signin />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/profile" element={<Profile />} />
       <Route path="/" element={<Home />} />
       <Route path="/tournaments" element={<Tournaments />} />
       <Route path="/team" element={<Team />} />
