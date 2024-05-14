@@ -434,12 +434,14 @@ function Tournament() {
         document.querySelector(".applicationPopup-error").innerHTML =
         "You must choose a team.";
       }
+      else {
+        selectedTeam = selectedTeam.innerTex
+      }
     } catch (e) {
       console.log(e)
-      return;
     }
 
-    let argTeam = selectedTeam.innerText || null
+    let argTeam = selectedTeam || null
 
     console.log(application);
 
