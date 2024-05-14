@@ -1129,27 +1129,29 @@ const handleApplicationSubmission = async (req, res) => {
     return res.status(404).json({ error: 'Tournament has started' })
   }
 
-
-  function isUserEnrolled(userUUID) {
-    const userExists = tournament.enrolledUsers.some(participant => participant.UUID === userUUID);
-    return userExists;
-  }
-  if (isUserEnrolled(userUUID)) {
-    return res.status(404).json({ error: 'You are already enrolled in this tournament.' })
-  }
-
-  function isTeamMemberEnrolled(team) {
-    for (let member of team.members) {
-      for (let enrolledTeam of tournament.enrolledTeams) {
-        if (enrolledTeam.players.includes(member)) {
-          return true;
+  if (team) {
+    function isTeamMemberEnrolled(team) {
+      for (let member of team.members) {
+        for (let enrolledTeam of tournament.enrolledTeams) {
+          if (enrolledTeam.players.includes(member)) {
+            return true;
+          }
         }
       }
+      return false;
     }
-    return false;
+    if (isTeamMemberEnrolled(team)) {
+      return res.status(404).json({ error: 'One of the team members is already enrolled in the tournament' })
+    }
   }
-  if (isTeamMemberEnrolled(team)) {
-    return res.status(404).json({ error: 'One of the team members is already enrolled in the tournament' })
+  else {
+    function isUserEnrolled(userUUID) {
+      const userExists = tournament.enrolledUsers.some(participant => participant.UUID === userUUID);
+      return userExists;
+    }
+    if (isUserEnrolled(userUUID)) {
+      return res.status(404).json({ error: 'You are already enrolled in this tournament.' })
+    }
   }
 
   // must not be host
