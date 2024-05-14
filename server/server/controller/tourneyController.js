@@ -895,7 +895,7 @@ const getTournamentDisplayData = async (req, res) => {
       const transformedEnrolledTeams = await Promise.all(originalEnrolledTeams.map(async team => {
         const players = await Promise.all(team.players.map(async player => {
           const user = await User.findOne({ _id: player.UUID });
-          return { username: 'x' }; // Assuming 'username' is the field in the user document containing the username
+          return { username: user.username }; // Assuming 'username' is the field in the user document containing the username
         }));
         return {
           teamName: team.teamName,
@@ -1070,7 +1070,7 @@ const handleApplicationSubmission = async (req, res) => {
   // match fields
   // fields must not be empty
   for (let i = 0; i < dbApplicationArray.length; i++) {
-    if (dbApplicationArray[i].name != userApplicationArray[i].label) {
+    if (dbApplicationArray[i] != userApplicationArray[i].label) {
       return res.status(400).json({ error: 'Invalid application form' })
     }
     if (!userApplicationArray[i].input) {
@@ -1739,7 +1739,7 @@ const getManageTournamentDisplayData = async (req, res) => {
       const transformedEnrolledTeams = await Promise.all(originalEnrolledTeams.map(async team => {
         const players = await Promise.all(team.players.map(async player => {
           const user = await User.findOne({ _id: player.UUID });
-          return { username: 'x' }; // Assuming 'username' is the field in the user document containing the username
+          return { username: user.username }; // Assuming 'username' is the field in the user document containing the username
         }));
         return {
           teamName: team.teamName,
@@ -1793,6 +1793,12 @@ images.set('football', "https://upload.wikimedia.org/wikipedia/commons/4/42/Foot
 images.set('basketball', "https://static.owayo-cdn.com/newhp/img/magazin/basketballstatistikEN/basketball-statistics-670.jpg")
 images.set('valorant', "https://m.media-amazon.com/images/M/MV5BNmNhM2NjMTgtNmIyZC00ZmVjLTk4YWItZmZjNGY2NThiNDhkXkEyXkFqcGdeQXVyODU4MDU1NjU@._V1_FMjpg_UX1000_.jpg")
 images.set('rainbow six: siege', 'https://img.redbull.com/images/c_fill,g_auto,w_450,h_600/q_auto:low,f_auto/redbullcom/2019/02/14/5455aa48-c5fb-48e5-9d54-3d848c7c32a2/rainbow-six-sieges-operators-add-complexity-to-the-strategising')
+images.set('pubg', 'https://img.redbull.com/images/c_crop,x_502,y_0,h_1080,w_864/c_fill,w_450,h_600/q_auto:low,f_auto/redbullcom/2017/08/22/c54ac74a-74b5-43b5-9352-5041fdc50766/pubg-title.jpg.jpg')
+images.set('apex legends', 'https://upload.wikimedia.org/wikipedia/en/d/db/Apex_legends_cover.jpg')
+images.set('call of duty: warzone', 'https://m.media-amazon.com/images/M/MV5BZWYxY2VmN2ItNjNlNi00ZmM0LWEwMjEtMTE1NGQxMGVhMWQxXkEyXkFqcGdeQXVyMTk2OTAzNTI@._V1_.jpg')
+images.set('dota 2', 'https://m.media-amazon.com/images/M/MV5BZDQxMjVmMjYtZTU4OC00MzRhLTljNTgtMTAwMDg3YzhlY2M4L2ltYWdlL2ltYWdlXkEyXkFqcGdeQXVyNTAyODkwOQ@@._V1_.jpg')
+images.set('volleyball', 'https://cdn.britannica.com/81/198481-050-10CED2D9/Gilberto-Godoy-Filho-ball-Brazil-Argentina-volleyball-2007.jpg')
+
 
 const getRandomTournaments = (tournaments) => {
   // Shuffle array using Durstenfeld shuffle algorithm for randomization
@@ -1863,12 +1869,12 @@ const getMyTournaments = async (req, res) => {
 }
 
 const getTournamentCategories = async (req, res) => {
-  const categories = ["Fortnite", "Counter Strike", "Tennis", "League of Legends", "Football", "Basketball", "Valorant", "Rainbow Six: Siege"]
+  const categories = ["Fortnite", "Counter Strike", "Tennis", "League of Legends", "Football", "Basketball", "Valorant", "Rainbow Six: Siege", "PUBG", "Apex Legends", "Call of Duty: Warzone", "Dota 2", "Volleyball"]
   return res.json(categories)
 }
 
 const getTournamentCategoriesWithImages = async (req, res) => {
-  const categories = ["Fortnite", "Counter Strike", "Tennis", "League of Legends", "Football", "Basketball", "Valorant", "Rainbow Six: Siege"]
+  const categories = ["Fortnite", "Counter Strike", "Tennis", "League of Legends", "Football", "Basketball", "Valorant", "Rainbow Six: Siege", "PUBG", "Apex Legends", "Call of Duty: Warzone", "Dota 2", "Volleyball"]
   const formattedCategories = categories.map(category => ({
     name: category,
     image: images.get(category.toLowerCase())
