@@ -753,7 +753,7 @@ function Manage() {
       tournament.applications.map((application, i) =>
         <div data-uuid={application.UUID} className={`application ${application.UUID}`} onMouseEnter={showButton} onMouseLeave={hideButton} key={i}>
           <span className='name'>
-            {application.teamName || application.players[0].username}
+            {application.teamName || application.players[0]?.username}
           </span>
           <div className="buttonsWrapper">
             <button className="viewApplicationButton" onClick={handleViewApplication}>View</button>
