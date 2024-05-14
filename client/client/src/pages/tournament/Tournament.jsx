@@ -435,7 +435,7 @@ function Tournament() {
         "You must choose a team.";
       }
       else {
-        selectedTeam = selectedTeam.innerTex
+        selectedTeam = selectedTeam.innerText
       }
     } catch (e) {
       console.log(e)
