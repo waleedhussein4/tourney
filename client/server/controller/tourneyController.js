@@ -934,7 +934,7 @@ const getTournamentDisplayData = async (req, res) => {
       for (let i = 0; i < applications.length; i++) {
         const teamUUID = applications[i].UUID
         const team = await Team.findOne({ _id: teamUUID })
-        if(team.members.map(member => member).includes(userUUID)) {
+        if (team.members.map(member => member).includes(userUUID)) {
           return true
         }
       }
@@ -1048,9 +1048,11 @@ const handleApplicationSubmission = async (req, res) => {
   // find team by name (name is unique but its not the id. the UUID is unique so treat name like any other attribute)
   const team = await Team.findOne({ name: req.body.team });
 
-  if (team.members.length != tournament.teamSize) {
-    console.log(team.members, tournament.teamSize)
-    return res.status(400).json({ error: 'Your chosen team must have exactly ' + tournament.teamSize + ' members.' })
+  if (team) {
+    if (team.members.length != tournament.teamSize) {
+      console.log(team.members, tournament.teamSize)
+      return res.status(400).json({ error: 'Your chosen team must have exactly ' + tournament.teamSize + ' members.' })
+    }
   }
 
 
