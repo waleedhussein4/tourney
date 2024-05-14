@@ -4,9 +4,10 @@ import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
 import '../styles/Brackets.css';
 
 const TeamUserListPopup = ({ teamName, players, onClose }) => {
+  console.log(players)
   return (
     <div className="team-user-list-popup">
-      <h2>{teamName || "Unknown Team"} Users</h2>
+      <h2>{teamName || "Unknown Team"}</h2>
       <ul>
         {players.map(player => (
           <li key={player.username} onClick={() => (window.location.href = `/profile/${player.username}`)}>
@@ -49,6 +50,7 @@ const BracketsComponent = ({ tournament }) => {
     const teamName = e.target.innerText;
     console.log('Team Clicked: ' + teamName)
     const team = tournament.enrolledTeams.find(t => t.teamName === teamName);
+    console.log('Team: ' + JSON.stringify(team))
     setSelectedTeam(team);
     setIsPopupOpen(true);
   };
