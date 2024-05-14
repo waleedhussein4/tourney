@@ -1,11 +1,44 @@
 /* eslint-disable react/prop-types */
+
+import { useState } from 'react';
+
 const BattleRoyale = ({ tournament }) => {
 
   let members
 
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
   const handleUserClick = (e) => {
     console.log(`/profile/${e.target.dataset.username}`)
     window.location.href = `/profile/${e.target.dataset.username}`;
+  };
+
+  const handleTeamClick = (e) => {
+    console.log(`/team/${e.target.dataset.teamname}`)
+    window.location.href = `/team/${e.target.dataset.teamname}`;
+  }
+
+  const handlePopupClose = () => {
+    setIsPopupOpen(false);
+    setSelectedTeam(null);
+  };
+
+  const TeamUserListPopup = ({ teamName, players, onClose }) => {
+    console.log(players)
+    return (
+      <div className="team-user-list-popup">
+        <h2>{teamName || "Unknown Team"}</h2>
+        <ul>
+          {players.map(player => (
+            <li key={player.username} onClick={() => (window.location.href = `/profile/${player.username}`)}>
+              {player.username}
+            </li>
+          ))}
+        </ul>
+        <button onClick={onClose}>Close</button>
+      </div>
+    );
   };
 
   if(tournament.enrolledUsers && tournament.enrolledTeams.length === 0) {
@@ -22,7 +55,7 @@ const BattleRoyale = ({ tournament }) => {
     console.log('enrolledTeams')
     members = tournament.enrolledTeams.map((competitor, index) => (
       <li key={competitor.teamName}>
-        <span>{index + 1}. {competitor.teamName} <span className="user-eliminated">{competitor.eliminated ? 'Eliminated' : ''}</span></span>
+        <span data-teamName={competitor.teamName} className="team" onClick={handleTeamClick}>{index + 1}. {competitor.teamName} <span className="user-eliminated">{competitor.eliminated ? 'Eliminated' : ''}</span></span>
         <span>{competitor.score}</span>
       </li>
     ));
@@ -32,6 +65,13 @@ const BattleRoyale = ({ tournament }) => {
   
   return (
     <div className="battle-royale">
+      {isPopupOpen && selectedTeam && (
+        <TeamUserListPopup
+          teamName={selectedTeam.teamName}
+          players={selectedTeam.players}
+          onClose={handlePopupClose}
+        />
+      )}
       <h1>Status: {tournament.hasStarted ? 'Ongoing' : 'Offline'}</h1>
       { (tournament.enrolledUsers?.length || tournament.enrolledTeams?.length) > 0 ?
       <>
