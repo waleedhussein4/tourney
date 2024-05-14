@@ -1735,7 +1735,7 @@ const getManageTournamentDisplayData = async (req, res) => {
     }
 
 
-    const transformedApps = await getTeamNameAndApplications(tournament.applications);
+    const transformedApps = await getTeamNameAndApplications(tournament.applications) || applications;
 
     const transformEnrolledUsers = await Promise.all(tournament.enrolledUsers.map(async (user) => {
       const userDoc = await User.findById(user.UUID);
