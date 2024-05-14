@@ -1734,8 +1734,13 @@ const getManageTournamentDisplayData = async (req, res) => {
       }
     }
 
-
-    const transformedApps = await getTeamNameAndApplications(tournament.applications) || applications;
+    let transformedApps
+    if (tournament.teamSize == 1) {
+      transformedApps = applications
+    }
+    else {
+      transformedApps = await getTeamNameAndApplications(tournament.applications)
+    }
 
     const transformEnrolledUsers = await Promise.all(tournament.enrolledUsers.map(async (user) => {
       const userDoc = await User.findById(user.UUID);
