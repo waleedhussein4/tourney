@@ -930,15 +930,19 @@ const getTournamentDisplayData = async (req, res) => {
       // iterate over applications and get team members
       // if team members include userUUID return true
 
-      const applications = tournament.applications
-      for (let i = 0; i < applications.length; i++) {
-        const teamUUID = applications[i].UUID
-        const team = await Team.findOne({ _id: teamUUID })
-        if (team.members.map(member => member).includes(userUUID)) {
-          return true
+      try {
+        const applications = tournament.applications
+        for (let i = 0; i < applications.length; i++) {
+          const teamUUID = applications[i].UUID
+          const team = await Team.findOne({ _id: teamUUID })
+          if (team.members.map(member => member).includes(userUUID)) {
+            return true
+          }
         }
+        return false
+      } catch (error) {
+        return false
       }
-      return false
     }
 
     const hasAppliedSolo = await checkHasAppliedSolo()
