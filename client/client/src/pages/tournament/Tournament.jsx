@@ -431,11 +431,11 @@ function Tournament() {
     try {
       selectedTeam = form.querySelector('.selectedTeam')
       if (!selectedTeam) {
-        throw new Error();
+        document.querySelector(".applicationPopup-error").innerHTML =
+        "You must choose a team.";
       }
     } catch (e) {
-      document.querySelector(".applicationPopup-error").innerHTML =
-        "You must choose a team.";
+      console.log(e)
       return;
     }
 
