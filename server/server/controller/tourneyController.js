@@ -1716,10 +1716,11 @@ const getManageTournamentDisplayData = async (req, res) => {
 
             results.push(result);
           } else {
-            // If no team information found for the provided UUID, add null teamName
+            // If no team information found for the provided UUID, add username
+            const user = await User.findOne({ _id: application.UUID });
             const result = {
               UUID: application.UUID,
-              teamName: null,
+              username: user.username,
               application: application.application
             };
 
@@ -1734,13 +1735,7 @@ const getManageTournamentDisplayData = async (req, res) => {
       }
     }
 
-    let transformedApps
-    if (tournament.teamSize == 1) {
-      transformedApps = tournament.applications
-    }
-    else {
-      transformedApps = await getTeamNameAndApplications(tournament.applications)
-    }
+    const transformedApps = await getTeamNameAndApplications(tournament.applications)
 
     const transformEnrolledUsers = await Promise.all(tournament.enrolledUsers.map(async (user) => {
       const userDoc = await User.findById(user.UUID);
