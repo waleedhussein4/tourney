@@ -916,6 +916,8 @@ const getTournamentDisplayData = async (req, res) => {
       const applications = tournament.applications
       for (let i = 0; i < applications.length; i++) {
         const appliedUser = applications[i].UUID
+        console.log("Applied user: " + appliedUser)
+        console.log("User UUID: " + userUUID)
         if (userUUID == appliedUser) {
           return true
         }
@@ -932,12 +934,13 @@ const getTournamentDisplayData = async (req, res) => {
       for (let i = 0; i < applications.length; i++) {
         const teamUUID = applications[i].UUID
         const team = await Team.findOne({ _id: teamUUID })
-        if (team.leader != userUUID) {
-          return false
+        if(team.members.map(member => member).includes(userUUID)) {
+          return true
         }
       }
       return false
     }
+
     const hasAppliedSolo = await checkHasAppliedSolo()
     const hasAppliedTeam = await checkHasAppliedTeam()
     const hasApplied = hasAppliedSolo || hasAppliedTeam
@@ -953,9 +956,10 @@ const getTournamentDisplayData = async (req, res) => {
 
       const acceptedTeams = tournament.acceptedTeams
       for (let i = 0; i < acceptedTeams.length; i++) {
-        console.log(acceptedTeams[i])
         const teamUUID = acceptedTeams[i]
         const team = await Team.findOne({ _id: teamUUID })
+        console.log("Team: " + team.leader)
+        console.log("User UUID: " + userUUID)
         if (team.leader == userUUID) {
           return true
         }

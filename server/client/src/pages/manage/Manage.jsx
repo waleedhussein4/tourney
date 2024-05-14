@@ -34,7 +34,7 @@ function Manage() {
       }
     )
       .then((res) => {
-        if(!res.ok) {
+        if (!res.ok) {
           navigate('/page-not-found')
         }
         return res.json()
@@ -765,6 +765,20 @@ function Manage() {
     )
   }
 
+  const Updates = () => {
+    if (tournament.updates.length === 0) {
+      return <span>No updates yet</span>
+    }
+    return (
+      tournament.updates.map((update, i) => (
+        <div key={i}>
+          <h4>{formatDate(update.date)}</h4>
+          <p>{update.content}</p>
+        </div>
+      ))
+    )
+  }
+
   const MatchesEditor = () => {
 
     var matchesInFirstRound = Math.ceil(tournament.enrolledTeams.length / 2);
@@ -907,10 +921,9 @@ function Manage() {
     else {
       return (
         <>
-          {tournament.earnings.map((earning, i) =>
+          {Array.from(tournament.earnings).map((earning, i) =>
             <div key={i}>
-              <span>{i}</span>
-              <span>{earning}</span>
+              <span>{earning.rank}. {earning.prize} credits</span>
             </div>
           )}
         </>
@@ -993,12 +1006,7 @@ function Manage() {
                   <h3>Updates</h3>
                   <div className="wrapper">
                     <div className='content updates-wrapper'>
-                      {tournament.updates.map((update, i) => (
-                        <div key={i}>
-                          <h4>{formatDate(update.date)}</h4>
-                          <p>{update.content}</p>
-                        </div>
-                      ))}
+                      <Updates />
                     </div>
                     <button className='postUpdateButton' onClick={showPostUpdatePopup}>Post Update</button>
                   </div>
