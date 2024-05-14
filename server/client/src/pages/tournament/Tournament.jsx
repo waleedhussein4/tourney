@@ -246,15 +246,16 @@ function Tournament() {
   }
 
   function SoloApplicationPopup() {
+    console.log(application)
     return (
       <div className="soloApplicationPopup">
         <img onClick={hideSoloApplicationPopup} src={alpha_x} alt="" />
         <h1>Apply</h1>
         <div className="application">
           {application.map((field) => (
-            <div className="field" key={field.name}>
-              <label htmlFor={`application-${field.name}`}>{field.name}</label>
-              <input type="text" id={`application-${field.name}`} />
+            <div className="field" key={field}>
+              <label htmlFor={`application-${field}`}>{field}</label>
+              <input type="text" id={`application-${field}`} />
             </div>
           ))}
         </div>
@@ -291,9 +292,9 @@ function Tournament() {
             )}
           </div>
           {application.map((field) => (
-            <div className="field" key={field.name}>
-              <label htmlFor={`application-${field.name}`}>{field.name}</label>
-              <input type="text" id={`application-${field.name}`} />
+            <div className="field" key={field}>
+              <label htmlFor={`application-${field}`}>{field}</label>
+              <input type="text" id={`application-${field}`} />
             </div>
           ))}
         </div>
