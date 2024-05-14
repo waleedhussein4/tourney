@@ -1070,7 +1070,7 @@ const handleApplicationSubmission = async (req, res) => {
   // match fields
   // fields must not be empty
   for (let i = 0; i < dbApplicationArray.length; i++) {
-    if (dbApplicationArray[i].name != userApplicationArray[i].label) {
+    if (dbApplicationArray[i] != userApplicationArray[i].label) {
       return res.status(400).json({ error: 'Invalid application form' })
     }
     if (!userApplicationArray[i].input) {
