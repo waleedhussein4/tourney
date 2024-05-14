@@ -439,6 +439,8 @@ function Tournament() {
       return;
     }
 
+    let argTeam = selectedTeam.innerText || null
+
     console.log(application);
 
     await fetch(submitApplicationURL, {
@@ -449,7 +451,7 @@ function Tournament() {
       body: JSON.stringify({
         tournament: UUID,
         application: application,
-        team: selectedTeam.innerText,
+        team: argTeam,
       }),
       credentials: "include",
     })
