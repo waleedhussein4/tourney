@@ -1736,7 +1736,7 @@ const getManageTournamentDisplayData = async (req, res) => {
 
     let transformedApps
     if (tournament.teamSize == 1) {
-      transformedApps = applications
+      transformedApps = tournament.applications
     }
     else {
       transformedApps = await getTeamNameAndApplications(tournament.applications)
