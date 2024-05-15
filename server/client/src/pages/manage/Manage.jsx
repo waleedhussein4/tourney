@@ -781,8 +781,10 @@ function Manage() {
 
   const MatchesEditor = () => {
 
-    var matchesInFirstRound = Math.ceil(tournament.enrolledTeams.length / 2);
+    var matchesInFirstRound = Math.ceil(Math.max(tournament.enrolledTeams?.length / 2, tournament.enrolledUsers?.length / 2));
     var totalMatches = matchesInFirstRound;
+
+    const teamsEnrolledYet = matchesInFirstRound > 0
 
     // Calculate the total number of matches
     while (matchesInFirstRound > 1) {
@@ -841,6 +843,7 @@ function Manage() {
     return (
       <div id='matchesEditor' className='attribute'>
         <h3>Match Winners</h3>
+        {!teamsEnrolledYet && <span>You will be able to access the match editor and manage rounds after users have joined your tournament.</span>}
         <div className="matches">
           {
             editedMatches.map((match, i) =>
@@ -852,7 +855,7 @@ function Manage() {
             )
           }
         </div>
-        <button onClick={handleSaveAll}>Save All</button>
+        {teamsEnrolledYet && <button onClick={handleSaveAll}>Save All</button>}
         <span className="error"></span>
       </div>
     )
@@ -929,6 +932,105 @@ function Manage() {
         </>
       )
     }
+  }
+
+  const Bank = () => {
+    tournament.bank = 5
+    const maxEarnings = tournament.type == 'brackets' ? tournament.earnings : tournament.earnings.reduce((acc, curr) => acc + curr.prize, 0)
+
+    const percentage = Math.min(100, Math.floor((tournament.bank / maxEarnings) * 100))
+
+    return (
+      <div id="bank" className='attribute'>
+        <h3>Bank</h3>
+        <div className="info">
+          In order to start the tournament, the bank must have enough credits to pay out the earnings.
+          You can either wait for more entry fees to be paid, or you can directly deposit credits into the bank.
+          Earnings will be given out from the bank after the tournament has ended, and any leftover amount will be given to you, the host.
+        </div>
+        <div className="balance">
+          <span className='balance-header'>Balance:</span>
+          <div className="bar">
+            <div className="bar-fill" style={{ width: `${percentage}%`, padding: `0 0 0 ${Math.min(percentage, 94)}%` }}>{`${percentage}%`}</div>
+          </div>
+          <div className="amount">{`${tournament.bank}/${maxEarnings} credits`}</div>
+        </div>
+        {percentage == 100 ? <span>Bank is full. You may now start the tournament.</span> : <button onClick={handleDepositeCredits}>Deposit credits</button>}
+        <span className="error"></span>
+      </div>
+    )
+  }
+
+  const handleDepositeCredits = async () => {
+    const maxEarnings = tournament.type == 'brackets' ? tournament.earnings : tournament.earnings.reduce((acc, curr) => acc + curr.prize, 0)
+
+    let popup = document.createElement('div');
+    popup.id = 'depositCreditsPopup';
+    popup.classList.add('popup');
+
+    let h2 = document.createElement('h2');
+    h2.innerHTML = 'Deposit Credits';
+
+    let input = document.createElement('input');
+    input.type = 'number';
+    input.id = 'depositAmount';
+    input.oninput = (e) => {
+      const field = document.getElementById('depositAmount');
+      field.value = field.value.replace(/[^0-9]/g, '');
+
+      const depositAmount = field.value;
+      const currentBank = tournament.bank;
+      const maxDeposit = currentBank + parseInt(depositAmount);
+      if (depositAmount < 1) {
+        document.querySelector('#depositCreditsPopup .error').innerText = 'Deposit amount must be greater than 0';
+        field.value = '';
+      } else if (maxDeposit > maxEarnings) {
+        document.querySelector('#depositCreditsPopup .error').innerText = `Deposit amount cannot exceed the maximum earnings of ${maxEarnings}`;
+        field.value = maxEarnings - currentBank;
+      } else {
+        document.querySelector('#depositCreditsPopup .error').innerText = '';
+      }
+    }
+
+    let button = document.createElement('button');
+    button.innerHTML = 'Confirm';
+    button.onclick = async () => {
+      console.log('hi');
+      await fetch('http://localhost:2000/api/tournement/depositIntoTournamentBank', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          UUID: UUID,
+          amount: document.getElementById('depositAmount').value
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            document.querySelector('#depositCreditsPopup .error').innerText = data.error;
+          } else {
+            navigate(0);
+          }
+        });
+    }
+
+    let cancel = document.createElement('button');
+    cancel.innerHTML = 'Cancel';
+    cancel.onclick = () => popup.remove();
+
+    let error = document.createElement('span')
+    error.classList.add('error')
+
+    popup.appendChild(h2);
+    popup.appendChild(input);
+    popup.appendChild(button);
+    popup.appendChild(cancel);
+    popup.appendChild(error);
+
+    document.getElementById('Manage').appendChild(popup);
   }
 
   return (
@@ -1012,8 +1114,9 @@ function Manage() {
                   </div>
                   <div className="pencil-placeholder"></div>
                 </div>
-                {tournament.type === 'brackets' && <MatchesEditor />}
               </div>
+              {tournament.type === 'brackets' && <MatchesEditor />}
+              {!tournament.hasStarted && <Bank />}
               <div className="controlButtons">
                 {tournament.hasStarted
                   ? <button onClick={endTournament} className="endTournament">End Tournament</button>
