@@ -10,7 +10,7 @@ import BattleRoyale from "./components/BattleRoyale";
 import { useNavigate, useParams } from "react-router-dom";
 
 const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
-const teamsURL = "http://localhost:2000/api/team/user";
+const teamsURL = "http://localhost:2000/api/team/user/teamsList";
 const submitApplicationURL = "http://localhost:2000/api/tournement/tournament/submitApplication";
 const joinAsSoloURL = "http://localhost:2000/api/tournement/tournament/joinAsSolo";
 const joinAsTeamURL = "http://localhost:2000/api/tournement/tournament/joinAsTeam";
@@ -99,6 +99,7 @@ function Tournament() {
       .then((data) => {
         setTeams(data);
         setIsLoadingTeams(false);
+        console.log('Teams data:', data)
       });
   };
 
@@ -285,7 +286,7 @@ function Tournament() {
               <div>Loading teams ...</div>
             ) : (
               teams.map((team) => (
-                <div className={`isValidTeam-${team.members.length == tournament.teamSize} team`} onClick={chooseTeam} key={team.UUID} data-uuid={team.UUID}>
+                <div className={`isValidTeam-${team.members.length == tournament.teamSize && team.isLeader} team`} onClick={chooseTeam} key={team.UUID} data-uuid={team.UUID}>
                   {team.name}
                 </div>
               ))

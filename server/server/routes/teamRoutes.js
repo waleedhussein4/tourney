@@ -11,6 +11,7 @@ const {
   leaveTeam,
   getTeamsByUser,
   getTeamByCode,
+  getTournamentDisplayTeams
 } = require("../controller/teamController"); // Adjust the path as necessary
 const { auth, getAuth } = require("../middleware/requireAuth"); // Path to your authentication middleware
 const checkTeamMembership = require("../middleware/checkMember");
@@ -18,6 +19,7 @@ const checkTeamMembership = require("../middleware/checkMember");
 // Routes
 router.post("/create", auth, createTeam); // Create a new team
 router.get('/user' ,  auth, getTeamsByUser);
+router.get('/user/teamsList', auth, getTournamentDisplayTeams);
 router.get("/view/:UUID", auth, getTeam); // Get specific team info, checks membership
 router.get("/view/code/:teamCode", auth, getTeamByCode); // Get specific team info by team code
 router.get("/view/:UUID/members", auth, getTeamMembers); // Get list of team members, checks membership

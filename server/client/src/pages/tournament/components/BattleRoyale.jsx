@@ -15,8 +15,15 @@ const BattleRoyale = ({ tournament }) => {
   };
 
   const handleTeamClick = (e) => {
-    console.log(`/team/${e.target.dataset.teamname}`)
-    window.location.href = `/team/${e.target.dataset.teamname}`;
+    // console.log(`/team/${e.target.dataset.teamname}`)
+    // window.location.href = `/team/${e.target.dataset.teamname}`;
+
+    const teamName = e.target.dataset.teamname;
+    console.log('Team Clicked: ' + teamName)
+    const team = tournament.enrolledTeams.find(t => t.teamName === teamName);
+    console.log('Team: ' + JSON.stringify(team))
+    setSelectedTeam(team);
+    setIsPopupOpen(true);
   }
 
   const handlePopupClose = () => {
