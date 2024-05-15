@@ -32,7 +32,8 @@ const createTeam = async (req, res) => {
 
   // make sure team name is not taken
   const teamExists = await Team.findOne
-    ({ name
+    ({
+      name
     });
   if (teamExists) {
     return res.status(400).json({ message: "Team name is already taken" });
@@ -99,7 +100,7 @@ const getTeam = async (req, res) => {
     let requester = await User.findOne({ _id: req.user }).select('username').lean();
     requester = requester.username
 
-    const formattedTeam = { name, members, leader, isLeader: leader === requester, teamId};
+    const formattedTeam = { name, members, leader, isLeader: leader === requester, teamId };
 
     res.status(200).json(formattedTeam);
   } catch (error) {
@@ -134,7 +135,7 @@ const getTeamByCode = async (req, res) => {
 
     const isMember = team.members.some(member => member._id === req.user);
 
-    const formattedTeam = { UUID: _id, name, isLeader: leader === requester, isMember};
+    const formattedTeam = { UUID: _id, name, isLeader: leader === requester, isMember };
 
     res.status(200).json(formattedTeam);
   } catch (error) {
@@ -168,7 +169,7 @@ const getTeamsByUser = async (req, res) => {
       return {
         UUID: team._id,
         name: team.name,
-        members: team.members
+        members: team.members,
       }
 
     })
@@ -179,6 +180,44 @@ const getTeamsByUser = async (req, res) => {
   }
 };
 
+const getTournamentDisplayTeams = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
+  try {
+    // Assuming user's ID is passed in the request, e.g., from a middleware that validates and attaches user info
+    const userId = req.user
+
+    // Query the database for teams where this user is a member, leader, or creator
+    const teams = await Team.find({
+      $or: [
+        { members: userId },
+        { leader: userId }
+      ]
+    })
+
+    const returnData = teams.map(team => {
+      return {
+        UUID: team._id,
+        name: team.name,
+        members: team.members,
+        leader: team.leader,
+        isLeader: team.leader === userId
+      }
+
+    })
+
+    res.status(200).json(returnData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
 
 const getTeamMembers = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
@@ -227,7 +266,7 @@ const joinTeam = async (req, res) => {
       return res.status(400).json({ message: "User is already the leader" });
     }
 
-    if (team.members.some(member => member._id===user._id)) {
+    if (team.members.some(member => member._id === user._id)) {
       return res.status(400).json({ message: "User is already a member" });
     }
 
@@ -272,7 +311,7 @@ const changeLeader = async (req, res) => {
     if (!team.members.map(member => member._id).includes(newLeader)) {
       return res.status(400).json({ message: "New leader is not a member" });
     }
-    
+
     team.leader = newLeader;
     await team.save();
 
@@ -390,6 +429,7 @@ module.exports = {
   kickMember,
   deleteTeam,
   leaveTeam,
-  getTeamsByUser
+  getTeamsByUser,
+  getTournamentDisplayTeams
 };
 
