@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const tournamentSchema = new Schema(
   {
     _id: { type: Object },
+    bank: { type: Number },
     UUID: { type: String, required: true, unique: true },
     host: {
       type: Schema.Types.String,

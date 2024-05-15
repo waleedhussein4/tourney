@@ -77,6 +77,7 @@ const createTournament = async (req, res) => {
         console.log("in if")
         newTournament = await Tournament.create({
           _id: id,
+          bank: 0,
           UUID: id,
           host: req.user,
           title: title,
@@ -84,14 +85,14 @@ const createTournament = async (req, res) => {
           description: description,
           type: type,
           category: category,
-          startDate: "2024-04-24T02:09:13.636+00:00",
-          endDate: "2024-02-29T10:02:10.959+00:00",
+          startDate: new Date(),
+          endDate: new Date(),
           hasStarted: false,
           hasEnded: false,
           enrolledTeams: [],
           enrolledUsers: [],
           entryFee: entryFee,
-          earnings: earnings,
+          earnings: parseInt(earnings),
           maxCapacity: maxCapacity * teamSize,
           accessibility: accessibility,
           matches: [],
@@ -106,6 +107,7 @@ const createTournament = async (req, res) => {
         console.log('iseeu')
         newTournament = await Tournament.create({
           _id: id,
+          bank: 0,
           UUID: id,
           host: req.user,
           title: title,
@@ -113,14 +115,14 @@ const createTournament = async (req, res) => {
           description: description,
           type: type.toLowerCase(),
           category: category,
-          startDate: "2024-04-24T02:09:13.636+00:00",
-          endDate: "2024-02-29T10:02:10.959+00:00",
+          startDate: new Date(),
+          endDate: new Date(),
           hasStarted: false,
           hasEnded: false,
           enrolledTeams: [],
           enrolledUsers: [],
           entryFee: entryFee,
-          earnings: earnings,
+          earnings: parseInt(earnings),
           maxCapacity: maxCapacity * teamSize,
           accessibility: accessibility,
           matches: [],
@@ -138,6 +140,7 @@ const createTournament = async (req, res) => {
       if (parseInt(teamSize) === 1) {
         newTournament = await Tournament.create({
           _id: id,
+          bank: 0,
           UUID: id,
           host: req.user,
           title: title,
@@ -145,13 +148,13 @@ const createTournament = async (req, res) => {
           description: description,
           type: type.toLowerCase(),
           category: category,
-          startDate: "2024-04-24T02:09:13.636+00:00",
-          endDate: "2024-02-29T10:02:10.959+00:00",
+          startDate: new Date(),
+          endDate: new Date(),
           hasStarted: false,
           hasEnded: false,
           enrolledUsers: [],
           entryFee: entryFee,
-          earnings: earnings,
+          earnings: earnings.map(item => ({...item, prize: parseInt(item.prize)})),
           maxCapacity: maxCapacity,
           accessibility: accessibility,
           matches: [],
@@ -164,6 +167,7 @@ const createTournament = async (req, res) => {
       if (parseInt(teamSize) >= 2) {
         newTournament = await Tournament.create({
           _id: id,
+          bank: 0,
           UUID: id,
           host: req.user,
           title: title,
@@ -171,13 +175,13 @@ const createTournament = async (req, res) => {
           description: description,
           type: type.toLowerCase(),
           category: category,
-          startDate: "2024-04-24T02:09:13.636+00:00",
-          endDate: "2024-02-29T10:02:10.959+00:00",
+          startDate: new Date(),
+          endDate: new Date(),
           hasStarted: false,
           hasEnded: false,
           enrolledTeams: [],
           entryFee: entryFee,
-          earnings: earnings,
+          earnings: earnings.map(item => ({...item, prize: parseInt(item.prize)})),
           maxCapacity: maxCapacity,
           accessibility: accessibility,
           matches: [],
@@ -1275,6 +1279,10 @@ const handleJoinAsSolo = async (req, res) => {
   // deduct entry fee from user's credits
   await User.updateOne({ _id: req.user }, { $inc: { credits: -tournament.entryFee } })
 
+  // add entry fee into tournament bank
+  tournament.bank += tournament.entryFee
+  await tournament.save()
+
   const newUser = {
     UUID: req.user,
     score: 0,
@@ -1372,6 +1380,10 @@ const handleJoinAsTeam = async (req, res) => {
   for (let member of team.members) {
     await User.updateOne({ _id: member }, { $inc: { credits: -tournament.entryFee } })
   }
+
+  // add entry fee into tournament bank
+  tournament.bank += tournament.entryFee * tournament.teamSize
+  await tournament.save()
 
   const enrolledTeam = {
     teamName: team.name,
@@ -1787,7 +1799,8 @@ const getManageTournamentDisplayData = async (req, res) => {
       startDate: tournament.startDate,
       endDate: tournament.endDate,
       applications: transformedApps,
-      matches: tournament.matches
+      matches: tournament.matches,
+      bank: tournament.bank
     });
   } catch (error) {
     console.error(error);
@@ -2286,8 +2299,16 @@ const startTournament = async (req, res) => {
   }
 
   // ensure tournament has enough participants
-  if (tournament.enrolledUsers?.length == tournament.maxCapacity || tournament.enrolledTeams?.length == tournament.maxCapacity) {
+  if (tournament.enrolledUsers?.length != tournament.maxCapacity || tournament.enrolledTeams?.length != tournament.maxCapacity) {
     return res.status(400).json({ error: 'Not enough participants' });
+  }
+
+  // ensure tournament bank is full
+  if (tournament.type == 'brackets' && tournament.bank != tournament.earnings) {
+    return res.status(400).json({ error: 'Tournament bank is not full' });
+  }
+  else if (tournament.type == 'battle royale' && tournament.bank != tournament.earnings.reduce((a, b) => a + b, 0)) {
+    return res.status(400).json({ error: 'Tournament bank is not full' });
   }
 
   // start tournament
@@ -2345,6 +2366,14 @@ const endTournament = async (req, res) => {
     // give earnings to winner
     winner.credits += earnings;
     await winner.save();
+
+    // remove the amount from the tournament bank
+    tournament.bank -= earnings;
+
+    // give out remaining bank balance to host
+    const host = await User.findOne({ _id: tournament.host });
+    host.credits += tournament.bank;
+    await host.save()
   }
 
   // give out earnings if team bracket tournament
@@ -2362,6 +2391,14 @@ const endTournament = async (req, res) => {
       user.credits += earningsPerMember;
       await user.save();
     }
+
+    // remove the amount from the tournament bank
+    tournament.bank -= earnings;
+
+    // give out remaining bank balance to host
+    const host = await User.findOne({ _id: tournament.host });
+    host.credits += tournament.bank;
+    await host.save()
   }
 
   // give out earnings if solo battle royale tournament
@@ -2370,10 +2407,18 @@ const endTournament = async (req, res) => {
     const usersSortedByScore = tournament.enrolledUsers.sort((a, b) => b.score - a.score);
 
     earnings.forEach(async (earning, i) => {
-      const user = await User.findOne({ _id: usersSortedByScore[i].UUID });
+      const user = await User.findOne({ _id: usersSortedByScore[i] });
       user.credits += earning;
       await user.save();
     });
+
+    // remove the amount from the tournament bank
+    tournament.bank -= earnings.reduce((a, b) => a + b, 0);
+
+    // give out remaining bank balance to host
+    const host = await User.findOne({ _id: tournament.host });
+    host.credits += tournament.bank;
+    await host.save()
   }
 
   // give out earnings if team battle royale tournament
@@ -2382,7 +2427,7 @@ const endTournament = async (req, res) => {
     const teamsSortedByScore = tournament.enrolledTeams.sort((a, b) => b.score - a.score);
 
     earnings.forEach(async (earning, i) => {
-      const team = await Team.findOne({ _id: teamsSortedByScore[i].UUID });
+      const team = await Team.findOne({ _id: teamsSortedByScore[i] });
 
       // divide earnings among team members
       const earningsPerMember = earning / team.members.length;
@@ -2392,6 +2437,14 @@ const endTournament = async (req, res) => {
         await user.save();
       }
     });
+
+    // remove the amount from the tournament bank
+    tournament.bank -= earnings.reduce((a, b) => a + b, 0);
+
+    // give out remaining bank balance to host
+    const host = await User.findOne({ _id: tournament.host });
+    host.credits += tournament.bank;
+    await host.save()
   }
 
   // end tournament
@@ -2399,6 +2452,51 @@ const endTournament = async (req, res) => {
   await tournament.save();
 
   res.status(200).json({ message: 'Tournament ended' });
+}
+
+const depositIntoTournamentBank = async (req, res) => {
+  const { UUID, amount } = req.body;
+
+  const tournament = await Tournament.findOne({ _id: UUID });
+  if (!tournament) {
+    return res.status(404).json({ error: 'Tournament not found' });
+  }
+
+  if (amount < 0) {
+    return res.status(400).json({ error: 'Amount must be positive' });
+  }
+
+  // ensure user has enough credits
+  const user = await User.findOne({ _id: req.user });
+  if (user.credits < amount) {
+    return res.status(400).json({ error: 'Insufficient funds' });
+  }
+
+  // deduct credits from user
+  user.credits -= amount;
+  await user.save();
+
+  // max bank balance is equal to the total earnings
+  let maxAmount
+
+  if (tournament.type == 'brackets') {
+    maxAmount = tournament.earnings;
+  } else if (tournament.type == 'battle royale') {
+    maxAmount = tournament.earnings.reduce((a, b) => a + b, 0);
+  }
+
+  if (amount > maxAmount) {
+    return res.status(400).json({ error: 'Amount exceeds maximum bank balance' });
+  }
+
+  console.log('Max amount:', maxAmount)
+  console.log('Old bank balance:', tournament.bank)
+  console.log('New bank balance:', tournament.bank + amount)
+
+  tournament.bank += amount;
+  await tournament.save();
+
+  res.status(200).json({ message: 'Amount deposited into tournament bank' });
 }
 
 module.exports = {
@@ -2430,7 +2528,8 @@ module.exports = {
   editTeamParticipants,
   editMatches,
   startTournament,
-  endTournament
+  endTournament,
+  depositIntoTournamentBank
 };
 
 
