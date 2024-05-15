@@ -216,7 +216,7 @@ export default function Host() {
     setTeamTypeError(false);
     teamTypeRef.current.style.border = '';
     if (event.target.value !== "1") {
-      setStringPerTeam("(per team)");
+      setStringPerTeam("(per team member)");
     } else {
       setStringPerTeam("");
     }
