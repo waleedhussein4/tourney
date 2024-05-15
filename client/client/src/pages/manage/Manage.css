@@ -6,6 +6,7 @@
 #Manage #container {
   background-color: black;
   display: flex;
+  gap: 1em;
   flex-direction: column;
   max-height: fit-content;
   min-height: calc(100% - 50pt);
@@ -230,6 +231,13 @@
 #Manage #matchesEditor {
   display: flex;
   flex-direction: column;
+  border: 1pt solid white;
+  padding: 1em;
+}
+
+#Manage #matchesEditor h3 {
+  width: 100%;
+  text-align: center;
 }
 
 #Manage #matchesEditor .matches {
@@ -254,6 +262,56 @@
   color: var(--color-red);
 }
 
+#Manage #bank {
+  display: flex;
+  flex-direction: column;
+  border: 1pt solid white;
+  padding: 1em;
+  gap: 2em;
+  align-items: center;
+}
+
+#Manage #bank h3 {
+  width: 100%;
+  text-align: center;
+}
+
+#Manage #bank .info {
+  font-size: 0.9em;
+  color: var(--color-secondary)
+}
+
+#Manage #bank .balance {
+ width: 100%;
+}
+
+#Manage #bank .balance-header {
+  width: 100%;
+  text-align: left;
+}
+
+#Manage #bank .bar {
+  background-color: var(--color-secondary);
+  width: 100%;
+  /* height: 10pt; */
+  padding: 0.2em;
+  border-radius: 2pt;
+}
+
+#Manage #bank .bar-fill {
+  background-color: var(--color-tertiary);
+  height: 100%;
+  border-radius: 2pt;
+}
+
+#Manage #bank button {
+  width: fit-content;
+  padding: 0.5em;
+  background-color: var(--color-green);
+  color: white;
+  border: none;
+}
+
 #Manage .controlButtons {
   display: flex;
   flex-direction: row;
@@ -262,4 +320,9 @@
 
 #Manage .controlButtons .error {
   color: var(--color-red);
+}
+
+#Manage #depositCreditsPopup {
+  height: fit-content;
+  padding: 1.5em;
 }
