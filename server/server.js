@@ -20,6 +20,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors({ origin: `${process.env.FRONTEND_URL}`, credentials: true }));
+console.log(`FRONTEND_URL: ${process.env.FRONTEND_URL}`)
 app.use(cookieParser());
 
 //route
