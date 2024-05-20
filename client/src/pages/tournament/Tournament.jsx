@@ -9,11 +9,11 @@ import TeamBrackets from "./components/TeamBrackets";
 import BattleRoyale from "./components/BattleRoyale";
 import { useNavigate, useParams } from "react-router-dom";
 
-const tournamentURL = `http://localhost:2000/api/tournement/tournament`;
-const teamsURL = "http://localhost:2000/api/team/user/teamsList";
-const submitApplicationURL = "http://localhost:2000/api/tournement/tournament/submitApplication";
-const joinAsSoloURL = "http://localhost:2000/api/tournement/tournament/joinAsSolo";
-const joinAsTeamURL = "http://localhost:2000/api/tournement/tournament/joinAsTeam";
+const tournamentURL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament`;
+const teamsURL = "${import.meta.env.VITE_BACKEND_URL}/api/team/user/teamsList";
+const submitApplicationURL = "${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/submitApplication";
+const joinAsSoloURL = "${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/joinAsSolo";
+const joinAsTeamURL = "${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/joinAsTeam";
 
 function Tournament() {
   const { loggedIn } = useContext(AuthContext);
@@ -104,7 +104,7 @@ function Tournament() {
   };
 
   const fetchTournamentCategories = async () => {
-    await fetch('http://localhost:2000/api/tournement/getTournamentCategories')
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/tournement/getTournamentCategories`)
       .then(res => res.json())
       .then(data => {
         console.log(data);

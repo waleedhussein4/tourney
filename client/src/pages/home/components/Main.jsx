@@ -12,7 +12,7 @@ function Main() {
   const { loggedIn } = useContext(AuthContext)
 
   const getTrendingTournaments = async () => {
-    const URL = 'http://localhost:2000/api/tournement/getTrendingTournaments';
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/getTrendingTournaments`;
     await fetch(URL)
     .then((res) => res.json())
     .then((data) => {
@@ -21,7 +21,7 @@ function Main() {
   }
 
   const getMyTournaments = async () => {
-    const URL = 'http://localhost:2000/api/tournement/getMyTournaments';
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/getMyTournaments`;
     await fetch(URL,
       {
         credentials: 'include',
