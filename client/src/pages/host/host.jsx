@@ -225,7 +225,7 @@ export default function Host() {
     if (isLoading) return;
     const fetchCategories = async () => {
       try {
-        const response = await fetch("${import.meta.env.VITE_BACKEND_URL}/api/tournement/getTournamentCategories");
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/tournement/getTournamentCategories`);
         if (!response.ok) {
           throw new Error("Failed to fetch categories");
         }
