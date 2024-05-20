@@ -9,7 +9,7 @@ function LogOutButton() {
   const navigate = useNavigate()
 
   async function logOut() {
-    await fetch("${import.meta.env.VITE_BACKEND_URL}/api/user/logout", {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/logout`, {
       method: "POST",
       credentials: "include"
     })

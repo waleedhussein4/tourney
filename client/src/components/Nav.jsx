@@ -15,7 +15,7 @@ function Nav() {
 
   useEffect(() => {
     if (loggedIn) {
-      fetch("${import.meta.env.VITE_BACKEND_URL}/api/user/profile", {
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
         credentials: "include"
       })
       .then(res => res.json())
