@@ -26,7 +26,7 @@ function Purchase() {
 
   const createTestProducts = async () => {
     // remove for production
-    await fetch("http://localhost:2000/api/purchase/createTestProducts", {
+    await fetch("${import.meta.env.VITE_BACKEND_URL}/api/purchase/createTestProducts", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -70,7 +70,7 @@ function Purchase() {
   };
 
   const getItem = async () => {
-    const URL = "http://localhost:2000/api/purchase/getProduct";
+    const URL = "${import.meta.env.VITE_BACKEND_URL}/api/purchase/getProduct";
     console.log("Product: " + product);
 
     await fetch(`${URL}/${product}`)
@@ -183,7 +183,7 @@ function Purchase() {
         <ConfirmationPopup
           message="Are you sure you want purchase this package?"
           onConfirm={() => {
-            const URL = "http://localhost:2000/api/purchase";
+            const URL = "${import.meta.env.VITE_BACKEND_URL}/api/purchase";
             const firstName = document.getElementById("input-firstName").value;
             const lastName = document.getElementById("input-lastName").value;
             const shippingAddress = document.getElementById(

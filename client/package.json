@@ -1,5 +1,5 @@
 {
-  "name": "tourney",
+  "name": "tourney-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,10 +12,11 @@
   "dependencies": {
     "axios": "^1.6.7",
     "cleave-zen": "^0.0.17",
-    "react": "^18.2.0",
+    "dotenv": "^16.4.5",
+    "react": "^18.3.1",
     "react-brackets": "^0.4.7",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.23.1",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

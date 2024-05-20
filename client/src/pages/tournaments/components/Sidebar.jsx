@@ -11,7 +11,7 @@ function Sidebar({ setFilters }) {
   }
 
   const getCategories = async () => {
-    const URL = 'http://localhost:2000/api/tournement/getTournamentCategoriesWithImages'
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/getTournamentCategoriesWithImages`
 
     await fetch(URL)
       .then(res => res.json())

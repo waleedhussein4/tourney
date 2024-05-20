@@ -7,7 +7,7 @@ import { useEffect, useState, useContext } from 'react'
 import AuthContext from '../../context/AuthContext.jsx'
 import { useNavigate } from 'react-router-dom'
 
-const URL = 'http://localhost:2000/api/team/user'
+const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/user`
 
 function Team() {
 
