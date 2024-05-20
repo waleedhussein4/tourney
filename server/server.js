@@ -1,5 +1,5 @@
-require("dotenv").config();
-console.log(process.env.SECRET);
+require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
+
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -18,7 +18,7 @@ app.use((req, res, next) => {
   console.log(req.path, req.method);
   next();
 });
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: `${import.meta.env.FRONTEND_URL}`, credentials: true }));
 app.use(cookieParser());
 
 //route
