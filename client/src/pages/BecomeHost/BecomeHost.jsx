@@ -15,7 +15,7 @@ const BecomeHost = () => {
     setLoading(true);
     let creditResponse
 
-    await fetch('http://localhost:2000/api/user/profile', {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ const BecomeHost = () => {
 
   const becomeHost = async () => {
     console.log("in become host")
-    await fetch('http://localhost:2000/api/user/becomehost',
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/becomehost`,
       {
         method: 'POST',
         credentials: 'include',
