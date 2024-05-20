@@ -1,5 +1,20 @@
+// the way it works now is that it checks if the NODE_ENV is production or development from '.env'
+// if it is production, it will use the .env file, which in the source code only contains the NODE_ENV variable
+// vercel adds its own environment variables, so you don't need to add them in the .env file
+// otherwise if its in development, it will use the .env.development file
+// so .env.production is useless until we migrate to another host other than vercel
 console.log('NODE_ENV: ' + require('dotenv').config({ path: `.env` }).parsed.NODE_ENV)
-require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
+
+if(process.env.NODE_ENV === 'production') {
+  console.log('Production')
+  require('dotenv').config({ path: `.env` })
+}
+else {
+  console.log('Development')
+  require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
+}
+
+console.log('index.js FRONTEND_URL: ' + process.env.FRONTEND_URL)
 
 const express = require("express");
 const cors = require("cors");
