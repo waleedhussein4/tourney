@@ -18,7 +18,7 @@ export const AuthContextProvider = (props) => {
   const [isHost, setIsHost] = useState(undefined);
 
   async function getLoggedIn() {
-    await fetch('http://localhost:2000/api/user/loggedIn', {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/loggedIn`, {
       credentials: 'include'
     })
       .then(res => res.json())
@@ -29,7 +29,7 @@ export const AuthContextProvider = (props) => {
   }
 
   async function getIsHost() {
-    await fetch('http://localhost:2000/api/user/isHost', {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/isHost`, {
       credentials: 'include'
     })
       .then(res => res.json())
