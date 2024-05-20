@@ -14,7 +14,7 @@ function Join() {
   const navigate = useNavigate()
 
   const fetchTeam = async () => {
-    const URL = 'http://localhost:2000/api/team/view/code/' + teamCode
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/view/code/` + teamCode
     await fetch(URL,
       {
         method: 'GET',
@@ -37,7 +37,7 @@ function Join() {
   }, [])
 
   async function joinTeam() {
-    const URL = 'http://localhost:2000/api/team/join/' + teamCode
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/join/` + teamCode
 
     await fetch(URL,
       {

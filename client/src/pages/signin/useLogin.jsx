@@ -8,7 +8,7 @@ export const useLogin = (props) => {
   const login = async (email, password, rememberPassword) => {
     setIsLoading(true);
     setError(null);
-    const response = await fetch("http://localhost:2000/api/user/login", {
+    const response = await fetch("${import.meta.env.VITE_BACKEND_URL}/api/user/login", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }, 
       body: JSON.stringify({ email, password, rememberPassword}),

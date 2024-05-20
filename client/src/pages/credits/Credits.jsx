@@ -11,7 +11,7 @@ const Credits = () => {
   const fetchData = async () => {
     console.log('fetching')
     const response = await fetch(
-      "http://localhost:2000/api/purchase/getProducts"
+      "${import.meta.env.VITE_BACKEND_URL}/api/purchase/getProducts"
     )
     .then((res) => res.json())
     .then((data) => setCredits(data));
@@ -31,7 +31,7 @@ const Credits = () => {
 
   const purchaseCredit = async (userId, creditId) => {
     const response = await fetch(
-      "http://localhost:2000/api/credit/purchase-credit-package",
+      "${import.meta.env.VITE_BACKEND_URL}/api/credit/purchase-credit-package",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
