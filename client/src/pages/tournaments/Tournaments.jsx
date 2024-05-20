@@ -16,12 +16,12 @@ function App() {
     if(!filters) {
       return;
     }
-    const URL = 'http://localhost:2000/api/tournement/getFilteredTournaments/' + pageNumber
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/getFilteredTournaments/` + pageNumber
     await fetch(URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'http://localhost:5173'
+        'Access-Control-Allow-Origin': `${import.meta.env.VITE_FRONTEND_URL}`
       },
       body: JSON.stringify({
         search: filters.search,

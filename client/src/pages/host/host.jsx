@@ -67,7 +67,7 @@ export default function Host() {
 
     const checkHostStatus = async () => {
       try {
-        const response = await fetch('http://localhost:2000/api/user/isHost', { credentials: 'include' });
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/isHost`, { credentials: 'include' });
         const data = await response.json();
         setIsHost(data);
         if(!data){
@@ -225,7 +225,7 @@ export default function Host() {
     if (isLoading) return;
     const fetchCategories = async () => {
       try {
-        const response = await fetch("http://localhost:2000/api/tournement/getTournamentCategories");
+        const response = await fetch("${import.meta.env.VITE_BACKEND_URL}/api/tournement/getTournamentCategories");
         if (!response.ok) {
           throw new Error("Failed to fetch categories");
         }
@@ -384,7 +384,7 @@ export default function Host() {
       try {
         console.log("hi");
         console.log(formData);
-        const response = await fetch('http://localhost:2000/api/tournement', {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/tournement`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
