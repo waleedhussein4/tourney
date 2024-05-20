@@ -18,7 +18,7 @@ app.use((req, res, next) => {
   console.log(req.path, req.method);
   next();
 });
-app.use(cors({ origin: `${import.meta.env.FRONTEND_URL}`, credentials: true }));
+app.use(cors({ origin: `${process.env.FRONTEND_URL}`, credentials: true }));
 app.use(cookieParser());
 
 //route
