@@ -1851,6 +1851,7 @@ const getRandomTournaments = (tournaments) => {
 };
 
 const getTrendingTournaments = async (req, res) => {
+  console.log('process.env.FRONTEND_URL: ' + process.env.FRONTEND_URL)
   res.setHeader('Access-Control-Allow-Credentials', true)
   res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
   // another common pattern
