@@ -18,7 +18,7 @@ function Manage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchTournamentData = async () => {
-    const URL = `http://localhost:2000/api/tournement/tournament/manage`
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/manage`
     await fetch(
       URL +
       "?" +
@@ -91,7 +91,7 @@ function Manage() {
     popup.remove();
 
     if (newTitle) {
-      const URL = `http://localhost:2000/api/tournement/tournament/editTitle`
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editTitle`
       await fetch(URL, {
         method: "POST",
         headers: {
@@ -155,7 +155,7 @@ function Manage() {
     const popup = document.getElementById('editDescriptionPopup');
     popup.remove();
 
-    const URL = `http://localhost:2000/api/tournement/tournament/editDescription`
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editDescription`
     await fetch(URL, {
       method: "POST",
       headers: {
@@ -213,7 +213,7 @@ function Manage() {
     popup.remove();
 
     if (newStartDate) {
-      const URL = `http://localhost:2000/api/tournement/tournament/editStartDate`
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editStartDate`
       await fetch(URL, {
         method: "POST",
         headers: {
@@ -289,7 +289,7 @@ function Manage() {
     popup.remove();
 
     if (newEndDate) {
-      const URL = `http://localhost:2000/api/tournement/tournament/editEndDate`
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editEndDate`
       await fetch(URL, {
         method: "POST",
         headers: {
@@ -397,7 +397,7 @@ function Manage() {
     popup.remove();
 
     if (newUpdate) {
-      const URL = `http://localhost:2000/api/tournement/tournament/postUpdate`
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/postUpdate`
       await fetch(URL, {
         method: "POST",
         headers: {
@@ -473,7 +473,7 @@ function Manage() {
     const parent = event.target.parentElement.parentElement
     const application = tournament.applications.map(app => app.UUID === parent.dataset.uuid ? app : null).filter(app => app !== null)[0]
     const uuid = application.UUID
-    const URL = `http://localhost:2000/api/tournement/tournament/acceptApplication`
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/acceptApplication`
     await fetch(URL, {
       method: "POST",
       headers: {
@@ -496,7 +496,7 @@ function Manage() {
     const parent = event.target.parentElement.parentElement
     const application = tournament.applications.map(app => app.UUID === parent.dataset.uuid ? app : null).filter(app => app !== null)[0]
     const uuid = application.UUID
-    const URL = `http://localhost:2000/api/tournement/tournament/rejectApplication`
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/rejectApplication`
     await fetch(URL, {
       method: "POST",
       headers: {
@@ -617,7 +617,7 @@ function Manage() {
     const popup = document.getElementById('editParticipantsPopup');
     popup.remove();
 
-    const URL = `http://localhost:2000/api/tournement/editSoloParticipants`
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editSoloParticipants`
     await fetch(URL, {
       method: "POST",
       headers: {
@@ -656,7 +656,7 @@ function Manage() {
     const popup = document.getElementById('editParticipantsPopup');
     popup.remove();
 
-    const URL = `http://localhost:2000/api/tournement/editTeamParticipants`
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editTeamParticipants`
     await fetch(URL, {
       method: "POST",
       headers: {
@@ -816,7 +816,7 @@ function Manage() {
       // Implement logic to save all edited strings
       console.log('Save all edited strings:', editedMatches);
 
-      const URL = `http://localhost:2000/api/tournement/editMatches`
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editMatches`
       await fetch(URL, {
         method: "POST",
         headers: {
@@ -862,7 +862,7 @@ function Manage() {
   }
 
   const startTournament = async () => {
-    const URL = `http://localhost:2000/api/tournement/startTournament`
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/startTournament`
     await fetch(URL, {
       method: "POST",
       headers: {
@@ -888,7 +888,7 @@ function Manage() {
   }
 
   const endTournament = async () => {
-    const URL = `http://localhost:2000/api/tournement/endTournament`
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/endTournament`
     await fetch(URL, {
       method: "POST",
       headers: {
@@ -996,7 +996,7 @@ function Manage() {
     button.innerHTML = 'Confirm';
     button.onclick = async () => {
       console.log('hi');
-      await fetch('http://localhost:2000/api/tournement/depositIntoTournamentBank', {
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/tournement/depositIntoTournamentBank`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
