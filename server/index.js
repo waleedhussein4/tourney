@@ -1,7 +1,15 @@
 console.log('NODE_ENV: ' + require('dotenv').config({ path: `.env` }).parsed.NODE_ENV)
-console.log('ENV: ' + process.env)
-require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
-console.log('FRONTEND_URL: ' + process.env.FRONTEND_URL)
+
+if(process.env.NODE_ENV === 'production') {
+  console.log('Production')
+  require('dotenv').config({ path: `.env` })
+}
+else {
+  console.log('Development')
+  require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
+}
+
+console.log('index.js FRONTEND_URL: ' + process.env.FRONTEND_URL)
 
 const express = require("express");
 const cors = require("cors");
