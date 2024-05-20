@@ -30,7 +30,7 @@ function MyTeams({ teams }) {
   }
 
   async function createTeam() {
-    const URL = 'http://localhost:2000/api/team/create'
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/create`
     let teamName = document.getElementById('teamName').value
     console.log("Creating team: ", teamName)
   
@@ -106,7 +106,7 @@ function Suggest() {
   }
 
   async function createTeam() {
-    const URL = 'http://localhost:2000/api/team/create'
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/create`
     let teamName = document.getElementById('teamName').value
     console.log("Creating team: ", teamName)
   
