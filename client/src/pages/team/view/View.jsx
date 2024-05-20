@@ -18,7 +18,7 @@ function App() {
   const [confirmationAction, setConfirmationAction] = useState(null);
 
   const fetchTeam = async () => {
-    const URL = "${import.meta.env.VITE_BACKEND_URL}/api/team/view/" + paramUUID;
+    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/view/` + paramUUID;
     await fetch(URL, {
       method: "GET",
       credentials: "include",
@@ -103,7 +103,7 @@ function Member({ member, team }) {
   async function kickMember() {
     setShowKickConfirmation(() => {
       const username = member.username;
-      const URL = "${import.meta.env.VITE_BACKEND_URL}/api/team/kick/" + paramUUID;
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/kick/` + paramUUID;
       return async () => {
         await fetch(URL, {
           headers: { "Content-Type": "application/json" },
@@ -128,7 +128,7 @@ function Member({ member, team }) {
   async function promoteMember() {
     setShowPromoteConfirmation(() => {
       const username = member.username;
-      const URL = "${import.meta.env.VITE_BACKEND_URL}/api/team/changeLeader/" + paramUUID;
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/changeLeader/` + paramUUID;
       return async () => {
         await fetch(URL, {
           headers: { "Content-Type": "application/json" },
@@ -208,7 +208,7 @@ function hideButton(event) {
 
 async function deleteTeam() {
   const paramUUID = new URLSearchParams(window.location.search).get("UUID");
-  const URL = "${import.meta.env.VITE_BACKEND_URL}/api/team/delete/" + paramUUID;
+  const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/delete/` + paramUUID;
 
   await fetch(URL, {
     method: "DELETE",
@@ -219,7 +219,7 @@ async function deleteTeam() {
 
 async function leaveTeam() {
   console.log("leaving team");
-  const URL = "${import.meta.env.VITE_BACKEND_URL}/api/team/leave/" + paramUUID;
+  const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/leave/` + paramUUID;
   console.log(URL);
 
   await fetch(URL, {
