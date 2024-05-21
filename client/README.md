@@ -14,11 +14,10 @@ Version: 1.0
 - Audience: Identify who the intended users and readers of the documentation are.
 
 2. [Requirements](#requirements)
-- User stories
+- [User stories](#user-stories)
 - Functional Requirements: Detailed description of functionalities the software must provide.
 - Non-functional Requirements: Performance, security, usability, and other quality attributes.
 - System Requirements: Hardware and software requirements for running the software.
-
 
 3. [Architecture and Design](#architecture-and-design)
 - System Architecture: High-level description of the system's architecture, including diagrams (e.g., UML diagrams).
@@ -57,7 +56,7 @@ Version: 1.0
 
 ## Introduction
 
-Tourney is a web application that allows users to create and manage tournaments for various games and sports. The application provides features for creating tournaments, managing participants, scheduling matches, and tracking results. Users can create public or private tournaments and invite participants. Tourney is designed to be flexible and customizable to support a wide range of games and sports, from casual events to professional competitions.
+Tourney is a web application that allows users to create and manage tournaments for various games and sports. The application provides features for creating tournaments, managing participants, scheduling matches, and tracking results. Users can create public or private tournaments. Tourney is designed to be flexible and customizable to support a wide range of games and sports, from casual events to professional competitions.
 
 ## Requirements
 
@@ -716,6 +715,22 @@ As a participant, I want access to coaching and mentorship services within the p
 - Coaches offer personalized training sessions, gameplay analysis, and strategy development.
 - Participants can book coaching sessions, track progress, and provide feedback within the platform.
 
+### Functional Requirements
+
+#### Earnings System
+Bank variable stored in tournament schema
+
+Bank is updated upon:
+Solo user joins solo tournament: add entryFee into bank
+Team joins team tournament: add (entryFee * team.size) into bank
+Host deposits (if bank not already full): add deposit amount into bank
+Tournament ends: distribute earnings, leftover transferred to host
+
+A bank is considered full when it is equal to the total earnings
+
+Host can view bank status in the manage tournament page: current/goal
+
+Host can deposit into bank if it isn’t already full, in the manage page
 
 ## Architecture and Design
 
