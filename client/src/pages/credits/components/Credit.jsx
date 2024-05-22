@@ -1,5 +1,3 @@
-import React from "react";
-
 function CreditCard({ name, totalCredits, price, onBuyClick }) {
   return (
     <div className="credit-card">
