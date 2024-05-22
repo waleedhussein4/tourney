@@ -1,5 +1,5 @@
 import CreditCard from "./components/Credit"; // Import CreditCard component
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import "./styles/Credits.css";
 import Nav from "../../components/Nav";
 import { useNavigate } from "react-router-dom";
@@ -23,29 +23,8 @@ const Credits = () => {
   }, []);
 
   const handleBuyClick = (creditId) => {
-    
     console.log(`Buying ${creditId} credits`);
-    
     navigate(`/purchase/${creditId}`);
-  };
-
-  const purchaseCredit = async (userId, creditId) => {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/credit/purchase-credit-package`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: userId, creditPackageId: creditId }),
-      }
-    );
-
-    const json = await response.json();
-
-    if (!response.ok) {
-      return Error(message, "Error purchasing credits!");
-    }
-    console.log(json, "json returned");
-    return json;
   };
 
   return (
