@@ -54,7 +54,7 @@ app.all("*", (req, res) => {
 
 mongoose
   .connect(
-    "REDACTED_MONGODB_URI"
+    `${process.env.DATABASE_URL}`
   )
   .then(() => {
     app.listen(port, () => {
