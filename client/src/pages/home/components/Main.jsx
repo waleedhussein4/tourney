@@ -91,10 +91,10 @@ function Main() {
       <div className="browse-container">
         <Link to={'/tournaments'} className="browseBtn">BROWSE</Link>
       </div>
-        <Carousel
+        {trendingTournaments.length > 0 && <Carousel
          title="Trending"
          data={trendingTournaments}
-        />
+        />}
         {loggedIn && myTournaments.length > 0 && <Carousel
           title="My Tournaments"
           data={myTournaments}
