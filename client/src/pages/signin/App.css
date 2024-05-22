@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
+
+#Signin {
+  display: flex;
+  flex-direction: column;
+  color: white;
+  height: 100%;
+}
+
+#Signin body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(to left, #000000, #434343);
+  color: #FFFFFF;
+}
+
+/* Container styling */
+#Signin .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: none;
+  flex: 1;
+}
+
+#Signin .container-center {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(15px);
+  border-radius: 12px;
+  width: 450px; /* Maintained width */
+  padding: 40px; /* Enhanced padding for better spacing */
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Typography and layout enhancements */
+#Signin .container-center h2 {
+  font-size: 28px; /* Enhanced title size */
+  color: #00FF76; /* Vibrant green for a modern look */
+  text-align: center;
+  margin-bottom: 20px; /* Increased spacing for a cleaner layout */
+}
+
+/* Input field styling */
+#Signin .container-center input[type="text"], 
+#Signin .container-center input[type="password"] {
+  padding: 12px;
+  margin-top: 15px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-color: #ffffff20;
+  color: #FFFFFF;
+  width: calc(100% - 30px); /* Calculated width for full input field */
+  font-size: 16px; /* Larger font size for readability */
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Input hover and focus states */
+#Signin .container-center input[type="text"]:hover, 
+#Signin .container-center input[type="password"]:hover,
+#Signin .container-center input[type="text"]:focus, 
+#Signin .container-center input[type="password"]:focus {
+  border-color: #00FF76; /* Coherent vibrant green */
+  box-shadow: 0 0 10px #00FF76; /* Added glow effect for interaction feedback */
+}
+
+/* Checkbox and label styling */
+#Signin #rememberPassword {
+  margin-bottom: 20px; /* Increased spacing between checkbox and login button */
+  display: flex;
+  align-items: center;
+}
+
+/* Sign-in button styling */
+#Signin input[type="submit"] {
+  background-color: #00FF76; /* Bright green for visual impact */
+  color: black; /* High contrast for legibility */
+  font-weight: 700; /* Bold weight for prominence */
+  height: 50px; /* Increased height for better interaction */
+  width: 100%; /* Full width for a more professional look */
+  font-size: 18px; /* Enhanced font size */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+  margin-bottom: 20px; /* Added space below button for "sign up" link */
+}
+
+/* Sign-up link styling */
+#Signin #account {
+  margin-top: 10px; /* Adjusted space for 'Don't have an account? Sign up' */
+  color: whitesmoke; /* Ensures visibility against background */
+  font-size: 16px; /* Clear and readable */
+  text-align: center; /* Centers text under the button */
+}
+
+/* Sign-up button styling, assuming an ID for the sign-up button */
+#Signin #signupButton {
+  background-color: #800080; /* Distinctive purple color */
+  color: white; /* High contrast for legibility */
+  font-weight: 700; /* Bold weight for prominence */
+  height: 50px; /* Increased height for better interaction */
+  width: 100%; /* Full width to match sign-in button */
+  font-size: 18px; /* Enhanced font size */
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px; /* Space from sign-in button */
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+}
+
+#Signin #signupButton:hover {
+  background-color: #9932CC; /* Lighter purple on hover for visual interest */
+  transform: scale(1.05); /* Slight enlargement on hover for emphasis */
+  box-shadow: 0 0 12px #9932CC; /* Purple glow effect to add interactivity */
+}
+
+/* Error styling */
+#Signin .error {
+  color: #FF6347; /* Visible and alerting color for errors */
+  font-size: 14px; /* Scaled up for clarity */
+  padding: 10px;
+  margin-top: 10px; /* Better spacing from other elements */
+}
