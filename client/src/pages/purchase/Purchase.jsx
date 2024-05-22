@@ -21,53 +21,7 @@ function Purchase() {
   const [ccType, setccType] = useState("");
   const [item, setItem] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const [showPurchaseConfirmation, setShowPurchaseConfirmation] =
-    useState(false);
-
-  const createTestProducts = async () => {
-    // remove for production
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/purchase/createTestProducts`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify([
-        {
-          id: "1",
-          name: "Bronze Package",
-          amount: 5,
-          price: 5,
-        },
-        {
-          id: "2",
-          name: "Silver Package",
-          amount: 10,
-          price: 10,
-        },
-        {
-          id: "3",
-          name: "Gold Package",
-          amount: 20,
-          price: 20,
-        },
-        {
-          id: "4",
-          name: "Diamond Package",
-          amount: 50,
-          price: 50,
-        },
-        {
-          id: "5",
-          name: "Ultra Package",
-          amount: 100,
-          price: 100,
-        },
-      ]),
-    })
-      .then((res) => res.json())
-      .then((data) => console.log(data));
-  };
+  const [showPurchaseConfirmation, setShowPurchaseConfirmation] = useState(false);
 
   const getItem = async () => {
     const URL = `${import.meta.env.VITE_BACKEND_URL}/api/purchase/getProduct`;
@@ -93,7 +47,6 @@ function Purchase() {
   };
 
   useEffect(() => {
-    createTestProducts();
     getItem();
   }, []);
 
