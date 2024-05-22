@@ -23,7 +23,6 @@ const touneyRoute = require("./routes/tourneyRoutes");
 const userRoute = require("./routes/userRoutes");
 const purchaseRoute = require("./routes/purchaseRoutes");
 const teamRoute = require("./routes/teamRoutes");
-const creditRoute = require("./routes/creditRoutes");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const port = 2000;
@@ -43,7 +42,6 @@ app.use("/api/tournement", touneyRoute);
 app.use("/api/user", userRoute);
 app.use("/api/purchase", purchaseRoute);
 app.use("/api/team", teamRoute);
-app.use("/api/credit", creditRoute);
 
 app.all("*", (req, res) => {
   return;

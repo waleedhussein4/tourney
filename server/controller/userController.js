@@ -220,6 +220,11 @@ const getisHost = async (req, res) => {
     // Assuming `req.user.id` is available and contains the user's ID
     const user = await User.findById(req.user);
 
+    // check if user found
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     console.log(user.isHost)
 
     // If the user is found and the isHost property exists
