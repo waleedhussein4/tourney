@@ -1,0 +1,447 @@
+#Tournament {
+  height: 100%;
+}
+
+#Tournament .joinPopup {
+  width: 600pt;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: black;
+  box-shadow: 0px 0px 6px 4px rgb(136, 136, 136, 0.5);
+  padding: 1em;
+  color: white;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5em;
+}
+
+#Tournament .joinPopup h1 {
+  text-align: center;
+}
+
+#Tournament .joinPopup-details {
+  text-align: center;
+}
+
+#Tournament .joinPopup-confirm {
+  padding: 0.5em;
+  width: fit-content;
+}
+
+#Tournament .joinPopup img {
+  color: white;
+  position: absolute;
+  height: 20pt;
+  right: 6pt;
+  top: 6pt;
+}
+
+#Tournament .joinPopup img:hover {
+  cursor: pointer;
+}
+
+#Tournament .joinPopup .joinPopup-error {
+  color: var(--color-red);
+}
+
+#Tournament .joinPopup-teams {
+  border: 2px solid white;
+  width: 90%;
+  max-height: 180pt;
+  display: flex;
+  flex-direction: column;
+  gap: 1pt;
+  overflow-y: auto;
+  background-color: white;
+  font-size: 1.2em;
+  color: var(--color-tertiary);
+  user-select: none;
+}
+
+#Tournament .joinPopup-teams>div {
+  width: 100%;
+  padding: 0.8em;
+  background-color: black;
+  display: flex;
+  align-items: center;
+  border-right: 1pt solid white;
+}
+
+#Tournament .joinPopup-teams>div:not(.isValidTeam-false):hover {
+  opacity: 0.85;
+  cursor: pointer;
+}
+
+#Tournament .joinPopup-teams>div.selectedTeam {
+  opacity: 0.85;
+}
+
+#Tournament .soloApplicationPopup {
+  width: 600pt;
+  max-height: 70%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: black;
+  box-shadow: 0px 0px 6px 4px rgb(136, 136, 136, 0.5);
+  padding: 1em;
+  color: white;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5em;
+}
+
+#Tournament .soloApplicationPopup h1 {
+  text-align: center;
+}
+
+#Tournament .soloApplicationPopup .application {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+#Tournament .soloApplicationPopup .application>div {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+}
+
+#Tournament .soloApplicationPopup .application>div label {
+  width: 25%;
+}
+
+#Tournament .soloApplicationPopup .application>div input {
+  width: 25%;
+}
+
+#Tournament .applicationPopup-application>div input {
+  width: 75%;
+  padding: 0.2em;
+}
+
+#Tournament .soloApplicationPopup-confirm {
+  padding: 0.5em;
+  width: fit-content;
+}
+
+#Tournament .soloApplicationPopup img {
+  color: white;
+  position: absolute;
+  height: 20pt;
+  right: 6pt;
+  top: 6pt;
+}
+
+#Tournament .soloApplicationPopup img:hover {
+  cursor: pointer;
+}
+
+#Tournament .teamApplicationPopup {
+  width: 600pt;
+  max-height: 70%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: black;
+  box-shadow: 0px 0px 6px 4px rgb(136, 136, 136, 0.5);
+  padding: 1em;
+  color: white;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5em;
+  overflow-y: auto;
+}
+
+#Tournament .teamApplicationPopup .info {
+  width: 100%;
+}
+
+#Tournament .teamApplicationPopup h1 {
+  text-align: center;
+}
+
+#Tournament .teamApplicationPopup .application {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  align-items: center;
+}
+
+#Tournament .teamApplicationPopup .application .field {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+}
+
+#Tournament .teamApplicationPopup .application .field label {
+  width: 25%;
+}
+
+#Tournament .teamApplicationPopup .application .field input {
+  width: 75%;
+  padding: 0.2em;
+}
+
+#Tournament .teamApplicationPopup-confirm {
+  padding: 0.5em;
+  width: fit-content;
+}
+
+#Tournament .teamApplicationPopup img {
+  color: white;
+  position: absolute;
+  height: 20pt;
+  right: 6pt;
+  top: 6pt;
+}
+
+#Tournament .teamApplicationPopup img:hover {
+  cursor: pointer;
+}
+
+#Tournament .applicationPopup-error {
+  color: var(--color-red);
+}
+
+#Tournament .teamApplicationPopup .teams {
+  border: 2px solid white;
+  width: 100%;
+  max-height: 180pt;
+  display: flex;
+  flex-direction: column;
+  gap: 1pt;
+  overflow-y: auto;
+  background-color: white;
+  font-size: 1.2em;
+  color: var(--color-tertiary);
+  user-select: none;
+}
+
+#Tournament .teamApplicationPopup .team {
+  width: 100%;
+  padding: 0.8em;
+  background-color: black;
+  display: flex;
+  align-items: center;
+  border-right: 1pt solid white;
+}
+
+#Tournament .teamApplicationPopup .teams .team:not(.isValidTeam-false):hover {
+  opacity: 0.85;
+  cursor: pointer;
+}
+
+#Tournament .teamApplicationPopup .teams .selectedTeam {
+  opacity: 0.85;
+}
+
+#Tournament .isValidTeam-false {
+  color: rgba(255, 255, 255, 0.464);
+}
+
+#Tournament .loadingText {
+  color: white;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#Tournament .tournament-container {
+  background-color: black;
+  display: flex;
+  flex-direction: row;
+  height: calc(100% - 50pt);
+}
+
+#Tournament .tournament-info {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+  padding: 1em;
+  box-shadow: 1px 0px 2px 0px rgb(255, 255, 255, 0.3);
+  font-size: 1.5rem;
+}
+
+#Tournament .tournament-title {
+  font-size: 1.7em;
+  font-weight: bold;
+  color: var(--color-tertiary);
+  margin-bottom: 5px;
+}
+
+#Tournament .tournament-description {
+  font-size: 1em;
+  color: #666;
+  line-height: 1.5;
+}
+
+#Tournament .tournament-specs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  color: white;
+  font-size: 0.7em;
+}
+
+#Tournament .tournament-status {
+  color: white;
+  font-size: 0.7em;
+  text-align: center;
+}
+
+#Tournament .hasStarted {
+  color: var(--color-green);
+  text-align: center;
+}
+
+#Tournament .btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  text-transform: uppercase;
+  transition: all 0.2s ease-in-out;
+}
+
+#Tournament .btn:hover {
+  background-color: #ddd;
+}
+
+#Tournament .btn-manage {
+  background-color: #eee;
+  color: #666;
+}
+
+#Tournament .btn-primary {
+  background-color: #28a745;
+  color: #fff;
+}
+
+#Tournament .btn-secondary {
+  background-color: #ddd;
+  color: #666;
+}
+
+#Tournament .tournament-content {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  padding: 1em;
+  overflow-y: auto;
+}
+
+#Tournament .brackets,
+#Tournament .battle-royale {
+  background-color: var(--color-primary);
+  padding: 15px;
+  border-radius: 5px;
+  color: white;
+  height: 82%;
+}
+
+#Tournament .tournament-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#Tournament .tournament-updates {
+  padding: 0.5em;
+  height: 18%;
+  font-size: 14px;
+  color: #999;
+  overflow-y: auto;
+}
+
+#Tournament .battle-royale {
+  display: flex;
+  flex-direction: column;
+}
+
+#Tournament .table-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-weight: bold;
+  margin: 0.5em 0 0.3em 0;
+  border-bottom: 1pt solid white;
+}
+
+#Tournament .battle-royale .user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1pt;
+  background-color: white;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+#Tournament .battle-royale .user-list li {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+  background-color: var(--color-primary);
+  padding: 0.4em;
+}
+
+#Tournament .user-eliminated {
+  color: var(--color-red);
+}
+
+#Tournament .notEnoughCreditsPopup {
+  width: fit-content;
+  max-height: 70%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: black;
+  box-shadow: 0px 0px 6px 4px rgb(136, 136, 136, 0.5);
+  padding: 3em;
+  color: white;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5em;
+  text-align: center;
+}
+
+#Tournament .notEnoughCreditsPopup h1 {
+  text-align: center;
+}
+
+#Tournament .notEnoughCreditsPopup img {
+  color: white;
+  position: absolute;
+  height: 20pt;
+  right: 6pt;
+  top: 6pt;
+}
+
+#Tournament .notEnoughCreditsPopup img:hover {
+  cursor: pointer;
+}
+
+#Tournament .user-list .user:hover {
+  cursor: pointer;
+}
