@@ -88,7 +88,6 @@ const purchase = async (req, res) => {
   const { paramID } = req.params;
 
   console.log("Handling purchase...");
-  const userUUID = req.user
 
   // add credits to user
   const product = await Product.findOne({ id: paramID });
@@ -106,54 +105,4 @@ const purchase = async (req, res) => {
   // Your purchase logic here
 };
 
-const createTestProducts = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
-  console.log('Creating test products...');
-
-  // Delete all existing products
-  await Product.deleteMany({})
-  .then(() => {
-    console.log('All products deleted successfully.');
-  })
-  .catch((error) => {
-    console.error('Error deleting products:', error);
-  });
-
-  try {
-    const count = await Product.countDocuments();
-
-    if (count !== 0) {
-      return res.status(200).send('Products already exist in the database.'); // Return 200 if products already exist
-    }
-  } catch (error) {
-    console.error("Error occurred while checking products:", error);
-    return res.status(500).send('Error occurred while checking products.');
-  }
-
-  const productsData = req.body;
-
-  if (!Array.isArray(productsData) || productsData.length === 0) {
-    console.log('Invalid products data format.');
-    return res.status(400).send('Invalid products data format.');
-  }
-
-  try {
-    // Save each product to the database
-    const savedProducts = await Product.insertMany(productsData);
-    console.log('Products added successfully:', savedProducts);
-    res.status(200).send('Products added successfully');
-  } catch (error) {
-    console.error('Error occurred while adding products:', error);
-    res.status(500).send('Error occurred while adding products');
-  }
-};
-
-module.exports = { getProduct, purchase, createTestProducts, getProducts };
+module.exports = { getProduct, purchase, getProducts };
