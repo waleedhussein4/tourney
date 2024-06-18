@@ -32,13 +32,27 @@ const BattleRoyale = ({ tournament }) => {
     return (
       <div className="team-user-list-popup">
         <h2>{teamName || 'Unknown Team'}</h2>
-        <ul>
+        <div className='header'>
+          <span>Username</span>
+          <span>Score</span>
+        </div>
+        <div className='players'>
           {players.map((player) => (
-            <li key={player.username} onClick={() => (window.location.href = `/profile/${player.username}`)}>
-              {player.username}
-            </li>
+            <div key={player.username} className='player' onClick={() => (window.location.href = `/profile/${player.username}`)}>
+              <span className='username'>
+                <span className={player.eliminated ? 'eliminated' : ''}>
+                  {player.username}
+                </span>
+                <span className='user-eliminated'>
+                  {player.eliminated ? 'Eliminated' : ''}
+                </span>
+              </span>
+              <span className='score'>
+                {player.score || 0}
+              </span>
+            </div>
           ))}
-        </ul>
+        </div>
         <button onClick={onClose}>Close</button>
       </div>
     );
@@ -53,7 +67,6 @@ const BattleRoyale = ({ tournament }) => {
   };
 
   if (tournament.enrolledUsers && tournament.enrolledTeams.length === 0) {
-    console.log('enrolledUsers');
     const sortedUsers = sortParticipants(tournament.enrolledUsers);
     members = sortedUsers.map((competitor, index) => (
       <li key={index}>
@@ -67,7 +80,6 @@ const BattleRoyale = ({ tournament }) => {
   }
 
   if (tournament.enrolledTeams && tournament.enrolledUsers.length === 0) {
-    console.log('enrolledTeams');
     const sortedTeams = sortParticipants(tournament.enrolledTeams);
     members = sortedTeams.map((competitor, index) => (
       <li key={competitor.teamName}>
