@@ -7,7 +7,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import './Manage.css'
 import pencil from '/src/assets/pencil.svg'
 
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 function Manage() {
+  const [editTeamParticipantsPopupOpen, setEditTeamParticipantsPopupOpen] = useState(false)
 
   const { UUID } = useParams();
 
@@ -652,98 +658,121 @@ function Manage() {
     showEditSoloParticipantsPopup();
   }
 
-  const handleEditTeamParticipants = async () => {
-    const popup = document.getElementById('editParticipantsPopup');
-    popup.remove();
+  const EditTeamParticipantsPopup = () => {
+    const handleConfirm = async () => {
+      const updatedTeams = tournament.enrolledTeams.map((team, teamIndex) => {
+        const teamScoreInput = document.getElementById(`team-score-${teamIndex}`);
+        const teamEliminatedInput = document.getElementById(`team-eliminated-${teamIndex}`);
 
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editTeamParticipants`
-    await fetch(URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        UUID: UUID,
-        participants: tournament.enrolledTeams,
-      }),
-    })
-      .then((res) => {
-        if (res.ok) {
-          navigate(0)
-        }
+        const updatedTeam = {
+          ...team,
+          score: parseInt(teamScoreInput.value),
+          eliminated: teamEliminatedInput.checked,
+          players: team.players.map((player, playerIndex) => {
+            const playerScoreInput = document.getElementById(`player-score-${teamIndex}-${playerIndex}`);
+            const playerEliminatedInput = document.getElementById(`player-eliminated-${teamIndex}-${playerIndex}`);
+
+            console.log("playerScoreInput", playerScoreInput.value, "playerEliminatedInput", playerEliminatedInput.checked);
+
+            return {
+              ...player,
+              score: parseInt(playerScoreInput.value),
+              eliminated: playerEliminatedInput.checked
+            };
+          })
+        };
+
+        return updatedTeam;
+      });
+
+      // Update the tournament state
+      setTournament({ ...tournament, enrolledTeams: updatedTeams });
+
+      // Close the popup
+      // setEditTeamParticipantsPopupOpen(false);
+
+      // Send the updated data to the backend
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editTeamParticipants`;
+      await fetch(URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ UUID: UUID, participants: updatedTeams }),
       })
-  }
+        .then((res) => {
+          if (res.ok) {
+            // navigate(0);
+          }
+        });
+    };
 
-  function editTeam(team) {
-    // Here you can implement your logic to edit the team's score and elimination status
-    const newScore = prompt(`Enter new score for ${team.teamName}:`, team.score);
-    const newEliminated = confirm(`Is ${team.teamName} eliminated?`);
-
-    // Update team object with new values
-    team.score = parseInt(newScore);
-    team.eliminated = newEliminated;
-
-    // remove the popup
-    document.getElementById('editParticipantsPopup').remove();
-
-    // Re-render teams with updated data
-    showEditTeamParticipantsPopup();
-  }
-
-  const showEditTeamParticipantsPopup = () => {
-    console.log(tournament.enrolledTeams)
-    let popup = document.createElement('div');
-    popup.id = 'editParticipantsPopup';
-    popup.classList.add('popup');
-
-    let h2 = document.createElement('h2');
-    h2.innerHTML = 'Edit Participants';
-
-    const teamsContainer = document.createElement('div');
-    teamsContainer.classList.add('teams-container');
-
-    tournament.enrolledTeams.forEach(team => {
-      const teamDiv = document.createElement('div');
-      teamDiv.classList.add('team');
-
-      const nameDiv = document.createElement('div');
-      nameDiv.classList.add('team-name');
-      nameDiv.textContent = team.teamName;
-
-      const infoDiv = document.createElement('div');
-      infoDiv.classList.add('team-info');
-      infoDiv.textContent = `Score: ${team.score}, Eliminated: ${team.eliminated ? 'Yes' : 'No'}`;
-
-      const editButton = document.createElement('button');
-      editButton.textContent = 'Edit';
-      editButton.classList.add('edit-button');
-      editButton.onclick = () => editTeam(team);
-
-      teamDiv.appendChild(nameDiv);
-      teamDiv.appendChild(infoDiv);
-      teamDiv.appendChild(editButton);
-
-      teamsContainer.appendChild(teamDiv);
-    });
-
-    const confirmButton = document.createElement('button');
-    confirmButton.textContent = 'Confirm';
-    confirmButton.classList.add('confirm-button');
-    confirmButton.onclick = () => handleEditTeamParticipants();
-
-    const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
-    cancelButton.classList.add('cancel-button');
-    cancelButton.onclick = () => popup.remove();
-
-    popup.appendChild(h2);
-    popup.appendChild(teamsContainer);
-    popup.appendChild(confirmButton);
-    popup.appendChild(cancelButton);
-
-    document.getElementById('Manage').appendChild(popup);
-  }
+    return (
+      <div id='editParticipantsPopup' className='popup'>
+        <h2>Edit Participants</h2>
+        <div className='teams-container'>
+          {tournament.enrolledTeams.map((team, teamIndex) => (
+            <div className="team" key={team.teamName}>
+              <Accordion className='team'>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  {team.teamName}
+                </AccordionSummary>
+                <AccordionDetails className='team-details-accordian'>
+                  <div className="team-info">
+                    <div className='team-info-item'>
+                      <span>Score:</span>
+                      <input
+                        type="number"
+                        id={`team-score-${teamIndex}`}
+                        defaultValue={team.score}
+                      />
+                    </div>
+                    <div className='team-info-item'>
+                      <span>Eliminated:</span>
+                      <input
+                        type="checkbox"
+                        id={`team-eliminated-${teamIndex}`}
+                        defaultChecked={team.eliminated}
+                      />
+                    </div>
+                  </div>
+                  <Accordion className='team-members'>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      Team Members
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {team.players.map((member, playerIndex) => (
+                        <div key={playerIndex} className='participant'>
+                          <span>{member.username}</span>
+                          <div>
+                            <span>Score:</span>
+                            <input
+                              type="number"
+                              id={`player-score-${teamIndex}-${playerIndex}`}
+                              defaultValue={member.score}
+                            />
+                          </div>
+                          <div>
+                            <span>Eliminated:</span>
+                            <input
+                              type="checkbox"
+                              id={`player-eliminated-${teamIndex}-${playerIndex}`}
+                              defaultChecked={member.eliminated}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </AccordionDetails>
+                  </Accordion>
+                </AccordionDetails>
+              </Accordion>
+            </div>
+          ))}
+        </div>
+        <button className='confirm-button' onClick={handleConfirm}>Confirm</button>
+        <button className='cancel-button' onClick={() => setEditTeamParticipantsPopupOpen(false)}>Cancel</button>
+      </div>
+    );
+  };
 
   const Applications = () => {
     if (tournament.applications.length === 0) {
@@ -1035,6 +1064,7 @@ function Manage() {
 
   return (
     <div id="Manage">
+      {editTeamParticipantsPopupOpen && <EditTeamParticipantsPopup />}
       <Nav />
       <div id="container">
         {isLoading
@@ -1090,7 +1120,7 @@ function Manage() {
                       {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length === 0 && <span>No participants yet</span>}
                       {/* <SoloParticipants /> */}
                     </div>
-                    <EditButton canBeEditedAfterStart={true} onclick={tournament.teamSize == 1 ? showEditSoloParticipantsPopup : showEditTeamParticipantsPopup} />
+                    <EditButton canBeEditedAfterStart={true} onclick={() => { tournament.teamSize == 1 ? showEditSoloParticipantsPopup() : setEditTeamParticipantsPopupOpen(true) }} />
                   </div>)}
                 <div className="attribute accessibility">
                   <h3>Accessibility</h3>
