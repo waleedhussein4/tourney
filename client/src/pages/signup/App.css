@@ -45,7 +45,8 @@
 
 /* Input field styling */
 #Signup .container-center input[type="text"],
-#Signup .container-center input[type="password"] {
+#Signup .container-center input[type="password"],
+#Signup .container-center input[type="email"] {
   padding: 15px;
   margin-top: 10px;
   border: 2px solid transparent;
@@ -61,8 +62,10 @@
 /* Input hover and focus states */
 #Signup .container-center input[type="text"]:hover, 
 #Signup .container-center input[type="password"]:hover,
+#Signup .container-center input[type="email"]:hover
 #Signup .container-center input[type="text"]:focus, 
-#Signup .container-center input[type="password"]:focus {
+#Signup .container-center input[type="password"]:focus,
+#Signup .container-center input[type="email"]:focus {
   border-color: #00FF76; /* Coherent vibrant green */
   box-shadow: 0 0 10px #00FF76; /* Added glow effect for interaction feedback */
 }
