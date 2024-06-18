@@ -445,3 +445,7 @@
 #Tournament .user-list .user:hover {
   cursor: pointer;
 }
+
+#Tournament .user-list .team:hover {
+  cursor: pointer;
+}
