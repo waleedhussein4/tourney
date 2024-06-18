@@ -196,19 +196,27 @@
   padding: 0.2em;
 }
 
+#Manage #editParticipantsPopup {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  justify-content: center;
+  align-items: center;
+}
+
 #Manage #editParticipantsPopup .teams-container {
   display: flex;
   flex-direction: column;
   gap: 1.5em;
-  width: fit-content;
+  width: 100%;
 }
 
 #Manage #editParticipantsPopup .teams-container .team {
   display: flex;
-  flex-direction: row;
-  gap: 5em;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 1em;
+  /* align-items: center; */
 }
 
 #Manage #editParticipantsPopup .teams-container .team .team-name {
@@ -218,14 +226,40 @@
 #Manage #editParticipantsPopup .teams-container .team .team-info {
   /* flex: 4; */
   width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+  width: 100%;
+}
+
+#Manage #editParticipantsPopup .teams-container .team .team-info .team-info-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+#Manage #editParticipantsPopup .teams-container .team .team-info .team-info-item input {
+  width: 100px;
 }
 
 #Manage #editParticipantsPopup .teams-container .team .edit-button {
   flex: 1;
 }
 
-#Manage #editParticipantsPopup {
-  width: fit-content;
+#Manage #editParticipantsPopup .team-details-accordian {
+  display: flex; 
+  flex-direction: column;
+  gap: 2em;
+}
+
+#Manage #editParticipantsPopup .team-details-accordian .participant {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2em;
 }
 
 #Manage #matchesEditor {
