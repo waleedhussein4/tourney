@@ -154,7 +154,7 @@ const createTournament = async (req, res) => {
           hasEnded: false,
           enrolledUsers: [],
           entryFee: entryFee,
-          earnings: earnings.map(item => ({...item, prize: parseInt(item.prize)})),
+          earnings: earnings.map(item => ({ ...item, prize: parseInt(item.prize) })),
           maxCapacity: maxCapacity,
           accessibility: accessibility,
           matches: [],
@@ -181,7 +181,7 @@ const createTournament = async (req, res) => {
           hasEnded: false,
           enrolledTeams: [],
           entryFee: entryFee,
-          earnings: earnings.map(item => ({...item, prize: parseInt(item.prize)})),
+          earnings: earnings.map(item => ({ ...item, prize: parseInt(item.prize) })),
           maxCapacity: maxCapacity,
           accessibility: accessibility,
           matches: [],
@@ -899,7 +899,7 @@ const getTournamentDisplayData = async (req, res) => {
       const transformedEnrolledTeams = await Promise.all(originalEnrolledTeams.map(async team => {
         const players = await Promise.all(team.players.map(async player => {
           const user = await User.findOne({ _id: player.UUID });
-          return { username: user.username }; // Assuming 'username' is the field in the user document containing the username
+          return { username: user.username, score: player.score, eliminated: player.eliminated }; // Assuming 'username' is the field in the user document containing the username
         }));
         return {
           teamName: team.teamName,
@@ -1763,7 +1763,7 @@ const getManageTournamentDisplayData = async (req, res) => {
       const transformedEnrolledTeams = await Promise.all(originalEnrolledTeams.map(async team => {
         const players = await Promise.all(team.players.map(async player => {
           const user = await User.findOne({ _id: player.UUID });
-          return { username: user.username }; // Assuming 'username' is the field in the user document containing the username
+          return { username: user.username, score: player.score, eliminated: player.eliminated }; // Assuming 'username' is the field in the user document containing the username
         }));
         return {
           teamName: team.teamName,
@@ -2077,121 +2077,152 @@ const postUpdate = async (req, res) => {
 }
 
 const editSoloParticipants = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
+  );
+
   const { UUID, participants } = req.body;
+
+  console.log("UUID: ", UUID);
+  console.log("Participants: ", participants);
 
   const tournament = await Tournament.findOne({ _id: UUID });
   if (!tournament) {
     return res.status(404).send('Tournament not found');
   }
 
-  // check if user is host
+  // Check if user is host
   if (tournament.host != req.user) {
     return res.status(401).send('Unauthorized');
   }
 
-  // ensure tournament has started
-  // if (!tournament.hasStarted) {
-  //   return res.status(400).send('Tournament has not started');
-  // }
-
-  // ensure tournament is solo based
-  // if (tournament.teamSize != 1) {
-  //   return res.status(400).send('Tournament is not solo based');
-  // }
+  // Ensure tournament is solo based
+  if (tournament.teamSize != 1) {
+    return res.status(400).send('Tournament is not solo based');
+  }
 
   try {
-    // Create an array of update operations for each participant
-    const updateOperations = participants.map(participantData => ({
-      updateOne: {
-        filter: { _id: UUID, "enrolledUsers.UUID": participantData.UUID },
-        update: {
-          $set: {
-            "enrolledUsers.$.score": participantData.score,
-            "enrolledUsers.$.eliminated": participantData.eliminated
-          }
-        }
+    // Fetch UUIDs for each username
+    const userUUIDs = await Promise.all(participants.map(async participant => {
+      const user = await User.findOne({ username: participant.username });
+      if (!user) {
+        return res.status(404).send(`User '${participant.username}' not found`);
       }
+      return { username: participant.username, UUID: user._id, score: participant.score, eliminated: participant.eliminated };
     }));
+
+    // Filter out participants whose UUIDs could not be found
+    const validParticipants = userUUIDs.filter(participant => participant !== null);
+
+    // Create an array of update operations for each valid participant
+    const updateOperations = validParticipants.map(participantData => {
+      const filter = { _id: UUID, "enrolledUsers.UUID": participantData.UUID };
+      const update = {
+        $set: {
+          "enrolledUsers.$.score": participantData.score,
+          "enrolledUsers.$.eliminated": participantData.eliminated
+        }
+      };
+
+      return {
+        updateOne: {
+          filter,
+          update
+        }
+      };
+    });
+
+    if (updateOperations.length === 0) {
+      return res.status(400).send('No valid participants to update');
+    }
 
     // Execute all update operations in bulk
     const result = await Tournament.bulkWrite(updateOperations);
 
-    console.log(result)
-
-    console.log(`${result.modifiedCount} participants in tournament '${UUID}' updated successfully.`);
   } catch (error) {
     console.error(`Error updating participants in tournament '${UUID}':`, error);
+    return res.status(500).send('Internal Server Error');
   }
 
   res.status(200).send('Participants updated');
-}
+};
 
 const editTeamParticipants = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
+  );
+
   const { UUID, participants } = req.body;
-  console.log(UUID, participants)
+  console.log("UUID: ", UUID);
+  console.log("Participants: ", participants);
 
   const tournament = await Tournament.findOne({ _id: UUID });
+
   if (!tournament) {
     return res.status(404).send('Tournament not found');
   }
 
-  // check if user is host
+  // Check if user is host
   if (tournament.host != req.user) {
     return res.status(401).send('Unauthorized');
   }
 
-  // ennsure tournament has started
-  // if (!tournament.hasStarted) {
-  //   return res.status(400).send('Tournament has not started');
-  // }
-
-  // ensure tournament is team based
+  // Ensure tournament is team based
   if (tournament.teamSize == 1) {
     return res.status(400).send('Tournament is not team based');
   }
 
   try {
-    // Create an array of update operations for each team
-    const updateOperations = participants.map(teamData => ({
-      updateOne: {
-        filter: { _id: UUID, "enrolledTeams.teamName": teamData.teamName },
-        update: {
-          $set: {
-            "enrolledTeams.$.score": teamData.score,
-            "enrolledTeams.$.eliminated": teamData.eliminated
-          }
+    // Fetch UUIDs for each team member by username
+    const teamUpdates = await Promise.all(participants.map(async team => {
+      const teamMembers = await Promise.all(team.players.map(async player => {
+        const user = await User.findOne({ username: player.username });
+        if (!user) {
+          console.error(`User with username '${player.username}' not found`);
+          return null;
         }
-      }
+        return { username: player.username, UUID: user._id, score: player.score, eliminated: player.eliminated };
+      }));
+
+      // Filter out players whose UUIDs could not be found
+      const validTeamMembers = teamMembers.filter(member => member !== null);
+
+      return { ...team, players: validTeamMembers };
     }));
 
-    // Execute all update operations in bulk
-    const result = await Tournament.bulkWrite(updateOperations);
+    console.log("Team Updates: ", teamUpdates);
 
-    console.log(`${result.modifiedCount} teams in tournament '${UUID}' updated successfully.`);
+    // Update each team in the tournament
+    for (const teamData of teamUpdates) {
+      if (teamData.players.length > 0) {
+        await Tournament.updateOne(
+          { _id: UUID, "enrolledTeams.teamName": teamData.teamName },
+          {
+            $set: {
+              "enrolledTeams.$.score": teamData.score,
+              "enrolledTeams.$.eliminated": teamData.eliminated,
+              "enrolledTeams.$.players": teamData.players
+            }
+          }
+        );
+      }
+    }
+
+    console.log(`Teams in tournament '${UUID}' updated successfully.`);
+    res.status(200).send('Participants updated');
   } catch (error) {
     console.error(`Error updating teams in tournament '${UUID}':`, error);
+    return res.status(500).send('Internal Server Error');
   }
-
-  res.status(200).send('Participants updated');
-}
+};
 
 const editMatches = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
