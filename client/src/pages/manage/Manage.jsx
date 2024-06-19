@@ -972,7 +972,6 @@ function Manage() {
   }
 
   const Bank = () => {
-    tournament.bank = 5
     const maxEarnings = tournament.type == 'brackets' ? tournament.earnings : tournament.earnings.reduce((acc, curr) => acc + curr.prize, 0)
 
     const percentage = Math.min(100, Math.floor((tournament.bank / maxEarnings) * 100))
@@ -1318,7 +1317,7 @@ function Manage() {
                 </div>
               </div>
               {tournament.type === 'brackets' && <MatchesEditor />}
-              {!tournament.hasStarted && <Bank />}
+              {!tournament.hasStarted && tournament.earnings && <Bank />}
               <div className="controlButtons">
                 {tournament.hasStarted
                   ? <button onClick={endTournament} className="endTournament">End Tournament</button>

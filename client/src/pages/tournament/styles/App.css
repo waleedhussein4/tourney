@@ -371,6 +371,10 @@
   overflow-y: auto;
 }
 
+#Tournament .tournament-updates h3 {
+  margin-bottom: 10px;
+}
+
 #Tournament .battle-royale {
   display: flex;
   flex-direction: column;

@@ -575,7 +575,7 @@ function Tournament() {
                 <h3>Updates</h3>
                 {tournament.updates.map((update) => (
                   <p key={update.date}>
-                    [{new Date(update.date).toDateString()}] {update.content}
+                    <span style={{"fontWeight": "bold"}}>{formatDate(update.date)}</span> {update.content}
                   </p>
                 ))}
               </div>
