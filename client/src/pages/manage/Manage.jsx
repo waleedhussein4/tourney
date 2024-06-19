@@ -872,19 +872,24 @@ function Manage() {
     return (
       <div id='matchesEditor' className='attribute'>
         <h3>Match Winners</h3>
-        {!teamsEnrolledYet && <span>You will be able to access the match editor and manage rounds after users have joined your tournament.</span>}
-        <div className="matches">
-          {
-            editedMatches.map((match, i) =>
-              <div className='match' key={i}>
-                <span className="matchNumber">Match {i}</span>
-                <span className="matchWinner">{match}</span>
-                <button onClick={() => handleEdit(i)}>Edit</button>
-              </div>
-            )
-          }
-        </div>
-        {teamsEnrolledYet && <button onClick={handleSaveAll}>Save All</button>}
+        {!teamsEnrolledYet ?
+          <span>After enough players have enrolled in the tournament, you will be able to start the tournament and access the match editor</span>
+          :
+          <>
+            <div className="matches">
+              {
+                editedMatches.map((match, i) =>
+                  <div className='match' key={i}>
+                    <span className="matchNumber">Match {i}</span>
+                    <span className="matchWinner">{match}</span>
+                    <button onClick={() => handleEdit(i)}>Edit</button>
+                  </div>
+                )
+              }
+            </div>
+            {tournament.hasStarted && <button onClick={handleSaveAll}>Save All</button>}
+          </>
+        }
         <span className="error"></span>
       </div>
     )
