@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
 import '../styles/Brackets.css';
+import Leaderboard from './Leaderboard';
 
 const handlePlayerClick = (e) => {
   if(e.target.classList.contains('tba')) {
@@ -89,6 +90,7 @@ const BracketsComponent = ({ tournament }) => {
   return (
     <div className="brackets-container">
       <Bracket renderSeedComponent={CustomSeed} rounds={rounds} />
+      <Leaderboard tournament={tournament} />
     </div>
   );
 };
