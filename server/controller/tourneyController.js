@@ -2416,13 +2416,10 @@ const endTournament = async (req, res) => {
     // get team from teamName
     const winner = await Team.findOne({ name: winnerTeamName });
 
-    // divide earnings among team members
-    const earningsPerMember = earnings / winner.members.length;
-    for (let member of winner.members) {
-      const user = await User.findOne({ _id: member });
-      user.credits += earningsPerMember;
-      await user.save();
-    }
+    // give earnings to team leader
+    const leader = await User.findOne({ _id: winner.leader });
+    leader.credits += earnings;
+    await leader.save();
 
     // remove the amount from the tournament bank
     tournament.bank -= earnings;
