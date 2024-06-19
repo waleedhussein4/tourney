@@ -1368,21 +1368,17 @@ const handleJoinAsTeam = async (req, res) => {
     return res.status(404).json({ error: 'Tournament host cannot join tournament' })
   }
 
-  // team members must have enough credits to pay the entry fee
-  for (let member of team.members) {
-    const user = await User.findOne({ _id: member });
-    if (user.credits < tournament.entryFee) {
-      return res.status(404).json({ error: 'Not enough credits' })
-    }
+  // team leader must have enough credits to pay the entry fee
+  const leader = await User.findOne({ _id: team.leader });
+  if (leader.credits < tournament.entryFee) {
+    return res.status(404).json({ error: 'Not enough credits' })
   }
 
-  // deduct credits from team members
-  for (let member of team.members) {
-    await User.updateOne({ _id: member }, { $inc: { credits: -tournament.entryFee } })
-  }
+  // deduct entry fee from team leader's credits
+  await User.updateOne({ _id: team.leader }, { $inc: { credits: -tournament.entryFee } })
 
   // add entry fee into tournament bank
-  tournament.bank += tournament.entryFee * tournament.teamSize
+  tournament.bank += tournament.entryFee
   await tournament.save()
 
   const enrolledTeam = {
