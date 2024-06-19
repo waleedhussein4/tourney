@@ -15,6 +15,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 function Manage() {
   const [editTeamParticipantsPopupOpen, setEditTeamParticipantsPopupOpen] = useState(false)
 
+  const [editSoloBracketsParticipantsPopupOpen, setEditSoloBracketsParticipantsPopupOpen] = useState(false)
+  const [editTeamBracketsParticipantsPopupOpen, setEditTeamBracketsParticipantsPopupOpen] = useState(false)
+
   const { UUID } = useParams();
 
   const navigate = useNavigate();
@@ -533,9 +536,9 @@ function Manage() {
               <span className="score">
                 Score: {participant.score}
               </span>
-              <span className="eliminationStatus">
+              {tournament.type == 'battle royale' && <span className="eliminationStatus">
                 {participant.eliminated ? 'Eliminated' : 'Active'}
-              </span>
+              </span>}
             </div>
           )
         }
@@ -689,7 +692,7 @@ function Manage() {
       setTournament({ ...tournament, enrolledTeams: updatedTeams });
 
       // Close the popup
-      // setEditTeamParticipantsPopupOpen(false);
+      setEditTeamParticipantsPopupOpen(false);
 
       // Send the updated data to the backend
       const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editTeamParticipants`;
@@ -701,7 +704,7 @@ function Manage() {
       })
         .then((res) => {
           if (res.ok) {
-            // navigate(0);
+            navigate(0);
           }
         });
     };
@@ -1067,9 +1070,162 @@ function Manage() {
     document.getElementById('Manage').appendChild(popup);
   }
 
+  const EditSoloBracketsParticipantsPopup = () => {
+    const handleConfirm = async () => {
+      const updatedParticipants = tournament.enrolledUsers.map((participant, participantIndex) => {
+        const scoreInput = document.getElementById(`participant-score-${participantIndex}`);
+
+        return {
+          ...participant,
+          score: parseInt(scoreInput.value),
+        };
+      });
+
+      // Update the tournament state
+      setTournament({ ...tournament, enrolledUsers: updatedParticipants });
+
+      // Close the popup
+      setEditSoloBracketsParticipantsPopupOpen(false);
+
+      // Send the updated data to the backend
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editSoloParticipants`;
+      await fetch(URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ UUID: UUID, participants: updatedParticipants }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            navigate(0);
+          }
+        });
+    };
+
+    return (
+      <div id='editParticipantsPopup' className='popup'>
+        <h2>Edit Participants</h2>
+        <div className='participants'>
+          {tournament.enrolledUsers.map((participant, participantIndex) => (
+            <div className='participant' key={participant.username}>
+              <span>{participant.username}</span>
+              <div>
+                <span>Score:</span>
+                <input
+                  type="number"
+                  id={`participant-score-${participantIndex}`}
+                  defaultValue={participant.score}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        <button className='confirm-button' onClick={handleConfirm}>Confirm</button>
+        <button className='cancel-button' onClick={() => setEditSoloBracketsParticipantsPopupOpen(false)}>Cancel</button>
+      </div>
+    );
+  };
+
+  const EditTeamBracketsParticipantsPopup = () => {
+    const handleConfirm = async () => {
+      const updatedTeams = tournament.enrolledTeams.map((team, teamIndex) => {
+        const teamScoreInput = document.getElementById(`team-score-${teamIndex}`);
+
+        const updatedTeam = {
+          ...team,
+          score: parseInt(teamScoreInput.value),
+          players: team.players.map((player, playerIndex) => {
+            const playerScoreInput = document.getElementById(`player-score-${teamIndex}-${playerIndex}`);
+
+            return {
+              ...player,
+              score: parseInt(playerScoreInput.value),
+            };
+          })
+        };
+
+        return updatedTeam;
+      });
+
+      // Update the tournament state
+      setTournament({ ...tournament, enrolledTeams: updatedTeams });
+
+      // Close the popup
+      setEditTeamBracketsParticipantsPopupOpen(false);
+
+      // Send the updated data to the backend
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editTeamParticipants`;
+      await fetch(URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ UUID: UUID, participants: updatedTeams }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            navigate(0);
+          }
+        });
+    };
+
+    return (
+      <div id='editParticipantsPopup' className='popup'>
+        <h2>Edit Participants</h2>
+        <div className='teams-container'>
+          {tournament.enrolledTeams.map((team, teamIndex) => (
+            <div className="team" key={team.teamName}>
+              <Accordion className='team'>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  {team.teamName}
+                </AccordionSummary>
+                <AccordionDetails className='team-details-accordian'>
+                  <div className="team-info">
+                    <div className='team-info-item'>
+                      <span>Score:</span>
+                      <input
+                        type="number"
+                        id={`team-score-${teamIndex}`}
+                        defaultValue={team
+                          .score}
+                      />
+                    </div>
+                  </div>
+                  <Accordion className='team-members'>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      Team Members
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {team.players.map((member, playerIndex) => (
+                        <div key={playerIndex} className='participant'>
+                          <span>{member.username}</span>
+                          <div>
+                            <span>Score:</span>
+                            <input
+                              type="number"
+                              id={`player-score-${teamIndex}-${playerIndex}`}
+                              defaultValue={member.score}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </AccordionDetails>
+                  </Accordion>
+                </AccordionDetails>
+              </Accordion>
+            </div>
+          ))}
+        </div>
+        <button className='confirm-button' onClick={handleConfirm}>Confirm</button>
+        <button className='cancel-button' onClick={() => setEditTeamBracketsParticipantsPopupOpen(false)}>Cancel</button>
+      </div>
+    );
+  };
+
   return (
     <div id="Manage">
       {editTeamParticipantsPopupOpen && <EditTeamParticipantsPopup />}
+      {editSoloBracketsParticipantsPopupOpen && <EditSoloBracketsParticipantsPopup />}
+      {editTeamBracketsParticipantsPopupOpen && <EditTeamBracketsParticipantsPopup />}
       <Nav />
       <div id="container">
         {isLoading
@@ -1120,12 +1276,23 @@ function Manage() {
                   <div className="attribute editable participants">
                     <h3>Participants</h3>
                     <div className='content'>
-                      {tournament.enrolledUsers.length === 0 && tournament.enrolledTeams.length > 0 && <TeamParticipants />}
-                      {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length > 0 && <SoloParticipants />}
+                      {tournament.teamSize > 1 && <TeamParticipants />}
+                      {tournament.teamSize == 1 && <SoloParticipants />}
                       {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length === 0 && <span>No participants yet</span>}
                       {/* <SoloParticipants /> */}
                     </div>
                     <EditButton canBeEditedAfterStart={true} onclick={() => { tournament.teamSize == 1 ? showEditSoloParticipantsPopup() : setEditTeamParticipantsPopupOpen(true) }} />
+                  </div>)}
+                {tournamentType === 'brackets' && (
+                  <div className="attribute editable participants">
+                    <h3>Participants</h3>
+                    <div className='content'>
+                      {tournament.teamSize > 1 && <TeamParticipants />}
+                      {tournament.teamSize == 1 && <SoloParticipants />}
+                      {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length === 0 && <span>No participants yet</span>}
+                      {/* <SoloParticipants /> */}
+                    </div>
+                    <EditButton canBeEditedAfterStart={true} onclick={() => { tournament.teamSize == 1 ? setEditSoloBracketsParticipantsPopupOpen(true) : setEditTeamBracketsParticipantsPopupOpen(true) }} />
                   </div>)}
                 <div className="attribute accessibility">
                   <h3>Accessibility</h3>

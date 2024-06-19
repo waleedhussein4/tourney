@@ -132,6 +132,7 @@
 #Manage .participants .content {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 0.3em;
 }
 
@@ -146,10 +147,11 @@
 
 #Manage .participants .participant span {
   flex: 1;
+  text-align: center;
 }
 
 #Manage .participants .participant .eliminationStatus {
-  text-align: right;
+  /* text-align: right; */
 }
 
 #Manage .application {
@@ -203,6 +205,17 @@
   gap: 1em;
   justify-content: center;
   align-items: center;
+}
+
+#Manage #editParticipantsPopup .participants {
+  width: 100%;
+}
+
+#Manage #editParticipantsPopup .participant {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: fit-content;
 }
 
 #Manage #editParticipantsPopup .teams-container {
