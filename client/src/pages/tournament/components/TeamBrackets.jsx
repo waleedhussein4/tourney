@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
 import '../styles/Brackets.css';
+import Leaderboard from './Leaderboard';
 
 const TeamUserListPopup = ({ teamName, players, onClose }) => {
   console.log(players)
@@ -10,7 +11,7 @@ const TeamUserListPopup = ({ teamName, players, onClose }) => {
       <h2>{teamName || "Unknown Team"}</h2>
       <ul>
         {players.map(player => (
-          <li key={player.username} onClick={() => (window.location.href = `/profile/${player.username}`)}>
+          <li className='player' key={player.username} onClick={() => (window.location.href = `/profile/${player.username}`)}>
             {player.username}
           </li>
         ))}
@@ -121,6 +122,7 @@ const BracketsComponent = ({ tournament }) => {
   return (
     <div className="brackets-container">
       <Bracket renderSeedComponent={CustomSeed} rounds={rounds} />
+      <Leaderboard tournament={tournament} setPopup={setIsPopupOpen} />
       {isPopupOpen && selectedTeam && (
         <TeamUserListPopup
           teamName={selectedTeam.teamName}

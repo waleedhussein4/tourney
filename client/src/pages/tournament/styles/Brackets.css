@@ -6,6 +6,22 @@
   overflow: auto;
 }
 
+.leaderboard {
+  width:300px;
+  margin-right: 20px;
+  border: 2px solid white;
+  padding: 1em;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.leaderboard-entry {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .brackets-container .player:hover:not(.tba) {
   cursor: pointer;
 }
