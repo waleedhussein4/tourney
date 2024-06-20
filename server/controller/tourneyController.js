@@ -17,6 +17,15 @@ const createTournament = async (req, res) => {
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   )
+
+  const user = await User.findById(req.user);
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  if (!user.isHost) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity, applications } = req.body;
   console.log('Earnings: ' + earnings)
   category = category;
@@ -39,35 +48,35 @@ const createTournament = async (req, res) => {
   console.log(typeof applications)
   const id = uuidv4();
   console.log(id)
-  // let errors = [];
+  let errors = [];
 
-  //   if (description && description.length > 200) {
-  //       errors.push("Description is more than 200 chars.");
-  //   }
+  if (description && description.length > 200) {
+    errors.push("Description is more than 200 chars.");
+  }
 
-  // if (parseInt(teamSize) === 0) {
-  //   errors.push("Can't be an empty team.");
-  // }
+  if (parseInt(teamSize) < 1) {
+    errors.push("Invalid team size.");
+  }
 
-  //   // if (typeof teamSize === 'string') {
-  //   //     errors.push("Team size must be an integer.");
-  //   // }
+  if (typeof teamSize === 'string') {
+    errors.push("Team size must be an integer.");
+  }
 
-  // if (earnings !== undefined && earnings <= -1) {
-  //     errors.push("Earnings must be positive.");
-  // }
-  // console.log(typeof entryFee)
-  // // if (typeof entryFee === 'string') {
-  // //     errors.push("Entry fee must be an integer.");
-  // // }
+  if (earnings !== undefined && earnings <= -1) {
+    errors.push("Earnings must be positive.");
+  }
+  console.log(typeof entryFee)
+  if (typeof entryFee === 'string') {
+    errors.push("Entry fee must be an integer.");
+  }
 
-  // if (typeof type !== 'string') {
-  //     errors.push("Type must be a string.");
-  // }
-  // console.log(errors)
-  // if (errors.length > 0) {
-  //     return res.status(400).send({ errors });
-  // }
+  if (typeof type !== 'string') {
+    errors.push("Type must be a string.");
+  }
+  console.log(errors)
+  if (errors.length > 0) {
+    return res.status(400).send({ errors });
+  }
 
   let newTournament
   try {
