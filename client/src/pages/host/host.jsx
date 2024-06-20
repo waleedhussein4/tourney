@@ -1,19 +1,18 @@
 import React, { useContext, useState, useRef, useEffect, useCallback } from "react";
-import { useNavigate } from 'react-router-dom'; //j
+import { useNavigate } from 'react-router-dom';
 import "./app.css";
 import Nav from "../../components/Nav";
 import { AuthContext } from "../../context/AuthContext";
 
-//const { user } = useContext(AuthContext);  // Assuming your auth context provides user details
 
 export default function Host() {
 
   const { loggedIn } = useContext(AuthContext);
 
   const navigate = useNavigate();
-  const [isHost, setIsHost] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [additionalInfoData, setAdditionalInfoData] = useState([]);
+  const [submitErrors, setSubmitErrors] = useState([]);
 
   const [isDisplayed, setIsDisplayed] = useState(true);
   const [btnIsDisplayed, setBtnIsDisplayed] = useState(true);
@@ -69,7 +68,6 @@ export default function Host() {
       try {
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/isHost`, { credentials: 'include' });
         const data = await response.json();
-        setIsHost(data);
         if(!data){
           navigate('/become-host')
         }
@@ -115,13 +113,11 @@ export default function Host() {
     }
   };
 
-
   const handleAdditionalInfoChange = (index, value) => {
     const updatedInfoData = [...additionalInfoData];
     updatedInfoData[index] = value;  // Update the data at the specified index
     setAdditionalInfoData(updatedInfoData);
   };
-
 
   const handleRemoveInfo = (indexToRemove) => {
     const newList = additionalInfoData.filter((_, index) => index !== indexToRemove);
@@ -130,7 +126,7 @@ export default function Host() {
   };
 
   const handleAddRank = () => {
-    if (rankCounter < maxParticipants) {
+    if (rankCounter < maxParticipants / teamSize) {
       if (!isValidated) {
         setIsValidated(true);
       }
@@ -150,7 +146,6 @@ export default function Host() {
     divPrizeRankRef.current.style.border = '';
   };
 
-
   const handleRemoveRank = () => {
     if (rankCounter >= 2) {
       const newList = [...inputPrizes];
@@ -164,17 +159,13 @@ export default function Host() {
     }
     setIsValidated2(true);
   };
+
   const handlePrizeChange = (index, value) => {
     const updatedPrizes = [...inputPrizes];
     updatedPrizes[index].prize = value;
     setInputPrizes(updatedPrizes);
   };
 
-
-  const handleClick = () => {
-    setIsDisplayed(true);
-    setBtnIsDisplayed(false);
-  };
   const handleDescribeChange = (event) => {
     setDescribeVal(event.target.value);
     setDescribeError(false);
@@ -215,8 +206,8 @@ export default function Host() {
     setTeamSize(event.target.value);
     setTeamTypeError(false);
     teamTypeRef.current.style.border = '';
-    if (event.target.value !== "1") {
-      setStringPerTeam("(per team member)");
+    if (event.target.value > "1") {
+      setStringPerTeam("(per team)");
     } else {
       setStringPerTeam("");
     }
@@ -239,6 +230,7 @@ export default function Host() {
 
     fetchCategories();
   }, [isLoading]);
+
   const handleMaxParticipants = (event) => {
     setMaxParticipants(event.target.value);
     setParticipantsError(false);
@@ -282,15 +274,6 @@ export default function Host() {
       });
     }
   };
-
-
-
-
-  const games = [
-    { id: 1, name: "Game 1" },
-    { id: 2, name: "Game 2" },
-    { id: 3, name: "Game 3" },
-  ];
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // This stops the form from submitting traditionally
@@ -393,6 +376,8 @@ export default function Host() {
           credentials: 'include'
         });
         if (!response.ok) {
+          const errors = await response.json();
+          setSubmitErrors(errors.errors);
           throw new Error('Failed to create tournament');
         }
 
@@ -423,15 +408,6 @@ export default function Host() {
                   Create and manage thrilling tournaments on our platform. Choose between classic bracket-style tournaments or action-packed battle royals. Customize rules, seeding, and formats for an unforgettable gaming experience!
                 </div>
                 <hr className="custom-line" />
-                <div id="btnTournament">
-                  <button
-                    id="createTournament"
-                    onClick={() => setIsDisplayed(true)}
-                    style={{ display: btnIsDisplayed ? "block" : "none" }}
-                  >
-                    Press here to create your tournament
-                  </button>
-                </div>
               </div>
               <div id="main" style={{ display: isDisplayed ? "block" : "none" }}>
                 <form onSubmit={handleSubmit}>
@@ -558,7 +534,7 @@ export default function Host() {
                       ))}
                       <input type="button" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddRank() }} value="Add Rank" />
                       <input type="button" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleRemoveRank() }} value="Remove Rank" />
-                      {isValidated ? null : <div id="rankError">if you wish to add more prize rank, you should increase the number of participants above!</div>}
+                      {isValidated ? null : <div id="rankError">if you wish to add more prize ranks, you should increase the number of participants above!</div>}
                       {isValidated2 ? null : <div id="rankError">If you wish to continue, you should remove ranks until they equal the number of participants.</div>}
                       {prizeRankError ? <div id="rankError">If you wish to continue, you should at least offer a prize to the first-place winner.</div> : null}
                     </div>
@@ -607,6 +583,11 @@ export default function Host() {
 
                       <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddInfo() }} value="Add question/request" />
 
+                    </div>
+                    <div className="submit-errors">
+                      {submitErrors.map((error, index) => (
+                        <p key={index}>{error}</p>
+                      ))}
                     </div>
                     <footer>
                       <input type="submit" value="Create" />
