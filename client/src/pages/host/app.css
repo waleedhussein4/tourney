@@ -253,3 +253,8 @@
   border-radius: 5px;
   box-sizing: border-box;
 }
+
+#Host .submit-errors {
+  color: red;
+  font-size: medium;
+}
