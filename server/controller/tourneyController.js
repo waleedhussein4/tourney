@@ -1548,58 +1548,164 @@ const editTitle = async (req, res) => {
   }
 }
 
-
 const editDescription = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
+  );
+
   const { UUID, description } = req.body;
 
+  // Sanitize the HTML input
+  const sanitizedDescription = sanitizeHtml(description, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      img: ['src', 'alt']
+    },
+    allowedSchemes: ['http', 'https', 'data']
+  });
 
-  // get tournament
+  // Ensure sanitized description length is no longer than 200 characters (excluding HTML tags)
+  const plainTextDescription = sanitizedDescription.replace(/<[^>]*>?/gm, '');
+  if (plainTextDescription.length > 200) {
+    return res.status(400).json({ error: 'Description is too long' });
+  }
+
+  // Get tournament
   const tournament = await Tournament.findById(UUID);
   if (!tournament) {
     return res.status(404).json({ error: 'No such tournament' });
   }
 
-
-  // ensure user is host
+  // Ensure user is host
   if (tournament.host != req.user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-
-  // ensure tournament hasnt started
+  // Ensure tournament hasn't started
   if (tournament.hasStarted) {
     return res.status(400).json({ error: 'Tournament has already started' });
   }
 
-
-  // ensure description is no longer than 200 characters
-  if (description.length > 200) {
-    return res.status(400).json({ error: 'Description is too long' });
-  }
-
-
   try {
-    const tournament = await Tournament.findByIdAndUpdate
-      (UUID, { description }, { new: true });
-    if (!tournament) {
+    const updatedTournament = await Tournament.findByIdAndUpdate(
+      UUID,
+      { description: sanitizedDescription },
+      { new: true }
+    );
+    if (!updatedTournament) {
       return res.status(404).json({ error: 'No such tournament' });
     }
-    res.status(200).json(tournament);
-  }
-  catch (error) {
+    res.status(200).json(updatedTournament);
+  } catch (error) {
     res.status(400).json({ error: error.message });
   }
 }
 
+const editRules = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
+  const { UUID, rules } = req.body;
+
+  // Sanitize the HTML input
+  const sanitizedRules = sanitizeHtml(rules, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      img: ['src', 'alt']
+    },
+    allowedSchemes: ['http', 'https', 'data']
+  });
+
+  // Get tournament
+  const tournament = await Tournament.findById(UUID);
+  if (!tournament) {
+    return res.status(404).json({ error: 'No such tournament' });
+  }
+
+  console.log(tournament.host, req.user)
+
+  // Ensure user is host
+  if (tournament.host != req.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // Ensure tournament hasn't started
+  if (tournament.hasStarted) {
+    return res.status(400).json({ error: 'Tournament has already started' });
+  }
+
+  try {
+    const updatedTournament = await Tournament.findByIdAndUpdate(
+      UUID,
+      { rules: sanitizedRules },
+      { new: true }
+    );
+    if (!updatedTournament) {
+      return res.status(404).json({ error: 'No such tournament' });
+    }
+    res.status(200).json(updatedTournament);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+const editContactInfo = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
+  const { UUID, contactInfo } = req.body;
+
+  // Validate contact info (example validation, customize as needed)
+  if (!contactInfo.email || !contactInfo.phone) {
+    return res.status(400).json({ error: 'Email and phone are required' });
+  }
+
+  // Get tournament
+  const tournament = await Tournament.findById(UUID);
+  if (!tournament) {
+    return res.status(404).json({ error: 'No such tournament' });
+  }
+
+  // Ensure user is host
+  if (tournament.host != req.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // Ensure tournament hasn't started
+  if (tournament.hasStarted) {
+    return res.status(400).json({ error: 'Tournament has already started' });
+  }
+
+  try {
+    const updatedTournament = await Tournament.findByIdAndUpdate(
+      UUID,
+      { contactInfo },
+      { new: true }
+    );
+    if (!updatedTournament) {
+      return res.status(404).json({ error: 'No such tournament' });
+    }
+    res.status(200).json(updatedTournament);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
 
 const editStartDate = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
@@ -2635,6 +2741,8 @@ module.exports = {
   handleJoinAsTeam,
   editTitle,
   editDescription,
+  editRules,
+  editContactInfo,
   editStartDate,
   editEndDate,
   getManageTournamentDisplayData,
