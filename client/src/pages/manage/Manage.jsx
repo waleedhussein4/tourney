@@ -1317,7 +1317,7 @@ function Manage() {
                 </div>
               </div>
               {tournament.type === 'brackets' && <MatchesEditor />}
-              {!tournament.hasStarted && tournament.earnings && <Bank />}
+              {!tournament.hasStarted && tournament.earnings > 0 && <Bank />}
               <div className="controlButtons">
                 {tournament.hasStarted
                   ? <button onClick={endTournament} className="endTournament">End Tournament</button>

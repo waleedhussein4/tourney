@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import "./app.css";
 import Nav from "../../components/Nav";
 import { AuthContext } from "../../context/AuthContext";
-
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css'
 
 export default function Host() {
 
@@ -58,6 +59,8 @@ export default function Host() {
   const [titleVal, setTitleVal] = useState('');
   const titleRef = useRef(null)
   const [prizeRankError, setPrizeRankError] = useState(false);
+  const [rules, setRules] = useState('');
+  const [rulesError, setRulesError] = useState(false);
 
   useEffect(() => {
 
@@ -68,7 +71,7 @@ export default function Host() {
       try {
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/isHost`, { credentials: 'include' });
         const data = await response.json();
-        if(!data){
+        if (!data) {
           navigate('/become-host')
         }
         setIsLoading(false);
@@ -166,21 +169,36 @@ export default function Host() {
     setInputPrizes(updatedPrizes);
   };
 
+  const stripHtml = (html) => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    return doc.body.textContent || "";
+  };
+
   const handleDescribeChange = (event) => {
-    setDescribeVal(event.target.value);
+    setDescribeVal(event);
     setDescribeError(false);
-    describeRef.current.style.border = "";
-    const inputText = event.target.value;
+    const inputText = event;
 
-
-    if (inputText.length <= 200) {
+    if (stripHtml(inputText).length <= 200) {
       setDescribeVal(inputText);
       setDescribeError2(false);
     } else {
-
-      const truncatedText = inputText.slice(0, 200);
-      setDescribeVal(truncatedText);
+      // const truncatedText = inputText.slice(0, 200);
+      // setDescribeVal(truncatedText);
       setDescribeError2(true);
+    }
+  };
+
+  const handleRulesChange = (event) => {
+    setRules(event);
+    setRulesError(false);
+    const inputText = event;
+
+    if (stripHtml(inputText).length <= 200) {
+      setRules(inputText);
+      setRulesError(false);
+    } else {
+      setRulesError(true);
     }
   };
 
@@ -347,7 +365,8 @@ export default function Host() {
           earnings: winnerPrize,
           accessibility: selectedEntryMode,
           maxCapacity: numberOfBrackets,
-          applications: additionalInfoData
+          applications: additionalInfoData,
+          rules: rules
         };
       }
       else {
@@ -361,7 +380,8 @@ export default function Host() {
           earnings: inputPrizes,
           accessibility: selectedEntryMode,
           maxCapacity: maxParticipants,
-          applications: additionalInfoData
+          applications: additionalInfoData,
+          rules: rules
         }
       }
       try {
@@ -450,8 +470,8 @@ export default function Host() {
                       <div id="divDesc"> <h2>Description:</h2>(up to 200 characters)</div>
                       <span id="teamTypeError" style={{ display: describeError ? 'block' : 'none' }}>
                         Please fill out this field</span>
-                      <textarea ref={describeRef} onChange={handleDescribeChange} value={describeVal} placeholder="Please describe your tournament.Include any unique rules, what participants can expect, and why they should join. Be as detailed as possible to attract the right participants."></textarea>
-                      {describeError2 ? <p style={{ color: 'red' }}>Maximum word limit exceeded (200 characters).</p> : <p>{describeVal.length}/200</p>}
+                      <ReactQuill className="description-field" ref={describeRef} value={describeVal} onChange={handleDescribeChange} />
+                      {describeError2 ? <p style={{ color: 'red' }}>Maximum word limit exceeded (200 characters).</p> : <p>{stripHtml(describeVal).length}/200</p>}
                     </div>
                     <hr
                       className="custom-line"></hr>
@@ -583,6 +603,11 @@ export default function Host() {
 
                       <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddInfo() }} value="Add question/request" />
 
+                    </div>
+                    <div className="form-group">
+                      <div id="divRules"> <h2>Rules and Regulations:</h2>(up to 800 characters)</div>
+                      <ReactQuill className="description-field" value={rules} onChange={handleRulesChange} />
+                      {rulesError ? <p style={{ color: 'red' }}>Maximum word limit exceeded (800 characters).</p> : <p>{stripHtml(rules).length}/800</p>}
                     </div>
                     <div className="submit-errors">
                       {submitErrors.map((error, index) => (
