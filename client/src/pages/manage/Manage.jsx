@@ -11,12 +11,18 @@ import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import sanitizeHtml from 'sanitize-html';
 
 function Manage() {
   const [editTeamParticipantsPopupOpen, setEditTeamParticipantsPopupOpen] = useState(false)
 
   const [editSoloBracketsParticipantsPopupOpen, setEditSoloBracketsParticipantsPopupOpen] = useState(false)
   const [editTeamBracketsParticipantsPopupOpen, setEditTeamBracketsParticipantsPopupOpen] = useState(false)
+  const [showEditDescriptionModal, setShowEditDescriptionModal] = useState(false);
+  const [showEditRulesModal, setShowEditRulesModal] = useState(false);
+  const [showEditContactInfoModal, setShowEditContactInfoModal] = useState(false);
 
   const { UUID } = useParams();
 
@@ -144,63 +150,6 @@ function Manage() {
     let button = document.createElement('button');
     button.innerHTML = 'Confirm';
     button.onclick = handleEditTitle;
-    let cancel = document.createElement('button');
-    cancel.innerHTML = 'Cancel';
-    cancel.onclick = () => popup.remove();
-    let error = document.createElement('span')
-    error.classList.add('error')
-
-    popup.appendChild(h2);
-    popup.appendChild(input);
-    popup.appendChild(button);
-    popup.appendChild(cancel);
-    popup.appendChild(error);
-
-    document.getElementById('Manage').appendChild(popup);
-  }
-
-  const handleEditDescription = async () => {
-    const newDescription = document.getElementById('newDescription').value;
-    const popup = document.getElementById('editDescriptionPopup');
-    popup.remove();
-
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editDescription`
-    await fetch(URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        UUID: UUID,
-        description: newDescription,
-      }),
-    })
-      .then((res) => {
-        if (res.ok) {
-          navigate(0)
-        }
-      })
-  }
-
-  const handleEditDescriptionInputChange = () => {
-    return
-  }
-
-  const showEditDescriptionPopup = () => {
-    let popup = document.createElement('div');
-    popup.id = 'editDescriptionPopup';
-    popup.classList.add('popup');
-
-    let h2 = document.createElement('h2');
-    h2.innerHTML = 'Edit Description';
-    let input = document.createElement('input');
-    input.type = 'text';
-    input.id = 'newDescription';
-    input.onchange = handleEditDescriptionInputChange
-    let button = document.createElement('button');
-    button.innerHTML = 'Confirm';
-    button.onclick = handleEditDescription;
     let cancel = document.createElement('button');
     cancel.innerHTML = 'Cancel';
     cancel.onclick = () => popup.remove();
@@ -1220,11 +1169,161 @@ function Manage() {
     );
   };
 
+  const EditDescriptionModal = () => {
+    const [description, setDescription] = useState(tournament.description);
+
+    const handleSave = async () => {
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editDescription`;
+      await fetch(URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ UUID: UUID, description }),
+      }).then((res) => {
+        if (res.ok) navigate(0);
+      });
+      setShowEditDescriptionModal(false);
+    };
+
+    return (
+      <div className="popup">
+        <h2>Edit Description</h2>
+        <ReactQuill value={description} onChange={setDescription} />
+        <button onClick={handleSave}>Save</button>
+        <button onClick={() => setShowEditDescriptionModal(false)}>Cancel</button>
+      </div>
+    );
+  };
+
+  const EditRulesModal = () => {
+    const [rules, setRules] = useState(tournament.rules);
+
+    const handleSave = async () => {
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editRules`;
+      await fetch(URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ UUID: UUID, rules }),
+      }).then((res) => {
+        if (res.ok) navigate(0);
+      });
+      setShowEditRulesModal(false);
+    };
+
+    return (
+      <div className="popup">
+        <h2>Edit Rules</h2>
+        <ReactQuill value={rules} onChange={setRules} />
+        <button onClick={handleSave}>Save</button>
+        <button onClick={() => setShowEditRulesModal(false)}>Cancel</button>
+      </div>
+    );
+  };
+
+  const EditContactInfoModal = () => {
+    const [contactInfo, setContactInfo] = useState({
+      email: tournament.contactInfo?.email || '',
+      phone: tournament.contactInfo?.phone || '',
+      socialMedia: {
+        discord: tournament.contactInfo?.socialMedia?.discord || '',
+        instagram: tournament.contactInfo?.socialMedia?.instagram || '',
+        twitter: tournament.contactInfo?.socialMedia?.twitter || '',
+        facebook: tournament.contactInfo?.socialMedia?.facebook || ''
+      }
+    });
+
+    const handleSave = async () => {
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editContactInfo`;
+      await fetch(URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ UUID: tournament.UUID, contactInfo }),
+      }).then((res) => {
+        if (res.ok) navigate(0);
+      });
+      setShowEditContactInfoModal(false);
+    };
+
+    const handleChange = (e) => {
+      const { name, value } = e.target;
+      if (name.startsWith('socialMedia')) {
+        const [, platform] = name.split('.');
+        setContactInfo((prev) => ({
+          ...prev,
+          socialMedia: { ...prev.socialMedia, [platform]: value }
+        }));
+      } else {
+        setContactInfo((prev) => ({ ...prev, [name]: value }));
+      }
+    };
+
+    return (
+      <div className="popup">
+        <h2>Edit Contact Information</h2>
+        <label htmlFor="email">Email</label>
+        <input
+          type="text"
+          name="email"
+          value={contactInfo.email}
+          onChange={handleChange}
+          placeholder="Email"
+        />
+        <label htmlFor="phone">Phone</label>
+        <input
+          type="text"
+          name="phone"
+          value={contactInfo.phone}
+          onChange={handleChange}
+          placeholder="Phone"
+        />
+        <label htmlFor="socialMedia.discord">Discord</label>
+        <input
+          type="text"
+          name="socialMedia.discord"
+          value={contactInfo.socialMedia.discord}
+          onChange={handleChange}
+          placeholder="Discord"
+        />
+        <label htmlFor="socialMedia.instagram">Instagram</label>
+        <input
+          type="text"
+          name="socialMedia.instagram"
+          value={contactInfo.socialMedia.instagram}
+          onChange={handleChange}
+          placeholder="Instagram"
+        />
+        <label htmlFor="socialMedia.twitter">Twitter</label>
+        <input
+          type="text"
+          name="socialMedia.twitter"
+          value={contactInfo.socialMedia.twitter}
+          onChange={handleChange}
+          placeholder="Twitter"
+        />
+        <label htmlFor="socialMedia.facebook">Facebook</label>
+        <input
+          type="text"
+          name="socialMedia.facebook"
+          value={contactInfo.socialMedia.facebook}
+          onChange={handleChange}
+          placeholder="Facebook"
+        />
+        <button onClick={handleSave}>Save</button>
+        <button onClick={() => setShowEditContactInfoModal(false)}>Cancel</button>
+      </div>
+    );
+  };
+
   return (
     <div id="Manage">
       {editTeamParticipantsPopupOpen && <EditTeamParticipantsPopup />}
       {editSoloBracketsParticipantsPopupOpen && <EditSoloBracketsParticipantsPopup />}
       {editTeamBracketsParticipantsPopupOpen && <EditTeamBracketsParticipantsPopup />}
+      {showEditDescriptionModal && <EditDescriptionModal />}
+      {showEditRulesModal && <EditRulesModal />}
+      {showEditContactInfoModal && <EditContactInfoModal />}
       <Nav />
       <div id="container">
         {isLoading
@@ -1243,8 +1342,25 @@ function Manage() {
                 </div>
                 <div className="attribute editable description">
                   <h3>Description</h3>
-                  <div className='content'>{tournament.description}</div>
-                  <EditButton onclick={showEditDescriptionPopup} />
+                  <div className='content' dangerouslySetInnerHTML={{ __html: sanitizeHtml(tournament.description) }}></div>
+                  <EditButton canBeEditedAfterStart={false} onclick={() => setShowEditDescriptionModal(true)} />
+                </div>
+                <div className="attribute editable rules">
+                  <h3>Rules</h3>
+                  <div className='content' dangerouslySetInnerHTML={{ __html: sanitizeHtml(tournament.rules) }}></div>
+                  <EditButton canBeEditedAfterStart={false} onclick={() => setShowEditRulesModal(true)} />
+                </div>
+                <div className="attribute editable contact-info">
+                  <h3>Contact Info</h3>
+                  <div className='content'>
+                    <p>Email: {tournament.contactInfo?.email}</p>
+                    <p>Phone: {tournament.contactInfo?.phone}</p>
+                    <p>Discord: {tournament.contactInfo?.socialMedia?.discord}</p>
+                    <p>Instagram: {tournament.contactInfo?.socialMedia?.instagram}</p>
+                    <p>Twitter: {tournament.contactInfo?.socialMedia?.twitter}</p>
+                    <p>Facebook: {tournament.contactInfo?.socialMedia?.facebook}</p>
+                  </div>
+                  <EditButton canBeEditedAfterStart={false} onclick={() => setShowEditContactInfoModal(true)} />
                 </div>
                 <div className="attribute category">
                   <h3>Category</h3>
