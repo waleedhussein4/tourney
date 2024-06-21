@@ -10,24 +10,6 @@ import BattleRoyale from "./components/BattleRoyale";
 import { useNavigate, useParams } from "react-router-dom";
 import sanitizeHtml from 'sanitize-html';
 
-// Define the sanitizeHtml options
-const sanitizeHtmlOptions = {
-  allowedTags: [
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'nl', 'li',
-    'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div', 'table', 'thead',
-    'caption', 'tbody', 'tr', 'th', 'td', 'pre'
-  ],
-  allowedAttributes: {
-    a: ['href', 'name', 'target'],
-    img: ['src']
-  },
-  selfClosing: ['img', 'br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta'],
-  allowedSchemes: ['http', 'https', 'ftp', 'mailto', 'tel'],
-  allowedSchemesByTag: {},
-  allowedSchemesAppliedToAttributes: ['href', 'src', 'cite'],
-  allowProtocolRelative: true
-};
-
 const tournamentURL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament`;
 const teamsURL = `${import.meta.env.VITE_BACKEND_URL}/api/team/user/teamsList`;
 const submitApplicationURL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/submitApplication`;
