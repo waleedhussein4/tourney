@@ -13,21 +13,21 @@ const stripHtml = (html) => {
 };
 
 const sanitizeHtmlOptions = {
-  allowedTags: [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
+  allowedTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
     'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',
-    'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre' ],
+    'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre'],
   allowedAttributes: {
-    a: [ 'href', 'name', 'target' ],
+    a: ['href', 'name', 'target'],
     // We don't currently allow img itself by default, but this
     // would make sense if we did
-    img: [ 'src' ]
+    img: ['src']
   },
   // Lots of these won't come up by default because we don't allow them
-  selfClosing: [ 'img', 'br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta' ],
+  selfClosing: ['img', 'br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta'],
   // URL schemes we permit
-  allowedSchemes: [ 'http', 'https', 'ftp', 'mailto', 'tel' ],
+  allowedSchemes: ['http', 'https', 'ftp', 'mailto', 'tel'],
   allowedSchemesByTag: {},
-  allowedSchemesAppliedToAttributes: [ 'href', 'src', 'cite' ],
+  allowedSchemesAppliedToAttributes: ['href', 'src', 'cite'],
   allowProtocolRelative: true
 };
 
@@ -49,7 +49,7 @@ const createTournament = async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity, applications, rules } = req.body;
+  let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity, applications, rules, contactInfo } = req.body;
   console.log('Earnings: ' + earnings);
   category = category;
   teamSize = parseInt(teamSize);
@@ -60,6 +60,48 @@ const createTournament = async (req, res) => {
   const sanitizedRules = sanitizeHtml(rules, sanitizeHtmlOptions);
   description = stripHtml(description);
   rules = stripHtml(rules);
+
+  if (contactInfo) {
+    if (contactInfo.email && typeof contactInfo.email !== 'string') {
+      return res.status(400).json({ error: 'Email must be a string' });
+    }
+    if (contactInfo.phone && typeof contactInfo.phone !== 'string') {
+      return res.status(400).json({ error: 'Phone must be a string' });
+    }
+    if (contactInfo.socialMedia) {
+      if (contactInfo.socialMedia.discord && typeof contactInfo.socialMedia.discord !== 'string') {
+        return res.status(400).json({ error: 'Discord must be a string' });
+      }
+      if (contactInfo.socialMedia.instagram && typeof contactInfo.socialMedia.instagram !== 'string') {
+        return res.status(400).json({ error: 'Instagram must be a string' });
+      }
+      if (contactInfo.socialMedia.twitter && typeof contactInfo.socialMedia.twitter !== 'string') {
+        return res.status(400).json({ error: 'Twitter must be a string' });
+      }
+      if (contactInfo.socialMedia.facebook && typeof contactInfo.socialMedia.facebook !== 'string') {
+        return res.status(400).json({ error: 'Facebook must be a string' });
+      }
+    }
+  }
+
+  // validate field names for contact info
+  if (contactInfo) {
+    Array.from(contactInfo).forEach((field) => {
+      if (field !== 'email' && field !== 'phone' && field !== 'socialMedia') {
+        return res.status(400).json({ error: 'Invalid field name in contact info' });
+      }
+    });
+  }
+
+  // validate social media field names
+  if (contactInfo && contactInfo.socialMedia) {
+    Array.from(contactInfo.socialMedia).forEach((field) => {
+      if (field !== 'discord' && field !== 'instagram' && field !== 'twitter' && field !== 'facebook') {
+        return res.status(400).json({ error: 'Invalid field name in social media' });
+      }
+    });
+  }
+
 
   if (typeof earnings === 'string') {
     console.log("in earnings");
@@ -143,7 +185,8 @@ const createTournament = async (req, res) => {
           acceptedUsers: [],
           acceptedTeams: [],
           application: applications,
-          applications: []
+          applications: [],
+          contactInfo: contactInfo
         });
       }
       if (parseInt(teamSize) > 1) {
@@ -174,7 +217,8 @@ const createTournament = async (req, res) => {
           application: [],
           acceptedUsers: [],
           acceptedTeams: [],
-          application: applications
+          application: applications,
+          contactInfo: contactInfo
         });
       }
     }
@@ -206,7 +250,8 @@ const createTournament = async (req, res) => {
           updates: [],
           application: applications,
           acceptedUsers: [],
-          applications: []
+          applications: [],
+          contactInfo: contactInfo
         });
       }
       if (parseInt(teamSize) >= 2) {
@@ -234,7 +279,8 @@ const createTournament = async (req, res) => {
           updates: [],
           application: applications,
           acceptedTeams: [],
-          applications: []
+          applications: [],
+          contactInfo: contactInfo
         });
       }
     }
@@ -1071,7 +1117,8 @@ const getTournamentDisplayData = async (req, res) => {
       endDate: tournament.endDate,
       isJoined: isJoined,
       matches: tournament.matches,
-      rules: tournament.rules
+      rules: tournament.rules,
+      contactInfo: tournament.contactInfo
     });
   } catch (error) {
     console.error(error);
@@ -1845,7 +1892,8 @@ const getManageTournamentDisplayData = async (req, res) => {
       applications: transformedApps,
       matches: tournament.matches,
       bank: tournament.bank,
-      rules: tournament.rules
+      rules: tournament.rules,
+      contactInfo: tournament.contactInfo
     });
   } catch (error) {
     console.error(error);
