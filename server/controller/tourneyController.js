@@ -1,3 +1,5 @@
+const { JSDOM } = require('jsdom');
+const sanitizeHtml = require('sanitize-html');
 const Tournament = require('../models/tourneyModels');
 const Team = require('../models/teamModels');
 const User = require('../models/userModel');
@@ -5,18 +7,39 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const generateAndAddUsersToTournament = require('./tester');
 
+const stripHtml = (html) => {
+  const dom = new JSDOM(html);
+  return dom.window.document.body.textContent || "";
+};
+
+const sanitizeHtmlOptions = {
+  allowedTags: [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
+    'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',
+    'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre' ],
+  allowedAttributes: {
+    a: [ 'href', 'name', 'target' ],
+    // We don't currently allow img itself by default, but this
+    // would make sense if we did
+    img: [ 'src' ]
+  },
+  // Lots of these won't come up by default because we don't allow them
+  selfClosing: [ 'img', 'br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta' ],
+  // URL schemes we permit
+  allowedSchemes: [ 'http', 'https', 'ftp', 'mailto', 'tel' ],
+  allowedSchemesByTag: {},
+  allowedSchemesAppliedToAttributes: [ 'href', 'src', 'cite' ],
+  allowProtocolRelative: true
+};
 
 // Create a new tournament
 const createTournament = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
+  );
 
   const user = await User.findById(req.user);
   if (!user) {
@@ -26,32 +49,42 @@ const createTournament = async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity, applications } = req.body;
-  console.log('Earnings: ' + earnings)
+  let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity, applications, rules } = req.body;
+  console.log('Earnings: ' + earnings);
   category = category;
-  teamSize = parseInt(teamSize)
-  maxCapacity = parseInt(maxCapacity)
-  entryFee = parseInt(entryFee)
+  teamSize = parseInt(teamSize);
+  maxCapacity = parseInt(maxCapacity);
+  entryFee = parseInt(entryFee);
+
+  const sanitizedDescription = sanitizeHtml(description, sanitizeHtmlOptions);
+  const sanitizedRules = sanitizeHtml(rules, sanitizeHtmlOptions);
+  description = stripHtml(description);
+  rules = stripHtml(rules);
+
   if (typeof earnings === 'string') {
-    console.log("in earnigs")
-    earnings = parseInt(earnings)
+    console.log("in earnings");
+    earnings = parseInt(earnings);
   }
   accessibility = accessibility.toLowerCase();
   type = type.toLowerCase();
   if (type === "bracket") {
-    type = "brackets"
+    type = "brackets";
   }
   if (type === "battleroyale") {
-    type = "battle royale"
+    type = "battle royale";
   }
-  console.log(req.body)
-  console.log(typeof applications)
+  console.log(req.body);
+  console.log(typeof applications);
   const id = uuidv4();
-  console.log(id)
+  console.log(id);
   let errors = [];
 
   if (description && description.length > 200) {
     errors.push("Description is more than 200 chars.");
+  }
+
+  if (rules && rules.length > 800) {
+    errors.push("Rules are more than 800 chars.");
   }
 
   if (parseInt(teamSize) < 1) {
@@ -65,7 +98,7 @@ const createTournament = async (req, res) => {
   if (earnings !== undefined && earnings <= -1) {
     errors.push("Earnings must be positive.");
   }
-  console.log(typeof entryFee)
+  console.log(typeof entryFee);
   if (typeof entryFee === 'string') {
     errors.push("Entry fee must be an integer.");
   }
@@ -73,17 +106,17 @@ const createTournament = async (req, res) => {
   if (typeof type !== 'string') {
     errors.push("Type must be a string.");
   }
-  console.log(errors)
+  console.log(errors);
   if (errors.length > 0) {
     return res.status(400).send({ errors });
   }
 
-  let newTournament
+  let newTournament;
   try {
-    console.log('teamsize: ' + teamSize)
+    console.log('teamsize: ' + teamSize);
     if (type === "brackets") {
       if (parseInt(teamSize) === 1) {
-        console.log("in if")
+        console.log("in if");
         newTournament = await Tournament.create({
           _id: id,
           bank: 0,
@@ -91,7 +124,8 @@ const createTournament = async (req, res) => {
           host: req.user,
           title: title,
           teamSize: teamSize,
-          description: description,
+          description: sanitizedDescription,
+          rules: sanitizedRules,
           type: type,
           category: category,
           startDate: new Date(),
@@ -110,10 +144,10 @@ const createTournament = async (req, res) => {
           acceptedTeams: [],
           application: applications,
           applications: []
-        })
+        });
       }
       if (parseInt(teamSize) > 1) {
-        console.log('iseeu')
+        console.log('iseeu');
         newTournament = await Tournament.create({
           _id: id,
           bank: 0,
@@ -121,7 +155,8 @@ const createTournament = async (req, res) => {
           host: req.user,
           title: title,
           teamSize: teamSize,
-          description: description,
+          description: sanitizedDescription,
+          rules: sanitizedRules,
           type: type.toLowerCase(),
           category: category,
           startDate: new Date(),
@@ -140,12 +175,12 @@ const createTournament = async (req, res) => {
           acceptedUsers: [],
           acceptedTeams: [],
           application: applications
-        })
+        });
       }
-    };
-    console.log('type: ' + type.toLowerCase())
+    }
+    console.log('type: ' + type.toLowerCase());
     if (type.toLowerCase() === "battle royale") {
-      console.log('battle royALE')
+      console.log('battle royALE');
       if (parseInt(teamSize) === 1) {
         newTournament = await Tournament.create({
           _id: id,
@@ -154,7 +189,8 @@ const createTournament = async (req, res) => {
           host: req.user,
           title: title,
           teamSize: teamSize,
-          description: description,
+          description: sanitizedDescription,
+          rules: sanitizedRules,
           type: type.toLowerCase(),
           category: category,
           startDate: new Date(),
@@ -171,7 +207,7 @@ const createTournament = async (req, res) => {
           application: applications,
           acceptedUsers: [],
           applications: []
-        })
+        });
       }
       if (parseInt(teamSize) >= 2) {
         newTournament = await Tournament.create({
@@ -181,7 +217,8 @@ const createTournament = async (req, res) => {
           host: req.user,
           title: title,
           teamSize: teamSize,
-          description: description,
+          description: sanitizedDescription,
+          rules: sanitizedRules,
           type: type.toLowerCase(),
           category: category,
           startDate: new Date(),
@@ -198,16 +235,17 @@ const createTournament = async (req, res) => {
           application: applications,
           acceptedTeams: [],
           applications: []
-        })
+        });
       }
     }
-    console.log('newTournament: ' + newTournament)
+    console.log('newTournament: ' + newTournament);
     res.status(200).json(newTournament);
   } catch (error) {
-    console.log("wrro")
+    console.log("wrro");
     res.status(400).json({ error: error.message });
   }
 };
+
 
 
 const newTournament = new Tournament({
@@ -1032,7 +1070,8 @@ const getTournamentDisplayData = async (req, res) => {
       startDate: tournament.startDate,
       endDate: tournament.endDate,
       isJoined: isJoined,
-      matches: tournament.matches
+      matches: tournament.matches,
+      rules: tournament.rules
     });
   } catch (error) {
     console.error(error);
@@ -1805,7 +1844,8 @@ const getManageTournamentDisplayData = async (req, res) => {
       endDate: tournament.endDate,
       applications: transformedApps,
       matches: tournament.matches,
-      bank: tournament.bank
+      bank: tournament.bank,
+      rules: tournament.rules
     });
   } catch (error) {
     console.error(error);
