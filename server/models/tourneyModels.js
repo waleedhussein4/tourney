@@ -85,6 +85,16 @@ const tournamentSchema = new Schema(
       },
     ],
     rules: { type: String },
+    contactInfo: {
+      email: { type: String },
+      phone: { type: String },
+      socialMedia: { 
+        discord: { type: String },
+        instagram: { type: String },
+        twitter: { type: String },
+        facebook: { type: String },
+      },
+    }
   },
   { timestamps: true }
 );
