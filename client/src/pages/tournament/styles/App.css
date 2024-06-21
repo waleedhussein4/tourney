@@ -292,6 +292,13 @@
   line-height: 1.5;
 }
 
+#Tournament .tournament-rules {
+  font-size: 1em;
+  color: #666;
+  line-height: 1.5;
+  border: 1px solid white;
+}
+
 #Tournament .tournament-specs {
   flex: 1;
   display: flex;
