@@ -538,6 +538,33 @@ function Tournament() {
                   <h3>Rules & Regulations</h3>
                   <div className="tournament-rules" dangerouslySetInnerHTML={{ __html: sanitizeHtml(tournament.rules) }}></div>
                 </div>}
+                {tournament.contactInfo && (
+                  <div className="tournament-contact-info">
+                    <h3>Contact Information</h3>
+                    {tournament.contactInfo.email && (
+                      <p>Email: <a href={`mailto:${tournament.contactInfo.email}`}>{tournament.contactInfo.email}</a></p>
+                    )}
+                    {tournament.contactInfo.phone && (
+                      <p>Phone: <a href={`tel:${tournament.contactInfo.phone}`}>{tournament.contactInfo.phone}</a></p>
+                    )}
+                    {tournament.contactInfo.socialMedia && (
+                      <div className="social-media">
+                        {tournament.contactInfo.socialMedia.discord && (
+                          <p>Discord: {tournament.contactInfo.socialMedia.discord}</p>
+                        )}
+                        {tournament.contactInfo.socialMedia.instagram && (
+                          <p>Instagram: <a href={`https://instagram.com/${tournament.contactInfo.socialMedia.instagram}`} target="_blank" rel="noopener noreferrer">{tournament.contactInfo.socialMedia.instagram}</a></p>
+                        )}
+                        {tournament.contactInfo.socialMedia.twitter && (
+                          <p>Twitter: <a href={`https://twitter.com/${tournament.contactInfo.socialMedia.twitter}`} target="_blank" rel="noopener noreferrer">{tournament.contactInfo.socialMedia.twitter}</a></p>
+                        )}
+                        {tournament.contactInfo.socialMedia.facebook && (
+                          <p>Facebook: <a href={`https://facebook.com/${tournament.contactInfo.socialMedia.facebook}`} target="_blank" rel="noopener noreferrer">{tournament.contactInfo.socialMedia.facebook}</a></p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <p className="tournament-category">
                   Category:{" "}
                   {tournament.category.replace(/(^\w|\s\w)/g, (m) =>

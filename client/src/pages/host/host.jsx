@@ -61,6 +61,12 @@ export default function Host() {
   const [prizeRankError, setPrizeRankError] = useState(false);
   const [rules, setRules] = useState('');
   const [rulesError, setRulesError] = useState(false);
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactDiscord, setContactDiscord] = useState('');
+  const [contactInstagram, setContactInstagram] = useState('');
+  const [contactTwitter, setContactTwitter] = useState('');
+  const [contactFacebook, setContactFacebook] = useState('');
 
   useEffect(() => {
 
@@ -366,7 +372,17 @@ export default function Host() {
           accessibility: selectedEntryMode,
           maxCapacity: numberOfBrackets,
           applications: additionalInfoData,
-          rules: rules
+          rules: rules,
+          contactInfo: {
+            email: contactEmail,
+            phone: contactPhone,
+            socialMedia: {
+              discord: contactDiscord,
+              instagram: contactInstagram,
+              twitter: contactTwitter,
+              facebook: contactFacebook,
+            },
+          },
         };
       }
       else {
@@ -381,7 +397,17 @@ export default function Host() {
           accessibility: selectedEntryMode,
           maxCapacity: maxParticipants,
           applications: additionalInfoData,
-          rules: rules
+          rules: rules,
+          contactInfo: {
+            email: contactEmail,
+            phone: contactPhone,
+            socialMedia: {
+              discord: contactDiscord,
+              instagram: contactInstagram,
+              twitter: contactTwitter,
+              facebook: contactFacebook,
+            },
+          },
         }
       }
       try {
@@ -605,9 +631,54 @@ export default function Host() {
 
                     </div>
                     <div className="form-group">
-                      <div id="divRules"> <h2>Rules and Regulations:</h2>(up to 800 characters)</div>
+                      <div id="divRules"> <h2>Rules and Regulations:<span style={{ color: "gray" }}> (Optional)</span></h2>(up to 800 characters) </div>
                       <ReactQuill className="description-field" value={rules} onChange={handleRulesChange} />
                       {rulesError ? <p style={{ color: 'red' }}>Maximum word limit exceeded (800 characters).</p> : <p>{stripHtml(rules).length}/800</p>}
+                    </div>
+                    <div className="form-group contact-info">
+                      <h2>Contact Information:</h2>
+                      <label>Email:</label>
+                      <input
+                        type="email"
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        placeholder="Enter contact email"
+                      />
+                      <label>Phone:</label>
+                      <input
+                        type="tel"
+                        value={contactPhone}
+                        onChange={(e) => setContactPhone(e.target.value)}
+                        placeholder="Enter contact phone"
+                      />
+                      <label>Discord:</label>
+                      <input
+                        type="text"
+                        value={contactDiscord}
+                        onChange={(e) => setContactDiscord(e.target.value)}
+                        placeholder="Enter Discord username"
+                      />
+                      <label>Instagram:</label>
+                      <input
+                        type="text"
+                        value={contactInstagram}
+                        onChange={(e) => setContactInstagram(e.target.value)}
+                        placeholder="Enter Instagram handle"
+                      />
+                      <label>Twitter:</label>
+                      <input
+                        type="text"
+                        value={contactTwitter}
+                        onChange={(e) => setContactTwitter(e.target.value)}
+                        placeholder="Enter Twitter handle"
+                      />
+                      <label>Facebook:</label>
+                      <input
+                        type="text"
+                        value={contactFacebook}
+                        onChange={(e) => setContactFacebook(e.target.value)}
+                        placeholder="Enter Facebook profile"
+                      />
                     </div>
                     <div className="submit-errors">
                       {submitErrors.map((error, index) => (
