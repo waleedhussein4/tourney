@@ -84,6 +84,7 @@ const tournamentSchema = new Schema(
         ],
       },
     ],
+    rules: { type: String },
   },
   { timestamps: true }
 );
