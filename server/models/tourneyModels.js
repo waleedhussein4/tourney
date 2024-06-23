@@ -88,13 +88,15 @@ const tournamentSchema = new Schema(
     contactInfo: {
       email: { type: String },
       phone: { type: String },
-      socialMedia: { 
+      socialMedia: {
         discord: { type: String },
         instagram: { type: String },
         twitter: { type: String },
         facebook: { type: String },
       },
-    }
+    },
+    bracketsShuffled: { type: Boolean, default: false },
+    bracketOrder: { type: [Number], default: [] }
   },
   { timestamps: true }
 );
