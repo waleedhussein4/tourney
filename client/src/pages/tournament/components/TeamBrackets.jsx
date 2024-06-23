@@ -5,7 +5,7 @@ import '../styles/Brackets.css';
 import Leaderboard from './Leaderboard';
 
 const TeamUserListPopup = ({ teamName, players, onClose }) => {
-  console.log(players)
+  console.log(players);
   return (
     <div className="team-user-list-popup">
       <h2>{teamName || "Unknown Team"}</h2>
@@ -28,13 +28,13 @@ const BracketsComponent = ({ tournament }) => {
     // to check if mobile view is triggered or not
   
     // mobileBreakpoint is required to be passed down to a seed
-    console.log('Seed: ' + JSON.stringify(seed))
+    console.log('Seed: ' + JSON.stringify(seed));
     return (
       <Seed mobileBreakpoint={breakpoint} style={{ fontSize: 12 }}>
         <SeedItem>
           <div>
-            <SeedTeam onClick={handleTeamClick} className={['team', seed.teams[0].eliminated && 'eliminated', !seed.teams[0]?.name && 'tba']}>{seed.teams[0]?.name || 'TBA '}</SeedTeam>
-            <SeedTeam onClick={handleTeamClick} className={['team', seed.teams[1].eliminated && 'eliminated', !seed.teams[1]?.name && 'tba']}>{seed.teams[1]?.name || 'TBA '}</SeedTeam>
+            <SeedTeam onClick={handleTeamClick} className={['team', seed.teams[0]?.eliminated && 'eliminated', !seed.teams[0]?.name && 'tba']}>{seed.teams[0]?.name || 'TBA '}</SeedTeam>
+            <SeedTeam onClick={handleTeamClick} className={['team', seed.teams[1]?.eliminated && 'eliminated', !seed.teams[1]?.name && 'tba']}>{seed.teams[1]?.name || 'TBA '}</SeedTeam>
           </div>
         </SeedItem>
       </Seed>
@@ -49,9 +49,9 @@ const BracketsComponent = ({ tournament }) => {
       return;
     }
     const teamName = e.target.innerText;
-    console.log('Team Clicked: ' + teamName)
+    console.log('Team Clicked: ' + teamName);
     const team = tournament.enrolledTeams.find(t => t.teamName === teamName);
-    console.log('Team: ' + JSON.stringify(team))
+    console.log('Team: ' + JSON.stringify(team));
     setSelectedTeam(team);
     setIsPopupOpen(true);
   };
@@ -62,6 +62,7 @@ const BracketsComponent = ({ tournament }) => {
   };
 
   const getTeamScore = (teamName) => {
+    if (!teamName) return null;
     const team = tournament.enrolledTeams.find(team => team.teamName === teamName);
     return team ? team.score : null; // Return team score if found, otherwise null
   };
@@ -85,7 +86,7 @@ const BracketsComponent = ({ tournament }) => {
             onClick: () => { }
           });
           // Assuming the first team always wins for demonstration; replace this logic with actual match results
-          const nextRoundWinner = tournament.matches[matches]
+          const nextRoundWinner = tournament.matches[matches];
           const findWinner = currentRoundTeams.find(team => team?.teamName === nextRoundWinner);
           nextRoundTeams.push(findWinner);
           matches++;
@@ -104,20 +105,17 @@ const BracketsComponent = ({ tournament }) => {
       });
     });
 
-
     return rounds;
   };
 
-
-  const teamsWithPlaceholders = [...tournament.enrolledTeams]
+  const teamsWithPlaceholders = [...tournament.enrolledTeams];
   for (let i = 0; i < tournament.maxCapacity / tournament.teamSize; i++) {
     if (!tournament.enrolledTeams[i]) {
       teamsWithPlaceholders.push({ teamName: undefined, players: [] });
     }
   }
 
-
-  const rounds = generateRoundsFromTeams(teamsWithPlaceholders);
+  const rounds = generateRoundsFromTeams(teamsWithPlaceholders) || [];
 
   return (
     <div className="brackets-container">
