@@ -3,15 +3,17 @@ import { useState } from 'react';
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
 import '../styles/Brackets.css';
 import Leaderboard from './Leaderboard';
+import { useNavigate } from 'react-router-dom';
 
 const TeamUserListPopup = ({ teamName, players, onClose }) => {
+  const navigate = useNavigate();
   console.log(players);
   return (
     <div className="team-user-list-popup">
       <h2>{teamName || "Unknown Team"}</h2>
       <ul>
         {players.map(player => (
-          <li className='player' key={player.username} onClick={() => (window.location.href = `/profile/${player.username}`)}>
+          <li className='player' key={player.username} onClick={() => navigate(`/profile/${player.username}`)}>
             {player.username}
           </li>
         ))}
