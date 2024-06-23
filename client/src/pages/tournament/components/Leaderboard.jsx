@@ -1,8 +1,11 @@
-import React from 'react'
+import React from 'react';
 
 const Leaderboard = ({ tournament }) => {
-  const sortedUsers = tournament.enrolledUsers ? [...tournament.enrolledUsers].sort((a, b) => b.score - a.score) : [];
-  const sortedTeams = tournament.enrolledTeams ? [...tournament.enrolledTeams].sort((a, b) => b.score - a.score) : [];
+  const filteredUsers = tournament.enrolledUsers ? tournament.enrolledUsers.filter(user => user !== null) : [];
+  const filteredTeams = tournament.enrolledTeams ? tournament.enrolledTeams.filter(team => team !== null) : [];
+
+  const sortedUsers = filteredUsers.sort((a, b) => b.score - a.score);
+  const sortedTeams = filteredTeams.sort((a, b) => b.score - a.score);
 
   return (
     <div className="leaderboard">
@@ -23,7 +26,7 @@ const Leaderboard = ({ tournament }) => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Leaderboard
+export default Leaderboard;

@@ -339,8 +339,8 @@ export default function Host() {
 
     }
     if (inputPrizes.length === 0) {
-      divPrizeRankRef.current.style.border = "2px solid red";
-      setPrizeRankError(true);
+      // divPrizeRankRef.current.style.border = "2px solid red";
+      // setPrizeRankError(true);
     } if (winnerPrize === "" && inputPrizes.length === 0) {
       e.preventDefault();
     }

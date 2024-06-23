@@ -376,13 +376,11 @@ function Manage() {
   }
 
   function showButton(event) {
-    console.log(event.target)
     let buttons = event.target.querySelectorAll('.buttonsWrapper button')
     Array.from(buttons).forEach(btn => btn.style.display = 'inline-block')
   }
 
   function hideButton(event) {
-    console.log(event.target)
     let buttons = event.target.querySelectorAll('.buttonsWrapper button')
     Array.from(buttons).forEach(btn => btn.style.display = 'none')
   }
@@ -394,7 +392,6 @@ function Manage() {
 
     const parent = event.target.parentElement.parentElement
     const application = tournament.applications.map(app => app.UUID === parent.dataset.uuid ? app : null).filter(app => app !== null)[0]
-    console.log(application)
 
     let h2 = document.createElement('h2');
     h2.innerHTML = 'Application';
@@ -624,8 +621,6 @@ function Manage() {
             const playerScoreInput = document.getElementById(`player-score-${teamIndex}-${playerIndex}`);
             const playerEliminatedInput = document.getElementById(`player-eliminated-${teamIndex}-${playerIndex}`);
 
-            console.log("playerScoreInput", playerScoreInput.value, "playerEliminatedInput", playerEliminatedInput.checked);
-
             return {
               ...player,
               score: parseInt(playerScoreInput.value),
@@ -727,7 +722,7 @@ function Manage() {
   };
 
   const Applications = () => {
-    if (tournament.applications.length === 0) {
+    if (tournament.applications?.length === 0) {
       return <span>No applications yet</span>
     }
     return (
@@ -761,11 +756,12 @@ function Manage() {
   }
 
   const MatchesEditor = () => {
+    const [matchesEditorError, setMatchesEditorError] = useState('');
 
     var matchesInFirstRound = Math.ceil(Math.max(tournament.enrolledTeams?.length / 2, tournament.enrolledUsers?.length / 2));
     var totalMatches = matchesInFirstRound;
 
-    const teamsEnrolledYet = matchesInFirstRound > 0
+    const teamsEnrolledYet = tournament.maxCapacity == tournament.enrolledTeams.length || tournament.maxCapacity == tournament.enrolledUsers.length
 
     // Calculate the total number of matches
     while (matchesInFirstRound > 1) {
@@ -773,8 +769,6 @@ function Manage() {
       totalMatches += matchesInFirstRound;
     }
 
-    console.log('totalMatches: ', totalMatches)
-    console.log(totalMatches)
     let matches = tournament.matches
     for (let i = 0; i < totalMatches; i++) {
       if (matches[i] === undefined) {
@@ -794,8 +788,6 @@ function Manage() {
     };
 
     const handleSaveAll = async () => {
-      // Implement logic to save all edited strings
-      console.log('Save all edited strings:', editedMatches);
 
       const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editMatches`
       await fetch(URL, {
@@ -821,11 +813,37 @@ function Manage() {
         })
     };
 
+    const handleShuffleBrackets = async () => {
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/shuffleBrackets`
+      await fetch(URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          UUID: UUID,
+        }),
+      })
+        .then(async (res) => {
+          if (res.ok) {
+            setMatchesEditorError('');
+            tournament.teamSize == 1 ? tournament.enrolledUsers = await res.json() : tournament.enrolledTeams = await res.json();
+            navigate(0);
+          }
+          else {
+            res.json().then(data => {
+              setMatchesEditorError(data.error)
+            })
+          }
+        })
+    }
+
     return (
       <div id='matchesEditor' className='attribute'>
-        <h3>Match Winners</h3>
-        {!teamsEnrolledYet ?
-          <span>After enough players have enrolled in the tournament, you will be able to start the tournament and access the match editor</span>
+        <h3>Match Manager</h3>
+        {!teamsEnrolledYet && !tournament.hasStarted ?
+          <span>After the tournament capacity is full, you will be able to start the tournament and access the match editor.</span>
           :
           <>
             <div className="matches">
@@ -840,6 +858,8 @@ function Manage() {
               }
             </div>
             {tournament.hasStarted && <button onClick={handleSaveAll}>Save All</button>}
+            <button onClick={handleShuffleBrackets}>Shuffle Brackets</button>
+            <span className="error">{matchesEditorError}</span>
           </>
         }
         <span className="error"></span>
@@ -868,7 +888,6 @@ function Manage() {
         }
       })
       .then((data) => {
-        console.log(data)
         document.querySelector('.controlButtons .error').innerText = data.error
       })
   }
@@ -894,7 +913,6 @@ function Manage() {
         }
       })
       .then((data) => {
-        console.log(data)
         document.querySelector('.controlButtons .error').innerText = data.error
       })
   }
@@ -980,7 +998,6 @@ function Manage() {
     let button = document.createElement('button');
     button.innerHTML = 'Confirm';
     button.onclick = async () => {
-      console.log('hi');
       await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/tournement/depositIntoTournamentBank`, {
         method: 'POST',
         headers: {
