@@ -7,7 +7,7 @@ const handlePlayerClick = (e) => {
   if (e.target.classList.contains('tba')) {
     return;
   }
-  window.location.href = `/profile/${e.target.innerText}`;
+  navigate(`/profile/${e.target.innerText}`);
 };
 
 const CustomSeed = ({ seed, breakpoint, roundIndex, seedIndex }) => {
