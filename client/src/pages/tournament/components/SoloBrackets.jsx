@@ -4,7 +4,7 @@ import '../styles/Brackets.css';
 import Leaderboard from './Leaderboard';
 
 const handlePlayerClick = (e) => {
-  if(e.target.classList.contains('tba')) {
+  if (e.target.classList.contains('tba')) {
     return;
   }
   window.location.href = `/profile/${e.target.innerText}`;
@@ -15,13 +15,13 @@ const CustomSeed = ({ seed, breakpoint, roundIndex, seedIndex }) => {
   // to check if mobile view is triggered or not
 
   // mobileBreakpoint is required to be passed down to a seed
-  console.log('Seed: ' + JSON.stringify(seed))
+  console.log('Seed: ' + JSON.stringify(seed));
   return (
     <Seed mobileBreakpoint={breakpoint} style={{ fontSize: 12 }}>
       <SeedItem>
         <div>
-          <SeedTeam onClick={handlePlayerClick} className={['player', seed.users[0].eliminated && 'eliminated', !seed.users[0]?.username && 'tba']}>{seed.users[0]?.username || 'TBA '}</SeedTeam>
-          <SeedTeam onClick={handlePlayerClick} className={['player', seed.users[1].eliminated && 'eliminated', !seed.users[1]?.username && 'tba']}>{seed.users[1]?.username || 'TBA '}</SeedTeam>
+          <SeedTeam onClick={handlePlayerClick} className={['player', seed.users[0]?.eliminated && 'eliminated', !seed.users[0]?.username && 'tba']}>{seed.users[0]?.username || 'TBA '}</SeedTeam>
+          <SeedTeam onClick={handlePlayerClick} className={['player', seed.users[1]?.eliminated && 'eliminated', !seed.users[1]?.username && 'tba']}>{seed.users[1]?.username || 'TBA '}</SeedTeam>
         </div>
       </SeedItem>
     </Seed>
@@ -31,12 +31,13 @@ const CustomSeed = ({ seed, breakpoint, roundIndex, seedIndex }) => {
 const BracketsComponent = ({ tournament }) => {
 
   const getUserScore = (username) => {
-    const user = tournament.enrolledUsers.find(user => user.username === username);
+    if (!username) return null;
+    const user = tournament.enrolledUsers.find(user => user?.username === username);
     return user ? user.score : null; // Return team score if found, otherwise null
   };
 
   const generateRoundsFromUsers = (users) => {
-    console.log('Users: ' + JSON.stringify(users))
+    console.log('Users: ' + JSON.stringify(users));
     let matches = 0;
     let rounds = [];
     let currentRoundUsers = [...users];
@@ -55,7 +56,7 @@ const BracketsComponent = ({ tournament }) => {
             onClick: () => { }
           });
           // Assuming the first team always wins for demonstration; replace this logic with actual match results
-          const nextRoundWinner = tournament.matches[matches]
+          const nextRoundWinner = tournament.matches[matches];
           const findWinner = currentRoundUsers.find(user => user?.username === nextRoundWinner);
           nextRoundUsers.push(findWinner);
           matches++;
@@ -74,18 +75,17 @@ const BracketsComponent = ({ tournament }) => {
       });
     });
 
-
     return rounds;
   };
 
-  const usersWithPlaceholders = [...tournament.enrolledUsers]
+  const usersWithPlaceholders = [...tournament.enrolledUsers];
   for (let i = 0; i < tournament.maxCapacity / tournament.teamSize; i++) {
     if (!tournament.enrolledUsers[i]) {
       usersWithPlaceholders.push({ username: undefined });
     }
   }
 
-  const rounds = generateRoundsFromUsers(usersWithPlaceholders);
+  const rounds = generateRoundsFromUsers(usersWithPlaceholders) || [];
 
   return (
     <div className="brackets-container">
