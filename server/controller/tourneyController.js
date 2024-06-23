@@ -863,235 +863,66 @@ const deleteTournament = async (req, res) => {
 
 // get tournament data for the tournament page
 const getTournamentDisplayData = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
-
-  // await createTournaments()
-
-
-  // delete all tournaments
-  // await Tournament.deleteMany({})
-  //   .then(result => {
-  //     console.log(`${result.deletedCount} tournaments deleted successfully.`);
-  //   })
-  //   .catch(error => {
-  //     console.error('Error deleting tournaments:', error);
-  //   });
-
-
-  // Delete the tournament document with the specified ID
-  // await Tournament.findByIdAndDelete('89b72cfe-0b87-4395-8230-8e8e1f571cb7')
-  // .then(deletedTournament => {
-  //   if (!deletedTournament) {
-  //     console.log('Tournament not found');
-  //   } else {
-  //     console.log('Tournament deleted successfully:', deletedTournament);
-  //   }
-  // })
-  // .catch(error => {
-  //   console.error('Error deleting tournament:', error);
-  // });
-
-
-  // create new tournament
-  // await newTournament.save()
-  //   .then(savedTournament => {
-  //     console.log('Tournament saved successfully:', savedTournament);
-  //   })
-  //   .catch(error => {
-  //     console.error('Error saving tournament:', error);
-  //   });
-
-  // print all tournaments
-  // Tournament.find({}).exec()
-  //   .then(tournaments => {
-  //     tournaments.forEach(tournament => {
-  //       console.log(tournament);
-  //       console.log("Type of id: ", typeof (tournament._id))
-  //     });
-  //   })
-  //   .catch(error => {
-  //     console.error('Error fetching tournaments:', error);
-  //   });
-
-
-  // Tournament.updateOne(
-  //   { _id: req.query.UUID }, // Filter for the tournament by its ID
-  //   { $set: { acceptedUsers: [], applications: [] } } // Set acceptedUsers and applications arrays to empty arrays
-  // )
-  // .then(result => {
-  //   if (result.nModified === 0) {
-  //     console.log('No tournament was updated'); // Tournament not found or no changes applied
-  //   } else {
-  //     console.log('AcceptedUsers and applications arrays cleared successfully');
-  //   }
-  // })
-  // .catch(error => {
-  //   console.error('Error updating tournament:', error);
-  // });
-
-
-  // print all users in the db
-  // User.find({}).exec()
-  // .then(users => {
-  //   users.forEach(user => {
-  //     console.log(user);
-  //   });
-  // })
+  );
 
   try {
     const UUID = req.query.UUID;
-    console.log(UUID)
+    console.log(UUID);
     if (!UUID) {
       return res.status(400).json({ error: 'UUID parameter is missing' });
     }
 
     const userUUID = req.user;
-
     const tournament = await Tournament.findById(UUID);
     if (!tournament) {
       return res.status(404).json({ error: 'Tournament not found' });
     }
 
-    const isHost = (tournament.host == userUUID)
+    const isHost = (tournament.host == userUUID);
 
-
-    // await generateAndAddUsersToTournament(UUID, 50);
-
-
-    async function getUserByUsername(username) {
-      try {
-        // Find the user document by username
-        const user = await User.findOne({ username });
-        return user; // Return the user document
-      } catch (error) {
-        console.error('Error finding user by username:', error);
-        throw error; // Throw the error for handling elsewhere
-      }
-    }
-
-
-    const transformEnrolledUsers = await Promise.all(tournament.enrolledUsers.map(async (user) => {
-      const userDoc = await User.findById(user.UUID);
-      return {
-        username: userDoc ? userDoc.username : null,
-        score: user.score,
-        eliminated: user.eliminated
-      };
-    }));
-
-    // convert team schema object to teamName, players, score, eliminated
-    async function transformEnrolledTeams(originalEnrolledTeams) {
-      const transformedEnrolledTeams = await Promise.all(originalEnrolledTeams.map(async team => {
-        const players = await Promise.all(team.players.map(async player => {
-          const user = await User.findOne({ _id: player.UUID });
-          return { username: user.username, score: player.score, eliminated: player.eliminated }; // Assuming 'username' is the field in the user document containing the username
-        }));
-        return {
-          teamName: team.teamName,
-          players: players,
-          score: team.score,
-          eliminated: team.eliminated
-        };
-      }));
-      return transformedEnrolledTeams;
-    }
-    const transformedEnrolledTeams = await transformEnrolledTeams(tournament.enrolledTeams);
-
-    let checkHasAppliedSolo = async () => {
-      // get all applications
-      // iterate over applications and get userUUID
-      // if userUUID matches return true
-
-      const applications = tournament.applications
-      for (let i = 0; i < applications.length; i++) {
-        const appliedUser = applications[i].UUID
-        console.log("Applied user: " + appliedUser)
-        console.log("User UUID: " + userUUID)
-        if (userUUID == appliedUser) {
-          return true
+    const transformEnrolledUsers = await Promise.all(
+      tournament.enrolledUsers.map(async (user) => {
+        if (user) {
+          const userDoc = await User.findById(user.UUID);
+          return {
+            username: userDoc ? userDoc.username : null,
+            score: user.score,
+            eliminated: user.eliminated,
+          };
         }
-      }
-      return false
-    }
+        return null; // Handle null values
+      })
+    );
 
-    let checkHasAppliedTeam = async () => {
-      // get all applications
-      // iterate over applications and get team members
-      // if team members include userUUID return true
-
-      try {
-        const applications = tournament.applications
-        for (let i = 0; i < applications.length; i++) {
-          const teamUUID = applications[i].UUID
-          const team = await Team.findOne({ _id: teamUUID })
-          if (team.members.map(member => member).includes(userUUID)) {
-            return true
-          }
+    const transformEnrolledTeams = await Promise.all(
+      tournament.enrolledTeams.map(async (team) => {
+        if (team) {
+          const players = await Promise.all(
+            team.players.map(async (player) => {
+              const user = await User.findOne({ _id: player.UUID });
+              return {
+                username: user ? user.username : null,
+                score: player.score,
+                eliminated: player.eliminated,
+              };
+            })
+          );
+          return {
+            teamName: team.teamName,
+            players: players,
+            score: team.score,
+            eliminated: team.eliminated,
+          };
         }
-        return false
-      } catch (error) {
-        return false
-      }
-    }
-
-    const hasAppliedSolo = await checkHasAppliedSolo()
-    const hasAppliedTeam = await checkHasAppliedTeam()
-    const hasApplied = hasAppliedSolo || hasAppliedTeam
-
-    let checkIsAcceptedSolo = async () => {
-      return tournament.acceptedUsers.includes(userUUID)
-    }
-
-    let checkIsAcceptedTeam = async () => {
-      // get all accepted teams
-      // iterate over teams and get team leaders
-      // if team leaders include userUUID return true
-
-      const acceptedTeams = tournament.acceptedTeams
-      for (let i = 0; i < acceptedTeams.length; i++) {
-        const teamUUID = acceptedTeams[i]
-        const team = await Team.findOne({ _id: teamUUID })
-        console.log("Team: " + team.leader)
-        console.log("User UUID: " + userUUID)
-        if (team.leader == userUUID) {
-          return true
-        }
-      }
-      return false
-    }
-    const isAcceptedSolo = await checkIsAcceptedSolo()
-    const isAcceptedTeam = await checkIsAcceptedTeam()
-    const isAccepted = isAcceptedSolo || isAcceptedTeam
-
-    let checkIsJoinedSolo = async () => {
-      return tournament.enrolledUsers.some(user => user.UUID === userUUID)
-    }
-
-    let checkIsJoinedTeam = async () => {
-      // get all enrolled teams
-      // iterate over teams and get team members
-      // if team members include userUUID return true
-
-      const enrolledTeams = tournament.enrolledTeams
-      for (let i = 0; i < enrolledTeams.length; i++) {
-        const team = enrolledTeams[i]
-        if ((team.players.map(player => player.UUID)).includes(userUUID)) {
-          return true
-        }
-      }
-      return false
-    }
-    const isJoinedSolo = await checkIsJoinedSolo()
-    const isJoinedTeam = await checkIsJoinedTeam()
-    const isJoined = isJoinedSolo || isJoinedTeam
+        return null; // Handle null values
+      })
+    );
 
     res.status(200).json({
       hasStarted: tournament.hasStarted,
@@ -1105,26 +936,24 @@ const getTournamentDisplayData = async (req, res) => {
       maxCapacity: tournament.maxCapacity,
       earnings: tournament.earnings,
       host: tournament.host,
-      isAccepted: isAccepted,
+      isAccepted: tournament.acceptedUsers.includes(userUUID),
       updates: tournament.updates,
       isHost: isHost,
       application: tournament.application,
-      hasApplied: hasApplied,
+      hasApplied: tournament.applications.map((app) => app.user).includes(userUUID),
       enrolledUsers: transformEnrolledUsers,
-      enrolledTeams: transformedEnrolledTeams,
-      hasStarted: tournament.hasStarted,
+      enrolledTeams: transformEnrolledTeams,
       startDate: tournament.startDate,
       endDate: tournament.endDate,
-      isJoined: isJoined,
       matches: tournament.matches,
       rules: tournament.rules,
-      contactInfo: tournament.contactInfo
+      contactInfo: tournament.contactInfo,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
-}
+};
 
 
 const handleApplicationSubmission = async (req, res) => {
@@ -1836,15 +1665,13 @@ const editEndDate = async (req, res) => {
 
 
 const getManageTournamentDisplayData = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
+  );
 
   try {
     const UUID = req.query.UUID;
@@ -1852,116 +1679,104 @@ const getManageTournamentDisplayData = async (req, res) => {
       return res.status(400).json({ error: 'UUID parameter is missing' });
     }
 
-
     const userUUID = req.user;
-
-
     const tournament = await Tournament.findById(UUID);
+
     if (!tournament) {
       return res.status(404).json({ error: 'Tournament not found' });
     }
 
-    // check if user is host
+    // Check if user is host
     if (tournament.host != req.user) {
       return res.status(401).send('Unauthorized');
     }
 
-
-    const isHost = (tournament.host == userUUID)
-
-
-    // await generateAndAddUsersToTournament(UUID, 50);
-
+    const isHost = (tournament.host == userUUID);
 
     async function getUserByUsername(username) {
       try {
-        // Find the user document by username
         const user = await User.findOne({ username });
-        return user; // Return the user document
+        return user;
       } catch (error) {
         console.error('Error finding user by username:', error);
-        throw error; // Throw the error for handling elsewhere
+        throw error;
       }
     }
-
 
     // Transform the data
     const transformedData = await Promise.all(tournament.enrolledTeams.map(async (participant) => {
       const players = await Promise.all(participant.players.map(async (player) => {
+        if (!player || !player.UUID) return null;
         const user = await getUserByUsername(player.UUID);
+        if (!user) return null;
         return {
-          username: user ? user.username : null,
+          username: user.username,
           score: player.score,
           eliminated: player.eliminated
         };
       }));
 
+      if (players.includes(null)) return null;
 
       return {
         teamName: participant.teamName,
         players: players
       };
-    }));
-
+    })).then(data => data.filter(team => team !== null));
 
     async function getTeamNameAndApplications(applications) {
       try {
-
         const results = [];
-
-        // Iterate through each application
         for (const application of applications) {
-          // Query MongoDB for team information based on UUID
           const teamInfo = await Team.findOne({ _id: application.UUID });
-          console.log(teamInfo)
-
           if (teamInfo) {
-            // Format the result as an object containing team name and application details
             const result = {
               UUID: application.UUID,
               teamName: teamInfo.name,
               application: application.application
             };
-
             results.push(result);
           } else {
-            // If no team information found for the provided UUID, add username
             const user = await User.findOne({ _id: application.UUID });
+            if (!user) return null;
             const result = {
               UUID: application.UUID,
               username: user.username,
               application: application.application
             };
-
             results.push(result);
           }
         }
-
-        return results;
+        return results.filter(result => result !== null);
       } catch (err) {
         console.error('Error retrieving team information:', err);
         return [];
       }
     }
 
-    const transformedApps = await getTeamNameAndApplications(tournament.applications)
+    const transformedApps = await getTeamNameAndApplications(tournament.applications);
 
     const transformEnrolledUsers = await Promise.all(tournament.enrolledUsers.map(async (user) => {
-      const userDoc = await User.findById(user.UUID);
+      const userDoc = await User.findById(user?.UUID);
+      if (!userDoc) return null;
       return {
-        username: userDoc ? userDoc.username : null,
+        username: userDoc.username,
         score: user.score,
         eliminated: user.eliminated
       };
-    }));
+    })).then(data => data.filter(user => user !== null));
 
-    // convert team schema object to teamName, players, score, eliminated
     async function transformEnrolledTeams(originalEnrolledTeams) {
       const transformedEnrolledTeams = await Promise.all(originalEnrolledTeams.map(async team => {
         const players = await Promise.all(team.players.map(async player => {
+          if (!player || !player.UUID) return null;
           const user = await User.findOne({ _id: player.UUID });
-          return { username: user.username, score: player.score, eliminated: player.eliminated }; // Assuming 'username' is the field in the user document containing the username
+          if (!user) return null;
+          return { username: user.username, score: player.score, eliminated: player.eliminated };
         }));
+
+        if (players.includes(null)) return null;
+
         return {
           teamName: team.teamName,
           players: players,
@@ -1969,8 +1784,9 @@ const getManageTournamentDisplayData = async (req, res) => {
           eliminated: team.eliminated
         };
       }));
-      return transformedEnrolledTeams;
+      return transformedEnrolledTeams.filter(team => team !== null);
     }
+
     const transformedEnrolledTeams = await transformEnrolledTeams(tournament.enrolledTeams);
 
     res.status(200).json({
@@ -1989,23 +1805,25 @@ const getManageTournamentDisplayData = async (req, res) => {
       updates: tournament.updates,
       isHost: isHost,
       application: tournament.application,
-      hasApplied: ((tournament.applications).map(app => app.user)).includes(userUUID),
+      hasApplied: tournament.applications.map(app => app.user).includes(userUUID),
       enrolledUsers: transformEnrolledUsers,
       enrolledTeams: transformedEnrolledTeams,
-      hasStarted: tournament.hasStarted,
       startDate: tournament.startDate,
       endDate: tournament.endDate,
       applications: transformedApps,
       matches: tournament.matches,
       bank: tournament.bank,
       rules: tournament.rules,
-      contactInfo: tournament.contactInfo
+      contactInfo: tournament.contactInfo,
+      bracketsShuffled: tournament.bracketsShuffled,
+      bracketOrder: tournament.bracketOrder,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
-}
+};
+
 
 
 const images = new Map();
@@ -2727,6 +2545,77 @@ const depositIntoTournamentBank = async (req, res) => {
   res.status(200).json({ message: 'Amount deposited into tournament bank' });
 }
 
+const shuffleBrackets = async (req, res) => {
+  const { UUID } = req.body;
+
+  try {
+    const tournament = await Tournament.findOne({ _id: UUID });
+    if (!tournament) {
+      return res.status(404).json({ error: 'Tournament not found' });
+    }
+
+    // check if user is host
+    if (tournament.host != req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // ensure tournament hasn't started
+    if (tournament.hasStarted) {
+      return res.status(400).json({ error: 'Tournament has already started' });
+    }
+
+    // ensure tournament hasn't ended
+    if (tournament.hasEnded) {
+      return res.status(400).json({ error: 'Tournament has already ended' });
+    }
+
+    // ensure it's a brackets tournament
+    if (tournament.type != 'brackets') {
+      return res.status(400).json({ error: 'Tournament is not brackets based' });
+    }
+
+    // ensure brackets are not already shuffled
+    if (tournament.bracketsShuffled) {
+      return res.status(400).json({ error: 'Brackets are already shuffled' });
+    }
+
+    let shuffledBrackets;
+    const maxSlots = tournament.maxCapacity / tournament.teamSize;
+
+    const fisherYatesShuffle = (array) => {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    };
+
+    if (tournament.teamSize == 1) {
+      shuffledBrackets = tournament.enrolledUsers.slice(); // Copy array
+      while (shuffledBrackets.length < maxSlots) {
+        shuffledBrackets.push(null); // Fill with placeholders
+      }
+      shuffledBrackets = fisherYatesShuffle(shuffledBrackets);
+      tournament.enrolledUsers = shuffledBrackets;
+    } else {
+      shuffledBrackets = tournament.enrolledTeams.slice(); // Copy array
+      while (shuffledBrackets.length < maxSlots) {
+        shuffledBrackets.push(null); // Fill with placeholders
+      }
+      shuffledBrackets = fisherYatesShuffle(shuffledBrackets);
+      tournament.enrolledTeams = shuffledBrackets;
+    }
+
+    tournament.bracketsShuffled = true;
+    await tournament.save();
+
+    res.status(200).json(shuffledBrackets);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   createTournament,
   getTournamentById,
@@ -2759,7 +2648,6 @@ module.exports = {
   editMatches,
   startTournament,
   endTournament,
-  depositIntoTournamentBank
+  depositIntoTournamentBank,
+  shuffleBrackets
 };
-
-
