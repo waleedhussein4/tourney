@@ -1,8 +1,10 @@
 /* eslint-disable react/prop-types */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const BattleRoyale = ({ tournament }) => {
+  const navigate = useNavigate();
   let members;
 
   const [selectedTeam, setSelectedTeam] = useState(null);
@@ -10,7 +12,7 @@ const BattleRoyale = ({ tournament }) => {
 
   const handleUserClick = (e) => {
     console.log(`/profile/${e.target.dataset.username}`);
-    window.location.href = `/profile/${e.target.dataset.username}`;
+    navigate(`/profile/${e.target.dataset.username}`);
   };
 
   const handleTeamClick = (e) => {
@@ -38,7 +40,7 @@ const BattleRoyale = ({ tournament }) => {
         </div>
         <div className='players'>
           {players.map((player) => (
-            <div key={player.username} className='player' onClick={() => (window.location.href = `/profile/${player.username}`)}>
+            <div key={player.username} className='player' onClick={() => navigate(`/profile/${player.username}`)}>
               <span className='username'>
                 <span className={player.eliminated ? 'eliminated' : ''}>
                   {player.username}
