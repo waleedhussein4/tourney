@@ -1548,57 +1548,56 @@ const editStartDate = async (req, res) => {
   )
   const { UUID, startDate } = req.body;
 
-
   // get tournament
   const tournament = await Tournament.findById(UUID);
   if (!tournament) {
     return res.status(404).json({ error: 'No such tournament' });
   }
 
-
   // ensure user is host
   if (tournament.host != req.user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-
-  // ensure tournament hasnt started
+  // ensure tournament hasn't started
   if (tournament.hasStarted) {
     return res.status(400).json({ error: 'Tournament has already started' });
   }
 
+  const start = new Date(startDate);
+  const end = new Date(tournament.endDate);
+  const now = new Date();
 
   // ensure start date is in the future
-  if (startDate < new Date()) {
+  if (start < now) {
     return res.status(400).json({ error: 'Start date is in the past' });
   }
 
-
   // ensure start date is before end date
-  if (startDate > tournament.endDate) {
+  if (start > end) {
+    console.log(start, end);
     return res.status(400).json({ error: 'Start date is after end date' });
   }
 
-
-  // validate date format in javascript
-  if (isNaN(Date.parse(startDate))) {
+  // validate date format in JavaScript
+  if (isNaN(start.getTime())) {
     return res.status(400).json({ error: 'Invalid date format' });
   }
 
-
   try {
-    const tournament = await Tournament.findByIdAndUpdate
-      (UUID, { startDate }, { new: true });
-    if (!tournament) {
+    const updatedTournament = await Tournament.findByIdAndUpdate(
+      UUID,
+      { startDate: start },
+      { new: true }
+    );
+    if (!updatedTournament) {
       return res.status(404).json({ error: 'No such tournament' });
     }
-    res.status(200).json(tournament);
-  }
-  catch (error) {
+    res.status(200).json(updatedTournament);
+  } catch (error) {
     res.status(400).json({ error: error.message });
   }
-}
-
+};
 
 const editEndDate = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
@@ -1612,56 +1611,55 @@ const editEndDate = async (req, res) => {
   )
   const { UUID, endDate } = req.body;
 
-
   // get tournament
   const tournament = await Tournament.findById(UUID);
   if (!tournament) {
     return res.status(404).json({ error: 'No such tournament' });
   }
 
-
   // ensure user is host
   if (tournament.host != req.user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-
-  // ensure tournament hasnt started
+  // ensure tournament hasn't started
   if (tournament.hasStarted) {
     return res.status(400).json({ error: 'Tournament has already started' });
   }
 
+  const end = new Date(endDate);
+  const start = new Date(tournament.startDate);
+  const now = new Date();
 
   // ensure end date is in the future
-  if (endDate < new Date()) {
+  if (end < now) {
     return res.status(400).json({ error: 'End date is in the past' });
   }
 
-
   // ensure end date is after start date
-  if (endDate < tournament.startDate) {
+  if (end < start) {
     return res.status(400).json({ error: 'End date is before start date' });
   }
 
-
-  // validate date format in javascript
-  if (isNaN(Date.parse(endDate))) {
+  // validate date format in JavaScript
+  if (isNaN(end.getTime())) {
     return res.status(400).json({ error: 'Invalid date format' });
   }
 
-
   try {
-    const tournament = await Tournament.findByIdAndUpdate
-      (UUID, { endDate }, { new: true });
-    if (!tournament) {
+    const updatedTournament = await Tournament.findByIdAndUpdate(
+      UUID, 
+      { endDate: end }, 
+      { new: true }
+    );
+    if (!updatedTournament) {
       return res.status(404).json({ error: 'No such tournament' });
     }
-    res.status(200).json(tournament);
-  }
-  catch (error) {
+    res.status(200).json(updatedTournament);
+  } catch (error) {
     res.status(400).json({ error: error.message });
   }
-}
+};
 
 
 const getManageTournamentDisplayData = async (req, res) => {
