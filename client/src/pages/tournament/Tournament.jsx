@@ -520,7 +520,7 @@ function Tournament() {
                   <h3>Rules & Regulations</h3>
                   <div className="tournament-rules" dangerouslySetInnerHTML={{ __html: sanitizeHtml(tournament.rules) }}></div>
                 </div>}
-                {tournament.contactInfo && (
+                {tournament.contactInfo && (tournament.contactInfo.email || tournament.contactInfo.phone || (tournament.contactInfo.socialMedia && (tournament.contactInfo.socialMedia.discord || tournament.contactInfo.socialMedia.instagram || tournament.contactInfo.socialMedia.twitter || tournament.contactInfo.socialMedia.facebook))) && (
                   <div className="tournament-contact-info">
                     <h3>Contact Information</h3>
                     {tournament.contactInfo.email && (
@@ -547,6 +547,7 @@ function Tournament() {
                     )}
                   </div>
                 )}
+
                 <p className="tournament-category">
                   Category:{" "}
                   {tournament.category.replace(/(^\w|\s\w)/g, (m) =>
