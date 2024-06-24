@@ -16,13 +16,19 @@ import 'react-quill/dist/quill.snow.css';
 import sanitizeHtml from 'sanitize-html';
 
 function Manage() {
-  const [editTeamParticipantsPopupOpen, setEditTeamParticipantsPopupOpen] = useState(false)
-
-  const [editSoloBracketsParticipantsPopupOpen, setEditSoloBracketsParticipantsPopupOpen] = useState(false)
-  const [editTeamBracketsParticipantsPopupOpen, setEditTeamBracketsParticipantsPopupOpen] = useState(false)
+  const [showEditTitlePopup, setShowEditTitlePopup] = useState(false)
   const [showEditDescriptionModal, setShowEditDescriptionModal] = useState(false);
   const [showEditRulesModal, setShowEditRulesModal] = useState(false);
   const [showEditContactInfoModal, setShowEditContactInfoModal] = useState(false);
+  const [showEditStartDatePopup, setShowEditStartDatePopup] = useState(false);
+  const [showEditEndDatePopup, setShowEditEndDatePopup] = useState(false);
+  const [showPostUpdatePopup, setShowPostUpdatePopup] = useState(false);
+  const [showEditSoloParticipantsPopup, setShowEditSoloParticipantsPopup] = useState(false);
+
+  const [editTeamParticipantsPopupOpen, setEditTeamParticipantsPopupOpen] = useState(false)
+
+  const [showEditSoloBracketsParticipantsPopup, setShowEditSoloBracketsParticipantsPopup] = useState(false)
+  const [showEditTeamBracketsParticipantsPopup, setShowEditTeamBracketsParticipantsPopup] = useState(false)
 
   const { UUID } = useParams();
 
@@ -100,279 +106,233 @@ function Manage() {
     )
   }
 
-  const handleEditTitle = async () => {
-    const newTitle = document.getElementById('newTitle').value;
-    const popup = document.getElementById('editTitlePopup');
-    popup.remove();
+  const EditTitlePopup = () => {
+    const [error, setError] = useState('');
+    const [newTitle, setNewTitle] = useState('');
 
-    if (newTitle) {
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editTitle`
-      await fetch(URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          UUID: UUID,
-          title: newTitle,
-        }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            navigate(0)
-          }
+    const handleEditTitleInputChange = (e) => {
+      setNewTitle(e.target.value);
+
+      if (e.target.value.length < 3) {
+        setError('Title must be at least 3 characters long');
+      } else {
+        setError('');
+      }
+    }
+
+    const handleEditTitle = async () => {
+      if (newTitle) {
+        const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editTitle`
+        await fetch(URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            UUID: UUID,
+            title: newTitle,
+          }),
         })
+          .then((res) => {
+            if (res.ok) {
+              navigate(0)
+            }
+            else {
+              res.json().then(data => {
+                setError(data.error)
+              })
+            }
+          })
+      }
     }
+
+    return (
+      <div id="editTitlePopup" className='popup'>
+        <h2>Edit Title</h2>
+        <input type="text" id="newTitle" value={newTitle} onChange={handleEditTitleInputChange} />
+        <button onClick={handleEditTitle}>Confirm</button>
+        <button onClick={() => setShowEditTitlePopup(false)}>Cancel</button>
+        <span className="error">{error}</span>
+      </div>
+    )
   }
 
-  const handleEditTitleInputChange = () => {
-    const newTitle = document.getElementById('newTitle').value;
-    if (newTitle.length < 3) {
-      document.querySelector('#editTitlePopup .error').innerText = 'Title must be at least 3 characters long';
-      document.getElementById('newTitle').value = '';
-    } else {
-      document.querySelector('#editTitlePopup .error').innerText = '';
-    }
-  }
+  const EditStartDatePopup = () => {
+    const [error, setError] = useState('');
+    const [newStartDate, setNewStartDate] = useState('');
 
-  const showEditTitlePopup = () => {
-    let popup = document.createElement('div');
-    popup.id = 'editTitlePopup';
-    popup.classList.add('popup');
-
-    let h2 = document.createElement('h2');
-    h2.innerHTML = 'Edit Title';
-    let input = document.createElement('input');
-    input.type = 'text';
-    input.id = 'newTitle';
-    input.onchange = handleEditTitleInputChange
-    let button = document.createElement('button');
-    button.innerHTML = 'Confirm';
-    button.onclick = handleEditTitle;
-    let cancel = document.createElement('button');
-    cancel.innerHTML = 'Cancel';
-    cancel.onclick = () => popup.remove();
-    let error = document.createElement('span')
-    error.classList.add('error')
-
-    popup.appendChild(h2);
-    popup.appendChild(input);
-    popup.appendChild(button);
-    popup.appendChild(cancel);
-    popup.appendChild(error);
-
-    document.getElementById('Manage').appendChild(popup);
-  }
-
-  const handleEditStartDate = async () => {
-    const newStartDate = document.getElementById('newStartDate').value;
-    const popup = document.getElementById('editStartDatePopup');
-    popup.remove();
-
-    if (newStartDate) {
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editStartDate`
-      await fetch(URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          UUID: UUID,
-          startDate: newStartDate,
-        }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            navigate(0)
-          }
+    const handleEditStartDate = async () => {
+      if (newStartDate) {
+        const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editStartDate`
+        await fetch(URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            UUID: UUID,
+            startDate: newStartDate,
+          }),
         })
+          .then((res) => {
+            if (res.ok) {
+              navigate(0)
+            }
+            else {
+              res.json().then(data => {
+                setError(data.error)
+              })
+            }
+          })
+      }
     }
+
+    const handleEditStartDateInputChange = (e) => {
+      setNewStartDate(e.target.value);
+
+      // make sure the date is in the future
+      if (new Date(newStartDate) < new Date()) {
+        setError('Start date must be in the future');
+        setNewStartDate('');
+      }
+
+      // make sure the date is before the end date
+      if (new Date(newStartDate) > new Date(tournament.endDate)) {
+        setError('Start date must be before the end date');
+        setNewStartDate('');
+      }
+
+      // clear error message if date is valid
+      if (new Date(newStartDate) > new Date() && new Date(newStartDate) < new Date(tournament.endDate)) {
+        setError('');
+      }
+    }
+
+    return (
+      <div id="editStartDatePopup" className='popup'>
+        <h2>Edit Start Date</h2>
+        <input type="datetime-local" id="newStartDate" onChange={handleEditStartDateInputChange} />
+        <button onClick={handleEditStartDate}>Confirm</button>
+        <button onClick={() => setShowEditStartDatePopup(false)}>Cancel</button>
+        <span className="error">{error}</span>
+      </div>
+    )
   }
 
-  const handleEditStartDateInputChange = () => {
-    const newStartDate = document.getElementById('newStartDate').value;
-    // make sure the date is in the future
-    if (new Date(newStartDate) < new Date()) {
-      document.querySelector('#editStartDatePopup .error').innerText = 'Start date must be in the future';
-      document.getElementById('newStartDate').value = '';
-    }
+  const EditEndDatePopup = () => {
+    const [error, setError] = useState('');
+    const [newEndDate, setNewEndDate] = useState('');
 
-    // make sure the date is before the end date
-    if (new Date(newStartDate) > new Date(tournament.endDate)) {
-      document.querySelector('#editStartDatePopup .error').innerText = 'Start date must be before the end date';
-      document.getElementById('newStartDate').value = '';
-    }
-
-    // clear error message if date is valid
-    if (new Date(newStartDate) > new Date() && new Date(newStartDate) < new Date(tournament.endDate)) {
-      document.querySelector('#editStartDatePopup .error').innerText = '';
-    }
-  }
-
-
-  const showEditStartDatePopup = () => {
-    let popup = document.createElement('div');
-    popup.id = 'editStartDatePopup';
-    popup.classList.add('popup');
-
-    let h2 = document.createElement('h2');
-    h2.innerHTML = 'Edit Start Date';
-    let input = document.createElement('input');
-    input.type = 'datetime-local';
-    input.id = 'newStartDate';
-    input.onchange = handleEditStartDateInputChange
-    let button = document.createElement('button');
-    button.innerHTML = 'Confirm';
-    button.onclick = handleEditStartDate;
-    let cancel = document.createElement('button');
-    cancel.innerHTML = 'Cancel';
-    cancel.onclick = () => popup.remove();
-    let error = document.createElement('span')
-    error.classList.add('error')
-
-    popup.appendChild(h2);
-    popup.appendChild(input);
-    popup.appendChild(button);
-    popup.appendChild(cancel);
-    popup.appendChild(error);
-
-    document.getElementById('Manage').appendChild(popup);
-  }
-
-  const handleEditEndDate = async () => {
-    const newEndDate = document.getElementById('newEndDate').value;
-    const popup = document.getElementById('editEndDatePopup');
-    popup.remove();
-
-    if (newEndDate) {
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editEndDate`
-      await fetch(URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          UUID: UUID,
-          endDate: newEndDate,
-        }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            navigate(0)
-          }
+    const handleEditEndDate = async () => {
+      if (newEndDate) {
+        const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editEndDate`
+        await fetch(URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            UUID: UUID,
+            endDate: newEndDate,
+          }),
         })
+          .then((res) => {
+            if (res.ok) {
+              navigate(0)
+            }
+            else {
+              res.json().then(data => {
+                setError(data.error)
+              })
+            }
+          })
+      }
     }
+
+    const handleEditEndDateInputChange = (e) => {
+      setNewEndDate(e.target.value);
+
+      // make sure the date is in the future
+      if (new Date(newEndDate) < new Date()) {
+        setError('End date must be in the future');
+        setNewEndDate('');
+      }
+
+      // make sure the date is after the start date
+      if (new Date(newEndDate) < new Date(tournament.startDate)) {
+        setError('End date must be after the start date');
+        setNewEndDate('');
+      }
+
+      // clear error message if date is valid
+      if (new Date(newEndDate) > new Date() && new Date(newEndDate) > new Date(tournament.startDate)) {
+        setError('');
+      }
+    }
+
+    return (
+      <div id="editEndDatePopup" className="popup">
+        <h2>Edit End Date</h2>
+        <input type="datetime-local" id="newEndDate" onChange={handleEditEndDateInputChange} />
+        <button onClick={handleEditEndDate}>Confirm</button>
+        <button onClick={() => setShowEditEndDatePopup(false)}>Cancel</button>
+        <span className="error">{error}</span>
+      </div>
+    )
   }
 
-  const handleEditEndDateInputChange = () => {
-    const newEndDate = document.getElementById('newEndDate').value;
-    // make sure the date is in the future
-    if (new Date(newEndDate) < new Date()) {
-      document.querySelector('#editEndDatePopup .error').innerText = 'End date must be in the future';
-      document.getElementById('newEndDate').value = '';
-    }
+  const PostUpdatePopup = () => {
+    const [error, setError] = useState('');
+    const [newUpdate, setNewUpdate] = useState('');
 
-    // make sure the date is after the start date
-    if (new Date(newEndDate) < new Date(tournament.startDate)) {
-      document.querySelector('#editEndDatePopup .error').innerText = 'End date must be after the start date';
-      document.getElementById('newEndDate').value = '';
-    }
+    const handlePostUpdate = async () => {
+      if (newUpdate.length < 1) {
+        setError('You must enter a value.')
+        return
+      }
 
-    // clear error message if date is valid
-    if (new Date(newEndDate) > new Date() && new Date(newEndDate) > new Date(tournament.startDate)) {
-      document.querySelector('#editEndDatePopup .error').innerText = '';
-    }
-  }
-
-  const showEditEndDatePopup = () => {
-    let popup = document.createElement('div');
-    popup.id = 'editEndDatePopup';
-    popup.classList.add('popup');
-
-    let h2 = document.createElement('h2');
-    h2.innerHTML = 'Edit End Date';
-    let input = document.createElement('input');
-    input.type = 'datetime-local';
-    input.id = 'newEndDate';
-    input.onchange = handleEditEndDateInputChange
-    let button = document.createElement('button');
-    button.innerHTML = 'Confirm';
-    button.onclick = handleEditEndDate;
-    let cancel = document.createElement('button');
-    cancel.innerHTML = 'Cancel';
-    cancel.onclick = () => popup.remove();
-    let error = document.createElement('span')
-    error.classList.add('error')
-
-    popup.appendChild(h2);
-    popup.appendChild(input);
-    popup.appendChild(button);
-    popup.appendChild(cancel);
-    popup.appendChild(error);
-
-    document.getElementById('Manage').appendChild(popup);
-  }
-
-  const showPostUpdatePopup = () => {
-    let popup = document.createElement('div');
-    popup.id = 'postUpdatePopup';
-    popup.classList.add('popup');
-
-    let h2 = document.createElement('h2');
-    h2.innerHTML = 'Post Update';
-    let input = document.createElement('input');
-    input.type = 'text';
-    input.id = 'newUpdate';
-    let button = document.createElement('button');
-    button.innerHTML = 'Confirm';
-    button.onclick = handlePostUpdate;
-    let cancel = document.createElement('button');
-    cancel.innerHTML = 'Cancel';
-    cancel.onclick = () => popup.remove();
-    let error = document.createElement('span')
-    error.classList.add('error')
-
-    popup.appendChild(h2);
-    popup.appendChild(input);
-    popup.appendChild(button);
-    popup.appendChild(cancel);
-    popup.appendChild(error);
-
-    document.getElementById('Manage').appendChild(popup);
-  }
-
-  const handlePostUpdate = async () => {
-    const newUpdate = document.getElementById('newUpdate').value;
-    if (newUpdate.length < 1) {
-      document.querySelector('#postUpdatePopup .error').innerText = 'You must enter an update';
-      return
-    }
-
-    const popup = document.getElementById('postUpdatePopup');
-    popup.remove();
-
-    if (newUpdate) {
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/postUpdate`
-      await fetch(URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          UUID: UUID,
-          update: newUpdate,
-        }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            navigate(0)
-          }
+      if (newUpdate) {
+        const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/postUpdate`
+        await fetch(URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            UUID: UUID,
+            update: newUpdate,
+          }),
         })
+          .then((res) => {
+            if (res.ok) {
+              navigate(0)
+            }
+            else {
+              res.json().then(data => {
+                setError(data.error)
+              })
+            }
+          })
+      }
     }
+
+    const handleEditUpdateInput = (e) => {
+      setNewUpdate(e.target.value);
+    }
+
+    return (
+      <div id="postUpdatePopup" className="popup">
+        <h2>Post Update</h2>
+        <input type="text" id="newUpdate" onChange={handleEditUpdateInput} />
+        <button onClick={handlePostUpdate}>Confirm</button>
+        <button onClick={() => setShowPostUpdatePopup(false)}>Cancel</button>
+        <span className="error">{error}</span>
+      </div>
+    )
   }
 
   function showButton(event) {
@@ -514,98 +474,65 @@ function Manage() {
     )
   }
 
-  const showEditSoloParticipantsPopup = () => {
-    let popup = document.createElement('div');
-    popup.id = 'editParticipantsPopup';
-    popup.classList.add('popup');
+  const EditSoloParticipantsPopup = () => {
+    const [error, setError] = useState('');
 
-    let h2 = document.createElement('h2');
-    h2.innerHTML = 'Edit Participants';
-
-    const participantsContainer = document.createElement('div');
-    participantsContainer.classList.add('participants-container');
-
-    tournament.enrolledUsers.forEach(user => {
-      const participantDiv = document.createElement('div');
-      participantDiv.classList.add('participant');
-
-      const nameDiv = document.createElement('div');
-      nameDiv.classList.add('participant-name');
-      nameDiv.textContent = user.username;
-
-      const infoDiv = document.createElement('div');
-      infoDiv.classList.add('participant-info');
-      infoDiv.textContent = `Score: ${user.score}, Eliminated: ${user.eliminated ? 'Yes' : 'No'}`;
-
-      const editButton = document.createElement('button');
-      editButton.textContent = 'Edit';
-      editButton.classList.add('edit-button');
-      editButton.onclick = () => editSolo(user);
-
-
-      participantDiv.appendChild(nameDiv);
-      participantDiv.appendChild(infoDiv);
-      participantDiv.appendChild(editButton);
-
-      participantsContainer.appendChild(participantDiv);
-    });
-
-    const confirmButton = document.createElement('button');
-    confirmButton.textContent = 'Confirm';
-    confirmButton.classList.add('confirm-button');
-    confirmButton.onclick = () => handleEditSoloParticipants();
-
-    const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
-    cancelButton.classList.add('cancel-button');
-    cancelButton.onclick = () => popup.remove();
-
-    popup.appendChild(h2);
-    popup.appendChild(participantsContainer);
-    popup.appendChild(confirmButton);
-    popup.appendChild(cancelButton);
-
-    document.getElementById('Manage').appendChild(popup);
-  }
-
-  const handleEditSoloParticipants = async () => {
-    const popup = document.getElementById('editParticipantsPopup');
-    popup.remove();
-
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editSoloParticipants`
-    await fetch(URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        UUID: UUID,
-        participants: tournament.enrolledUsers,
-      }),
-    })
-      .then((res) => {
-        if (res.ok) {
-          navigate(0)
-        }
+    const handleEditSoloParticipants = async () => {
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editSoloParticipants`
+      await fetch(URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          UUID: UUID,
+          participants: tournament.enrolledUsers,
+        }),
       })
-  }
+        .then((res) => {
+          if (res.ok) {
+            navigate(0)
+          }
+          else {
+            res.json().then(data => {
+              setError(data.error)
+            })
+          }
+        })
+    }
 
-  function editSolo(user) {
-    // Here you can implement your logic to edit the user's score and elimination status
-    const newScore = prompt(`Enter new score for ${user.username}:`, user.score);
-    const newEliminated = confirm(`Is ${user.username} eliminated?`);
+    function editSolo(user) {
+      const newScore = prompt(`Enter new score for ${user.username}:`, user.score);
+      const newEliminated = confirm(`Is ${user.username} eliminated?`);
 
-    // Update user object with new values
-    user.score = parseInt(newScore);
-    user.eliminated = newEliminated;
+      user.score = parseInt(newScore);
+      user.eliminated = newEliminated;
 
-    // remove the popup
-    document.getElementById('editParticipantsPopup').remove();
+      setTournament({ ...tournament, enrolledUsers: tournament.enrolledUsers });
+    }
 
-    // Re-render users with updated data
-    showEditSoloParticipantsPopup();
-  }
+    return (
+      <div id='editParticipantsPopup' className='popup'>
+        <h2>Edit Participants</h2>
+        <div className='participants-container'>
+          {tournament.enrolledUsers.map((participant, participantIndex) => (
+            <div className='participant' key={participant.username}>
+              <div className='participant-name'>{participant.username}</div>
+              <div className='participant-info'>
+                <span>Score:</span><span>{participant.score}</span>
+                <span>Eliminated:</span><span>{participant.eliminated ? 'Yes' : 'No'}</span>
+              </div>
+              <button className='edit-button' onClick={() => editSolo(participant)}>Edit</button>
+            </div>
+          ))}
+        </div>
+        <button className='confirm-button' onClick={handleEditSoloParticipants}>Confirm</button>
+        <button className='cancel-button' onClick={() => setShowEditSoloParticipantsPopup(false)}>Cancel</button>
+        <span className='error'>{error}</span>
+      </div>
+    );
+  };
 
   const EditTeamParticipantsPopup = () => {
     const handleConfirm = async () => {
@@ -717,6 +644,157 @@ function Manage() {
         </div>
         <button className='confirm-button' onClick={handleConfirm}>Confirm</button>
         <button className='cancel-button' onClick={() => setEditTeamParticipantsPopupOpen(false)}>Cancel</button>
+      </div>
+    );
+  };
+
+  const EditSoloBracketsParticipantsPopup = () => {
+    const handleConfirm = async () => {
+      const updatedParticipants = tournament.enrolledUsers.map((participant, participantIndex) => {
+        const scoreInput = document.getElementById(`participant-score-${participantIndex}`);
+
+        return {
+          ...participant,
+          score: parseInt(scoreInput.value),
+        };
+      });
+
+      // Update the tournament state
+      setTournament({ ...tournament, enrolledUsers: updatedParticipants });
+
+      // Close the popup
+      setShowEditSoloBracketsParticipantsPopup(false);
+
+      // Send the updated data to the backend
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editSoloParticipants`;
+      await fetch(URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ UUID: UUID, participants: updatedParticipants }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            navigate(0);
+          }
+        });
+    };
+
+    return (
+      <div id='editParticipantsPopup' className='popup'>
+        <h2>Edit Participants</h2>
+        <div className='participants'>
+          {tournament.enrolledUsers.map((participant, participantIndex) => (
+            <div className='participant' key={participant.username}>
+              <span>{participant.username}</span>
+              <div>
+                <span>Score:</span>
+                <input
+                  type="number"
+                  id={`participant-score-${participantIndex}`}
+                  defaultValue={participant.score}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        <button className='confirm-button' onClick={handleConfirm}>Confirm</button>
+        <button className='cancel-button' onClick={() => setShowEditSoloBracketsParticipantsPopup(false)}>Cancel</button>
+      </div>
+    );
+  };
+
+  const EditTeamBracketsParticipantsPopup = () => {
+    const handleConfirm = async () => {
+      const updatedTeams = tournament.enrolledTeams.map((team, teamIndex) => {
+        const teamScoreInput = document.getElementById(`team-score-${teamIndex}`);
+
+        const updatedTeam = {
+          ...team,
+          score: parseInt(teamScoreInput.value),
+          players: team.players.map((player, playerIndex) => {
+            const playerScoreInput = document.getElementById(`player-score-${teamIndex}-${playerIndex}`);
+
+            return {
+              ...player,
+              score: parseInt(playerScoreInput.value),
+            };
+          })
+        };
+
+        return updatedTeam;
+      });
+
+      // Update the tournament state
+      setTournament({ ...tournament, enrolledTeams: updatedTeams });
+
+      // Close the popup
+      setShowEditTeamBracketsParticipantsPopup(false);
+
+      // Send the updated data to the backend
+      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editTeamParticipants`;
+      await fetch(URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ UUID: UUID, participants: updatedTeams }),
+      })
+        .then((res) => {
+          if (res.ok) {
+            navigate(0);
+          }
+        });
+    };
+
+    return (
+      <div id='editParticipantsPopup' className='popup'>
+        <h2>Edit Participants</h2>
+        <div className='teams-container'>
+          {tournament.enrolledTeams.map((team, teamIndex) => (
+            <div className="team" key={team.teamName}>
+              <Accordion className='team'>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  {team.teamName}
+                </AccordionSummary>
+                <AccordionDetails className='team-details-accordian'>
+                  <div className="team-info">
+                    <div className='team-info-item'>
+                      <span>Score:</span>
+                      <input
+                        type="number"
+                        id={`team-score-${teamIndex}`}
+                        defaultValue={team
+                          .score}
+                      />
+                    </div>
+                  </div>
+                  <Accordion className='team-members'>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      Team Members
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {team.players.map((member, playerIndex) => (
+                        <div key={playerIndex} className='participant'>
+                          <span>{member.username}</span>
+                          <div>
+                            <span>Score:</span>
+                            <input
+                              type="number"
+                              id={`player-score-${teamIndex}-${playerIndex}`}
+                              defaultValue={member.score}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </AccordionDetails>
+                  </Accordion>
+                </AccordionDetails>
+              </Accordion>
+            </div>
+          ))}
+        </div>
+        <button className='confirm-button' onClick={handleConfirm}>Confirm</button>
+        <button className='cancel-button' onClick={() => setShowEditTeamBracketsParticipantsPopup(false)}>Cancel</button>
       </div>
     );
   };
@@ -1035,157 +1113,6 @@ function Manage() {
     document.getElementById('Manage').appendChild(popup);
   }
 
-  const EditSoloBracketsParticipantsPopup = () => {
-    const handleConfirm = async () => {
-      const updatedParticipants = tournament.enrolledUsers.map((participant, participantIndex) => {
-        const scoreInput = document.getElementById(`participant-score-${participantIndex}`);
-
-        return {
-          ...participant,
-          score: parseInt(scoreInput.value),
-        };
-      });
-
-      // Update the tournament state
-      setTournament({ ...tournament, enrolledUsers: updatedParticipants });
-
-      // Close the popup
-      setEditSoloBracketsParticipantsPopupOpen(false);
-
-      // Send the updated data to the backend
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editSoloParticipants`;
-      await fetch(URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ UUID: UUID, participants: updatedParticipants }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            navigate(0);
-          }
-        });
-    };
-
-    return (
-      <div id='editParticipantsPopup' className='popup'>
-        <h2>Edit Participants</h2>
-        <div className='participants'>
-          {tournament.enrolledUsers.map((participant, participantIndex) => (
-            <div className='participant' key={participant.username}>
-              <span>{participant.username}</span>
-              <div>
-                <span>Score:</span>
-                <input
-                  type="number"
-                  id={`participant-score-${participantIndex}`}
-                  defaultValue={participant.score}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-        <button className='confirm-button' onClick={handleConfirm}>Confirm</button>
-        <button className='cancel-button' onClick={() => setEditSoloBracketsParticipantsPopupOpen(false)}>Cancel</button>
-      </div>
-    );
-  };
-
-  const EditTeamBracketsParticipantsPopup = () => {
-    const handleConfirm = async () => {
-      const updatedTeams = tournament.enrolledTeams.map((team, teamIndex) => {
-        const teamScoreInput = document.getElementById(`team-score-${teamIndex}`);
-
-        const updatedTeam = {
-          ...team,
-          score: parseInt(teamScoreInput.value),
-          players: team.players.map((player, playerIndex) => {
-            const playerScoreInput = document.getElementById(`player-score-${teamIndex}-${playerIndex}`);
-
-            return {
-              ...player,
-              score: parseInt(playerScoreInput.value),
-            };
-          })
-        };
-
-        return updatedTeam;
-      });
-
-      // Update the tournament state
-      setTournament({ ...tournament, enrolledTeams: updatedTeams });
-
-      // Close the popup
-      setEditTeamBracketsParticipantsPopupOpen(false);
-
-      // Send the updated data to the backend
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editTeamParticipants`;
-      await fetch(URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ UUID: UUID, participants: updatedTeams }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            navigate(0);
-          }
-        });
-    };
-
-    return (
-      <div id='editParticipantsPopup' className='popup'>
-        <h2>Edit Participants</h2>
-        <div className='teams-container'>
-          {tournament.enrolledTeams.map((team, teamIndex) => (
-            <div className="team" key={team.teamName}>
-              <Accordion className='team'>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  {team.teamName}
-                </AccordionSummary>
-                <AccordionDetails className='team-details-accordian'>
-                  <div className="team-info">
-                    <div className='team-info-item'>
-                      <span>Score:</span>
-                      <input
-                        type="number"
-                        id={`team-score-${teamIndex}`}
-                        defaultValue={team
-                          .score}
-                      />
-                    </div>
-                  </div>
-                  <Accordion className='team-members'>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      Team Members
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      {team.players.map((member, playerIndex) => (
-                        <div key={playerIndex} className='participant'>
-                          <span>{member.username}</span>
-                          <div>
-                            <span>Score:</span>
-                            <input
-                              type="number"
-                              id={`player-score-${teamIndex}-${playerIndex}`}
-                              defaultValue={member.score}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </AccordionDetails>
-                  </Accordion>
-                </AccordionDetails>
-              </Accordion>
-            </div>
-          ))}
-        </div>
-        <button className='confirm-button' onClick={handleConfirm}>Confirm</button>
-        <button className='cancel-button' onClick={() => setEditTeamBracketsParticipantsPopupOpen(false)}>Cancel</button>
-      </div>
-    );
-  };
-
   const EditDescriptionModal = () => {
     const [description, setDescription] = useState(tournament.description);
 
@@ -1335,12 +1262,20 @@ function Manage() {
 
   return (
     <div id="Manage">
-      {editTeamParticipantsPopupOpen && <EditTeamParticipantsPopup />}
-      {editSoloBracketsParticipantsPopupOpen && <EditSoloBracketsParticipantsPopup />}
-      {editTeamBracketsParticipantsPopupOpen && <EditTeamBracketsParticipantsPopup />}
+      {showEditTitlePopup && <EditTitlePopup />}
       {showEditDescriptionModal && <EditDescriptionModal />}
       {showEditRulesModal && <EditRulesModal />}
       {showEditContactInfoModal && <EditContactInfoModal />}
+      {showEditStartDatePopup && <EditStartDatePopup />}
+      {showEditEndDatePopup && <EditEndDatePopup />}
+      {showPostUpdatePopup && <PostUpdatePopup />}
+      {showEditSoloParticipantsPopup && <EditSoloParticipantsPopup />}
+
+      {editTeamParticipantsPopupOpen && <EditTeamParticipantsPopup />}
+      {showEditSoloBracketsParticipantsPopup && <EditSoloBracketsParticipantsPopup />}
+      {showEditTeamBracketsParticipantsPopup && <EditTeamBracketsParticipantsPopup />}
+
+      { }
       <Nav />
       <div id="container">
         {isLoading
@@ -1355,7 +1290,7 @@ function Manage() {
                 <div className="attribute editable title">
                   <h3>Title</h3>
                   <div className='content'>{tournament.title}</div>
-                  <EditButton onclick={showEditTitlePopup} />
+                  <EditButton onclick={() => setShowEditTitlePopup(true)} />
                 </div>
                 <div className="attribute editable description">
                   <h3>Description</h3>
@@ -1387,12 +1322,12 @@ function Manage() {
                 <div className="attribute editable startDate">
                   <h3>Start Date</h3>
                   <div className='content'>{formatDate(tournament.startDate)}</div>
-                  <EditButton onclick={showEditStartDatePopup} />
+                  <EditButton onclick={() => setShowEditStartDatePopup(true)} />
                 </div>
                 <div className="attribute editable endDate">
                   <h3>End Date</h3>
                   <div className='content'>{formatDate(tournament.endDate)}</div>
-                  <EditButton onclick={showEditEndDatePopup} />
+                  <EditButton onclick={() => setShowEditEndDatePopup(true)} />
                 </div>
                 <div className="attribute earnings">
                   <h3>Earnings</h3>
@@ -1413,7 +1348,7 @@ function Manage() {
                       {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length === 0 && <span>No participants yet</span>}
                       {/* <SoloParticipants /> */}
                     </div>
-                    <EditButton canBeEditedAfterStart={true} onclick={() => { tournament.teamSize == 1 ? showEditSoloParticipantsPopup() : setEditTeamParticipantsPopupOpen(true) }} />
+                    <EditButton canBeEditedAfterStart={true} onclick={() => { tournament.teamSize == 1 ? setShowEditSoloParticipantsPopup(true) : setEditTeamParticipantsPopupOpen(true) }} />
                   </div>)}
                 {tournamentType === 'brackets' && (
                   <div className="attribute editable participants">
@@ -1424,7 +1359,7 @@ function Manage() {
                       {tournament.enrolledTeams.length === 0 && tournament.enrolledUsers.length === 0 && <span>No participants yet</span>}
                       {/* <SoloParticipants /> */}
                     </div>
-                    <EditButton canBeEditedAfterStart={true} onclick={() => { tournament.teamSize == 1 ? setEditSoloBracketsParticipantsPopupOpen(true) : setEditTeamBracketsParticipantsPopupOpen(true) }} />
+                    <EditButton canBeEditedAfterStart={true} onclick={() => { tournament.teamSize == 1 ? setShowEditSoloBracketsParticipantsPopup(true) : setShowEditTeamBracketsParticipantsPopup(true) }} />
                   </div>)}
                 <div className="attribute accessibility">
                   <h3>Accessibility</h3>
@@ -1444,7 +1379,7 @@ function Manage() {
                     <div className='content updates-wrapper'>
                       <Updates />
                     </div>
-                    <button className='postUpdateButton' onClick={showPostUpdatePopup}>Post Update</button>
+                    <button className='postUpdateButton' onClick={() => setShowPostUpdatePopup(true)}>Post Update</button>
                   </div>
                   <div className="pencil-placeholder"></div>
                 </div>
