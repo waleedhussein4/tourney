@@ -1,8 +1,58 @@
 # Tourney
 
+## Overview:
+
 Version: 1.0
 
+[abstract here]
+
 ## Table of Contents
+
+1. [Introduction](#introduction)
+- Project Purpose: Describe why the project exists and what problem it solves.
+- Scope: Define the boundaries of the project, what it will and  will not do.
+- Audience: Identify who the intended users and readers of the documentation are.
+
+2. [Requirements](#requirements)
+- [User stories](#user-stories)
+- Functional Requirements: Detailed description of functionalities the software must provide.
+- Non-functional Requirements: Performance, security, usability, and other quality attributes.
+- System Requirements: Hardware and software requirements for running the software.
+
+3. [Architecture and Design](#architecture-and-design)
+- System Architecture: High-level description of the system's architecture, including diagrams (e.g., UML diagrams).
+- Design Decisions: Explain major design choices and trade-offs.
+- Component Descriptions: Detailed information on each major component or module.
+   
+4. [Implementation](#implementation)
+- Code Structure: Overview of the codebase, including directory structure and naming conventions.
+- Development Environment: Instructions for setting up the development environment.
+- Dependencies: List and describe external libraries and frameworks used.
+
+5. [Usage](#usage)
+- Installation Guide: Step-by-step instructions on how to install the software.
+- Configuration: Information on configuring the software, including configuration files and environment variables.
+- User Guide: Detailed instructions on how to use the software, with examples and screenshots.
+
+6. [Testing](#testing)
+- Testing Strategy: Overview of the testing approach and types of tests used (unit tests, integration tests, etc.).
+- Test Cases: Detailed test cases and expected outcomes.
+- Running Tests: Instructions on how to run the tests and interpret the results.
+
+7. [Maintenance](#maintenance)
+- Troubleshooting: Common issues and their solutions.
+- Updating: How to update the software, including migration steps if necessary.
+- Backup and Recovery: Procedures for backing up data and recovering from failures.
+
+8. [Contributing](#contributing)
+- Contribution Guidelines: Rules and guidelines for contributing to the project.
+- Code of Conduct: Behavioral guidelines for contributors.
+- Development Workflow: Explanation of the development process, including branching strategy, code reviews, and continuous integration.
+
+9.  [Appendices](#appendices)
+- Glossary: Definitions of terms and acronyms used in the documentation.
+- References: Links to external resources, documentation, and tools used in the project.
+- License: Information about the software's license and any third-party licenses.
 
 ## Introduction
 
