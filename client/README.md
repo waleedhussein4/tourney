@@ -2,6 +2,8 @@
 
 Version: 1.0
 
+Visit Tourney: https://tourney-frontend-omega.vercel.app/
+
 Backend API repo: https://github.com/waleedhussein4/tourney-backend
 
 ## Table of Contents
