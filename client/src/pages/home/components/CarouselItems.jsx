@@ -25,7 +25,7 @@ function CarouselItem(data) {
             <span className="fas fa-plus-circle"></span>
           </div>
           <h5 className="carousel-item__details--title">{data.title}</h5>
-          <h6 className="carousel-item__details--subtitle">{data.description}</h6>
+          {/* <h6 className="carousel-item__details--subtitle">{data.description}</h6> */}
         </div>
       </div>
     </a>
