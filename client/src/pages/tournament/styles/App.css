@@ -274,7 +274,7 @@
   display: flex;
   flex-direction: column;
   width: 30%;
-  padding: 1em;
+  padding: 0.5em;
   box-shadow: 1px 0px 2px 0px rgb(255, 255, 255, 0.3);
   font-size: 1.5rem;
 }
@@ -296,7 +296,7 @@
   font-size: 1em;
   color: #666;
   line-height: 1.5;
-  border: 1px solid white;
+  /* border: 1px solid white; */
 }
 
 #Tournament .tournament-specs {
@@ -306,6 +306,7 @@
   gap: 2em;
   color: white;
   font-size: 0.7em;
+  overflow: auto;
 }
 
 #Tournament .tournament-status {

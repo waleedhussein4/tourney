@@ -850,7 +850,7 @@ function Manage() {
     let matches = tournament.matches
     for (let i = 0; i < totalMatches; i++) {
       if (matches[i] === undefined) {
-        matches[i] = 'n/a'
+        matches[i] = null;
       }
     }
 
@@ -920,7 +920,7 @@ function Manage() {
     return (
       <div id='matchesEditor' className='attribute'>
         <h3>Match Manager</h3>
-        {!teamsEnrolledYet && !tournament.hasStarted ?
+        {!teamsEnrolledYet || !tournament.hasStarted ?
           <span>After the tournament capacity is full, you will be able to start the tournament and access the match editor.</span>
           :
           <>
@@ -929,7 +929,7 @@ function Manage() {
                 editedMatches.map((match, i) =>
                   <div className='match' key={i}>
                     <span className="matchNumber">Match {i}</span>
-                    <span className="matchWinner">{match}</span>
+                    <span className="matchWinner">{match || "N/A"}</span>
                     <button onClick={() => handleEdit(i)}>Edit</button>
                   </div>
                 )
