@@ -572,12 +572,35 @@ function Tournament() {
                 <p className="tournament-entryFee">
                   Entry Fee: ${tournament.entryFee}
                 </p>
-                {/* <div className="tournament-earnings">
-                  Earnings:
-                  <p>1st: ${tournament.earnings[1]}</p>
-                  <p>2nd: ${tournament.earnings[2]}</p>
-                  <p>3rd: ${tournament.earnings[3]}</p>
-                </div> */}
+                {tournament.earnings !== 0 && (
+                  <div className="tournament-earnings">
+                    <h3>Earnings</h3>
+
+                    {tournament.type === "brackets" && (
+                      <span>{tournament.earnings} credits</span>
+                    )}
+
+                    {tournament.type === "battle royale" && (
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Rank</th>
+                            <th>Credits</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {tournament.earnings.map((entry, index) => (
+                            <tr key={index}>
+                              <td>{entry.rank}</td>
+                              <td>{entry.prize}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                )}
+
                 <p className="tournament-accessibility">
                   {tournament.accessibility != "open"
                     ? tournament.accessibility.replace(/(^\w|\s\w)/g, (m) =>
@@ -609,6 +632,7 @@ function Tournament() {
                     <span style={{ "fontWeight": "bold" }}>{formatDate(update.date)}</span> {update.content}
                   </p>
                 ))}
+                {!tournament.updates.length && <p>The host has not yet posted any updates</p>}
               </div>
             </div>
           </>
