@@ -41,4 +41,24 @@ const getAuth = async (req, res, next) => {
   }
 }
 
-module.exports = { auth, getAuth };
+const admin = async (req, res, next) => {
+  try {
+    const token = req.cookies.token
+
+    if (!token) return res.status(401).json({ error: "Request is not authorized" })
+
+    const { _id } = jwt.verify(token, process.env.SECRET)
+
+    const user = await User.findOne({ _id }).select('role')
+    if (user.role !== 'admin') return res.status(401).json({ error: "Request is not authorized" })
+
+    req.user = _id
+    next()
+
+  } catch (error) {
+    console.log(error)
+    res.status(401).json({ error: 'Request is not authorized' })
+  }
+}
+
+module.exports = { auth, getAuth, admin };
