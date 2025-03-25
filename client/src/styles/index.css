@@ -37,3 +37,11 @@ body {
 #root {
   height: 100%;
 }
+
+ul {
+  list-style-position: inside;
+}
+
+ol {
+  list-style-position: inside;
+}

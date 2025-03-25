@@ -8,6 +8,7 @@ import SoloBrackets from "./components/SoloBrackets";
 import TeamBrackets from "./components/TeamBrackets";
 import BattleRoyale from "./components/BattleRoyale";
 import { useNavigate, useParams } from "react-router-dom";
+import sanitizeHtml from 'sanitize-html';
 
 const tournamentURL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament`;
 const teamsURL = `${import.meta.env.VITE_BACKEND_URL}/api/team/user/teamsList`;
@@ -369,7 +370,7 @@ function Tournament() {
         <div className="notEnoughCreditsPopup-details">
           {tournament.teamSize == 1 ? "You do not have enough credits to pay for the entry fee." : "Each member of your team must have enough credits to pay for the entry fee."}
         </div>
-        <button onClick={() => {navigate('/credits')}} className="btn btn-primary notEnoughCreditsPopup-confirm">Buy Credits</button>
+        <button onClick={() => { navigate('/credits') }} className="btn btn-primary notEnoughCreditsPopup-confirm">Buy Credits</button>
       </div>
     );
   }
@@ -433,7 +434,7 @@ function Tournament() {
       selectedTeam = form.querySelector('.selectedTeam')
       if (!selectedTeam) {
         document.querySelector(".applicationPopup-error").innerHTML =
-        "You must choose a team.";
+          "You must choose a team.";
       }
       else {
         selectedTeam = selectedTeam.innerText
@@ -514,9 +515,39 @@ function Tournament() {
             <div className="tournament-info">
               <div className="tournament-specs">
                 <h1 className="tournament-title">{tournament.title}</h1>
-                <p className="tournament-description">
-                  {tournament.description}
-                </p>
+                <div className="tournament-description" dangerouslySetInnerHTML={{ __html: sanitizeHtml(tournament.description) }}></div>
+                {tournament.rules && <div className="tournament-rules-wrapper">
+                  <h3>Rules & Regulations</h3>
+                  <div className="tournament-rules" dangerouslySetInnerHTML={{ __html: sanitizeHtml(tournament.rules) }}></div>
+                </div>}
+                {tournament.contactInfo && (tournament.contactInfo.email || tournament.contactInfo.phone || (tournament.contactInfo.socialMedia && (tournament.contactInfo.socialMedia.discord || tournament.contactInfo.socialMedia.instagram || tournament.contactInfo.socialMedia.twitter || tournament.contactInfo.socialMedia.facebook))) && (
+                  <div className="tournament-contact-info">
+                    <h3>Contact Information</h3>
+                    {tournament.contactInfo.email && (
+                      <p>Email: <a href={`mailto:${tournament.contactInfo.email}`}>{tournament.contactInfo.email}</a></p>
+                    )}
+                    {tournament.contactInfo.phone && (
+                      <p>Phone: <a href={`tel:${tournament.contactInfo.phone}`}>{tournament.contactInfo.phone}</a></p>
+                    )}
+                    {tournament.contactInfo.socialMedia && (
+                      <div className="social-media">
+                        {tournament.contactInfo.socialMedia.discord && (
+                          <p>Discord: {tournament.contactInfo.socialMedia.discord}</p>
+                        )}
+                        {tournament.contactInfo.socialMedia.instagram && (
+                          <p>Instagram: <a href={`https://instagram.com/${tournament.contactInfo.socialMedia.instagram}`} target="_blank" rel="noopener noreferrer">{tournament.contactInfo.socialMedia.instagram}</a></p>
+                        )}
+                        {tournament.contactInfo.socialMedia.twitter && (
+                          <p>Twitter: <a href={`https://twitter.com/${tournament.contactInfo.socialMedia.twitter}`} target="_blank" rel="noopener noreferrer">{tournament.contactInfo.socialMedia.twitter}</a></p>
+                        )}
+                        {tournament.contactInfo.socialMedia.facebook && (
+                          <p>Facebook: <a href={`https://facebook.com/${tournament.contactInfo.socialMedia.facebook}`} target="_blank" rel="noopener noreferrer">{tournament.contactInfo.socialMedia.facebook}</a></p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <p className="tournament-category">
                   Category:{" "}
                   {tournament.category.replace(/(^\w|\s\w)/g, (m) =>
@@ -541,12 +572,35 @@ function Tournament() {
                 <p className="tournament-entryFee">
                   Entry Fee: ${tournament.entryFee}
                 </p>
-                {/* <div className="tournament-earnings">
-                  Earnings:
-                  <p>1st: ${tournament.earnings[1]}</p>
-                  <p>2nd: ${tournament.earnings[2]}</p>
-                  <p>3rd: ${tournament.earnings[3]}</p>
-                </div> */}
+                {tournament.earnings !== 0 && (
+                  <div className="tournament-earnings">
+                    <h3>Earnings</h3>
+
+                    {tournament.type === "brackets" && (
+                      <span>{tournament.earnings} credits</span>
+                    )}
+
+                    {tournament.type === "battle royale" && (
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Rank</th>
+                            <th>Credits</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {tournament.earnings.map((entry, index) => (
+                            <tr key={index}>
+                              <td>{entry.rank}</td>
+                              <td>{entry.prize}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                )}
+
                 <p className="tournament-accessibility">
                   {tournament.accessibility != "open"
                     ? tournament.accessibility.replace(/(^\w|\s\w)/g, (m) =>
@@ -575,9 +629,10 @@ function Tournament() {
                 <h3>Updates</h3>
                 {tournament.updates.map((update) => (
                   <p key={update.date}>
-                    [{new Date(update.date).toDateString()}] {update.content}
+                    <span style={{ "fontWeight": "bold" }}>{formatDate(update.date)}</span> {update.content}
                   </p>
                 ))}
+                {!tournament.updates.length && <p>The host has not yet posted any updates</p>}
               </div>
             </div>
           </>

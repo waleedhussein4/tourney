@@ -16,6 +16,7 @@ export const authReducer = (state, action) => {
 export const AuthContextProvider = (props) => {
   const [loggedIn, setLoggedIn] = useState(undefined);
   const [isHost, setIsHost] = useState(undefined);
+  const [isAdmin, setIsAdmin] = useState(undefined);
 
   async function getLoggedIn() {
     await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/loggedIn`, {
@@ -39,12 +40,24 @@ export const AuthContextProvider = (props) => {
       })
   }
 
+  async function getIsAdmin() {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/isAdmin`, {
+      credentials: 'include'
+    })
+      .then(res => res.json())
+      .then(data => {
+        setIsAdmin(data)
+        return data
+      })
+  }
+
   useEffect(() => {
     getLoggedIn()
     getIsHost()
+    getIsAdmin()
   }, [])
 
-  return <AuthContext.Provider value={{ loggedIn, getLoggedIn, isHost }}>
+  return <AuthContext.Provider value={{ loggedIn, getLoggedIn, isHost, isAdmin }}>
     {props.children}
   </AuthContext.Provider>
 }

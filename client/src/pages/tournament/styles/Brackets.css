@@ -6,6 +6,22 @@
   overflow: auto;
 }
 
+.leaderboard {
+  width:300px;
+  margin-right: 20px;
+  border: 2px solid white;
+  padding: 1em;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.leaderboard-entry {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .brackets-container .player:hover:not(.tba) {
   cursor: pointer;
 }
@@ -84,16 +100,36 @@
   font-size: 22px;
 }
 
-.team-user-list-popup ul {
-  list-style: none;
-  padding: 0;
-  margin-top: 10px;
+.team-user-list-popup .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid black;
+  padding-bottom: 6px;
+  margin-top: 14px;
 }
 
-.team-user-list-popup li {
+.team-user-list-popup .players {
+  list-style: none;
+  padding: 0;
+  /* margin-top: 10px; */
+}
+
+.team-user-list-popup .player {
   padding: 10px;
   cursor: pointer;
   border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.team-user-list-popup .username {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
 }
 
 .team-user-list-popup button {
