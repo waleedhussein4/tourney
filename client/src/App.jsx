@@ -13,6 +13,7 @@ import Host from "./pages/host/host";
 import Manage from "./pages/manage/Manage";
 import BecomeHost from "./pages/BecomeHost/BecomeHost";
 import Credits from "./pages/credits/Credits.jsx";
+import Admin from "./pages/admin/Admin";
 import NotFound from "./pages/notfound/notfound";
 
 import "/src/styles/index.css";
@@ -34,6 +35,7 @@ function App() {
       <Route path="/tournament/:UUID/manage" element={<Manage />} />
       <Route path="/credits" element={<Credits />} />
       <Route path="/become-host" element={<BecomeHost />} />
+      <Route path="/admin" element={<Admin />} />
       <Route path="/page-not-found" element={<NotFound />} />
       <Route path="*" element={<Navigate to="/page-not-found" replace />} /> 
     </Routes>
