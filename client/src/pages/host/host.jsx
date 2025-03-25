@@ -1,19 +1,19 @@
 import React, { useContext, useState, useRef, useEffect, useCallback } from "react";
-import { useNavigate } from 'react-router-dom'; //j
+import { useNavigate } from 'react-router-dom';
 import "./app.css";
 import Nav from "../../components/Nav";
 import { AuthContext } from "../../context/AuthContext";
-
-//const { user } = useContext(AuthContext);  // Assuming your auth context provides user details
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css'
 
 export default function Host() {
 
   const { loggedIn } = useContext(AuthContext);
 
   const navigate = useNavigate();
-  const [isHost, setIsHost] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [additionalInfoData, setAdditionalInfoData] = useState([]);
+  const [submitErrors, setSubmitErrors] = useState([]);
 
   const [isDisplayed, setIsDisplayed] = useState(true);
   const [btnIsDisplayed, setBtnIsDisplayed] = useState(true);
@@ -59,6 +59,14 @@ export default function Host() {
   const [titleVal, setTitleVal] = useState('');
   const titleRef = useRef(null)
   const [prizeRankError, setPrizeRankError] = useState(false);
+  const [rules, setRules] = useState('');
+  const [rulesError, setRulesError] = useState(false);
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactDiscord, setContactDiscord] = useState('');
+  const [contactInstagram, setContactInstagram] = useState('');
+  const [contactTwitter, setContactTwitter] = useState('');
+  const [contactFacebook, setContactFacebook] = useState('');
 
   useEffect(() => {
 
@@ -69,8 +77,7 @@ export default function Host() {
       try {
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/isHost`, { credentials: 'include' });
         const data = await response.json();
-        setIsHost(data);
-        if(!data){
+        if (!data) {
           navigate('/become-host')
         }
         setIsLoading(false);
@@ -115,13 +122,11 @@ export default function Host() {
     }
   };
 
-
   const handleAdditionalInfoChange = (index, value) => {
     const updatedInfoData = [...additionalInfoData];
     updatedInfoData[index] = value;  // Update the data at the specified index
     setAdditionalInfoData(updatedInfoData);
   };
-
 
   const handleRemoveInfo = (indexToRemove) => {
     const newList = additionalInfoData.filter((_, index) => index !== indexToRemove);
@@ -130,7 +135,7 @@ export default function Host() {
   };
 
   const handleAddRank = () => {
-    if (rankCounter < maxParticipants) {
+    if (rankCounter < maxParticipants / teamSize) {
       if (!isValidated) {
         setIsValidated(true);
       }
@@ -150,7 +155,6 @@ export default function Host() {
     divPrizeRankRef.current.style.border = '';
   };
 
-
   const handleRemoveRank = () => {
     if (rankCounter >= 2) {
       const newList = [...inputPrizes];
@@ -164,32 +168,43 @@ export default function Host() {
     }
     setIsValidated2(true);
   };
+
   const handlePrizeChange = (index, value) => {
     const updatedPrizes = [...inputPrizes];
     updatedPrizes[index].prize = value;
     setInputPrizes(updatedPrizes);
   };
 
-
-  const handleClick = () => {
-    setIsDisplayed(true);
-    setBtnIsDisplayed(false);
+  const stripHtml = (html) => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    return doc.body.textContent || "";
   };
+
   const handleDescribeChange = (event) => {
-    setDescribeVal(event.target.value);
+    setDescribeVal(event);
     setDescribeError(false);
-    describeRef.current.style.border = "";
-    const inputText = event.target.value;
+    const inputText = event;
 
-
-    if (inputText.length <= 200) {
+    if (stripHtml(inputText).length <= 200) {
       setDescribeVal(inputText);
       setDescribeError2(false);
     } else {
-
-      const truncatedText = inputText.slice(0, 200);
-      setDescribeVal(truncatedText);
+      // const truncatedText = inputText.slice(0, 200);
+      // setDescribeVal(truncatedText);
       setDescribeError2(true);
+    }
+  };
+
+  const handleRulesChange = (event) => {
+    setRules(event);
+    setRulesError(false);
+    const inputText = event;
+
+    if (stripHtml(inputText).length <= 200) {
+      setRules(inputText);
+      setRulesError(false);
+    } else {
+      setRulesError(true);
     }
   };
 
@@ -215,8 +230,8 @@ export default function Host() {
     setTeamSize(event.target.value);
     setTeamTypeError(false);
     teamTypeRef.current.style.border = '';
-    if (event.target.value !== "1") {
-      setStringPerTeam("(per team member)");
+    if (event.target.value > "1") {
+      setStringPerTeam("(per team)");
     } else {
       setStringPerTeam("");
     }
@@ -239,6 +254,7 @@ export default function Host() {
 
     fetchCategories();
   }, [isLoading]);
+
   const handleMaxParticipants = (event) => {
     setMaxParticipants(event.target.value);
     setParticipantsError(false);
@@ -283,15 +299,6 @@ export default function Host() {
     }
   };
 
-
-
-
-  const games = [
-    { id: 1, name: "Game 1" },
-    { id: 2, name: "Game 2" },
-    { id: 3, name: "Game 3" },
-  ];
-
   const handleSubmit = async (e) => {
     e.preventDefault(); // This stops the form from submitting traditionally
     console.log("handleSubmit is triggered");
@@ -332,8 +339,8 @@ export default function Host() {
 
     }
     if (inputPrizes.length === 0) {
-      divPrizeRankRef.current.style.border = "2px solid red";
-      setPrizeRankError(true);
+      // divPrizeRankRef.current.style.border = "2px solid red";
+      // setPrizeRankError(true);
     } if (winnerPrize === "" && inputPrizes.length === 0) {
       e.preventDefault();
     }
@@ -364,7 +371,18 @@ export default function Host() {
           earnings: winnerPrize,
           accessibility: selectedEntryMode,
           maxCapacity: numberOfBrackets,
-          applications: additionalInfoData
+          applications: additionalInfoData,
+          rules: rules,
+          contactInfo: {
+            email: contactEmail,
+            phone: contactPhone,
+            socialMedia: {
+              discord: contactDiscord,
+              instagram: contactInstagram,
+              twitter: contactTwitter,
+              facebook: contactFacebook,
+            },
+          },
         };
       }
       else {
@@ -378,7 +396,18 @@ export default function Host() {
           earnings: inputPrizes,
           accessibility: selectedEntryMode,
           maxCapacity: maxParticipants,
-          applications: additionalInfoData
+          applications: additionalInfoData,
+          rules: rules,
+          contactInfo: {
+            email: contactEmail,
+            phone: contactPhone,
+            socialMedia: {
+              discord: contactDiscord,
+              instagram: contactInstagram,
+              twitter: contactTwitter,
+              facebook: contactFacebook,
+            },
+          },
         }
       }
       try {
@@ -393,6 +422,8 @@ export default function Host() {
           credentials: 'include'
         });
         if (!response.ok) {
+          const errors = await response.json();
+          setSubmitErrors(errors.errors);
           throw new Error('Failed to create tournament');
         }
 
@@ -423,15 +454,6 @@ export default function Host() {
                   Create and manage thrilling tournaments on our platform. Choose between classic bracket-style tournaments or action-packed battle royals. Customize rules, seeding, and formats for an unforgettable gaming experience!
                 </div>
                 <hr className="custom-line" />
-                <div id="btnTournament">
-                  <button
-                    id="createTournament"
-                    onClick={() => setIsDisplayed(true)}
-                    style={{ display: btnIsDisplayed ? "block" : "none" }}
-                  >
-                    Press here to create your tournament
-                  </button>
-                </div>
               </div>
               <div id="main" style={{ display: isDisplayed ? "block" : "none" }}>
                 <form onSubmit={handleSubmit}>
@@ -474,8 +496,8 @@ export default function Host() {
                       <div id="divDesc"> <h2>Description:</h2>(up to 200 characters)</div>
                       <span id="teamTypeError" style={{ display: describeError ? 'block' : 'none' }}>
                         Please fill out this field</span>
-                      <textarea ref={describeRef} onChange={handleDescribeChange} value={describeVal} placeholder="Please describe your tournament.Include any unique rules, what participants can expect, and why they should join. Be as detailed as possible to attract the right participants."></textarea>
-                      {describeError2 ? <p style={{ color: 'red' }}>Maximum word limit exceeded (200 characters).</p> : <p>{describeVal.length}/200</p>}
+                      <ReactQuill className="description-field" ref={describeRef} value={describeVal} onChange={handleDescribeChange} />
+                      {describeError2 ? <p style={{ color: 'red' }}>Maximum word limit exceeded (200 characters).</p> : <p>{stripHtml(describeVal).length}/200</p>}
                     </div>
                     <hr
                       className="custom-line"></hr>
@@ -558,7 +580,7 @@ export default function Host() {
                       ))}
                       <input type="button" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddRank() }} value="Add Rank" />
                       <input type="button" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleRemoveRank() }} value="Remove Rank" />
-                      {isValidated ? null : <div id="rankError">if you wish to add more prize rank, you should increase the number of participants above!</div>}
+                      {isValidated ? null : <div id="rankError">if you wish to add more prize ranks, you should increase the number of participants above!</div>}
                       {isValidated2 ? null : <div id="rankError">If you wish to continue, you should remove ranks until they equal the number of participants.</div>}
                       {prizeRankError ? <div id="rankError">If you wish to continue, you should at least offer a prize to the first-place winner.</div> : null}
                     </div>
@@ -607,6 +629,61 @@ export default function Host() {
 
                       <input type="submit" className="submitRank-App" onClick={(event) => { event.preventDefault(); handleAddInfo() }} value="Add question/request" />
 
+                    </div>
+                    <div className="form-group">
+                      <div id="divRules"> <h2>Rules and Regulations:<span style={{ color: "gray" }}> (Optional)</span></h2>(up to 800 characters) </div>
+                      <ReactQuill className="description-field" value={rules} onChange={handleRulesChange} />
+                      {rulesError ? <p style={{ color: 'red' }}>Maximum word limit exceeded (800 characters).</p> : <p>{stripHtml(rules).length}/800</p>}
+                    </div>
+                    <div className="form-group contact-info">
+                      <h2>Contact Information:</h2>
+                      <label>Email:</label>
+                      <input
+                        type="email"
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        placeholder="Enter contact email"
+                      />
+                      <label>Phone:</label>
+                      <input
+                        type="tel"
+                        value={contactPhone}
+                        onChange={(e) => setContactPhone(e.target.value)}
+                        placeholder="Enter contact phone"
+                      />
+                      <label>Discord:</label>
+                      <input
+                        type="text"
+                        value={contactDiscord}
+                        onChange={(e) => setContactDiscord(e.target.value)}
+                        placeholder="Enter Discord username"
+                      />
+                      <label>Instagram:</label>
+                      <input
+                        type="text"
+                        value={contactInstagram}
+                        onChange={(e) => setContactInstagram(e.target.value)}
+                        placeholder="Enter Instagram handle"
+                      />
+                      <label>Twitter:</label>
+                      <input
+                        type="text"
+                        value={contactTwitter}
+                        onChange={(e) => setContactTwitter(e.target.value)}
+                        placeholder="Enter Twitter handle"
+                      />
+                      <label>Facebook:</label>
+                      <input
+                        type="text"
+                        value={contactFacebook}
+                        onChange={(e) => setContactFacebook(e.target.value)}
+                        placeholder="Enter Facebook profile"
+                      />
+                    </div>
+                    <div className="submit-errors">
+                      {submitErrors.map((error, index) => (
+                        <p key={index}>{error}</p>
+                      ))}
                     </div>
                     <footer>
                       <input type="submit" value="Create" />
