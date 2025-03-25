@@ -139,7 +139,7 @@ function Member({ member, team }) {
           }),
         }).then((res) => {
           if (res.ok) {
-            window.location.reload();
+            navigate(0);
           }
         });
       };
@@ -214,7 +214,7 @@ async function deleteTeam() {
     method: "DELETE",
     credentials: "include",
   });
-  window.location.href = "/team";
+  navigate("/team");
 }
 
 async function leaveTeam() {
@@ -227,7 +227,7 @@ async function leaveTeam() {
     credentials: "include",
   }).then((res) => {
     if (res.ok) {
-      window.location.href = "/team";
+      navigate("/team");
     }
   });
 }

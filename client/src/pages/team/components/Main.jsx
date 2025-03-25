@@ -44,7 +44,7 @@ function MyTeams({ teams }) {
     })
     .then(res => {
       if(res.ok) {
-        window.location.reload()
+        navigate(0)
       }
       return res.json()
     })
@@ -120,7 +120,7 @@ function Suggest() {
     })
     .then(res => {
       if(res.ok) {
-        window.location.reload()
+        navigate(0)
       }
       return res.json()
     })
