@@ -236,6 +236,37 @@ const getisHost = async (req, res) => {
   }
 }
 
+const getIsAdmin = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true)
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
+  // another common pattern
+  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  )
+
+  try {
+    // Assuming `req.user.id` is available and contains the user's ID
+    const user = await User.findById(req.user);
+
+    // check if user found
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    console.log(user.role)
+
+    // If the user is found and the role property exists
+    return res.json(user.role === 'admin');
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error accessing user data" });
+  }
+}
+
 const subHostEarninhgs = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
   res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
@@ -264,4 +295,4 @@ const subHostEarninhgs = async (req, res) => {
 
 }
 
-module.exports = { signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile, getisHost, subHostEarninhgs }
+module.exports = { signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile, getisHost, getIsAdmin, subHostEarninhgs }
