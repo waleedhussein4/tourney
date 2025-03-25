@@ -1,5 +1,5 @@
 const express = require('express');
-const { createTournament, getTournamentById, getAllTournaments, updateTournament, deleteTournament, getTournamentDisplayData, handleApplicationSubmission, handleJoinAsSolo, handleJoinAsTeam, editTitle, editDescription, editStartDate, editEndDate, getManageTournamentDisplayData, getTrendingTournaments, getTournamentCategories, updateScores, acceptApplication, rejectApplication, postUpdate, editSoloParticipants, editTeamParticipants, editMatches, startTournament, endTournament, getMyTournaments, getPaginatedTournaments, getFilteredTournaments, getTournamentCategoriesWithImages, depositIntoTournamentBank } = require('../controller/tourneyController');
+const { createTournament, getTournamentById, getAllTournaments, updateTournament, deleteTournament, getTournamentDisplayData, handleApplicationSubmission, handleJoinAsSolo, handleJoinAsTeam, editTitle, editDescription, editRules, editContactInfo, editStartDate, editEndDate, getManageTournamentDisplayData, getTrendingTournaments, getTournamentCategories, updateScores, acceptApplication, rejectApplication, postUpdate, editSoloParticipants, editTeamParticipants, editMatches, startTournament, endTournament, getMyTournaments, getPaginatedTournaments, getFilteredTournaments, getTournamentCategoriesWithImages, depositIntoTournamentBank, shuffleBrackets } = require('../controller/tourneyController');
 const router = express();
 const { auth, getAuth } = require("../middleware/requireAuth")
 
@@ -38,6 +38,12 @@ router.post('/tournament/editTitle', auth, editTitle)
 
 
 router.post('/tournament/editDescription', auth, editDescription)
+
+
+router.post('/tournament/editRules', auth, editRules);
+
+
+router.post('/tournament/editContactInfo', auth, editContactInfo);
 
 
 router.post('/tournament/editStartDate', auth, editStartDate)
@@ -86,6 +92,9 @@ router.post('/endTournament', auth, endTournament)
 
 
 router.post('/depositIntoTournamentBank', auth, depositIntoTournamentBank)
+
+
+router.post('/shuffleBrackets', auth, shuffleBrackets)
 
 
 //delete
