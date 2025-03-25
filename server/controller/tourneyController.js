@@ -292,8 +292,6 @@ const createTournament = async (req, res) => {
   }
 };
 
-
-
 const newTournament = new Tournament({
   _id: "89b72cfe-0b87-4395-8230-8e8e1f571cb7",
   UUID: "89b72cfe-0b87-4395-8230-8e8e1f571cb7",
@@ -368,259 +366,6 @@ const newTournament = new Tournament({
   applications: [],
   matches: []
 });
-
-async function createTournaments() {
-
-  // delete all tournaments
-  await Tournament.deleteMany({})
-    .then(result => {
-      console.log(`${result.deletedCount} tournaments deleted successfully.`);
-    })
-    .catch(error => {
-      console.error('Error deleting tournaments:', error);
-    });
-
-  let tournaments = [];
-
-  let tournament1 = new Tournament({
-    _id: "89b50cfe-0b87-4395-8230-8e8e1f571cb7",
-    UUID: "89b50cfe-0b87-4395-8230-8e8e1f571cb7",
-    host: "e1236c52-1db6-4524-9dc3-25a030b6b61e", // soumi7
-    title: "Football Tournament",
-    teamSize: 2,
-    description: "A fun football tournament.",
-    type: "battle royale",
-    category: "football",
-    startDate: new Date("2024-05-05T22:50:00.000Z"),
-    endDate: new Date("2024-05-10T17:30:00.000Z"),
-    hasStarted: false,
-    hasEnded: false,
-    enrolledTeams: [
-    ],
-    entryFee: 0,
-    earnings: [
-      0
-    ],
-    maxCapacity: 100,
-    accessibility: "application required",
-    updates: [{
-      date: new Date("2024-02-29T10:01:31.474Z"),
-      content: "Tournament Started"
-    },
-    {
-      date: new Date("2024-02-29T10:02:10.959Z"),
-      content: "First Round Complete"
-    }
-    ],
-    application: [
-      {
-        name: "Player names"
-      },
-      {
-        name: "Player ages"
-      }
-    ],
-    acceptedUsers: [],
-    acceptedTeams: [],
-    applications: [],
-    matches: []
-  })
-
-  await tournament1.save()
-    .then(savedTournament => {
-      console.log('Tournament saved successfully:', savedTournament);
-    })
-    .catch(error => {
-      console.error('Error saving tournament:', error);
-    });
-
-
-  let tournament2 = new Tournament({
-    _id: "15b72cfe-0b87-4395-8230-8e8e1f571cb7",
-    UUID: "15b72cfe-0b87-4395-8230-8e8e1f571cb7",
-    host: "d6cab22f-b734-4ad9-b43e-cde81a82b62b", // Waleed00
-    title: "Fortnite Duo Cup",
-    teamSize: 2,
-    description: "The ultimate Fortnite duo championship. High stakes. High rewards. Only the best will emerge victorious",
-    type: "brackets",
-    category: "fortnite",
-    startDate: new Date("2024-04-23T17:30:00.000Z"),
-    endDate: new Date("2024-05-01T19:30:00.000Z"),
-    hasStarted: false,
-    hasEnded: false,
-    enrolledTeams: [
-      {
-        teamName: "Team 1",
-        players: [
-          {
-            UUID: "9410f265-0bef-4516-b3ea-661c575490f2",
-          },
-          {
-            UUID: "9410f267-0bef-4516-b3ea-661c575492f2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      },
-      {
-        teamName: "Team 2",
-        players: [
-          {
-            UUID: "9410f244-0bef-4516-b3e4-661c575690f2",
-          },
-          {
-            UUID: "9410f2a4-0bef-4516-b3e2-661c575692f2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      },
-      {
-        teamName: "Team 3",
-        players: [
-          {
-            UUID: "9410f264-0beg-4516-b3e4-661c575690f2",
-          },
-          {
-            UUID: "9410f264-0bzf-4516-b3e2-661c575692f2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      },
-      {
-        teamName: "Team 4",
-        players: [
-          {
-            UUID: "9410f264-0bef-4z16-b3e4-661c575690f2",
-          },
-          {
-            UUID: "9410f264-0bef-4516-b3e2-66xc575692f2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      },
-      {
-        teamName: "Team 5",
-        players: [
-          {
-            UUID: "9410f264-0bef-4516-b3e4-661c57b690f2",
-          },
-          {
-            UUID: "9410f264-0bef-4516-b3e2-661c575692l2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      },
-      {
-        teamName: "Team 6",
-        players: [
-          {
-            UUID: "9410f264-0bef-4516-b3e4-66hc575690f2",
-          },
-          {
-            UUID: "9410f264-0beh-4516-b3e2-661c575692f2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      },
-      {
-        teamName: "Team 7",
-        players: [
-          {
-            UUID: "9410f264-0bef-45m6-b3e4-661c575690f2",
-          },
-          {
-            UUID: "9410f264-0bef-4y16-b3e2-661c575692f2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      }
-    ],
-    entryFee: 5,
-    earnings: 50,
-    maxCapacity: 16,
-    accessibility: "application required",
-    updates: [],
-    application: [
-      {
-        name: "Names"
-      },
-      {
-        name: "Ages"
-      },
-      {
-        name: "Epic Games Usernames"
-      }
-    ],
-    acceptedUsers: [],
-    acceptedTeams: [],
-    applications: [],
-    matches: []
-  });
-
-  await tournament2.save()
-    .then(savedTournament => {
-      console.log('Tournament saved successfully:', savedTournament);
-    })
-    .catch(error => {
-      console.error('Error saving tournament:', error);
-    });
-
-  let tournament3 = new Tournament({
-    _id: "15b72cfe-0b87-4395-8230-8e8e2f571cb7",
-    UUID: "15b72cfe-0b87-4395-8230-8e8e2f571cb7",
-    host: "d6cab22f-b734-4ad9-b43e-cde81a82b62b", // Waleed00
-    title: "Fortnite Solo Cup",
-    teamSize: 1,
-    description: "The ultimate Fortnite solo championship. High stakes. High rewards. Only the best will emerge victorious",
-    type: "brackets",
-    category: "fortnite",
-    startDate: new Date("2024-04-23T17:30:00.000Z"),
-    endDate: new Date("2024-05-01T19:30:00.000Z"),
-    hasStarted: false,
-    hasEnded: false,
-    enrolledUsers: [
-      {
-        UUID: "d6cab22f-b734-4ad9-b43e-cde81a82b62b",
-        score: 0,
-        eliminated: false
-      }
-    ],
-    entryFee: 5,
-    earnings: 50,
-    maxCapacity: 16,
-    accessibility: "application required",
-    updates: [],
-    application: [
-      {
-        name: "Names"
-      },
-      {
-        name: "Ages"
-      },
-      {
-        name: "Epic Games Usernames"
-      }
-    ],
-    acceptedUsers: [],
-    acceptedTeams: [],
-    applications: [],
-    matches: []
-  });
-
-  await tournament3.save()
-    .then(savedTournament => {
-      console.log('Tournament saved successfully:', savedTournament);
-    })
-    .catch(error => {
-      console.error('Error saving tournament:', error);
-    });
-}
 
 // Get all tournaments
 const getAllTournaments = async (req, res) => {
@@ -2270,6 +2015,10 @@ const editMatches = async (req, res) => {
   if (tournament.teamSize == 1) {
     for (let participant of matches) {
 
+      if (participant == null) {
+        break;
+      }
+
       const user = await User.findOne({ username: participant });
 
       if (!user) return res.status(404).json({ error: 'Match winners must be part of the tournament.' });
@@ -2280,6 +2029,10 @@ const editMatches = async (req, res) => {
   // ensure winners are part of the tournament
   if (tournament.teamSize > 1) {
     for (let participant of matches) {
+
+      if (participant == null) {
+        break;
+      }
 
       const team = await Team.findOne({ name: participant });
 
@@ -2346,7 +2099,7 @@ const startTournament = async (req, res) => {
   }
 
   // ensure tournament has enough participants
-  if (tournament.enrolledUsers?.length != tournament.maxCapacity || tournament.enrolledTeams?.length != tournament.maxCapacity) {
+  if (tournament.enrolledUsers?.length != tournament.maxCapacity && tournament.enrolledTeams?.length != tournament.maxCapacity) {
     return res.status(400).json({ error: 'Not enough participants' });
   }
 
