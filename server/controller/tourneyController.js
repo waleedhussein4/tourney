@@ -1,3 +1,5 @@
+const { JSDOM } = require('jsdom');
+const sanitizeHtml = require('sanitize-html');
 const Tournament = require('../models/tourneyModels');
 const Team = require('../models/teamModels');
 const User = require('../models/userModel');
@@ -5,76 +7,158 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const generateAndAddUsersToTournament = require('./tester');
 
+const stripHtml = (html) => {
+  const dom = new JSDOM(html);
+  return dom.window.document.body.textContent || "";
+};
+
+const sanitizeHtmlOptions = {
+  allowedTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
+    'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',
+    'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre'],
+  allowedAttributes: {
+    a: ['href', 'name', 'target'],
+    // We don't currently allow img itself by default, but this
+    // would make sense if we did
+    img: ['src']
+  },
+  // Lots of these won't come up by default because we don't allow them
+  selfClosing: ['img', 'br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta'],
+  // URL schemes we permit
+  allowedSchemes: ['http', 'https', 'ftp', 'mailto', 'tel'],
+  allowedSchemesByTag: {},
+  allowedSchemesAppliedToAttributes: ['href', 'src', 'cite'],
+  allowProtocolRelative: true
+};
 
 // Create a new tournament
 const createTournament = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
-  let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity, applications } = req.body;
-  console.log('Earnings: ' + earnings)
+  );
+
+  const user = await User.findById(req.user);
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  if (!user.isHost) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  let { title, teamSize, description, type, category, entryFee, earnings, accessibility, maxCapacity, applications, rules, contactInfo } = req.body;
+  console.log('Earnings: ' + earnings);
   category = category;
-  teamSize = parseInt(teamSize)
-  maxCapacity = parseInt(maxCapacity)
-  entryFee = parseInt(entryFee)
+  teamSize = parseInt(teamSize);
+  maxCapacity = parseInt(maxCapacity);
+  entryFee = parseInt(entryFee);
+
+  const sanitizedDescription = sanitizeHtml(description, sanitizeHtmlOptions);
+  const sanitizedRules = sanitizeHtml(rules, sanitizeHtmlOptions);
+  description = stripHtml(description);
+  rules = stripHtml(rules);
+
+  if (contactInfo) {
+    if (contactInfo.email && typeof contactInfo.email !== 'string') {
+      return res.status(400).json({ error: 'Email must be a string' });
+    }
+    if (contactInfo.phone && typeof contactInfo.phone !== 'string') {
+      return res.status(400).json({ error: 'Phone must be a string' });
+    }
+    if (contactInfo.socialMedia) {
+      if (contactInfo.socialMedia.discord && typeof contactInfo.socialMedia.discord !== 'string') {
+        return res.status(400).json({ error: 'Discord must be a string' });
+      }
+      if (contactInfo.socialMedia.instagram && typeof contactInfo.socialMedia.instagram !== 'string') {
+        return res.status(400).json({ error: 'Instagram must be a string' });
+      }
+      if (contactInfo.socialMedia.twitter && typeof contactInfo.socialMedia.twitter !== 'string') {
+        return res.status(400).json({ error: 'Twitter must be a string' });
+      }
+      if (contactInfo.socialMedia.facebook && typeof contactInfo.socialMedia.facebook !== 'string') {
+        return res.status(400).json({ error: 'Facebook must be a string' });
+      }
+    }
+  }
+
+  // validate field names for contact info
+  if (contactInfo) {
+    Array.from(contactInfo).forEach((field) => {
+      if (field !== 'email' && field !== 'phone' && field !== 'socialMedia') {
+        return res.status(400).json({ error: 'Invalid field name in contact info' });
+      }
+    });
+  }
+
+  // validate social media field names
+  if (contactInfo && contactInfo.socialMedia) {
+    Array.from(contactInfo.socialMedia).forEach((field) => {
+      if (field !== 'discord' && field !== 'instagram' && field !== 'twitter' && field !== 'facebook') {
+        return res.status(400).json({ error: 'Invalid field name in social media' });
+      }
+    });
+  }
+
+
   if (typeof earnings === 'string') {
-    console.log("in earnigs")
-    earnings = parseInt(earnings)
+    console.log("in earnings");
+    earnings = parseInt(earnings);
   }
   accessibility = accessibility.toLowerCase();
   type = type.toLowerCase();
   if (type === "bracket") {
-    type = "brackets"
+    type = "brackets";
   }
   if (type === "battleroyale") {
-    type = "battle royale"
+    type = "battle royale";
   }
-  console.log(req.body)
-  console.log(typeof applications)
+  console.log(req.body);
+  console.log(typeof applications);
   const id = uuidv4();
-  console.log(id)
-  // let errors = [];
+  console.log(id);
+  let errors = [];
 
-  //   if (description && description.length > 200) {
-  //       errors.push("Description is more than 200 chars.");
-  //   }
+  if (description && description.length > 200) {
+    errors.push("Description is more than 200 chars.");
+  }
 
-  // if (parseInt(teamSize) === 0) {
-  //   errors.push("Can't be an empty team.");
-  // }
+  if (rules && rules.length > 800) {
+    errors.push("Rules are more than 800 chars.");
+  }
 
-  //   // if (typeof teamSize === 'string') {
-  //   //     errors.push("Team size must be an integer.");
-  //   // }
+  if (parseInt(teamSize) < 1) {
+    errors.push("Invalid team size.");
+  }
 
-  // if (earnings !== undefined && earnings <= -1) {
-  //     errors.push("Earnings must be positive.");
-  // }
-  // console.log(typeof entryFee)
-  // // if (typeof entryFee === 'string') {
-  // //     errors.push("Entry fee must be an integer.");
-  // // }
+  if (typeof teamSize === 'string') {
+    errors.push("Team size must be an integer.");
+  }
 
-  // if (typeof type !== 'string') {
-  //     errors.push("Type must be a string.");
-  // }
-  // console.log(errors)
-  // if (errors.length > 0) {
-  //     return res.status(400).send({ errors });
-  // }
+  if (earnings !== undefined && earnings <= -1) {
+    errors.push("Earnings must be positive.");
+  }
+  console.log(typeof entryFee);
+  if (typeof entryFee === 'string') {
+    errors.push("Entry fee must be an integer.");
+  }
 
-  let newTournament
+  if (typeof type !== 'string') {
+    errors.push("Type must be a string.");
+  }
+  console.log(errors);
+  if (errors.length > 0) {
+    return res.status(400).send({ errors });
+  }
+
+  let newTournament;
   try {
-    console.log('teamsize: ' + teamSize)
+    console.log('teamsize: ' + teamSize);
     if (type === "brackets") {
       if (parseInt(teamSize) === 1) {
-        console.log("in if")
+        console.log("in if");
         newTournament = await Tournament.create({
           _id: id,
           bank: 0,
@@ -82,7 +166,8 @@ const createTournament = async (req, res) => {
           host: req.user,
           title: title,
           teamSize: teamSize,
-          description: description,
+          description: sanitizedDescription,
+          rules: sanitizedRules,
           type: type,
           category: category,
           startDate: new Date(),
@@ -100,11 +185,12 @@ const createTournament = async (req, res) => {
           acceptedUsers: [],
           acceptedTeams: [],
           application: applications,
-          applications: []
-        })
+          applications: [],
+          contactInfo: contactInfo
+        });
       }
       if (parseInt(teamSize) > 1) {
-        console.log('iseeu')
+        console.log('iseeu');
         newTournament = await Tournament.create({
           _id: id,
           bank: 0,
@@ -112,7 +198,8 @@ const createTournament = async (req, res) => {
           host: req.user,
           title: title,
           teamSize: teamSize,
-          description: description,
+          description: sanitizedDescription,
+          rules: sanitizedRules,
           type: type.toLowerCase(),
           category: category,
           startDate: new Date(),
@@ -130,13 +217,14 @@ const createTournament = async (req, res) => {
           application: [],
           acceptedUsers: [],
           acceptedTeams: [],
-          application: applications
-        })
+          application: applications,
+          contactInfo: contactInfo
+        });
       }
-    };
-    console.log('type: ' + type.toLowerCase())
+    }
+    console.log('type: ' + type.toLowerCase());
     if (type.toLowerCase() === "battle royale") {
-      console.log('battle royALE')
+      console.log('battle royALE');
       if (parseInt(teamSize) === 1) {
         newTournament = await Tournament.create({
           _id: id,
@@ -145,7 +233,8 @@ const createTournament = async (req, res) => {
           host: req.user,
           title: title,
           teamSize: teamSize,
-          description: description,
+          description: sanitizedDescription,
+          rules: sanitizedRules,
           type: type.toLowerCase(),
           category: category,
           startDate: new Date(),
@@ -154,15 +243,16 @@ const createTournament = async (req, res) => {
           hasEnded: false,
           enrolledUsers: [],
           entryFee: entryFee,
-          earnings: earnings.map(item => ({...item, prize: parseInt(item.prize)})),
+          earnings: earnings.map(item => ({ ...item, prize: parseInt(item.prize) })),
           maxCapacity: maxCapacity,
           accessibility: accessibility,
           matches: [],
           updates: [],
           application: applications,
           acceptedUsers: [],
-          applications: []
-        })
+          applications: [],
+          contactInfo: contactInfo
+        });
       }
       if (parseInt(teamSize) >= 2) {
         newTournament = await Tournament.create({
@@ -172,7 +262,8 @@ const createTournament = async (req, res) => {
           host: req.user,
           title: title,
           teamSize: teamSize,
-          description: description,
+          description: sanitizedDescription,
+          rules: sanitizedRules,
           type: type.toLowerCase(),
           category: category,
           startDate: new Date(),
@@ -181,25 +272,25 @@ const createTournament = async (req, res) => {
           hasEnded: false,
           enrolledTeams: [],
           entryFee: entryFee,
-          earnings: earnings.map(item => ({...item, prize: parseInt(item.prize)})),
+          earnings: earnings.map(item => ({ ...item, prize: parseInt(item.prize) })),
           maxCapacity: maxCapacity,
           accessibility: accessibility,
           matches: [],
           updates: [],
           application: applications,
           acceptedTeams: [],
-          applications: []
-        })
+          applications: [],
+          contactInfo: contactInfo
+        });
       }
     }
-    console.log('newTournament: ' + newTournament)
+    console.log('newTournament: ' + newTournament);
     res.status(200).json(newTournament);
   } catch (error) {
-    console.log("wrro")
+    console.log("wrro");
     res.status(400).json({ error: error.message });
   }
 };
-
 
 const newTournament = new Tournament({
   _id: "89b72cfe-0b87-4395-8230-8e8e1f571cb7",
@@ -275,259 +366,6 @@ const newTournament = new Tournament({
   applications: [],
   matches: []
 });
-
-async function createTournaments() {
-
-  // delete all tournaments
-  await Tournament.deleteMany({})
-    .then(result => {
-      console.log(`${result.deletedCount} tournaments deleted successfully.`);
-    })
-    .catch(error => {
-      console.error('Error deleting tournaments:', error);
-    });
-
-  let tournaments = [];
-
-  let tournament1 = new Tournament({
-    _id: "89b50cfe-0b87-4395-8230-8e8e1f571cb7",
-    UUID: "89b50cfe-0b87-4395-8230-8e8e1f571cb7",
-    host: "e1236c52-1db6-4524-9dc3-25a030b6b61e", // soumi7
-    title: "Football Tournament",
-    teamSize: 2,
-    description: "A fun football tournament.",
-    type: "battle royale",
-    category: "football",
-    startDate: new Date("2024-05-05T22:50:00.000Z"),
-    endDate: new Date("2024-05-10T17:30:00.000Z"),
-    hasStarted: false,
-    hasEnded: false,
-    enrolledTeams: [
-    ],
-    entryFee: 0,
-    earnings: [
-      0
-    ],
-    maxCapacity: 100,
-    accessibility: "application required",
-    updates: [{
-      date: new Date("2024-02-29T10:01:31.474Z"),
-      content: "Tournament Started"
-    },
-    {
-      date: new Date("2024-02-29T10:02:10.959Z"),
-      content: "First Round Complete"
-    }
-    ],
-    application: [
-      {
-        name: "Player names"
-      },
-      {
-        name: "Player ages"
-      }
-    ],
-    acceptedUsers: [],
-    acceptedTeams: [],
-    applications: [],
-    matches: []
-  })
-
-  await tournament1.save()
-    .then(savedTournament => {
-      console.log('Tournament saved successfully:', savedTournament);
-    })
-    .catch(error => {
-      console.error('Error saving tournament:', error);
-    });
-
-
-  let tournament2 = new Tournament({
-    _id: "15b72cfe-0b87-4395-8230-8e8e1f571cb7",
-    UUID: "15b72cfe-0b87-4395-8230-8e8e1f571cb7",
-    host: "d6cab22f-b734-4ad9-b43e-cde81a82b62b", // Waleed00
-    title: "Fortnite Duo Cup",
-    teamSize: 2,
-    description: "The ultimate Fortnite duo championship. High stakes. High rewards. Only the best will emerge victorious",
-    type: "brackets",
-    category: "fortnite",
-    startDate: new Date("2024-04-23T17:30:00.000Z"),
-    endDate: new Date("2024-05-01T19:30:00.000Z"),
-    hasStarted: false,
-    hasEnded: false,
-    enrolledTeams: [
-      {
-        teamName: "Team 1",
-        players: [
-          {
-            UUID: "9410f265-0bef-4516-b3ea-661c575490f2",
-          },
-          {
-            UUID: "9410f267-0bef-4516-b3ea-661c575492f2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      },
-      {
-        teamName: "Team 2",
-        players: [
-          {
-            UUID: "9410f244-0bef-4516-b3e4-661c575690f2",
-          },
-          {
-            UUID: "9410f2a4-0bef-4516-b3e2-661c575692f2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      },
-      {
-        teamName: "Team 3",
-        players: [
-          {
-            UUID: "9410f264-0beg-4516-b3e4-661c575690f2",
-          },
-          {
-            UUID: "9410f264-0bzf-4516-b3e2-661c575692f2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      },
-      {
-        teamName: "Team 4",
-        players: [
-          {
-            UUID: "9410f264-0bef-4z16-b3e4-661c575690f2",
-          },
-          {
-            UUID: "9410f264-0bef-4516-b3e2-66xc575692f2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      },
-      {
-        teamName: "Team 5",
-        players: [
-          {
-            UUID: "9410f264-0bef-4516-b3e4-661c57b690f2",
-          },
-          {
-            UUID: "9410f264-0bef-4516-b3e2-661c575692l2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      },
-      {
-        teamName: "Team 6",
-        players: [
-          {
-            UUID: "9410f264-0bef-4516-b3e4-66hc575690f2",
-          },
-          {
-            UUID: "9410f264-0beh-4516-b3e2-661c575692f2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      },
-      {
-        teamName: "Team 7",
-        players: [
-          {
-            UUID: "9410f264-0bef-45m6-b3e4-661c575690f2",
-          },
-          {
-            UUID: "9410f264-0bef-4y16-b3e2-661c575692f2",
-          }
-        ],
-        score: 0,
-        eliminated: false
-      }
-    ],
-    entryFee: 5,
-    earnings: 50,
-    maxCapacity: 16,
-    accessibility: "application required",
-    updates: [],
-    application: [
-      {
-        name: "Names"
-      },
-      {
-        name: "Ages"
-      },
-      {
-        name: "Epic Games Usernames"
-      }
-    ],
-    acceptedUsers: [],
-    acceptedTeams: [],
-    applications: [],
-    matches: []
-  });
-
-  await tournament2.save()
-    .then(savedTournament => {
-      console.log('Tournament saved successfully:', savedTournament);
-    })
-    .catch(error => {
-      console.error('Error saving tournament:', error);
-    });
-
-  let tournament3 = new Tournament({
-    _id: "15b72cfe-0b87-4395-8230-8e8e2f571cb7",
-    UUID: "15b72cfe-0b87-4395-8230-8e8e2f571cb7",
-    host: "d6cab22f-b734-4ad9-b43e-cde81a82b62b", // Waleed00
-    title: "Fortnite Solo Cup",
-    teamSize: 1,
-    description: "The ultimate Fortnite solo championship. High stakes. High rewards. Only the best will emerge victorious",
-    type: "brackets",
-    category: "fortnite",
-    startDate: new Date("2024-04-23T17:30:00.000Z"),
-    endDate: new Date("2024-05-01T19:30:00.000Z"),
-    hasStarted: false,
-    hasEnded: false,
-    enrolledUsers: [
-      {
-        UUID: "d6cab22f-b734-4ad9-b43e-cde81a82b62b",
-        score: 0,
-        eliminated: false
-      }
-    ],
-    entryFee: 5,
-    earnings: 50,
-    maxCapacity: 16,
-    accessibility: "application required",
-    updates: [],
-    application: [
-      {
-        name: "Names"
-      },
-      {
-        name: "Ages"
-      },
-      {
-        name: "Epic Games Usernames"
-      }
-    ],
-    acceptedUsers: [],
-    acceptedTeams: [],
-    applications: [],
-    matches: []
-  });
-
-  await tournament3.save()
-    .then(savedTournament => {
-      console.log('Tournament saved successfully:', savedTournament);
-    })
-    .catch(error => {
-      console.error('Error saving tournament:', error);
-    });
-}
 
 // Get all tournaments
 const getAllTournaments = async (req, res) => {
@@ -770,235 +608,66 @@ const deleteTournament = async (req, res) => {
 
 // get tournament data for the tournament page
 const getTournamentDisplayData = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
-
-  // await createTournaments()
-
-
-  // delete all tournaments
-  // await Tournament.deleteMany({})
-  //   .then(result => {
-  //     console.log(`${result.deletedCount} tournaments deleted successfully.`);
-  //   })
-  //   .catch(error => {
-  //     console.error('Error deleting tournaments:', error);
-  //   });
-
-
-  // Delete the tournament document with the specified ID
-  // await Tournament.findByIdAndDelete('89b72cfe-0b87-4395-8230-8e8e1f571cb7')
-  // .then(deletedTournament => {
-  //   if (!deletedTournament) {
-  //     console.log('Tournament not found');
-  //   } else {
-  //     console.log('Tournament deleted successfully:', deletedTournament);
-  //   }
-  // })
-  // .catch(error => {
-  //   console.error('Error deleting tournament:', error);
-  // });
-
-
-  // create new tournament
-  // await newTournament.save()
-  //   .then(savedTournament => {
-  //     console.log('Tournament saved successfully:', savedTournament);
-  //   })
-  //   .catch(error => {
-  //     console.error('Error saving tournament:', error);
-  //   });
-
-  // print all tournaments
-  // Tournament.find({}).exec()
-  //   .then(tournaments => {
-  //     tournaments.forEach(tournament => {
-  //       console.log(tournament);
-  //       console.log("Type of id: ", typeof (tournament._id))
-  //     });
-  //   })
-  //   .catch(error => {
-  //     console.error('Error fetching tournaments:', error);
-  //   });
-
-
-  // Tournament.updateOne(
-  //   { _id: req.query.UUID }, // Filter for the tournament by its ID
-  //   { $set: { acceptedUsers: [], applications: [] } } // Set acceptedUsers and applications arrays to empty arrays
-  // )
-  // .then(result => {
-  //   if (result.nModified === 0) {
-  //     console.log('No tournament was updated'); // Tournament not found or no changes applied
-  //   } else {
-  //     console.log('AcceptedUsers and applications arrays cleared successfully');
-  //   }
-  // })
-  // .catch(error => {
-  //   console.error('Error updating tournament:', error);
-  // });
-
-
-  // print all users in the db
-  // User.find({}).exec()
-  // .then(users => {
-  //   users.forEach(user => {
-  //     console.log(user);
-  //   });
-  // })
+  );
 
   try {
     const UUID = req.query.UUID;
-    console.log(UUID)
+    console.log(UUID);
     if (!UUID) {
       return res.status(400).json({ error: 'UUID parameter is missing' });
     }
 
     const userUUID = req.user;
-
     const tournament = await Tournament.findById(UUID);
     if (!tournament) {
       return res.status(404).json({ error: 'Tournament not found' });
     }
 
-    const isHost = (tournament.host == userUUID)
+    const isHost = (tournament.host == userUUID);
 
-
-    // await generateAndAddUsersToTournament(UUID, 50);
-
-
-    async function getUserByUsername(username) {
-      try {
-        // Find the user document by username
-        const user = await User.findOne({ username });
-        return user; // Return the user document
-      } catch (error) {
-        console.error('Error finding user by username:', error);
-        throw error; // Throw the error for handling elsewhere
-      }
-    }
-
-
-    const transformEnrolledUsers = await Promise.all(tournament.enrolledUsers.map(async (user) => {
-      const userDoc = await User.findById(user.UUID);
-      return {
-        username: userDoc ? userDoc.username : null,
-        score: user.score,
-        eliminated: user.eliminated
-      };
-    }));
-
-    // convert team schema object to teamName, players, score, eliminated
-    async function transformEnrolledTeams(originalEnrolledTeams) {
-      const transformedEnrolledTeams = await Promise.all(originalEnrolledTeams.map(async team => {
-        const players = await Promise.all(team.players.map(async player => {
-          const user = await User.findOne({ _id: player.UUID });
-          return { username: user.username }; // Assuming 'username' is the field in the user document containing the username
-        }));
-        return {
-          teamName: team.teamName,
-          players: players,
-          score: team.score,
-          eliminated: team.eliminated
-        };
-      }));
-      return transformedEnrolledTeams;
-    }
-    const transformedEnrolledTeams = await transformEnrolledTeams(tournament.enrolledTeams);
-
-    let checkHasAppliedSolo = async () => {
-      // get all applications
-      // iterate over applications and get userUUID
-      // if userUUID matches return true
-
-      const applications = tournament.applications
-      for (let i = 0; i < applications.length; i++) {
-        const appliedUser = applications[i].UUID
-        console.log("Applied user: " + appliedUser)
-        console.log("User UUID: " + userUUID)
-        if (userUUID == appliedUser) {
-          return true
+    const transformEnrolledUsers = await Promise.all(
+      tournament.enrolledUsers.map(async (user) => {
+        if (user) {
+          const userDoc = await User.findById(user.UUID);
+          return {
+            username: userDoc ? userDoc.username : null,
+            score: user.score,
+            eliminated: user.eliminated,
+          };
         }
-      }
-      return false
-    }
+        return null; // Handle null values
+      })
+    );
 
-    let checkHasAppliedTeam = async () => {
-      // get all applications
-      // iterate over applications and get team members
-      // if team members include userUUID return true
-
-      try {
-        const applications = tournament.applications
-        for (let i = 0; i < applications.length; i++) {
-          const teamUUID = applications[i].UUID
-          const team = await Team.findOne({ _id: teamUUID })
-          if (team.members.map(member => member).includes(userUUID)) {
-            return true
-          }
+    const transformEnrolledTeams = await Promise.all(
+      tournament.enrolledTeams.map(async (team) => {
+        if (team) {
+          const players = await Promise.all(
+            team.players.map(async (player) => {
+              const user = await User.findOne({ _id: player.UUID });
+              return {
+                username: user ? user.username : null,
+                score: player.score,
+                eliminated: player.eliminated,
+              };
+            })
+          );
+          return {
+            teamName: team.teamName,
+            players: players,
+            score: team.score,
+            eliminated: team.eliminated,
+          };
         }
-        return false
-      } catch (error) {
-        return false
-      }
-    }
-
-    const hasAppliedSolo = await checkHasAppliedSolo()
-    const hasAppliedTeam = await checkHasAppliedTeam()
-    const hasApplied = hasAppliedSolo || hasAppliedTeam
-
-    let checkIsAcceptedSolo = async () => {
-      return tournament.acceptedUsers.includes(userUUID)
-    }
-
-    let checkIsAcceptedTeam = async () => {
-      // get all accepted teams
-      // iterate over teams and get team leaders
-      // if team leaders include userUUID return true
-
-      const acceptedTeams = tournament.acceptedTeams
-      for (let i = 0; i < acceptedTeams.length; i++) {
-        const teamUUID = acceptedTeams[i]
-        const team = await Team.findOne({ _id: teamUUID })
-        console.log("Team: " + team.leader)
-        console.log("User UUID: " + userUUID)
-        if (team.leader == userUUID) {
-          return true
-        }
-      }
-      return false
-    }
-    const isAcceptedSolo = await checkIsAcceptedSolo()
-    const isAcceptedTeam = await checkIsAcceptedTeam()
-    const isAccepted = isAcceptedSolo || isAcceptedTeam
-
-    let checkIsJoinedSolo = async () => {
-      return tournament.enrolledUsers.some(user => user.UUID === userUUID)
-    }
-
-    let checkIsJoinedTeam = async () => {
-      // get all enrolled teams
-      // iterate over teams and get team members
-      // if team members include userUUID return true
-
-      const enrolledTeams = tournament.enrolledTeams
-      for (let i = 0; i < enrolledTeams.length; i++) {
-        const team = enrolledTeams[i]
-        if ((team.players.map(player => player.UUID)).includes(userUUID)) {
-          return true
-        }
-      }
-      return false
-    }
-    const isJoinedSolo = await checkIsJoinedSolo()
-    const isJoinedTeam = await checkIsJoinedTeam()
-    const isJoined = isJoinedSolo || isJoinedTeam
+        return null; // Handle null values
+      })
+    );
 
     res.status(200).json({
       hasStarted: tournament.hasStarted,
@@ -1012,24 +681,24 @@ const getTournamentDisplayData = async (req, res) => {
       maxCapacity: tournament.maxCapacity,
       earnings: tournament.earnings,
       host: tournament.host,
-      isAccepted: isAccepted,
+      isAccepted: tournament.acceptedUsers.includes(userUUID),
       updates: tournament.updates,
       isHost: isHost,
       application: tournament.application,
-      hasApplied: hasApplied,
+      hasApplied: tournament.applications.map((app) => app.user).includes(userUUID),
       enrolledUsers: transformEnrolledUsers,
-      enrolledTeams: transformedEnrolledTeams,
-      hasStarted: tournament.hasStarted,
+      enrolledTeams: transformEnrolledTeams,
       startDate: tournament.startDate,
       endDate: tournament.endDate,
-      isJoined: isJoined,
-      matches: tournament.matches
+      matches: tournament.matches,
+      rules: tournament.rules,
+      contactInfo: tournament.contactInfo,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
-}
+};
 
 
 const handleApplicationSubmission = async (req, res) => {
@@ -1368,21 +1037,17 @@ const handleJoinAsTeam = async (req, res) => {
     return res.status(404).json({ error: 'Tournament host cannot join tournament' })
   }
 
-  // team members must have enough credits to pay the entry fee
-  for (let member of team.members) {
-    const user = await User.findOne({ _id: member });
-    if (user.credits < tournament.entryFee) {
-      return res.status(404).json({ error: 'Not enough credits' })
-    }
+  // team leader must have enough credits to pay the entry fee
+  const leader = await User.findOne({ _id: team.leader });
+  if (leader.credits < tournament.entryFee) {
+    return res.status(404).json({ error: 'Not enough credits' })
   }
 
-  // deduct credits from team members
-  for (let member of team.members) {
-    await User.updateOne({ _id: member }, { $inc: { credits: -tournament.entryFee } })
-  }
+  // deduct entry fee from team leader's credits
+  await User.updateOne({ _id: team.leader }, { $inc: { credits: -tournament.entryFee } })
 
   // add entry fee into tournament bank
-  tournament.bank += tournament.entryFee * tournament.teamSize
+  tournament.bank += tournament.entryFee
   await tournament.save()
 
   const enrolledTeam = {
@@ -1457,58 +1122,164 @@ const editTitle = async (req, res) => {
   }
 }
 
-
 const editDescription = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
+  );
+
   const { UUID, description } = req.body;
 
+  // Sanitize the HTML input
+  const sanitizedDescription = sanitizeHtml(description, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      img: ['src', 'alt']
+    },
+    allowedSchemes: ['http', 'https', 'data']
+  });
 
-  // get tournament
+  // Ensure sanitized description length is no longer than 200 characters (excluding HTML tags)
+  const plainTextDescription = sanitizedDescription.replace(/<[^>]*>?/gm, '');
+  if (plainTextDescription.length > 200) {
+    return res.status(400).json({ error: 'Description is too long' });
+  }
+
+  // Get tournament
   const tournament = await Tournament.findById(UUID);
   if (!tournament) {
     return res.status(404).json({ error: 'No such tournament' });
   }
 
-
-  // ensure user is host
+  // Ensure user is host
   if (tournament.host != req.user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-
-  // ensure tournament hasnt started
+  // Ensure tournament hasn't started
   if (tournament.hasStarted) {
     return res.status(400).json({ error: 'Tournament has already started' });
   }
 
-
-  // ensure description is no longer than 200 characters
-  if (description.length > 200) {
-    return res.status(400).json({ error: 'Description is too long' });
-  }
-
-
   try {
-    const tournament = await Tournament.findByIdAndUpdate
-      (UUID, { description }, { new: true });
-    if (!tournament) {
+    const updatedTournament = await Tournament.findByIdAndUpdate(
+      UUID,
+      { description: sanitizedDescription },
+      { new: true }
+    );
+    if (!updatedTournament) {
       return res.status(404).json({ error: 'No such tournament' });
     }
-    res.status(200).json(tournament);
-  }
-  catch (error) {
+    res.status(200).json(updatedTournament);
+  } catch (error) {
     res.status(400).json({ error: error.message });
   }
 }
 
+const editRules = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
+  const { UUID, rules } = req.body;
+
+  // Sanitize the HTML input
+  const sanitizedRules = sanitizeHtml(rules, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      img: ['src', 'alt']
+    },
+    allowedSchemes: ['http', 'https', 'data']
+  });
+
+  // Get tournament
+  const tournament = await Tournament.findById(UUID);
+  if (!tournament) {
+    return res.status(404).json({ error: 'No such tournament' });
+  }
+
+  console.log(tournament.host, req.user)
+
+  // Ensure user is host
+  if (tournament.host != req.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // Ensure tournament hasn't started
+  if (tournament.hasStarted) {
+    return res.status(400).json({ error: 'Tournament has already started' });
+  }
+
+  try {
+    const updatedTournament = await Tournament.findByIdAndUpdate(
+      UUID,
+      { rules: sanitizedRules },
+      { new: true }
+    );
+    if (!updatedTournament) {
+      return res.status(404).json({ error: 'No such tournament' });
+    }
+    res.status(200).json(updatedTournament);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+const editContactInfo = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
+  const { UUID, contactInfo } = req.body;
+
+  // Validate contact info (example validation, customize as needed)
+  if (!contactInfo.email || !contactInfo.phone) {
+    return res.status(400).json({ error: 'Email and phone are required' });
+  }
+
+  // Get tournament
+  const tournament = await Tournament.findById(UUID);
+  if (!tournament) {
+    return res.status(404).json({ error: 'No such tournament' });
+  }
+
+  // Ensure user is host
+  if (tournament.host != req.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // Ensure tournament hasn't started
+  if (tournament.hasStarted) {
+    return res.status(400).json({ error: 'Tournament has already started' });
+  }
+
+  try {
+    const updatedTournament = await Tournament.findByIdAndUpdate(
+      UUID,
+      { contactInfo },
+      { new: true }
+    );
+    if (!updatedTournament) {
+      return res.status(404).json({ error: 'No such tournament' });
+    }
+    res.status(200).json(updatedTournament);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
 
 const editStartDate = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
@@ -1522,57 +1293,56 @@ const editStartDate = async (req, res) => {
   )
   const { UUID, startDate } = req.body;
 
-
   // get tournament
   const tournament = await Tournament.findById(UUID);
   if (!tournament) {
     return res.status(404).json({ error: 'No such tournament' });
   }
 
-
   // ensure user is host
   if (tournament.host != req.user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-
-  // ensure tournament hasnt started
+  // ensure tournament hasn't started
   if (tournament.hasStarted) {
     return res.status(400).json({ error: 'Tournament has already started' });
   }
 
+  const start = new Date(startDate);
+  const end = new Date(tournament.endDate);
+  const now = new Date();
 
   // ensure start date is in the future
-  if (startDate < new Date()) {
+  if (start < now) {
     return res.status(400).json({ error: 'Start date is in the past' });
   }
 
-
   // ensure start date is before end date
-  if (startDate > tournament.endDate) {
+  if (start > end) {
+    console.log(start, end);
     return res.status(400).json({ error: 'Start date is after end date' });
   }
 
-
-  // validate date format in javascript
-  if (isNaN(Date.parse(startDate))) {
+  // validate date format in JavaScript
+  if (isNaN(start.getTime())) {
     return res.status(400).json({ error: 'Invalid date format' });
   }
 
-
   try {
-    const tournament = await Tournament.findByIdAndUpdate
-      (UUID, { startDate }, { new: true });
-    if (!tournament) {
+    const updatedTournament = await Tournament.findByIdAndUpdate(
+      UUID,
+      { startDate: start },
+      { new: true }
+    );
+    if (!updatedTournament) {
       return res.status(404).json({ error: 'No such tournament' });
     }
-    res.status(200).json(tournament);
-  }
-  catch (error) {
+    res.status(200).json(updatedTournament);
+  } catch (error) {
     res.status(400).json({ error: error.message });
   }
-}
-
+};
 
 const editEndDate = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
@@ -1586,68 +1356,65 @@ const editEndDate = async (req, res) => {
   )
   const { UUID, endDate } = req.body;
 
-
   // get tournament
   const tournament = await Tournament.findById(UUID);
   if (!tournament) {
     return res.status(404).json({ error: 'No such tournament' });
   }
 
-
   // ensure user is host
   if (tournament.host != req.user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-
-  // ensure tournament hasnt started
+  // ensure tournament hasn't started
   if (tournament.hasStarted) {
     return res.status(400).json({ error: 'Tournament has already started' });
   }
 
+  const end = new Date(endDate);
+  const start = new Date(tournament.startDate);
+  const now = new Date();
 
   // ensure end date is in the future
-  if (endDate < new Date()) {
+  if (end < now) {
     return res.status(400).json({ error: 'End date is in the past' });
   }
 
-
   // ensure end date is after start date
-  if (endDate < tournament.startDate) {
+  if (end < start) {
     return res.status(400).json({ error: 'End date is before start date' });
   }
 
-
-  // validate date format in javascript
-  if (isNaN(Date.parse(endDate))) {
+  // validate date format in JavaScript
+  if (isNaN(end.getTime())) {
     return res.status(400).json({ error: 'Invalid date format' });
   }
 
-
   try {
-    const tournament = await Tournament.findByIdAndUpdate
-      (UUID, { endDate }, { new: true });
-    if (!tournament) {
+    const updatedTournament = await Tournament.findByIdAndUpdate(
+      UUID, 
+      { endDate: end }, 
+      { new: true }
+    );
+    if (!updatedTournament) {
       return res.status(404).json({ error: 'No such tournament' });
     }
-    res.status(200).json(tournament);
-  }
-  catch (error) {
+    res.status(200).json(updatedTournament);
+  } catch (error) {
     res.status(400).json({ error: error.message });
   }
-}
+};
 
 
 const getManageTournamentDisplayData = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
+  );
 
   try {
     const UUID = req.query.UUID;
@@ -1655,116 +1422,104 @@ const getManageTournamentDisplayData = async (req, res) => {
       return res.status(400).json({ error: 'UUID parameter is missing' });
     }
 
-
     const userUUID = req.user;
-
-
     const tournament = await Tournament.findById(UUID);
+
     if (!tournament) {
       return res.status(404).json({ error: 'Tournament not found' });
     }
 
-    // check if user is host
+    // Check if user is host
     if (tournament.host != req.user) {
       return res.status(401).send('Unauthorized');
     }
 
-
-    const isHost = (tournament.host == userUUID)
-
-
-    // await generateAndAddUsersToTournament(UUID, 50);
-
+    const isHost = (tournament.host == userUUID);
 
     async function getUserByUsername(username) {
       try {
-        // Find the user document by username
         const user = await User.findOne({ username });
-        return user; // Return the user document
+        return user;
       } catch (error) {
         console.error('Error finding user by username:', error);
-        throw error; // Throw the error for handling elsewhere
+        throw error;
       }
     }
-
 
     // Transform the data
     const transformedData = await Promise.all(tournament.enrolledTeams.map(async (participant) => {
       const players = await Promise.all(participant.players.map(async (player) => {
+        if (!player || !player.UUID) return null;
         const user = await getUserByUsername(player.UUID);
+        if (!user) return null;
         return {
-          username: user ? user.username : null,
+          username: user.username,
           score: player.score,
           eliminated: player.eliminated
         };
       }));
 
+      if (players.includes(null)) return null;
 
       return {
         teamName: participant.teamName,
         players: players
       };
-    }));
-
+    })).then(data => data.filter(team => team !== null));
 
     async function getTeamNameAndApplications(applications) {
       try {
-
         const results = [];
-
-        // Iterate through each application
         for (const application of applications) {
-          // Query MongoDB for team information based on UUID
           const teamInfo = await Team.findOne({ _id: application.UUID });
-          console.log(teamInfo)
-
           if (teamInfo) {
-            // Format the result as an object containing team name and application details
             const result = {
               UUID: application.UUID,
               teamName: teamInfo.name,
               application: application.application
             };
-
             results.push(result);
           } else {
-            // If no team information found for the provided UUID, add username
             const user = await User.findOne({ _id: application.UUID });
+            if (!user) return null;
             const result = {
               UUID: application.UUID,
               username: user.username,
               application: application.application
             };
-
             results.push(result);
           }
         }
-
-        return results;
+        return results.filter(result => result !== null);
       } catch (err) {
         console.error('Error retrieving team information:', err);
         return [];
       }
     }
 
-    const transformedApps = await getTeamNameAndApplications(tournament.applications)
+    const transformedApps = await getTeamNameAndApplications(tournament.applications);
 
     const transformEnrolledUsers = await Promise.all(tournament.enrolledUsers.map(async (user) => {
-      const userDoc = await User.findById(user.UUID);
+      const userDoc = await User.findById(user?.UUID);
+      if (!userDoc) return null;
       return {
-        username: userDoc ? userDoc.username : null,
+        username: userDoc.username,
         score: user.score,
         eliminated: user.eliminated
       };
-    }));
+    })).then(data => data.filter(user => user !== null));
 
-    // convert team schema object to teamName, players, score, eliminated
     async function transformEnrolledTeams(originalEnrolledTeams) {
       const transformedEnrolledTeams = await Promise.all(originalEnrolledTeams.map(async team => {
         const players = await Promise.all(team.players.map(async player => {
+          if (!player || !player.UUID) return null;
           const user = await User.findOne({ _id: player.UUID });
-          return { username: user.username }; // Assuming 'username' is the field in the user document containing the username
+          if (!user) return null;
+          return { username: user.username, score: player.score, eliminated: player.eliminated };
         }));
+
+        if (players.includes(null)) return null;
+
         return {
           teamName: team.teamName,
           players: players,
@@ -1772,8 +1527,9 @@ const getManageTournamentDisplayData = async (req, res) => {
           eliminated: team.eliminated
         };
       }));
-      return transformedEnrolledTeams;
+      return transformedEnrolledTeams.filter(team => team !== null);
     }
+
     const transformedEnrolledTeams = await transformEnrolledTeams(tournament.enrolledTeams);
 
     res.status(200).json({
@@ -1792,21 +1548,25 @@ const getManageTournamentDisplayData = async (req, res) => {
       updates: tournament.updates,
       isHost: isHost,
       application: tournament.application,
-      hasApplied: ((tournament.applications).map(app => app.user)).includes(userUUID),
+      hasApplied: tournament.applications.map(app => app.user).includes(userUUID),
       enrolledUsers: transformEnrolledUsers,
       enrolledTeams: transformedEnrolledTeams,
-      hasStarted: tournament.hasStarted,
       startDate: tournament.startDate,
       endDate: tournament.endDate,
       applications: transformedApps,
       matches: tournament.matches,
-      bank: tournament.bank
+      bank: tournament.bank,
+      rules: tournament.rules,
+      contactInfo: tournament.contactInfo,
+      bracketsShuffled: tournament.bracketsShuffled,
+      bracketOrder: tournament.bracketOrder,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
-}
+};
+
 
 
 const images = new Map();
@@ -2077,121 +1837,152 @@ const postUpdate = async (req, res) => {
 }
 
 const editSoloParticipants = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
+  );
+
   const { UUID, participants } = req.body;
+
+  console.log("UUID: ", UUID);
+  console.log("Participants: ", participants);
 
   const tournament = await Tournament.findOne({ _id: UUID });
   if (!tournament) {
     return res.status(404).send('Tournament not found');
   }
 
-  // check if user is host
+  // Check if user is host
   if (tournament.host != req.user) {
     return res.status(401).send('Unauthorized');
   }
 
-  // ensure tournament has started
-  // if (!tournament.hasStarted) {
-  //   return res.status(400).send('Tournament has not started');
-  // }
-
-  // ensure tournament is solo based
-  // if (tournament.teamSize != 1) {
-  //   return res.status(400).send('Tournament is not solo based');
-  // }
+  // Ensure tournament is solo based
+  if (tournament.teamSize != 1) {
+    return res.status(400).send('Tournament is not solo based');
+  }
 
   try {
-    // Create an array of update operations for each participant
-    const updateOperations = participants.map(participantData => ({
-      updateOne: {
-        filter: { _id: UUID, "enrolledUsers.UUID": participantData.UUID },
-        update: {
-          $set: {
-            "enrolledUsers.$.score": participantData.score,
-            "enrolledUsers.$.eliminated": participantData.eliminated
-          }
-        }
+    // Fetch UUIDs for each username
+    const userUUIDs = await Promise.all(participants.map(async participant => {
+      const user = await User.findOne({ username: participant.username });
+      if (!user) {
+        return res.status(404).send(`User '${participant.username}' not found`);
       }
+      return { username: participant.username, UUID: user._id, score: participant.score, eliminated: participant.eliminated };
     }));
+
+    // Filter out participants whose UUIDs could not be found
+    const validParticipants = userUUIDs.filter(participant => participant !== null);
+
+    // Create an array of update operations for each valid participant
+    const updateOperations = validParticipants.map(participantData => {
+      const filter = { _id: UUID, "enrolledUsers.UUID": participantData.UUID };
+      const update = {
+        $set: {
+          "enrolledUsers.$.score": participantData.score,
+          "enrolledUsers.$.eliminated": participantData.eliminated
+        }
+      };
+
+      return {
+        updateOne: {
+          filter,
+          update
+        }
+      };
+    });
+
+    if (updateOperations.length === 0) {
+      return res.status(400).send('No valid participants to update');
+    }
 
     // Execute all update operations in bulk
     const result = await Tournament.bulkWrite(updateOperations);
 
-    console.log(result)
-
-    console.log(`${result.modifiedCount} participants in tournament '${UUID}' updated successfully.`);
   } catch (error) {
     console.error(`Error updating participants in tournament '${UUID}':`, error);
+    return res.status(500).send('Internal Server Error');
   }
 
   res.status(200).send('Participants updated');
-}
+};
 
 const editTeamParticipants = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
+  );
+
   const { UUID, participants } = req.body;
-  console.log(UUID, participants)
+  console.log("UUID: ", UUID);
+  console.log("Participants: ", participants);
 
   const tournament = await Tournament.findOne({ _id: UUID });
+
   if (!tournament) {
     return res.status(404).send('Tournament not found');
   }
 
-  // check if user is host
+  // Check if user is host
   if (tournament.host != req.user) {
     return res.status(401).send('Unauthorized');
   }
 
-  // ennsure tournament has started
-  // if (!tournament.hasStarted) {
-  //   return res.status(400).send('Tournament has not started');
-  // }
-
-  // ensure tournament is team based
+  // Ensure tournament is team based
   if (tournament.teamSize == 1) {
     return res.status(400).send('Tournament is not team based');
   }
 
   try {
-    // Create an array of update operations for each team
-    const updateOperations = participants.map(teamData => ({
-      updateOne: {
-        filter: { _id: UUID, "enrolledTeams.teamName": teamData.teamName },
-        update: {
-          $set: {
-            "enrolledTeams.$.score": teamData.score,
-            "enrolledTeams.$.eliminated": teamData.eliminated
-          }
+    // Fetch UUIDs for each team member by username
+    const teamUpdates = await Promise.all(participants.map(async team => {
+      const teamMembers = await Promise.all(team.players.map(async player => {
+        const user = await User.findOne({ username: player.username });
+        if (!user) {
+          console.error(`User with username '${player.username}' not found`);
+          return null;
         }
-      }
+        return { username: player.username, UUID: user._id, score: player.score, eliminated: player.eliminated };
+      }));
+
+      // Filter out players whose UUIDs could not be found
+      const validTeamMembers = teamMembers.filter(member => member !== null);
+
+      return { ...team, players: validTeamMembers };
     }));
 
-    // Execute all update operations in bulk
-    const result = await Tournament.bulkWrite(updateOperations);
+    console.log("Team Updates: ", teamUpdates);
 
-    console.log(`${result.modifiedCount} teams in tournament '${UUID}' updated successfully.`);
+    // Update each team in the tournament
+    for (const teamData of teamUpdates) {
+      if (teamData.players.length > 0) {
+        await Tournament.updateOne(
+          { _id: UUID, "enrolledTeams.teamName": teamData.teamName },
+          {
+            $set: {
+              "enrolledTeams.$.score": teamData.score,
+              "enrolledTeams.$.eliminated": teamData.eliminated,
+              "enrolledTeams.$.players": teamData.players
+            }
+          }
+        );
+      }
+    }
+
+    console.log(`Teams in tournament '${UUID}' updated successfully.`);
+    res.status(200).send('Participants updated');
   } catch (error) {
     console.error(`Error updating teams in tournament '${UUID}':`, error);
+    return res.status(500).send('Internal Server Error');
   }
-
-  res.status(200).send('Participants updated');
-}
+};
 
 const editMatches = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
@@ -2224,6 +2015,10 @@ const editMatches = async (req, res) => {
   if (tournament.teamSize == 1) {
     for (let participant of matches) {
 
+      if (participant == null) {
+        break;
+      }
+
       const user = await User.findOne({ username: participant });
 
       if (!user) return res.status(404).json({ error: 'Match winners must be part of the tournament.' });
@@ -2234,6 +2029,10 @@ const editMatches = async (req, res) => {
   // ensure winners are part of the tournament
   if (tournament.teamSize > 1) {
     for (let participant of matches) {
+
+      if (participant == null) {
+        break;
+      }
 
       const team = await Team.findOne({ name: participant });
 
@@ -2300,7 +2099,7 @@ const startTournament = async (req, res) => {
   }
 
   // ensure tournament has enough participants
-  if (tournament.enrolledUsers?.length != tournament.maxCapacity || tournament.enrolledTeams?.length != tournament.maxCapacity) {
+  if (tournament.enrolledUsers?.length != tournament.maxCapacity && tournament.enrolledTeams?.length != tournament.maxCapacity) {
     return res.status(400).json({ error: 'Not enough participants' });
   }
 
@@ -2385,13 +2184,10 @@ const endTournament = async (req, res) => {
     // get team from teamName
     const winner = await Team.findOne({ name: winnerTeamName });
 
-    // divide earnings among team members
-    const earningsPerMember = earnings / winner.members.length;
-    for (let member of winner.members) {
-      const user = await User.findOne({ _id: member });
-      user.credits += earningsPerMember;
-      await user.save();
-    }
+    // give earnings to team leader
+    const leader = await User.findOne({ _id: winner.leader });
+    leader.credits += earnings;
+    await leader.save();
 
     // remove the amount from the tournament bank
     tournament.bank -= earnings;
@@ -2500,6 +2296,77 @@ const depositIntoTournamentBank = async (req, res) => {
   res.status(200).json({ message: 'Amount deposited into tournament bank' });
 }
 
+const shuffleBrackets = async (req, res) => {
+  const { UUID } = req.body;
+
+  try {
+    const tournament = await Tournament.findOne({ _id: UUID });
+    if (!tournament) {
+      return res.status(404).json({ error: 'Tournament not found' });
+    }
+
+    // check if user is host
+    if (tournament.host != req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // ensure tournament hasn't started
+    if (tournament.hasStarted) {
+      return res.status(400).json({ error: 'Tournament has already started' });
+    }
+
+    // ensure tournament hasn't ended
+    if (tournament.hasEnded) {
+      return res.status(400).json({ error: 'Tournament has already ended' });
+    }
+
+    // ensure it's a brackets tournament
+    if (tournament.type != 'brackets') {
+      return res.status(400).json({ error: 'Tournament is not brackets based' });
+    }
+
+    // ensure brackets are not already shuffled
+    if (tournament.bracketsShuffled) {
+      return res.status(400).json({ error: 'Brackets are already shuffled' });
+    }
+
+    let shuffledBrackets;
+    const maxSlots = tournament.maxCapacity / tournament.teamSize;
+
+    const fisherYatesShuffle = (array) => {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    };
+
+    if (tournament.teamSize == 1) {
+      shuffledBrackets = tournament.enrolledUsers.slice(); // Copy array
+      while (shuffledBrackets.length < maxSlots) {
+        shuffledBrackets.push(null); // Fill with placeholders
+      }
+      shuffledBrackets = fisherYatesShuffle(shuffledBrackets);
+      tournament.enrolledUsers = shuffledBrackets;
+    } else {
+      shuffledBrackets = tournament.enrolledTeams.slice(); // Copy array
+      while (shuffledBrackets.length < maxSlots) {
+        shuffledBrackets.push(null); // Fill with placeholders
+      }
+      shuffledBrackets = fisherYatesShuffle(shuffledBrackets);
+      tournament.enrolledTeams = shuffledBrackets;
+    }
+
+    tournament.bracketsShuffled = true;
+    await tournament.save();
+
+    res.status(200).json(shuffledBrackets);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   createTournament,
   getTournamentById,
@@ -2514,6 +2381,8 @@ module.exports = {
   handleJoinAsTeam,
   editTitle,
   editDescription,
+  editRules,
+  editContactInfo,
   editStartDate,
   editEndDate,
   getManageTournamentDisplayData,
@@ -2530,7 +2399,6 @@ module.exports = {
   editMatches,
   startTournament,
   endTournament,
-  depositIntoTournamentBank
+  depositIntoTournamentBank,
+  shuffleBrackets
 };
-
-
