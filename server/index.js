@@ -6,9 +6,14 @@
 // vercel adds its own environment variables, so you don't need to add them in the .env file
 // otherwise if its in development, it will use the .env.development file
 // so .env.production is useless until we migrate to another host other than vercel
+
+const dns = require("dns");
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
+
+
 console.log('NODE_ENV: ' + require('dotenv').config({ path: `.env` }).parsed.NODE_ENV)
 
-if(process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production') {
   require('dotenv').config({ path: `.env` })
 }
 else {
@@ -26,6 +31,11 @@ const adminRoute = require("./routes/adminRoutes");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const port = 2000;
+
+const Tournament = require("./models/tourneyModels"); // your tournaments model file name
+const { createTournaments } = require("./scripts/generateTestTournaments");
+const { createUsers } = require("./scripts/generateTestUsers");
+
 
 //middleware
 app.use(express.json());
@@ -48,11 +58,28 @@ app.all("*", (req, res) => {
   return;
 });
 
+async function seedTestDataIfTournamentsEmpty() {
+  const count = await Tournament.countDocuments();
+
+  if (count === 0) {
+    console.log("No tournaments found — seeding test users + tournaments...");
+
+    // tournaments script needs non-admin users first :contentReference[oaicite:0]{index=0}
+    await createUsers();        // :contentReference[oaicite:1]{index=1}
+    await createTournaments();  // :contentReference[oaicite:2]{index=2}
+
+    console.log("✅ Seed complete.");
+  } else {
+    console.log(`Tournaments already exist (${count}) — skipping seed.`);
+  }
+}
+
+
 mongoose
-  .connect(
-    `${process.env.DATABASE_URL}`
-  )
-  .then(() => {
+  .connect(`${process.env.DATABASE_URL}`)
+  .then(async () => {
+    await seedTestDataIfTournamentsEmpty();
+
     app.listen(port, () => {
       console.log(`Server running on http://localhost:${port}`);
     });
@@ -60,3 +87,4 @@ mongoose
   .catch((error) => {
     console.log(error);
   });
+
