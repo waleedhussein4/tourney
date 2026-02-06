@@ -27,6 +27,31 @@ async function getProductById(productId) {
   }
 }
 
+async function seedDefaultProducts() {
+  const defaults = [
+    {
+      id: "credits_100",
+      name: "100 Credits",
+      amount: 100,
+      price: 50
+    },
+    {
+      id: "credits_500",
+      name: "500 Credits",
+      amount: 500,
+      price: 250
+    },
+    {
+      id: "credits_1000",
+      name: "1000 Credits",
+      amount: 1000,
+      price: 500
+    }
+  ];
+
+  await Product.insertMany(defaults);
+}
+
 const getProducts = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true)
   res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
@@ -39,8 +64,17 @@ const getProducts = async (req, res) => {
   )
   console.log('Fetching products...')
   try {
-    const products = await Product.find({}).select('id name description price -_id');
+    let products = await Product.find({}).select('id name description price -_id');
+
+    // ✅ if empty, seed defaults then fetch again
+    if (!products || products.length === 0) {
+      console.log('No products found. Seeding default products...');
+      await seedDefaultProducts();
+      products = await Product.find({}).select('id name description price -_id');
+    }
+
     console.log('Products:', products)
+
     return res.status(200).json(products); // Send the products as JSON response
   } catch (error) {
     console.error('Error occurred while fetching products:', error);
