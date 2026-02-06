@@ -65,9 +65,8 @@ app.use("/api/purchase", purchaseRoute);
 app.use("/api/team", teamRoute);
 app.use("/api/admin", adminRoute);
 
-app.all("*", (req, res) => {
-  return;
-});
+app.all("*", (req, res) => res.sendStatus(404));
+
 
 async function seedTestDataIfTournamentsEmpty() {
   const count = await Tournament.countDocuments();
