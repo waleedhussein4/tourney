@@ -43,7 +43,23 @@ app.use((req, res, next) => {
   console.log(req.path, req.method);
   next();
 });
-app.use(cors({ origin: `${process.env.FRONTEND_URL}`, credentials: true }));
+// app.use(cors({ origin: `${process.env.FRONTEND_URL}`, credentials: true }));
+
+const allowedOrigins = [
+  process.env.FRONTEND_URL,                  // set this in Vercel env vars
+  "https://tourney-frontend-peach.vercel.app", // hardcode your deployed frontend
+  "http://localhost:5173",                   // local dev
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true); // allow server-to-server / curl
+    return cb(null, allowedOrigins.includes(origin));
+  },
+  credentials: true,
+}));
+app.options("*", cors()); // ✅ IMPORTANT for preflight
+
 console.log(`FRONTEND_URL: ${process.env.FRONTEND_URL}`)
 app.use(cookieParser());
 
