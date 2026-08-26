@@ -1,6 +1,7 @@
 /*
- * Global element styles and the handful of layout utilities every feature uses.
- * Component-specific styling lives next to its component.
+ * Global element styles: the typographic defaults, the focus ring, and the two
+ * utilities that must be reachable from anywhere. Everything else is a CSS
+ * Module sitting next to its component.
  */
 
 @import './tokens.css';
@@ -17,24 +18,55 @@
 
 html {
   color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   min-height: 100vh;
   background: var(--surface-page);
   color: var(--text);
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-size: var(--text-base);
-  line-height: 1.55;
+  line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/*
+ * A single, very faint bracket-tree wash behind the whole app. It is the
+ * signature motif at its quietest: you should notice it only if you look for
+ * it. Fixed, so it does not travel with the scroll.
+ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 34rem at 78% -12%, var(--accent-wash), transparent 70%),
+    radial-gradient(
+      48rem 30rem at -8% 4%,
+      color-mix(in srgb, var(--art-cyan) 7%, transparent),
+      transparent 65%
+    );
+}
+
+/*
+ * Display type: Archivo, set expanded and tight. Headings are the only place
+ * the display face appears by default — everywhere else it is opted into.
+ */
 h1,
 h2,
 h3,
-h4 {
+h4,
+h5 {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
   color: var(--text-strong);
-  line-height: 1.2;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  font-weight: 650;
   text-wrap: balance;
 }
 
@@ -46,9 +78,15 @@ h2 {
 }
 h3 {
   font-size: var(--text-xl);
+  line-height: var(--leading-snug);
 }
 h4 {
   font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+}
+h5 {
+  font-size: var(--text-base);
+  line-height: var(--leading-snug);
 }
 
 p {
@@ -61,7 +99,9 @@ a {
 }
 
 a:hover {
+  color: var(--accent-hover);
   text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 img,
@@ -76,6 +116,34 @@ select,
 textarea {
   font: inherit;
   color: inherit;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--violet-500) 40%, transparent);
+  color: var(--text-strong);
+}
+
+/* Scrollbars, brought into the palette rather than left as bright OS chrome. */
+* {
+  scrollbar-color: var(--ink-600) transparent;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ink-600);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-500);
+  background-clip: content-box;
 }
 
 /*
@@ -104,9 +172,9 @@ textarea {
   position: absolute;
   top: var(--space-2);
   left: var(--space-2);
-  z-index: 100;
+  z-index: var(--z-skip-link);
   padding: var(--space-2) var(--space-4);
-  background: var(--accent);
+  background: var(--accent-solid);
   color: var(--accent-ink);
   border-radius: var(--radius);
   transform: translateY(-200%);

@@ -1,0 +1,43 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.logo:hover {
+  text-decoration: none;
+  color: var(--text-strong);
+}
+
+.mark {
+  flex-shrink: 0;
+  color: var(--text-strong);
+  transition: color var(--duration) var(--ease-out);
+}
+
+.logo:hover .mark {
+  color: var(--accent);
+}
+
+/* The light variant is for anything printed on a pale surface. */
+.onLight,
+.onLight .mark {
+  color: var(--ink-950);
+}
+
+.sm {
+  font-size: var(--text-lg);
+}
+.md {
+  font-size: var(--text-xl);
+}
+.lg {
+  font-size: var(--text-4xl);
+}

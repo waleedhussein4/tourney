@@ -1,5 +1,7 @@
 /** Presentation helpers shared across features. */
 
+import { categoryName } from '/src/components/brand/index.js'
+
 const DATE = new Intl.DateTimeFormat(undefined, {
   day: 'numeric',
   month: 'short',
@@ -23,12 +25,13 @@ export function formatCredits(amount) {
   return `${amount} ${amount === 1 ? 'credit' : 'credits'}`
 }
 
-/** Turns a category slug into the label a reader expects. */
-export const formatCategory = (slug) =>
-  String(slug ?? '')
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
+/**
+ * Turns a category slug into the label a reader expects.
+ *
+ * The category table owns the names, because title-casing a slug gets "Moba"
+ * where a reader expects "MOBA".
+ */
+export const formatCategory = categoryName
 
 export const formatType = (type) => (type === 'brackets' ? 'Brackets' : 'Battle royale')
 
