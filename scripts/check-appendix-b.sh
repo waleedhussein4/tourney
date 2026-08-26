@@ -46,8 +46,10 @@ gate "no jsdom, init, or mongodb driver dependency" \
 gate "no dotenv or uuid in the client bundle" \
   grep -n "\"dotenv\"\|\"uuid\"" client/package.json
 
+# Shipped code only: the test suite names these dead routes on purpose, to
+# assert they answer 404.
 gate "no removeEarn or subHostEarninhgs" \
-  grep -rn "removeEarn\|subHostEarninhg" $S client/src --include=*.js --include=*.jsx
+  grep -rn "removeEarn\|subHostEarninhg" $S/src $S/scripts client/src --include=*.js --include=*.jsx
 
 gate "no raw Set-Cookie header" \
   grep -rn "setHeader('Set-Cookie'\|setHeader(\"Set-Cookie\"" $S/src
@@ -74,7 +76,7 @@ gate "no authReducer dead code" \
   grep -rn "authReducer" client/src
 
 gate "no checkMember middleware" \
-  grep -rn "checkMember" $S client/src --include=*.js --include=*.jsx
+  grep -rn "checkMember" $S/src $S/scripts client/src --include=*.js --include=*.jsx
 
 gate "no prompt/confirm/alert in the pages the server rewrite touched" \
   grep -rn "window\.prompt\|[^.]\bprompt(" client/src/pages/manage/Manage.jsx client/src/pages/tournament/Tournament.jsx
