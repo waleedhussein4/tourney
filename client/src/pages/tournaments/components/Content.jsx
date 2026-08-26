@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 import Tournament from './Tournament';
 
 function Content({ tournaments }) {

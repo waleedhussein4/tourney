@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 import './App.css';
 import '/src/styles/index.css';
 import { AuthContextProvider } from '../../context/AuthContext';
