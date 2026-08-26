@@ -1,11 +1,7 @@
 import { Router } from 'express'
 import { requireAdmin } from '../../middleware/auth.js'
 import { asyncHandler } from '../../utils/asyncHandler.js'
-import { createUsers, deleteUsers } from '../../../scripts/generateTestUsers.js'
-import {
-  createTournaments,
-  deleteAllTournaments,
-} from '../../../scripts/generateTestTournaments.js'
+import { clearDemoData, seedDemoData } from '../../../scripts/seed-data.js'
 
 export const adminRouter = Router()
 
@@ -15,33 +11,15 @@ export const adminRouter = Router()
 adminRouter.use(requireAdmin)
 
 adminRouter.post(
-  '/users',
+  '/seed',
   asyncHandler(async (_req, res) => {
-    const created = await createUsers()
-    res.json({ created: created.length })
+    res.json(await seedDemoData())
   })
 )
 
 adminRouter.delete(
-  '/users',
+  '/seed',
   asyncHandler(async (_req, res) => {
-    const { deletedCount } = await deleteUsers()
-    res.json({ deleted: deletedCount })
-  })
-)
-
-adminRouter.post(
-  '/tournaments',
-  asyncHandler(async (_req, res) => {
-    const created = await createTournaments()
-    res.json({ created: created.length })
-  })
-)
-
-adminRouter.delete(
-  '/tournaments',
-  asyncHandler(async (_req, res) => {
-    const { deletedCount } = await deleteAllTournaments()
-    res.json({ deleted: deletedCount })
+    res.json(await clearDemoData())
   })
 )

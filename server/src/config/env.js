@@ -104,10 +104,4 @@ function loadConfig() {
 
 const config = loadConfig()
 
-// Temporary bridge for the legacy modules still mounted while Phase 2 replaces
-// them module by module: they read `process.env.SECRET` directly. Writing the
-// validated value back under the legacy name means a `.env` using the new names
-// keeps the old code working. Removed with the last legacy file.
-process.env.SECRET = config.jwtSecret
-
 export default config

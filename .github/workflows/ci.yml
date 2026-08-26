@@ -30,6 +30,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Appendix B regression gates
+        run: npm run check:appendix-b
+
       # Placeholder until Phase 3 of PLAN.md adds the server test suite.
       - name: Test
         run: npm test

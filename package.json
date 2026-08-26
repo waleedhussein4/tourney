@@ -23,6 +23,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run test -w server",
+    "check:appendix-b": "bash scripts/check-appendix-b.sh",
     "seed": "npm run seed -w server"
   },
   "devDependencies": {
