@@ -1,0 +1,65 @@
+.browse {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.browse__filters {
+  position: sticky;
+  top: calc(var(--nav-height) + var(--space-4));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.browse__filters-title {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.browse__fee-range {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.browse__results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 20rem;
+}
+
+.browse__count {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.browse__pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.browse__page-of {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+@media (max-width: 860px) {
+  .browse {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .browse__filters {
+    position: static;
+  }
+}

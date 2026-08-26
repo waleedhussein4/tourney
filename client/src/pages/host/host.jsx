@@ -5,7 +5,7 @@ import "./app.css";
 import { Nav } from '/src/components/layout/Nav.jsx'
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'
-import { createTournament } from '/src/api/tournaments.js'
+import { createTournament } from '/src/api/legacy-tournaments.js'
 
 export default function Host() {
 

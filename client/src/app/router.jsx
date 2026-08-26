@@ -4,12 +4,12 @@ import { SignInPage } from '/src/features/auth/SignInPage.jsx'
 import { SignUpPage } from '/src/features/auth/SignUpPage.jsx'
 import { ProfilePage } from '/src/features/profile/ProfilePage.jsx'
 import { NotFoundPage } from '/src/features/misc/NotFoundPage.jsx'
+import { HomePage } from '/src/features/home/HomePage.jsx'
+import { BrowsePage } from '/src/features/tournaments/BrowsePage.jsx'
+import { TournamentPage } from '/src/features/tournaments/TournamentPage.jsx'
 
 // Legacy pages, replaced one feature at a time. Each import disappears with the
 // PR that rewrites the page behind it.
-import Home from '/src/pages/home/Home.jsx'
-import Tournaments from '/src/pages/tournaments/Tournaments.jsx'
-import Tournament from '/src/pages/tournament/Tournament.jsx'
 import Host from '/src/pages/host/host.jsx'
 import Manage from '/src/pages/manage/Manage.jsx'
 import Team from '/src/pages/team/Team.jsx'
@@ -31,9 +31,9 @@ export function Router() {
   return (
     <Routes>
       {/* Public — a guest can browse the whole catalogue. */}
-      <Route path="/" element={<Home />} />
-      <Route path="/tournaments" element={<Tournaments />} />
-      <Route path="/tournament/:UUID?" element={<Tournament />} />
+      <Route path="/" element={<HomePage />} />
+      <Route path="/tournaments" element={<BrowsePage />} />
+      <Route path="/tournament/:UUID" element={<TournamentPage />} />
       <Route path="/credits" element={<Credits />} />
 
       {/* Signed out only. */}
