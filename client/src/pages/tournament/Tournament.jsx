@@ -1,8 +1,8 @@
+import { useAuth } from '/src/features/auth/useAuth.js'
 import { useEffect, useState } from "react";
 import { useContext } from "react";
-import { AuthContext } from "/src/context/AuthContext";
 import "./styles/App.css";
-import Nav from "/src/components/Nav.jsx";
+import { Nav } from '/src/components/layout/Nav.jsx'
 import alpha_x from "/src/assets/alpha-x.svg";
 import SoloBrackets from "./components/SoloBrackets";
 import TeamBrackets from "./components/TeamBrackets";
@@ -14,7 +14,7 @@ import * as api from '/src/api/tournaments.js';
 const teamsURL = '/api/teams/mine';
 
 function Tournament() {
-  const { loggedIn } = useContext(AuthContext);
+  const { isAuthenticated } = useAuth();
 
   const navigate = useNavigate();
 
@@ -136,7 +136,7 @@ function Tournament() {
 
   let button;
 
-  if (!loggedIn) {
+  if (!isAuthenticated) {
     button = (
       <button className="btn btn-primary" onClick={() => navigate("/signin")}>
         Sign in to join
@@ -541,9 +541,9 @@ function Tournament() {
           </>
         )}
       </div>
-      {tournament.teamSize == 1 && loggedIn && <SoloPopup />}
-      {tournament.teamSize > 1 && loggedIn && <TeamPopup />}
-      {tournament.accessibility == "application required" && loggedIn ? (
+      {tournament.teamSize == 1 && isAuthenticated && <SoloPopup />}
+      {tournament.teamSize > 1 && isAuthenticated && <TeamPopup />}
+      {tournament.accessibility == "application required" && isAuthenticated ? (
         <>
           {tournament.teamSize == 1 && <SoloApplicationPopup />}
           {tournament.teamSize > 1 && <TeamApplicationPopup />}

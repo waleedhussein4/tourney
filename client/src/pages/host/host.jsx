@@ -1,15 +1,15 @@
+import { useAuth } from '/src/features/auth/useAuth.js'
 import React, { useContext, useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
 import "./app.css";
-import Nav from "../../components/Nav";
-import { AuthContext } from "../../context/AuthContext";
+import { Nav } from '/src/components/layout/Nav.jsx'
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'
 import { createTournament } from '/src/api/tournaments.js'
 
 export default function Host() {
 
-  const { loggedIn } = useContext(AuthContext);
+  const { isAuthenticated } = useAuth();
 
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -95,11 +95,11 @@ export default function Host() {
   }, []);
 
   useEffect(() => {
-    if (loggedIn === undefined) return
-    if (!loggedIn) {
+    if (isAuthenticated === undefined) return
+    if (!isAuthenticated) {
       navigate('/signin')
     }
-  }, [loggedIn]);
+  }, [isAuthenticated]);
 
   const handleTitleChange = (e) => {
     setTitleVal(e.target.value);
