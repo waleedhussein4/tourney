@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 import { useState } from 'react';
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
 import '../styles/Brackets.css';
