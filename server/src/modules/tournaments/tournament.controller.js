@@ -15,7 +15,7 @@ export const trending = asyncHandler(async (req, res) => {
   res.json({ tournaments: toListItems(tournaments) })
 })
 
-/** The fixed category list. Artwork for each is added in Phase 5. */
+/** The fixed category list every tournament is filed under. */
 export const categories = asyncHandler(async (_req, res) => {
   res.json({ categories: CATEGORIES })
 })

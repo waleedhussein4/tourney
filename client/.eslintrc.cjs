@@ -23,10 +23,9 @@ module.exports = {
     },
     {
       // Legacy SPA inherited from the university project. It trips prop-types,
-      // unused-vars, and unescaped-entity rules across most components; the
-      // Phase 4 rewrite (PLAN.md §6) replaces these files wholesale. Exempting
-      // them here lets CI gate every *new* component strictly instead of being
-      // permanently red.
+      // unused-vars, and unescaped-entity rules across most components, and the
+      // client rewrite replaces these files wholesale. Exempting them here lets
+      // CI gate every *new* component strictly instead of being permanently red.
       files: ['src/**/*.{js,jsx}'],
       rules: {
         'no-undef': 'off',

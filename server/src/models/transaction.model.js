@@ -9,8 +9,7 @@ const { Schema } = mongoose
  *
  * `amount` is signed from the user's point of view: positive means credits
  * arrived, negative means they left. Summing a user's amounts therefore
- * reproduces their balance, which is what the conservation tests in Phase 3
- * assert.
+ * reproduces their balance, which is what the conservation tests assert.
  */
 const transactionSchema = new Schema(
   {

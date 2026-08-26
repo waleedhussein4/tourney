@@ -17,6 +17,6 @@ assignees: ''
 ## Scope
 
 - Area: <!-- client / server / both -->
-- Does this stay inside the frozen stack and feature set? <!-- see PLAN.md §0 -->
+- Does this stay inside the current stack and feature set?
 
 ## Anything else

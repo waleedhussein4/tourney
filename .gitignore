@@ -29,6 +29,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Scratch notes kept alongside a checkout, never published
+/notes/
+*.local.md
+
 # Editors
 .vscode/*
 !.vscode/extensions.json

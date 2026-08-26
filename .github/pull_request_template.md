@@ -1,6 +1,6 @@
 ## What
 
-<!-- The change, in a few lines. Reference the plan section, e.g. "Plan §4, PR 2 of 5". -->
+<!-- The change, in a few lines. -->
 
 ## Why
 
@@ -8,8 +8,7 @@
 
 ## How
 
-<!-- Approach, trade-offs, and anything a reviewer would otherwise have to guess.
-     Call out decisions the plan left open. -->
+<!-- Approach, trade-offs, and anything a reviewer would otherwise have to guess. -->
 
 ## Screenshots
 
@@ -22,5 +21,5 @@
 - [ ] `npm run build` passes
 - [ ] `main` stays deployable after this merge
 - [ ] Conventional commit messages
-- [ ] No core feature removed (PLAN.md Appendix A)
+- [ ] No core feature removed
 - [ ] No secrets, no copyrighted assets, no `console.log` in new code
