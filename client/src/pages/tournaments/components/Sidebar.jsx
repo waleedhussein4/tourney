@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 import '../styles/Sidebar.css'
 import { useEffect, useState } from 'react'
 

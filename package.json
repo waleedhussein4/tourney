@@ -1,0 +1,32 @@
+{
+  "name": "tourney",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Tournament hosting platform — brackets & battle royale, teams, credits economy. MERN monorepo.",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,green \"npm:dev -w server\" \"npm:dev -w client\"",
+    "dev:server": "npm run dev -w server",
+    "dev:client": "npm run dev -w client",
+    "build": "npm run build -w client",
+    "start": "npm run start -w server",
+    "lint": "npm run lint -w server && npm run lint -w client",
+    "lint:fix": "npm run lint:fix -w server && npm run lint:fix -w client",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test -w server",
+    "seed": "npm run seed -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.4.2"
+  }
+}

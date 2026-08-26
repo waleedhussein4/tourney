@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 import Nav from '/src/components/Nav.jsx'
 
 import { useEffect, useState } from 'react';

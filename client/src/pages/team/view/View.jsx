@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 import Nav from "/src/components/Nav.jsx";
 import "./styles/App.css";
 import crown from "./assets/crown.webp";
