@@ -1,6 +1,6 @@
-const Tournament = require('../models/tourneyModels')
-const User = require('../models/userModel')
-const jwt = require('jsonwebtoken')
+import Tournament from '../models/tourneyModels.js'
+import User from '../models/userModel.js'
+import jwt from 'jsonwebtoken'
 
 const createToken = (_id, expiry) => {
   return jwt.sign({ _id }, process.env.SECRET, { expiresIn: expiry })
@@ -8,15 +8,6 @@ const createToken = (_id, expiry) => {
 
 // login a user
 const loginUser = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   const { email, password, rememberPassword } = req.body
 
   try {
@@ -42,15 +33,6 @@ const loginUser = async (req, res) => {
 
 // signup a user
 const signupUser = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   const { email, userName, password } = req.body
 
   try {
@@ -73,15 +55,6 @@ const signupUser = async (req, res) => {
 }
 
 const logoutUser = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   console.log('logout user')
   res.setHeader('Set-Cookie', `token=${''}; HttpOnly; Path=/; SameSite=None; Secure`)
   res.cookie("token", "", {
@@ -92,15 +65,6 @@ const logoutUser = async (req, res) => {
 }
 
 const loggedIn = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   try {
     const token = req.cookies.token
     if (!token) return res.json(false)
@@ -116,15 +80,6 @@ const loggedIn = async (req, res) => {
 // a payement route that will be used to make payments wether to purchase credits, become host or ... "/payment"
 // implement the payment process coming from the client side
 const paymentProcess = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   console.log("in payment process");
 
   try {
@@ -142,15 +97,6 @@ const paymentProcess = async (req, res) => {
 
 // become host route that updates isHost to true
 const becomeHost = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   try {
     console.log("in try for become host");
     // Find the user by ID stored in req.user
@@ -181,15 +127,6 @@ const becomeHost = async (req, res) => {
 };
 
 const profile = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   const userUUID = req.user
   try {
     console.log("in try for profile");
@@ -206,15 +143,6 @@ const profile = async (req, res) => {
 }
 
 const getisHost = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
 
   try {
     // Assuming `req.user.id` is available and contains the user's ID
@@ -237,15 +165,6 @@ const getisHost = async (req, res) => {
 }
 
 const getIsAdmin = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
 
   try {
     // Assuming `req.user.id` is available and contains the user's ID
@@ -268,15 +187,6 @@ const getIsAdmin = async (req, res) => {
 }
 
 const subHostEarninhgs = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   try {
     const user = await User.findById(req.user);
     const winnerPrize = req.body.winnerPrize;
@@ -295,4 +205,15 @@ const subHostEarninhgs = async (req, res) => {
 
 }
 
-module.exports = { signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile, getisHost, getIsAdmin, subHostEarninhgs }
+export {
+  signupUser,
+  loginUser,
+  logoutUser,
+  loggedIn,
+  paymentProcess,
+  becomeHost,
+  profile,
+  getisHost,
+  getIsAdmin,
+  subHostEarninhgs,
+}

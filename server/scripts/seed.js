@@ -3,30 +3,25 @@
 //
 // Phase 3 of PLAN.md replaces this with a richer, idempotent seed.
 
-const mongoose = require('mongoose')
+/* eslint-disable no-console -- this script's output is its user interface. */
 
-let config
-try {
-  config = require('../src/config/env')
-} catch (error) {
-  console.error(error.message)
-  process.exit(1)
-}
-const { createUsers } = require('./generateTestUsers')
-const { createTournaments } = require('./generateTestTournaments')
+import { connectToDatabase, disconnectFromDatabase } from '../src/db/connect.js'
+import { createUsers } from './generateTestUsers.js'
+import { createTournaments } from './generateTestTournaments.js'
 
 async function seed() {
-  await mongoose.connect(config.mongodbUri)
+  await connectToDatabase()
   console.log('Connected. Seeding demo users and tournaments...')
 
   await createUsers()
   await createTournaments()
 
   console.log('Seed complete.')
-  await mongoose.disconnect()
+  await disconnectFromDatabase()
 }
 
-seed().catch((error) => {
+seed().catch(async (error) => {
   console.error('Seed failed:', error)
-  process.exit(1)
+  await disconnectFromDatabase().catch(() => {})
+  process.exitCode = 1
 })
