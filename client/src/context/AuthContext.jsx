@@ -1,65 +1,35 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 
 export const AuthContext = createContext();
 
-export const authReducer = (state, action) => {
-  switch (action.type) {
-    case 'LOGIN':
-      return { user: action.payload }
-    case 'LOGOUT':
-      return { user: null }
-    default:
-      return state
-  }
-}
-
 export const AuthContextProvider = (props) => {
-  const [loggedIn, setLoggedIn] = useState(undefined);
-  const [isHost, setIsHost] = useState(undefined);
-  const [isAdmin, setIsAdmin] = useState(undefined);
+  // `undefined` means "not known yet" and keeps guards from redirecting during
+  // the first render; `null` means "definitely signed out".
+  const [user, setUser] = useState(undefined);
 
-  async function getLoggedIn() {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/loggedIn`, {
-      credentials: 'include'
-    })
-      .then(res => res.json())
-      .then(data => {
-        setLoggedIn(data)
-        return data
-      })
-  }
-
-  async function getIsHost() {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/isHost`, {
-      credentials: 'include'
-    })
-      .then(res => res.json())
-      .then(data => {
-        setIsHost(data)
-        return data
-      })
-  }
-
-  async function getIsAdmin() {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/isAdmin`, {
-      credentials: 'include'
-    })
-      .then(res => res.json())
-      .then(data => {
-        setIsAdmin(data)
-        return data
-      })
-  }
+  const refreshUser = useCallback(async () => {
+    const response = await fetch("/api/users/me", { credentials: "include" });
+    // A 401 is the signed-out answer, not an error — and, unlike the old
+    // endpoints, its body can never be mistaken for a truthy isHost/isAdmin.
+    const nextUser = response.ok ? (await response.json()).user : null;
+    setUser(nextUser);
+    return nextUser;
+  }, []);
 
   useEffect(() => {
-    getLoggedIn()
-    getIsHost()
-    getIsAdmin()
-  }, [])
+    refreshUser();
+  }, [refreshUser]);
 
-  return <AuthContext.Provider value={{ loggedIn, getLoggedIn, isHost, isAdmin }}>
-    {props.children}
-  </AuthContext.Provider>
-}
+  const value = {
+    user,
+    loggedIn: user === undefined ? undefined : user !== null,
+    isHost: user === undefined ? undefined : Boolean(user?.isHost),
+    isAdmin: user === undefined ? undefined : Boolean(user?.isAdmin),
+    getLoggedIn: refreshUser,
+    refreshUser,
+  };
 
-export default AuthContext
+  return <AuthContext.Provider value={value}>{props.children}</AuthContext.Provider>;
+};
+
+export default AuthContext;

@@ -26,20 +26,7 @@ function Signin() {
 
   const handleRememberPasswordChange = () => {
     setRememberPassword(!rememberPassword);
-    if (!rememberPassword) {
-      localStorage.setItem('rememberedPassword', pass);
-    } else {
-      localStorage.removeItem('rememberedPassword');
-    }
   };
-
-  useEffect(() => {
-    const rememberedPassword = localStorage.getItem('rememberedPassword');
-    if (rememberedPassword) {
-      setPass(rememberedPassword);
-      setRememberPassword(true);
-    }
-  }, []);
 
   useEffect(() => {
     if(loggedIn) {

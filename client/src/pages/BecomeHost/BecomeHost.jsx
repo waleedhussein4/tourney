@@ -6,7 +6,7 @@ import AuthContext from '../../context/AuthContext';
 
 const BecomeHost = () => {
 
-  const { loggedIn, isHost } = useContext(AuthContext);
+  const { loggedIn, isHost, refreshUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -15,17 +15,10 @@ const BecomeHost = () => {
     setLoading(true);
     let creditResponse
 
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    })
-      .then((res) => res.json())
+    await fetch('/api/users/me', { credentials: 'include' })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        console.log(data)
-        creditResponse = data
+        creditResponse = data?.user ?? { credits: 0 }
       })
 
     if (creditResponse.credits >= 20) {
@@ -43,17 +36,17 @@ const BecomeHost = () => {
   };
 
   const becomeHost = async () => {
-    console.log("in become host")
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/becomehost`,
-      {
-        method: 'POST',
-        credentials: 'include',
-      })
-      .then((res) => {
-        if (res.ok) {
-          navigate("/")
-        }
-      })
+    const response = await fetch('/api/users/me/become-host', {
+      method: 'POST',
+      credentials: 'include',
+    })
+    if (!response.ok) {
+      const json = await response.json()
+      alert(json.error?.message ?? 'Could not become a host.')
+      return
+    }
+    await refreshUser()
+    navigate('/')
   };
 
   useEffect(() => {
