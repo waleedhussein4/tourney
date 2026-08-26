@@ -22,8 +22,8 @@ export const TRANSACTION_TYPES = [
 
 /**
  * Tournament categories. Fixed list rather than free text so filtering, seeding,
- * and the category artwork added in Phase 5 all agree on the same set. Each
- * `slug` maps to a local, original SVG card — no third-party game imagery.
+ * and the category artwork all agree on the same set. Each `slug` maps to a
+ * local, original SVG card — no third-party game imagery.
  */
 export const CATEGORIES = [
   { slug: 'battle-royale', name: 'Battle Royale' },

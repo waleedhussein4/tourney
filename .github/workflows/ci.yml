@@ -38,8 +38,8 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Appendix B regression gates
-        run: npm run check:appendix-b
+      - name: Regression gates
+        run: npm run check:regressions
 
       - name: Test
         run: npm test
