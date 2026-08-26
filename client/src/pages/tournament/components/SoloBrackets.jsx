@@ -2,20 +2,16 @@
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
 import '../styles/Brackets.css';
 import Leaderboard from './Leaderboard';
+import { useNavigate } from 'react-router-dom';
 
-const handlePlayerClick = (e) => {
-  if (e.target.classList.contains('tba')) {
-    return;
-  }
-  navigate(`/profile/${e.target.innerText}`);
-};
+const CustomSeed = ({ seed, breakpoint }) => {
+  const navigate = useNavigate();
 
-const CustomSeed = ({ seed, breakpoint, roundIndex, seedIndex }) => {
-  // breakpoint passed to Bracket component
-  // to check if mobile view is triggered or not
+  const handlePlayerClick = (event) => {
+    if (event.target.classList.contains('tba')) return;
+    navigate(`/profile/${event.target.innerText}`);
+  };
 
-  // mobileBreakpoint is required to be passed down to a seed
-  console.log('Seed: ' + JSON.stringify(seed));
   return (
     <Seed mobileBreakpoint={breakpoint} style={{ fontSize: 12 }}>
       <SeedItem>
@@ -37,7 +33,6 @@ const BracketsComponent = ({ tournament }) => {
   };
 
   const generateRoundsFromUsers = (users) => {
-    console.log('Users: ' + JSON.stringify(users));
     let matches = 0;
     let rounds = [];
     let currentRoundUsers = [...users];
@@ -79,7 +74,7 @@ const BracketsComponent = ({ tournament }) => {
   };
 
   const usersWithPlaceholders = [...tournament.enrolledUsers];
-  for (let i = 0; i < tournament.maxCapacity / tournament.teamSize; i++) {
+  for (let i = 0; i < tournament.maxCapacity; i++) {
     if (!tournament.enrolledUsers[i]) {
       usersWithPlaceholders.push({ username: undefined });
     }

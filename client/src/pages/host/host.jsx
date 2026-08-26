@@ -5,6 +5,7 @@ import Nav from "../../components/Nav";
 import { AuthContext } from "../../context/AuthContext";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'
+import { createTournament } from '/src/api/tournaments.js'
 
 export default function Host() {
 
@@ -67,6 +68,9 @@ export default function Host() {
   const [contactInstagram, setContactInstagram] = useState('');
   const [contactTwitter, setContactTwitter] = useState('');
   const [contactFacebook, setContactFacebook] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [scheduleError, setScheduleError] = useState('');
 
   useEffect(() => {
 
@@ -240,13 +244,12 @@ export default function Host() {
     if (isLoading) return;
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/tournement/getTournamentCategories`);
+        const response = await fetch("/api/tournaments/categories");
         if (!response.ok) {
           throw new Error("Failed to fetch categories");
         }
         const data = await response.json();
-        setCategories(data);
-        console.log(data);
+        setCategories(data.categories);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -360,83 +363,55 @@ export default function Host() {
     }
     else {
 
-      if (selectedType === "Bracket") {
-        var formData = {
-          title: titleVal,
-          teamSize: teamSize,
-          description: describeVal,
-          type: selectedType,
-          category: selectedGame,
-          entryFee: entryFee,
-          earnings: winnerPrize,
-          accessibility: selectedEntryMode,
-          maxCapacity: numberOfBrackets,
-          applications: additionalInfoData,
-          rules: rules,
-          contactInfo: {
-            email: contactEmail,
-            phone: contactPhone,
-            socialMedia: {
-              discord: contactDiscord,
-              instagram: contactInstagram,
-              twitter: contactTwitter,
-              facebook: contactFacebook,
-            },
-          },
-        };
+      if (!startDate || !endDate) {
+        e.preventDefault();
+        setScheduleError('Choose when the tournament starts and ends');
+        return;
       }
-      else {
-        formData = {
-          title: titleVal,
-          description: describeVal,
-          type: selectedType,
-          category: selectedGame,
-          teamSize: teamSize,
-          entryFee: entryFee,
-          earnings: inputPrizes,
-          accessibility: selectedEntryMode,
-          maxCapacity: maxParticipants,
-          applications: additionalInfoData,
-          rules: rules,
-          contactInfo: {
-            email: contactEmail,
-            phone: contactPhone,
-            socialMedia: {
-              discord: contactDiscord,
-              instagram: contactInstagram,
-              twitter: contactTwitter,
-              facebook: contactFacebook,
-            },
-          },
-        }
+      if (new Date(endDate) <= new Date(startDate)) {
+        e.preventDefault();
+        setScheduleError('The end must be after the start');
+        return;
       }
+
+      const isBracket = selectedType === "Bracket";
+      const formData = {
+        title: titleVal,
+        type: isBracket ? "brackets" : "battle royale",
+        category: selectedGame,
+        accessibility: selectedEntryMode.toLowerCase(),
+        teamSize: Number(teamSize) || 1,
+        entryFee: Number(entryFee) || 0,
+        maxCapacity: Number(isBracket ? numberOfBrackets : maxParticipants),
+        description: describeVal,
+        rules,
+        startDate: new Date(startDate).toISOString(),
+        endDate: new Date(endDate).toISOString(),
+        applicationForm: additionalInfoData.filter(Boolean),
+        contactInfo: {
+          email: contactEmail,
+          phone: contactPhone,
+          socialMedia: {
+            discord: contactDiscord,
+            instagram: contactInstagram,
+            twitter: contactTwitter,
+            facebook: contactFacebook,
+          },
+        },
+        ...(isBracket
+          ? { prize: Number(winnerPrize) || 0 }
+          : { prizes: inputPrizes.map((entry) => ({ rank: entry.rank, prize: Number(entry.prize) || 0 })) }),
+      };
+
       try {
-        console.log("hi");
-        console.log(formData);
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/tournement`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-          credentials: 'include'
-        });
-        if (!response.ok) {
-          const errors = await response.json();
-          setSubmitErrors(errors.errors);
-          throw new Error('Failed to create tournament');
-        }
-
-        if (response.ok) {
-          const data = await response.json()
-          navigate("/tournament/" + data.UUID)
-        }
-
-        // Handle successful response (optional)
-        console.log('Tournament created successfully!');
-      } catch (error) {
-        console.error('Error creating tournament:', error);
-        // Handle error (e.g., show error message to the user)
+        const { tournament } = await createTournament(formData);
+        navigate("/tournament/" + tournament.id);
+      } catch (failure) {
+        setSubmitErrors(
+          failure.details?.length
+            ? failure.details.map((detail) => `${detail.path}: ${detail.message}`)
+            : [failure.message]
+        );
       }
     }
   };
@@ -514,11 +489,30 @@ export default function Host() {
                       >
                         <option value="" disabled hidden>Select a category</option>
                         {categories.map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                          <option key={category.slug} value={category.slug}>
+                            {category.name}
                           </option>
                         ))}
                       </select>
+                    </div>
+                    <div className="form-group" id="schedule">
+                      <h2>Schedule:</h2>
+                      <span id="teamTypeError" style={{ display: scheduleError ? 'block' : 'none' }}>
+                        {scheduleError}</span>
+                      <label htmlFor="startDate">Starts</label>
+                      <input
+                        id="startDate"
+                        type="datetime-local"
+                        value={startDate}
+                        onChange={(e) => { setStartDate(e.target.value); setScheduleError(''); }}
+                      />
+                      <label htmlFor="endDate">Ends</label>
+                      <input
+                        id="endDate"
+                        type="datetime-local"
+                        value={endDate}
+                        onChange={(e) => { setEndDate(e.target.value); setScheduleError(''); }}
+                      />
                     </div>
                     <div className="form-group" id="participantNumber" style={{ display: typeSpec ? 'none' : 'block' }}>
                       <h2>Maximum Number of Participants:</h2>

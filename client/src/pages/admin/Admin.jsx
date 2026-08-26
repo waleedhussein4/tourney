@@ -19,49 +19,23 @@ function Main() {
     }
   }, [loggedIn, isAdmin]);
 
-  async function createTestUsers() {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/createUsers`, {
-      method: 'POST',
-      credentials: 'include'
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log(data)
-      })
+  const [status, setStatus] = useState('')
+
+  async function run(label, path, method) {
+    setStatus(`${label}…`)
+    const response = await fetch(path, { method, credentials: 'include' })
+    const data = await response.json().catch(() => null)
+    setStatus(
+      response.ok
+        ? `${label}: ${JSON.stringify(data)}`
+        : `${label} failed — ${data?.error?.message ?? response.status}`
+    )
   }
 
-  async function deleteUsers() {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/deleteUsers`, {
-      method: 'DELETE',
-      credentials: 'include'
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log(data)
-      })
-  }
-
-  async function createTournaments() {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/createTournaments`, {
-      method: 'POST',
-      credentials: 'include'
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log(data)
-      })
-  }
-
-  async function deleteAllTournaments() {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/deleteAllTournaments`, {
-      method: 'DELETE',
-      credentials: 'include'
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log(data)
-      })
-  }
+  const createTestUsers = () => run('Create users', '/api/admin/users', 'POST')
+  const deleteUsers = () => run('Delete users', '/api/admin/users', 'DELETE')
+  const createTournaments = () => run('Create tournaments', '/api/admin/tournaments', 'POST')
+  const deleteAllTournaments = () => run('Delete tournaments', '/api/admin/tournaments', 'DELETE')
 
   return (
     <div id="main">
@@ -69,6 +43,7 @@ function Main() {
       <button id="btn_deleteUsers" onClick={() => deleteUsers()}>Delete Users</button>
       <button id="btn_createTournaments" onClick={() => createTournaments()}>Create Tournaments</button>
       <button id="btn_deleteAllTournaments" onClick={() => deleteAllTournaments()}>Delete All Tournaments</button>
+      <p className="status">{status}</p>
     </div>
   );
 }

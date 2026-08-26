@@ -1,8 +1,7 @@
 import crypto from 'node:crypto'
 import Team from '../../models/team.model.js'
 import User from '../../models/user.model.js'
-// Repointed to the rewritten tournament model in PR 4.
-import Tournament from '../../../models/tourneyModels.js'
+import Tournament from '../../models/tournament.model.js'
 import { ApiError } from '../../utils/ApiError.js'
 
 // No I, O, 0 or 1: a join code gets read aloud and typed from a screenshot.
@@ -184,9 +183,7 @@ async function assertRosterIsMutable(team, action) {
   const active = await Tournament.exists({
     hasStarted: true,
     hasEnded: { $ne: true },
-    // `teamName` is how the legacy tournament schema records an enrolled team;
-    // PR 4 replaces it with `teamId` and this clause goes away.
-    $or: [{ 'enrolledTeams.teamId': team._id }, { 'enrolledTeams.teamName': team.name }],
+    'enrolledTeams.teamId': team._id,
   })
 
   if (active) {

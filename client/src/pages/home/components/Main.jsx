@@ -12,24 +12,17 @@ function Main() {
   const { loggedIn } = useContext(AuthContext)
 
   const getTrendingTournaments = async () => {
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/getTrendingTournaments`;
-    await fetch(URL)
-    .then((res) => res.json())
-    .then((data) => {
-      setTrendingTournaments(data);
-    });
+    const response = await fetch('/api/tournaments/trending')
+    if (!response.ok) return
+    const data = await response.json()
+    setTrendingTournaments(data.tournaments)
   }
 
   const getMyTournaments = async () => {
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/getMyTournaments`;
-    await fetch(URL,
-      {
-        credentials: 'include',
-      })
-    .then((res) => res.json())
-    .then((data) => {
-      setMyTournaments(data);
-    });
+    const response = await fetch('/api/tournaments/mine', { credentials: 'include' })
+    if (!response.ok) return
+    const data = await response.json()
+    setMyTournaments(data.tournaments)
   }
   
   useEffect(() => {
