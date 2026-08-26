@@ -1,8 +1,8 @@
-import './Card.css'
+import styles from './Card.module.css'
 
 export function Card({ as: Tag = 'div', className = '', children, ...rest }) {
   return (
-    <Tag className={`card ${className}`} {...rest}>
+    <Tag className={`${styles.card} ${className}`} {...rest}>
       {children}
     </Tag>
   )
@@ -10,12 +10,12 @@ export function Card({ as: Tag = 'div', className = '', children, ...rest }) {
 
 export function CardHeader({ title, subtitle, actions }) {
   return (
-    <header className="card__header">
+    <header className={styles.header}>
       <div>
-        <h3 className="card__title">{title}</h3>
-        {subtitle && <p className="card__subtitle">{subtitle}</p>}
+        <h3 className={styles.title}>{title}</h3>
+        {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
       </div>
-      {actions && <div className="card__actions">{actions}</div>}
+      {actions && <div className={styles.actions}>{actions}</div>}
     </header>
   )
 }

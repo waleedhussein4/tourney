@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import './Accordion.css'
+import styles from './Accordion.module.css'
 
 /**
  * A disclosure section.
@@ -19,18 +19,18 @@ export function Accordion({ title, defaultOpen = false, children }) {
   const buttonId = `${id}-button`
 
   return (
-    <div className={`accordion ${open ? 'accordion--open' : ''}`}>
-      <h3 className="accordion__heading">
+    <div className={`${styles.accordion} ${open ? styles.open : ''}`}>
+      <h3 className={styles.heading}>
         <button
           type="button"
           id={buttonId}
-          className="accordion__trigger"
+          className={styles.trigger}
           aria-expanded={open}
           aria-controls={panelId}
           onClick={() => setOpen((wasOpen) => !wasOpen)}
         >
           <span>{title}</span>
-          <span className="accordion__chevron" aria-hidden="true" />
+          <span className={styles.chevron} aria-hidden="true" />
         </button>
       </h3>
 
@@ -39,7 +39,7 @@ export function Accordion({ title, defaultOpen = false, children }) {
         role="region"
         aria-labelledby={buttonId}
         hidden={!open}
-        className="accordion__panel"
+        className={styles.panel}
       >
         {children}
       </div>

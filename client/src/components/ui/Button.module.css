@@ -1,0 +1,101 @@
+/*
+ * Buttons carry the display face: expanded, tight, and a touch of tracking.
+ * They are one of the few places outside a heading where it appears, which is
+ * what makes an action look like an action.
+ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+/* A press should feel like a press — 1px, not a bounce. */
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.md {
+  padding: 0.6875rem var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.sm {
+  padding: 0.4375rem var(--space-3);
+  font-size: var(--text-xs);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primary {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  box-shadow: var(--edge-light);
+}
+.primary:hover:not(:disabled) {
+  background: var(--accent-solid-hover);
+  box-shadow:
+    var(--edge-light),
+    0 6px 20px -8px var(--accent-glow);
+}
+
+.secondary {
+  background: var(--surface-overlay);
+  border-color: var(--border-strong);
+  color: var(--text-strong);
+  box-shadow: var(--edge-light);
+}
+.secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--border-accent);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--text-muted);
+}
+.ghost:hover:not(:disabled) {
+  background: var(--surface-overlay);
+  color: var(--text-strong);
+}
+
+.danger {
+  background: var(--danger-solid);
+  color: #fff;
+  box-shadow: var(--edge-light);
+}
+.danger:hover:not(:disabled) {
+  background: var(--danger-solid-hover);
+}
+
+.spinner {
+  width: 0.85em;
+  height: 0.85em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

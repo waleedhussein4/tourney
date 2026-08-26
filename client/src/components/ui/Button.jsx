@@ -1,4 +1,4 @@
-import './Button.css'
+import styles from './Button.module.css'
 
 /**
  * @param {object} props
@@ -18,13 +18,13 @@ export function Button({
   return (
     <button
       type="button"
-      className={`btn btn--${variant} btn--${size} ${className}`}
+      className={`${styles.btn} ${styles[variant]} ${styles[size]} ${className}`}
       disabled={disabled || loading}
       // Tells a screen reader the control is working rather than broken.
       aria-busy={loading || undefined}
       {...rest}
     >
-      {loading && <span className="btn__spinner" aria-hidden="true" />}
+      {loading && <span className={styles.spinner} aria-hidden="true" />}
       {children}
     </button>
   )

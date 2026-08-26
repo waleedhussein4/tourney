@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { saveParticipants } from '/src/api/tournaments.js'
-import { Button, Card, CardHeader, EmptyState } from '/src/components/ui/index.js'
+import { Button, Card, CardHeader, EmptyState, Input } from '/src/components/ui/index.js'
 import { useManageMutation } from '../useManageMutation.js'
 
 function toDraft(participants) {
@@ -111,9 +111,9 @@ export function ParticipantsSection({ tournament }) {
                 <label className="visually-hidden" htmlFor={`score-${participant.id}`}>
                   Score for {participant.name}
                 </label>
-                <input
+                <Input
                   id={`score-${participant.id}`}
-                  className="control manage__number"
+                  className="manage__number"
                   type="number"
                   disabled={!editable}
                   value={draft[participant.id]?.score ?? 0}

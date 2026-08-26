@@ -1,0 +1,61 @@
+.page {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-4) var(--space-9);
+}
+
+.narrow {
+  max-width: var(--page-max-narrow);
+}
+
+.wide {
+  max-width: var(--page-max-wide);
+}
+
+.page:focus {
+  outline: none;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+
+/* A small cap above the title, for pages that need to say where you are. */
+.eyebrow {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.title {
+  font-size: var(--text-4xl);
+}
+
+.description {
+  margin-top: var(--space-3);
+  color: var(--text-muted);
+  max-width: 62ch;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding-top: var(--space-5);
+  }
+}

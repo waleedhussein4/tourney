@@ -1,0 +1,48 @@
+.card {
+  position: relative;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--edge-light), var(--shadow-sm);
+}
+
+/*
+ * A one-pixel bracket spine down the left edge of every card. It is the motif
+ * reduced to almost nothing — a gradient that fades before it reaches the
+ * bottom — and it is what makes a page of panels read as one family.
+ */
+.card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: var(--space-5);
+  bottom: 45%;
+  width: 2px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(var(--border-accent), transparent);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.title {
+  font-size: var(--text-lg);
+}
+
+.subtitle {
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}

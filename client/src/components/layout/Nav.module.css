@@ -1,0 +1,126 @@
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav);
+  height: var(--nav-height);
+  background: color-mix(in srgb, var(--surface-page) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--border);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  height: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.brand {
+  flex-shrink: 0;
+  border-radius: var(--radius);
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-right: auto;
+}
+
+.link {
+  position: relative;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+.link:hover {
+  color: var(--text-strong);
+  background: var(--surface-overlay);
+  text-decoration: none;
+}
+
+.link:global(.active) {
+  color: var(--text-strong);
+}
+
+/*
+ * The active link is marked with the bracket's advancing line rather than a
+ * plain underline: a short spine, then the run-out. One more place the motif
+ * does the work a generic border would have done.
+ */
+.link:global(.active)::after {
+  content: '';
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: 0.15rem;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--violet-500) 40%, var(--border-accent));
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Credits are money, and money is a win: the success hue, in tabular figures. */
+.credits {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  padding: 0.3rem var(--space-3);
+  background: color-mix(in srgb, var(--credits) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--credits) 32%, transparent);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--credits);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.credits:hover {
+  text-decoration: none;
+  border-color: var(--credits);
+  color: var(--credits);
+}
+
+.creditsValue {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: var(--text-base);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+}
+
+@media (max-width: 720px) {
+  .inner {
+    gap: var(--space-3);
+  }
+  .links {
+    gap: 0;
+  }
+  .link {
+    padding: var(--space-2);
+  }
+  .link:global(.active)::after {
+    left: var(--space-2);
+    right: var(--space-2);
+  }
+  .creditsLabel {
+    display: none;
+  }
+}
