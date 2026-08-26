@@ -15,15 +15,12 @@ function Nav() {
 
   useEffect(() => {
     if (loggedIn) {
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/profile`, {
-        credentials: "include"
-      })
-      .then(res => res.json())
-      .then(data => {
-        setCredits(data.credits);
-        setUsername(data.username);
-      })
-      .catch(err => console.log(err));
+      fetch("/api/users/me", { credentials: "include" })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          setCredits(data?.user?.credits ?? 0);
+          setUsername(data?.user?.username ?? "");
+        });
     }
   }, [loggedIn]);
 
