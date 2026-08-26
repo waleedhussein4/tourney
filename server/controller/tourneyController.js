@@ -1,6 +1,6 @@
 import sanitizeHtml from 'sanitize-html'
 import Tournament from '../models/tourneyModels.js'
-import Team from '../models/teamModels.js'
+import Team from '../src/models/team.model.js'
 import User from '../src/models/user.model.js'
 import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
