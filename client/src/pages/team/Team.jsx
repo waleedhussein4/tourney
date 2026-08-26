@@ -7,8 +7,6 @@ import { useEffect, useState, useContext } from 'react'
 import AuthContext from '../../context/AuthContext.jsx'
 import { useNavigate } from 'react-router-dom'
 
-const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/user`
-
 function Team() {
 
   const { loggedIn } = useContext(AuthContext)
@@ -18,14 +16,10 @@ function Team() {
   const [loadingTeams, setLoadingTeams] = useState(true)
 
   const fetchTeams = async () => {
-    await fetch(URL, {
-      credentials: 'include'
-    })
-    .then(res => res.json())
-    .then(data => {
-      setTeams(data)
-      setLoadingTeams(false)
-    })
+    const response = await fetch('/api/teams/mine', { credentials: 'include' })
+    const data = response.ok ? await response.json() : { teams: [] }
+    setTeams(data.teams)
+    setLoadingTeams(false)
   }
 
   useEffect(() => {
