@@ -54,12 +54,27 @@ it will not start half-configured.
 npm run seed
 ```
 
-Creates the demo accounts, the credit packages, and one tournament of each
-shape. The script prints the demo account and its password when it finishes.
+Creates fourteen accounts, four teams, the credit packages, and ten
+tournaments — every format, and every state a visitor can land on: upcoming,
+part-filled, under way, and finished with the prizes paid out.
 
-No password is committed. Set `SEED_PASSWORD` in `server/.env` to choose one,
-or let the script generate a fresh one for that run. `npm run seed -- --reset`
-clears the demo data first.
+Each tournament is built through the same services the API uses, so a seeded
+tournament that says it has started really did pass the bank check, and a seeded
+payout really did move credits and write its ledger rows.
+
+The script prints the three sign-ins when it finishes:
+
+| Account | Set with |
+| --- | --- |
+| `demo@tourney.app` — a host with credits | `SEED_DEMO_EMAIL` / `SEED_DEMO_PASSWORD` |
+| `admin@tourney.app` — reaches the admin page | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` |
+| The twelve demo players | `SEED_PASSWORD` |
+
+**No password is committed.** Anything left unset is generated for that run and
+printed once — so read the output, or set the variables in `server/.env` and
+choose your own.
+
+`npm run seed -- --reset` clears the demo data first.
 
 > The credits checkout is a **demo**. Card fields are visual only and are never
 > sent to the server. No real payment is ever processed.
