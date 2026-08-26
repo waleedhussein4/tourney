@@ -1,4 +1,4 @@
-const Team = require("../models/teamModels");
+import Team from '../models/teamModels.js'
 
 // Middleware to check if the user is part of the team
 async function checkTeamMembership(req, res, next) {
@@ -19,4 +19,4 @@ async function checkTeamMembership(req, res, next) {
   }
 }
 
-module.exports = checkTeamMembership;
+export default checkTeamMembership

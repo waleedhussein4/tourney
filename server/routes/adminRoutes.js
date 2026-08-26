@@ -1,8 +1,8 @@
-const express = require('express');
-const { createTournaments, deleteAllTournaments } = require('../scripts/generateTestTournaments');
-const { createUsers, deleteUsers } = require('../scripts/generateTestUsers');
+import express from 'express'
+import { createTournaments, deleteAllTournaments } from '../scripts/generateTestTournaments.js'
+import { createUsers, deleteUsers } from '../scripts/generateTestUsers.js'
 const router = express();
-const { admin } = require("../middleware/requireAuth")
+import { admin } from '../middleware/requireAuth.js'
 
 
 // create test touranments
@@ -17,4 +17,4 @@ router.post('/createUsers', admin, createUsers);
 // delete users
 router.delete('/deleteUsers', admin, deleteUsers);
 
-module.exports = router;
+export default router

@@ -1,6 +1,6 @@
-const express = require('express');
-const { getProduct, purchase, getProducts } = require('../controller/purchaseController');
-const { auth, getAuth } = require('../middleware/requireAuth'); 
+import express from 'express'
+import { getProduct, purchase, getProducts } from '../controller/purchaseController.js'
+import { auth, getAuth } from '../middleware/requireAuth.js'
 const router = express.Router();
 
 router.get('/getProduct/:paramID', getProduct);
@@ -11,4 +11,4 @@ router.get('/getProducts', getProducts);
 
 
 
-module.exports = router;
+export default router

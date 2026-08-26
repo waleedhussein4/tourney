@@ -1,7 +1,7 @@
-const express = require('express');
-const {signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile, getisHost, getIsAdmin, subHostEarninhgs} = require('../controller/userController');
+import express from 'express'
+import { signupUser, loginUser, logoutUser, loggedIn, paymentProcess, becomeHost, profile, getisHost, getIsAdmin, subHostEarninhgs } from '../controller/userController.js'
 const router = express.Router();
-const { auth } = require("../middleware/requireAuth")
+import { auth } from '../middleware/requireAuth.js'
 
 //login route
 router.post('/login', loginUser);
@@ -28,4 +28,4 @@ router.get('/isAdmin', auth, getIsAdmin);
 
 router.post('/removeEarn',auth,subHostEarninhgs)
 
-module.exports = router;
+export default router
