@@ -8,7 +8,7 @@ import "./styles/Purchase.css";
 
 function Purchase() {
 
-  const { loggedIn } = useContext(AuthContext);
+  const { loggedIn, refreshUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const { product } = useParams();
@@ -22,24 +22,17 @@ function Purchase() {
   const [item, setItem] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [showPurchaseConfirmation, setShowPurchaseConfirmation] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
 
   const getItem = async () => {
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/purchase/getProduct`;
-    console.log("Product: " + product);
-
-    await fetch(`${URL}/${product}`)
-      .then((res) => {
-        if (res.ok) {
-          setIsLoading(false);
-        } else {
-          navigate("/notfound");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log(data);
-        setItem(data);
-      });
+    const response = await fetch(`/api/products/${product}`);
+    if (!response.ok) {
+      navigate("/notfound");
+      return;
+    }
+    const data = await response.json();
+    setItem(data.product);
+    setIsLoading(false);
   };
 
   const purchaseItem = () => {
@@ -67,6 +60,10 @@ function Purchase() {
             <div className="purchase-screen">
               <div className="user-input">
                 <h3>Payment</h3>
+                <p className="demo-notice">
+                  <strong>Demo checkout.</strong> These fields are a mock-up. They are
+                  never sent anywhere, and no payment is taken.
+                </p>
                 <div className="input-fields">
                   <div className="input-name">
                     <input
@@ -117,7 +114,7 @@ function Purchase() {
                 <div className="item-info">
                   <div className="item-name">{item.name}</div>
                   <div className="item-description">
-                    Amount: {item.amount} credits
+                    Amount: {item.credits} credits
                   </div>
                   <div className="item-price">Price: ${item.price}</div>
                 </div>
@@ -127,6 +124,7 @@ function Purchase() {
                 <button id="submit" onClick={purchaseItem}>
                   Continue
                 </button>
+                {checkoutError && <p className="error">{checkoutError}</p>}
               </div>
             </div>
           </div>
@@ -135,39 +133,25 @@ function Purchase() {
       {showPurchaseConfirmation && (
         <ConfirmationPopup
           message="Are you sure you want purchase this package?"
-          onConfirm={() => {
-            const URL = `${import.meta.env.VITE_BACKEND_URL}/api/purchase`;
-            const firstName = document.getElementById("input-firstName").value;
-            const lastName = document.getElementById("input-lastName").value;
-            const shippingAddress = document.getElementById(
-              "input-shippingAddress"
-            ).value;
-            const creditCardNumber = document.getElementById(
-              "input-creditCardNumber"
-            ).value;
-            const ccv = document.getElementById("input-ccv").value;
+          onConfirm={async () => {
+            setShowPurchaseConfirmation(false);
+            setCheckoutError("");
 
-            fetch(`${URL}/${product}`, {
+            // The card fields above are a mock-up. Nothing from them is read
+            // here, and the request carries no body at all.
+            const response = await fetch(`/api/credits/checkout/${product}`, {
               method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
               credentials: "include",
-              body: JSON.stringify({
-                firstName,
-                lastName,
-                shippingAddress,
-                creditCardNumber,
-                ccv,
-              }),
-            })
-              .then((res) => res.json())
-              .then((data) => {
-                console.log(data);
-                navigate("/");
-                navigate(0);
-              })
-              .catch((error) => console.error("Error:", error));
+            });
+
+            if (!response.ok) {
+              const data = await response.json().catch(() => null);
+              setCheckoutError(data?.error?.message ?? "Could not complete the demo purchase");
+              return;
+            }
+
+            await refreshUser();
+            navigate("/credits");
           }}
           onCancel={() => setShowPurchaseConfirmation(false)}
         />

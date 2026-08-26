@@ -32,17 +32,13 @@ function Main() {
     )
   }
 
-  const createTestUsers = () => run('Create users', '/api/admin/users', 'POST')
-  const deleteUsers = () => run('Delete users', '/api/admin/users', 'DELETE')
-  const createTournaments = () => run('Create tournaments', '/api/admin/tournaments', 'POST')
-  const deleteAllTournaments = () => run('Delete tournaments', '/api/admin/tournaments', 'DELETE')
+  const seedDemoData = () => run('Seed demo data', '/api/admin/seed', 'POST')
+  const clearDemoData = () => run('Clear demo data', '/api/admin/seed', 'DELETE')
 
   return (
     <div id="main">
-      <button id="btn_createTestUsers" onClick={() => createTestUsers()}>Create Test Users</button>
-      <button id="btn_deleteUsers" onClick={() => deleteUsers()}>Delete Users</button>
-      <button id="btn_createTournaments" onClick={() => createTournaments()}>Create Tournaments</button>
-      <button id="btn_deleteAllTournaments" onClick={() => deleteAllTournaments()}>Delete All Tournaments</button>
+      <button id="btn_seedDemoData" onClick={() => seedDemoData()}>Seed Demo Data</button>
+      <button id="btn_clearDemoData" onClick={() => clearDemoData()}>Clear Demo Data</button>
       <p className="status">{status}</p>
     </div>
   );

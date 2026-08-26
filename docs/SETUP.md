@@ -54,8 +54,12 @@ it will not start half-configured.
 npm run seed
 ```
 
-Creates the demo users and tournaments. Every demo account uses the passwords
-listed in `server/scripts/generateTestUsers.js`.
+Creates the demo accounts, the credit packages, and one tournament of each
+shape. The script prints the demo account and its password when it finishes.
+
+No password is committed. Set `SEED_PASSWORD` in `server/.env` to choose one,
+or let the script generate a fresh one for that run. `npm run seed -- --reset`
+clears the demo data first.
 
 > The credits checkout is a **demo**. Card fields are visual only and are never
 > sent to the server. No real payment is ever processed.

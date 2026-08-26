@@ -9,13 +9,10 @@ const Credits = () => {
   const navigate = useNavigate();
 
   const fetchData = async () => {
-    console.log('fetching')
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/purchase/getProducts`
-    )
-    .then((res) => res.json())
-    .then((data) => setCredits(data));
-    return response;
+    const response = await fetch("/api/products");
+    if (!response.ok) return;
+    const data = await response.json();
+    setCredits(data.products);
   };
 
   useEffect(() => {
@@ -23,7 +20,6 @@ const Credits = () => {
   }, []);
 
   const handleBuyClick = (creditId) => {
-    console.log(`Buying ${creditId} credits`);
     navigate(`/purchase/${creditId}`);
   };
 
@@ -33,12 +29,16 @@ const Credits = () => {
       <div className="credits-page">
         <h1>Buy Credits</h1>
         <p>Purchase credits to use on the platform.</p>
+        <p className="demo-notice">
+          <strong>Demo checkout.</strong> No payment is taken and no card details
+          ever leave your browser — the credits are granted straight away.
+        </p>
         <div className="credit-cards">
           {credits.map((credit) => (
             <CreditCard
-              key={credit.amount}
+              key={credit.id}
               name={credit.name}
-              totalCredits={credit.amount}
+              totalCredits={credit.credits}
               price={credit.price}
               onBuyClick={() => handleBuyClick(credit.id)}
             />
