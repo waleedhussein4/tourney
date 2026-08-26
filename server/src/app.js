@@ -13,12 +13,12 @@ import { notFound } from './middleware/notFound.js'
 import { healthRouter } from './modules/health/health.routes.js'
 import { authRouter } from './modules/auth/auth.routes.js'
 import { userRouter } from './modules/users/user.routes.js'
+import { teamRouter } from './modules/teams/team.routes.js'
 
 // Legacy routers, still mounted at their original paths. Each is deleted by the
 // Phase 2 PR that replaces it; the last one to go takes these imports with it.
 import legacyTournamentRoutes from '../routes/tourneyRoutes.js'
 import legacyPurchaseRoutes from '../routes/purchaseRoutes.js'
-import legacyTeamRoutes from '../routes/teamRoutes.js'
 import legacyAdminRoutes from '../routes/adminRoutes.js'
 
 export function createApp() {
@@ -49,10 +49,10 @@ export function createApp() {
   app.use('/api/health', healthRouter)
   app.use('/api/auth', authRouter)
   app.use('/api/users', userRouter)
+  app.use('/api/teams', teamRouter)
 
   app.use('/api/tournement', legacyTournamentRoutes)
   app.use('/api/purchase', legacyPurchaseRoutes)
-  app.use('/api/team', legacyTeamRoutes)
   app.use('/api/admin', legacyAdminRoutes)
 
   app.use(notFound)
