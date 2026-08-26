@@ -11,7 +11,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import sanitizeHtml from 'sanitize-html';
 
 const tournamentURL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament`;
-const teamsURL = `${import.meta.env.VITE_BACKEND_URL}/api/team/user/teamsList`;
+const teamsURL = '/api/teams/mine';
 const submitApplicationURL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/submitApplication`;
 const joinAsSoloURL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/joinAsSolo`;
 const joinAsTeamURL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/joinAsTeam`;
@@ -96,11 +96,10 @@ function Tournament() {
     await fetch(teamsURL, {
       credentials: "include",
     })
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : { teams: [] }))
       .then((data) => {
-        setTeams(data);
+        setTeams(data.teams.map((team) => ({ ...team, UUID: team.id })));
         setIsLoadingTeams(false);
-        console.log('Teams data:', data)
       });
   };
 

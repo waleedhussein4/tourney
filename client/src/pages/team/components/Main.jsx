@@ -30,34 +30,28 @@ function MyTeams({ teams }) {
   }
 
   async function createTeam() {
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/create`
-    let teamName = document.getElementById('teamName').value
-    console.log("Creating team: ", teamName)
-  
-    await fetch(URL, {
+    const teamName = document.getElementById('teamName').value
+
+    const response = await fetch('/api/teams', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: teamName }),
       credentials: 'include'
     })
-    .then(res => {
-      if(res.ok) {
-        navigate(0)
-      }
-      return res.json()
-    })
-    .then(data => {
-      setCreateError(data.message)
-    })
+    const data = await response.json()
+
+    if (!response.ok) {
+      setCreateError(data.error?.message ?? 'Could not create the team')
+      return
+    }
+    navigate('/team/view/?UUID=' + data.team.id)
   }
   
   return (
     <div id="display">
       <h1>My Teams</h1>
       <div className="teams">
-        {teams.map((team) => <Team key={team.UUID} team={team} />)}
+        {teams.map((team) => <Team key={team.id} team={team} />)}
       </div>
       <div className="create-join">
         <div className="create">
@@ -83,7 +77,7 @@ function MyTeams({ teams }) {
 }
 
 function Team({ team }) {
-  let teamLink = `/team/view/?UUID=${team.UUID}`
+  let teamLink = `/team/view/?UUID=${team.id}`
   return (
     <div className="team">
       <h3 className="name"><a href={teamLink}>{team.name}</a></h3>
@@ -106,27 +100,21 @@ function Suggest() {
   }
 
   async function createTeam() {
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/team/create`
-    let teamName = document.getElementById('teamName').value
-    console.log("Creating team: ", teamName)
-  
-    await fetch(URL, {
+    const teamName = document.getElementById('teamName').value
+
+    const response = await fetch('/api/teams', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: teamName }),
       credentials: 'include'
     })
-    .then(res => {
-      if(res.ok) {
-        navigate(0)
-      }
-      return res.json()
-    })
-    .then(data => {
-      setCreateError(data.message)
-    })
+    const data = await response.json()
+
+    if (!response.ok) {
+      setCreateError(data.error?.message ?? 'Could not create the team')
+      return
+    }
+    navigate('/team/view/?UUID=' + data.team.id)
   }
 
   return (

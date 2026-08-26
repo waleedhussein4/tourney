@@ -81,7 +81,12 @@
   border: none;
   font-weight: bold;
   padding: 2pt;
-  display: none;
+  visibility: hidden;
+}
+
+#ViewTeam .member:hover .buttonsWrapper button,
+#ViewTeam .buttonsWrapper button:focus-visible {
+  visibility: visible;
 }
 
 #ViewTeam button:hover {
