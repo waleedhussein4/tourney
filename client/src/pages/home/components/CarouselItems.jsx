@@ -1,31 +1,19 @@
-function CarouselItems(props) {
-
-  let items = []
-
-  Array.from(props.data).forEach(item => {
-    items.push(CarouselItem(item))
-  })
-
-  return (
-    items
-  )
+function CarouselItems({ data }) {
+  return Array.from(data).map((item) => <CarouselItem key={item.id} data={item} />)
 }
 
-function CarouselItem(data) {
+function CarouselItem({ data }) {
   return (
-    <a key={data.UUID} href={`/tournament/${data.UUID}`}>
+    <a href={`/tournament/${data.id}`}>
       <div className="carousel-item">
-        <img
-          className="carousel-item__img"
-          src={data.image}
-        />
+        <div className="carousel-item__img carousel-item__art" data-category={data.category}>
+          <span>{data.category?.replace(/-/g, ' ')}</span>
+        </div>
         <div className="carousel-item__details">
-          <div className="controls">
-            <span className="fas fa-play-circle"></span>
-            <span className="fas fa-plus-circle"></span>
-          </div>
           <h5 className="carousel-item__details--title">{data.title}</h5>
-          {/* <h6 className="carousel-item__details--subtitle">{data.description}</h6> */}
+          <h6 className="carousel-item__details--subtitle">
+            {data.participantCount}/{data.maxCapacity} · {data.totalPrize} credits
+          </h6>
         </div>
       </div>
     </a>

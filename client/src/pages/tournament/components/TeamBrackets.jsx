@@ -111,7 +111,7 @@ const BracketsComponent = ({ tournament }) => {
   };
 
   const teamsWithPlaceholders = [...tournament.enrolledTeams];
-  for (let i = 0; i < tournament.maxCapacity / tournament.teamSize; i++) {
+  for (let i = 0; i < tournament.maxCapacity; i++) {
     if (!tournament.enrolledTeams[i]) {
       teamsWithPlaceholders.push({ teamName: undefined, players: [] });
     }

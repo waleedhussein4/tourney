@@ -4,6 +4,7 @@ import './styles/Tournaments.css'
 import Nav from '/src/components/Nav'
 import Sidebar from './components/Sidebar.jsx'
 import Content from './components/Content.jsx'
+import { listTournaments } from '/src/api/tournaments.js'
 
 function App() {
 
@@ -12,38 +13,45 @@ function App() {
   const [pageNumber, setPageNumber] = useState(1)
   const [hasMore, setHasMore] = useState(true)
 
-  const fetchPaginatedData = async () => {
-    if(!filters) {
-      return;
+  // "All"/"Any" are the form's way of saying "no filter", and an empty string is
+  // an empty box — neither belongs in the query string.
+  const toQuery = () => {
+    const query = { page: pageNumber, limit: 12 }
+    if (filters.search) query.search = filters.search
+    if (filters.category && filters.category !== 'All') query.category = filters.category
+    if (filters.type && filters.type !== 'Any') query.type = filters.type.toLowerCase()
+    if (filters.accessibility && filters.accessibility !== 'Any') {
+      query.accessibility = filters.accessibility.toLowerCase()
     }
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/getFilteredTournaments/` + pageNumber
-    await fetch(URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': `${import.meta.env.VITE_FRONTEND_URL}`
-      },
-      body: JSON.stringify({
-        search: filters.search,
-        category: filters.category,
-        minEntryFee: filters.minEntryFee,
-        maxEntryFee: filters.maxEntryFee,
-        type: filters.type,
-        accessibility: filters.accessibility
-      })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.length === 0) {
-          setHasMore(false)
-        }
-        setTournaments([...tournaments, ...data])
-      })
+    if (filters.minEntryFee) query.minEntryFee = filters.minEntryFee
+    if (filters.maxEntryFee) query.maxEntryFee = filters.maxEntryFee
+    return query
+  }
+
+  const fetchPaginatedData = async () => {
+    if (!filters) return
+
+    const data = await listTournaments(toQuery())
+    const page = data.tournaments.map((tournament) => ({
+      ...tournament,
+      UUID: tournament.id,
+    }))
+
+    // Page 1 is always a fresh result set. The original appended every time, so
+    // changing a filter added its results to the ones it was meant to replace.
+    setTournaments((current) => (pageNumber === 1 ? page : [...current, ...page]))
+    setHasMore(pageNumber < data.pagination.pages)
   }
 
   useEffect(() => {
     fetchPaginatedData()
   }, [pageNumber, filters])
+
+  // A new filter set starts again from the first page.
+  useEffect(() => {
+    setPageNumber(1)
+    setHasMore(true)
+  }, [filters])
 
   return (
     <div id='Tournaments'>

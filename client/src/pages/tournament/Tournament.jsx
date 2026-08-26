@@ -9,12 +9,9 @@ import TeamBrackets from "./components/TeamBrackets";
 import BattleRoyale from "./components/BattleRoyale";
 import { useNavigate, useParams } from "react-router-dom";
 import sanitizeHtml from 'sanitize-html';
+import * as api from '/src/api/tournaments.js';
 
-const tournamentURL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament`;
 const teamsURL = '/api/teams/mine';
-const submitApplicationURL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/submitApplication`;
-const joinAsSoloURL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/joinAsSolo`;
-const joinAsTeamURL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/joinAsTeam`;
 
 function Tournament() {
   const { loggedIn } = useContext(AuthContext);
@@ -33,6 +30,9 @@ function Tournament() {
   const [chosenTeam, setChosenTeam] = useState({ uuid: "" });
   const [application, setApplication] = useState({});
   const [hasApplied, setHasApplied] = useState(false);
+  // Join and application errors used to be written into the DOM by hand.
+  const [joinError, setJoinError] = useState("");
+  const [applicationError, setApplicationError] = useState("");
 
   const handleJoin = () => {
     console.log("Joining tournament");
@@ -58,38 +58,18 @@ function Tournament() {
   };
 
   const fetchTournamentData = async () => {
-    await fetch(
-      tournamentURL +
-      "?" +
-      new URLSearchParams({
-        UUID: UUID,
-      }),
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      }
-    )
-      .then((res) => {
-        if (!res.ok) {
-          navigate('/page-not-found');
-        }
-        return res.json()
-      })
-      .then((data) => {
-        // data.accessibility = "open"
-        // data.teamSize = 1
-        setTournament(data);
-        setIsLoading(false);
-        setIsHost(data.isHost);
-        setIsJoined(data.isJoined);
-        setApplicationAccepted(data.isAccepted);
-        setApplication(data.application);
-        setHasApplied(data.hasApplied);
-        console.log(data)
-      });
+    try {
+      const data = await api.getTournament(UUID);
+      setTournament(data);
+      setIsLoading(false);
+      setIsHost(data.isHost);
+      setIsJoined(data.isJoined);
+      setApplicationAccepted(data.isAccepted);
+      setApplication(data.application);
+      setHasApplied(data.hasApplied);
+    } catch {
+      navigate('/page-not-found');
+    }
   };
 
   const fetchTeams = async () => {
@@ -102,14 +82,6 @@ function Tournament() {
         setIsLoadingTeams(false);
       });
   };
-
-  const fetchTournamentCategories = async () => {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/tournement/getTournamentCategories`)
-      .then(res => res.json())
-      .then(data => {
-        console.log(data);
-      })
-  }
 
   useEffect(() => {
     fetchTournamentData();
@@ -235,7 +207,7 @@ function Tournament() {
             ))
           )}
         </div>
-        <div className="joinPopup-error"></div>
+        <div className="joinPopup-error">{joinError}</div>
         <button
           className="btn btn-primary joinPopup-confirm"
           onClick={joinTournamentAsTeam}
@@ -299,7 +271,7 @@ function Tournament() {
             </div>
           ))}
         </div>
-        <div className="applicationPopup-error"></div>
+        <div className="applicationPopup-error">{applicationError}</div>
         <button
           className="btn btn-primary teamApplicationPopup-confirm"
           onClick={submitApplication}
@@ -330,35 +302,18 @@ function Tournament() {
   }
 
   async function joinTournamentAsTeam() {
-    console.log("Joining as team...");
-    // if theres no selected team, show error
     if (!chosenTeam.uuid) {
-      document.querySelector(".joinPopup-error").innerHTML = "You must choose a team.";
+      setJoinError("You must choose a team.");
       return;
     }
     hideJoinPopup();
-    await fetch(joinAsTeamURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        tournament: UUID,
-        team: chosenTeam,
-      }),
-      credentials: "include",
-    }).then((res) => {
-      if (res.ok) {
-        navigate(0)
-      } else {
-        res.json().then(data => {
-          console.log(data);
-          if (data.error === "Not enough credits") {
-            displayNotEnoughCreditsPopup();
-          }
-        });
-      }
-    });
+    try {
+      await api.joinAsTeam(UUID, chosenTeam.uuid);
+      navigate(0);
+    } catch (failure) {
+      if (failure.message === 'Not enough credits') displayNotEnoughCreditsPopup();
+      else setJoinError(failure.message);
+    }
   }
 
   function NotEnoughCreditsPopup() {
@@ -383,90 +338,39 @@ function Tournament() {
   }
 
   async function joinTournamentAsSolo() {
-    console.log("Joining as solo...");
-    hideJoinPopup();
-    await fetch(joinAsSoloURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        tournament: UUID,
-      }),
-      credentials: "include",
-    }).then((res) => {
-      if (res.ok) {
-        navigate(0)
-      } else {
-        res.json().then(data => {
-          console.log(data);
-          if (data.error === "Not enough credits") {
-            displayNotEnoughCreditsPopup();
-          }
-        });
-      }
-    });
+    try {
+      await api.joinSolo(UUID);
+      navigate(0);
+    } catch (failure) {
+      if (failure.message === 'Not enough credits') displayNotEnoughCreditsPopup();
+      else setJoinError(failure.message);
+    }
   }
 
   async function submitApplication() {
-    console.log("Submitting application...");
+    const form = document.querySelector(".application");
+    const fields = Array.from(form.querySelectorAll('.field')).map((field) => ({
+      label: field.querySelector("label").innerText,
+      input: field.querySelector("input").value,
+    }));
 
-    let form = document.querySelector(".application");
-    let fields = form.querySelectorAll('.field');
-    if (!validateForm(fields)) {
-      document.querySelector(".applicationPopup-error").innerHTML =
-        "You must fill all fields.";
+    if (fields.some((field) => !field.input.trim())) {
+      setApplicationError("You must fill all fields.");
       return;
     }
 
-    let application = [];
-
-    Array.from(fields).forEach((field) => {
-      let label = field.querySelector("label").innerText;
-      let input = field.querySelector("input").value;
-
-      application.push({ label, input });
-    });
-
-    let selectedTeam
-    try {
-      selectedTeam = form.querySelector('.selectedTeam')
-      if (!selectedTeam) {
-        document.querySelector(".applicationPopup-error").innerHTML =
-          "You must choose a team.";
-      }
-      else {
-        selectedTeam = selectedTeam.innerText
-      }
-    } catch (e) {
-      console.log(e)
+    const teamId = tournament.teamSize > 1 ? chosenTeam.uuid : undefined;
+    if (tournament.teamSize > 1 && !teamId) {
+      setApplicationError("You must choose a team.");
+      return;
     }
 
-    let argTeam = selectedTeam || null
-
-    console.log(application);
-
-    await fetch(submitApplicationURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        tournament: UUID,
-        application: application,
-        team: argTeam,
-      }),
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          document.querySelector(".applicationPopup-error").innerHTML = data.error;
-        }
-        else {
-          navigate(0)
-        }
-      });
+    try {
+      await api.apply(UUID, { teamId, fields });
+      navigate(0);
+    } catch (failure) {
+      setApplicationError(failure.message);
+    }
   }
 
   function validateForm(fields) {

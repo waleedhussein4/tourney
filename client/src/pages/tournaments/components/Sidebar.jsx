@@ -11,13 +11,10 @@ function Sidebar({ setFilters }) {
   }
 
   const getCategories = async () => {
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/getTournamentCategoriesWithImages`
-
-    await fetch(URL)
-      .then(res => res.json())
-      .then(data => {
-        setCategories(data)
-      })
+    const response = await fetch('/api/tournaments/categories')
+    if (!response.ok) return
+    const data = await response.json()
+    setCategories(data.categories)
   }
 
   function getFilterFormData() {
@@ -130,168 +127,10 @@ function Sidebar({ setFilters }) {
 
   }
 
-  function hideCategorySearchResults() {
-    let searchResults = document.getElementById('category-search-results')
-    searchResults.style.display = 'none'
-  }
-
-  function showCategorySearchResults() {
-    let searchResults = document.getElementById('category-search-results')
-    if (searchResults.innerHTML && searchResults.innerHTML != '' && document.getElementById('filter-category-input').value) {
-      searchResults.style.display = 'block'
-    }
-  }
-
-  const getCategorySearchResults = async () => {
-
-    // Function to calculate Jaro-Winkler distance between two strings
-    function jaroWinklerDistance(s1, s2) {
-      const prefixMatchScale = 0.1;
-      const maxPrefixLength = 4;
-
-      if (s1 === s2) return 1;
-
-      const s1Length = s1.length;
-      const s2Length = s2.length;
-      const matchDistance = Math.floor(Math.max(s1Length, s2Length) / 2) - 1;
-
-      const s1Matches = new Array(s1Length).fill(false);
-      const s2Matches = new Array(s2Length).fill(false);
-
-      let matches = 0;
-      for (let i = 0; i < s1Length; i++) {
-        const start = Math.max(0, i - matchDistance);
-        const end = Math.min(i + matchDistance + 1, s2Length);
-
-        for (let j = start; j < end; j++) {
-          if (!s2Matches[j] && s1[i] === s2[j]) {
-            s1Matches[i] = true;
-            s2Matches[j] = true;
-            matches++;
-            break;
-          }
-        }
-      }
-
-      if (matches === 0) return 0;
-
-      let transpositions = 0;
-      let k = 0;
-      for (let i = 0; i < s1Length; i++) {
-        if (s1Matches[i]) {
-          while (!s2Matches[k]) k++;
-          if (s1[i] !== s2[k]) transpositions++;
-          k++;
-        }
-      }
-
-      const jaro = (matches / s1Length + matches / s2Length + (matches - transpositions / 2) / matches) / 3;
-
-      const prefixLength = Math.min(maxPrefixLength, Math.min(s1Length, s2Length));
-      let commonPrefix = 0;
-      for (let i = 0; i < prefixLength; i++) {
-        if (s1[i] === s2[i]) commonPrefix++;
-        else break;
-      }
-
-      const jaroWinkler = jaro + commonPrefix * prefixMatchScale * (1 - jaro);
-
-      return jaroWinkler;
-    }
-
-    // Function to find categories similar to the query using Jaro-Winkler distance
-    function findSimilarCategories(query, categories, threshold) {
-      return categories.filter(category => {
-        const distance = jaroWinklerDistance(query.toLowerCase(), category.name.toLowerCase());
-        return distance >= threshold;
-      });
-    }
-
-    // Function to find best match for the query in categories
-    function findBestMatch(query, categories, threshold) {
-      const matches = categories.filter(category => {
-        return category.name.toLowerCase().includes(query.toLowerCase());
-      });
-
-      if (matches.length === 0) {
-        // If there's no exact match, try finding similar categories
-        return findSimilarCategories(query, categories, threshold);
-      }
-
-      return matches;
-    }
-
-    let resultsDiv = document.getElementById('category-search-results');
-    let input = document.getElementById('filter-category-input').value.toLowerCase();
-
-    if (!categories || categories.length === 0) {
-      resultsDiv.innerHTML = 'No results';
-      return;
-    }
-
-    // Clear previous search results
-    resultsDiv.innerHTML = '';
-
-    // Find categories similar to the query
-    const similarCategories = findBestMatch(input, categories, 0.7); // You can adjust the threshold as needed
-
-    if (similarCategories.length === 0) {
-      resultsDiv.innerHTML = 'No results';
-      return;
-    }
-
-    Array.from(similarCategories).forEach(e => {
-      let div = document.createElement('div')
-      div.classList.add('category-search-result')
-      div.addEventListener('click', () => {
-        hideCategorySearchResults()
-        document.getElementById('filter-category-input').value = e.name
-        try {
-          document.querySelector('.active-category').classList.remove('active-category')
-        }
-        catch (e) {
-          console.log(e)
-        }
-        div.classList.add('active-category')
-      })
-
-      let imgDiv = document.createElement('div')
-      imgDiv.classList.add('category-search-result-img')
-
-      let img = document.createElement('img')
-      img.src = e.image
-
-      let p = document.createElement('p')
-      p.innerHTML = e.name.charAt(0).toUpperCase() + e.name.slice(1);
-
-      imgDiv.appendChild(img)
-      div.appendChild(imgDiv)
-      div.appendChild(p)
-      resultsDiv.appendChild(div)
-    })
-
-    showCategorySearchResults()
-
-
-
-  }
-
   function defaults() {
     document.getElementById('applyFilters').addEventListener('click', (e) => { e.preventDefault() })
 
-    document.getElementById('filter-category-input').addEventListener('input', (e) => {
 
-      if (!e.target.value) {
-        hideCategorySearchResults()
-
-        return
-      }
-
-      getCategorySearchResults()
-
-    })
-
-    document.getElementById('filter-category-input').addEventListener('focus', showCategorySearchResults)
   }
 
   useEffect(() => {
@@ -314,8 +153,12 @@ function Sidebar({ setFilters }) {
         </div>
         <div id='filter-category' className="filter" data-name="category">
           <span className="name">Category</span>
-          <input autoComplete='off' onInput={getCategorySearchResults} id='filter-category-input' type="text" placeholder='Search' />
-          <div id="category-search-results"></div>
+          <select id='filter-category-input' defaultValue="All">
+            <option value="All">All categories</option>
+            {categories.map((category) => (
+              <option key={category.slug} value={category.slug}>{category.name}</option>
+            ))}
+          </select>
         </div>
         <div id='filter-entryFee' className="filter" data-name="entryFee">
           <span className="name">Entry Fee</span>
