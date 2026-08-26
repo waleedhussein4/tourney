@@ -1,7 +1,7 @@
-const express = require('express');
-const { createTournament, getTournamentById, getAllTournaments, updateTournament, deleteTournament, getTournamentDisplayData, handleApplicationSubmission, handleJoinAsSolo, handleJoinAsTeam, editTitle, editDescription, editRules, editContactInfo, editStartDate, editEndDate, getManageTournamentDisplayData, getTrendingTournaments, getTournamentCategories, updateScores, acceptApplication, rejectApplication, postUpdate, editSoloParticipants, editTeamParticipants, editMatches, startTournament, endTournament, getMyTournaments, getPaginatedTournaments, getFilteredTournaments, getTournamentCategoriesWithImages, depositIntoTournamentBank, shuffleBrackets } = require('../controller/tourneyController');
+import express from 'express'
+import { createTournament, getTournamentById, getAllTournaments, updateTournament, deleteTournament, getTournamentDisplayData, handleApplicationSubmission, handleJoinAsSolo, handleJoinAsTeam, editTitle, editDescription, editRules, editContactInfo, editStartDate, editEndDate, getManageTournamentDisplayData, getTrendingTournaments, getTournamentCategories, updateScores, acceptApplication, rejectApplication, postUpdate, editSoloParticipants, editTeamParticipants, editMatches, startTournament, endTournament, getMyTournaments, getPaginatedTournaments, getFilteredTournaments, getTournamentCategoriesWithImages, depositIntoTournamentBank, shuffleBrackets } from '../controller/tourneyController.js'
 const router = express();
-const { auth, getAuth } = require("../middleware/requireAuth")
+import { auth, getAuth } from '../middleware/requireAuth.js'
 
 
 //tournaments
@@ -105,4 +105,4 @@ router.delete('/', deleteTournament);
 router.patch('/', updateTournament);
 
 
-module.exports = router;
+export default router

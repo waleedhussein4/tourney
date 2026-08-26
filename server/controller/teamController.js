@@ -1,8 +1,8 @@
-const e = require("express");
-const Team = require("../models/teamModels"); // Path to your Team model
-const User = require("../models/userModel"); // Path to your User model
-const { default: mongoose } = require("mongoose");
-const { v4: uuidv4 } = require('uuid');
+import e from 'express'
+import Team from '../models/teamModels.js'
+import User from '../models/userModel.js'
+import mongoose from 'mongoose'
+import { v4 as uuidv4 } from 'uuid'
 
 function generateAlphanumericId(length) {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -15,15 +15,6 @@ function generateAlphanumericId(length) {
 }
 
 const createTeam = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   const { name } = req.body;
 
   if (name.length < 3) {
@@ -63,15 +54,6 @@ const createTeam = async (req, res) => {
 };
 
 const getTeam = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
 
   try {
     const team = await Team.findOne({ _id: req.params.UUID }).populate(
@@ -109,15 +91,6 @@ const getTeam = async (req, res) => {
 };
 
 const getTeamByCode = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
 
   try {
     const team = await Team.findOne({ teamId: req.params.teamCode }).populate(
@@ -144,15 +117,6 @@ const getTeamByCode = async (req, res) => {
 };
 
 const getTeamsByUser = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   try {
     // Assuming user's ID is passed in the request, e.g., from a middleware that validates and attaches user info
     const userId = req.user
@@ -181,15 +145,6 @@ const getTeamsByUser = async (req, res) => {
 };
 
 const getTournamentDisplayTeams = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   try {
     // Assuming user's ID is passed in the request, e.g., from a middleware that validates and attaches user info
     const userId = req.user
@@ -220,15 +175,6 @@ const getTournamentDisplayTeams = async (req, res) => {
 }
 
 const getTeamMembers = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   try {
     const team = await Team.findOne({ _id: req.params.UUID }).populate(
       "members",
@@ -241,15 +187,6 @@ const getTeamMembers = async (req, res) => {
 };
 
 const joinTeam = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   try {
     const user = await User.findById(req.user);
 
@@ -280,15 +217,6 @@ const joinTeam = async (req, res) => {
 };
 
 const changeLeader = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   let newLeader = req.body.username;
 
   try {
@@ -322,15 +250,6 @@ const changeLeader = async (req, res) => {
 };
 
 const kickMember = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   let member = req.body.username;
   try {
     member = await User.findOne({ username: member });
@@ -364,15 +283,6 @@ const kickMember = async (req, res) => {
 };
 
 const deleteTeam = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   try {
     const team = await Team.findOne({ _id: req.params.UUID });
     if (team.leader !== req.user) {
@@ -387,15 +297,6 @@ const deleteTeam = async (req, res) => {
 };
 
 const leaveTeam = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Allow-Origin', `${process.env.FRONTEND_URL}`)
-  // another common pattern
-  // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  )
   console.log('in leave team')
   try {
     const team = await Team.findOne({ _id: req.params.UUID })
@@ -419,7 +320,7 @@ const leaveTeam = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createTeam,
   getTeam,
   getTeamByCode,
@@ -430,6 +331,6 @@ module.exports = {
   deleteTeam,
   leaveTeam,
   getTeamsByUser,
-  getTournamentDisplayTeams
-};
+  getTournamentDisplayTeams,
+}
 

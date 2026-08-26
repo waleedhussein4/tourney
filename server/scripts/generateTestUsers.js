@@ -1,4 +1,4 @@
-const User = require('../models/userModel');
+import User from '../models/userModel.js'
 
 // list of all sample users
 const users = [
@@ -41,4 +41,7 @@ async function deleteUsers() {
 }
 
 
-module.exports = { createUsers, deleteUsers };
+export {
+  createUsers,
+  deleteUsers,
+}
