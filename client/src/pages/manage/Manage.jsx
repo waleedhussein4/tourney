@@ -393,14 +393,9 @@ function Manage() {
       }
     }
 
-    function editSolo(user) {
-      const newScore = prompt(`Enter new score for ${user.username}:`, user.score);
-      const newEliminated = confirm(`Is ${user.username} eliminated?`);
-
-      user.score = parseInt(newScore);
-      user.eliminated = newEliminated;
-
-      setTournament({ ...tournament, enrolledUsers: tournament.enrolledUsers });
+    function editSolo(user, changes) {
+      Object.assign(user, changes)
+      setTournament({ ...tournament, enrolledUsers: [...tournament.enrolledUsers] });
     }
 
     return (
@@ -411,10 +406,21 @@ function Manage() {
             <div className='participant' key={participant.username}>
               <div className='participant-name'>{participant.username}</div>
               <div className='participant-info'>
-                <span>Score:</span><span>{participant.score}</span>
-                <span>Eliminated:</span><span>{participant.eliminated ? 'Yes' : 'No'}</span>
+                <label htmlFor={`score-${participantIndex}`}>Score:</label>
+                <input
+                  id={`score-${participantIndex}`}
+                  type="number"
+                  value={participant.score ?? 0}
+                  onChange={(e) => editSolo(participant, { score: Number(e.target.value) || 0 })}
+                />
+                <label htmlFor={`eliminated-${participantIndex}`}>Eliminated:</label>
+                <input
+                  id={`eliminated-${participantIndex}`}
+                  type="checkbox"
+                  checked={Boolean(participant.eliminated)}
+                  onChange={(e) => editSolo(participant, { eliminated: e.target.checked })}
+                />
               </div>
-              <button className='edit-button' onClick={() => editSolo(participant)}>Edit</button>
             </div>
           ))}
         </div>
