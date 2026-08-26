@@ -75,8 +75,24 @@ clears the demo data first.
 | `npm run lint:fix` | Lints and applies safe fixes |
 | `npm run format` | Formats with Prettier |
 | `npm run build` | Production build of the client |
-| `npm test` | Server test suite (added in Phase 3) |
+| `npm test` | Server test suite (vitest) |
+| `npm test -w server -- --watch` | The suite, re-running on change |
 | `npm run seed` | Seeds demo data |
+
+## Tests
+
+```bash
+npm test
+```
+
+The suite runs against a real MongoDB: `mongodb-memory-server` starts an
+in-memory **replica set** once per run, and each test file gets its own database
+inside it. A replica set rather than a standalone `mongod`, because every credit
+movement runs inside a transaction and a standalone server rejects those — so
+the tests exercise the same code path production does.
+
+Nothing needs to be installed or running first. The mongod binary is downloaded
+and cached on first use.
 
 ## Troubleshooting
 
@@ -84,9 +100,10 @@ clears the demo data first.
 telling you exactly which variable is missing. Check `server/.env` against
 `server/.env.example`.
 
-**API requests resolve to `undefined/api/...`** — `client/.env.local` is
-missing. Copy it from `client/.env.example`; `VITE_BACKEND_URL` is meant to be
-present and *empty*, which is what makes requests relative.
+**API requests 404 or go to the wrong host** — the client calls a relative
+`/api` path and Vite proxies it. Check that `VITE_API_URL` in
+`client/.env.local` is empty, and that the API is running on the port
+`client/vite.config.js` targets.
 
 **`MongooseServerSelectionError`** — nothing is listening on the configured
 MongoDB address. Start your local `mongod`, or check that your Atlas cluster

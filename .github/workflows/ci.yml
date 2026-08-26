@@ -27,13 +27,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # The test suite downloads a mongod binary on first use. Caching it keeps
+      # the run to seconds instead of re-fetching ~100 MB every time.
+      - name: Cache the in-memory MongoDB binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}
+
       - name: Lint
         run: npm run lint
 
       - name: Appendix B regression gates
         run: npm run check:appendix-b
 
-      # Placeholder until Phase 3 of PLAN.md adds the server test suite.
       - name: Test
         run: npm test
 
