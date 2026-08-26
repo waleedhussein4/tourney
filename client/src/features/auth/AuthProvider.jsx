@@ -1,0 +1,54 @@
+import { useCallback, useMemo } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { signOut } from '/src/api/auth.js'
+import { AuthContext } from './auth-context.js'
+import { currentUserKey, fetchCurrentUser } from './queries.js'
+
+/**
+ * Holds the answer to "who is this?" for the whole app.
+ *
+ * One query, cached by React Query, so the nav bar, the route guards, and any
+ * page that needs the user all read the same value and all update together when
+ * it changes — no page-level `useEffect` re-fetching, and no way for two parts
+ * of the screen to disagree about whether someone is signed in.
+ */
+export function AuthProvider({ children }) {
+  const queryClient = useQueryClient()
+
+  const { data: user, isPending } = useQuery({
+    queryKey: currentUserKey,
+    queryFn: fetchCurrentUser,
+    // Being signed out is a perfectly good answer; retrying it wastes requests
+    // and delays the first paint of every guarded route.
+    retry: false,
+    staleTime: 30_000,
+  })
+
+  const refresh = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: currentUserKey }),
+    [queryClient]
+  )
+
+  const logout = useCallback(async () => {
+    await signOut()
+    // Everything cached was fetched as the previous user. Dropping it all is the
+    // only way to be sure none of it leaks into the next session.
+    queryClient.clear()
+    queryClient.setQueryData(currentUserKey, null)
+  }, [queryClient])
+
+  const value = useMemo(
+    () => ({
+      user: user ?? null,
+      isLoading: isPending,
+      isAuthenticated: Boolean(user),
+      isHost: Boolean(user?.isHost),
+      isAdmin: Boolean(user?.isAdmin),
+      refresh,
+      logout,
+    }),
+    [user, isPending, refresh, logout]
+  )
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import './styles/Tournaments.css'
-import Nav from '/src/components/Nav'
+import { Nav } from '/src/components/layout/Nav.jsx'
 import Sidebar from './components/Sidebar.jsx'
 import Content from './components/Content.jsx'
 import { listTournaments } from '/src/api/tournaments.js'

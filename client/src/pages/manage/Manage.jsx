@@ -1,5 +1,5 @@
  
-import Nav from '/src/components/Nav.jsx'
+import { Nav } from '/src/components/layout/Nav.jsx'
 
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -15,10 +15,7 @@ function maxEarningsOf(tournament) {
 import './Manage.css'
 import pencil from '/src/assets/pencil.svg'
 
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Accordion } from '/src/components/ui/Accordion.jsx';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import sanitizeHtml from 'sanitize-html';
@@ -477,11 +474,7 @@ function Manage() {
         <div className='teams-container'>
           {tournament.enrolledTeams.map((team, teamIndex) => (
             <div className="team" key={team.teamName}>
-              <Accordion className='team'>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  {team.teamName}
-                </AccordionSummary>
-                <AccordionDetails className='team-details-accordian'>
+              <Accordion className='team' title={team.teamName}>
                   <div className="team-info">
                     <div className='team-info-item'>
                       <span>Score:</span>
@@ -500,11 +493,7 @@ function Manage() {
                       />
                     </div>
                   </div>
-                  <Accordion className='team-members'>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      Team Members
-                    </AccordionSummary>
-                    <AccordionDetails>
+                  <Accordion className='team-members' title={'Team Members'}>
                       {team.players.map((member, playerIndex) => (
                         <div key={playerIndex} className='participant'>
                           <span>{member.username}</span>
@@ -526,10 +515,8 @@ function Manage() {
                           </div>
                         </div>
                       ))}
-                    </AccordionDetails>
-                  </Accordion>
-                </AccordionDetails>
-              </Accordion>
+                    </Accordion>
+                </Accordion>
             </div>
           ))}
         </div>
@@ -631,11 +618,7 @@ function Manage() {
         <div className='teams-container'>
           {tournament.enrolledTeams.map((team, teamIndex) => (
             <div className="team" key={team.teamName}>
-              <Accordion className='team'>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  {team.teamName}
-                </AccordionSummary>
-                <AccordionDetails className='team-details-accordian'>
+              <Accordion className='team' title={team.teamName}>
                   <div className="team-info">
                     <div className='team-info-item'>
                       <span>Score:</span>
@@ -647,11 +630,7 @@ function Manage() {
                       />
                     </div>
                   </div>
-                  <Accordion className='team-members'>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      Team Members
-                    </AccordionSummary>
-                    <AccordionDetails>
+                  <Accordion className='team-members' title={'Team Members'}>
                       {team.players.map((member, playerIndex) => (
                         <div key={playerIndex} className='participant'>
                           <span>{member.username}</span>
@@ -665,10 +644,8 @@ function Manage() {
                           </div>
                         </div>
                       ))}
-                    </AccordionDetails>
-                  </Accordion>
-                </AccordionDetails>
-              </Accordion>
+                    </Accordion>
+                </Accordion>
             </div>
           ))}
         </div>

@@ -1,7 +1,7 @@
 import CreditCard from "./components/Credit"; // Import CreditCard component
 import { useEffect, useState } from "react";
 import "./styles/Credits.css";
-import Nav from "../../components/Nav";
+import { Nav } from '/src/components/layout/Nav.jsx'
 import { useNavigate } from "react-router-dom";
 
 const Credits = () => {
