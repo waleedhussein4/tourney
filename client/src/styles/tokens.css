@@ -1,39 +1,168 @@
 /*
- * Design tokens.
+ * Design tokens — the whole visual system in one file.
  *
- * Every colour, space, radius, and type step the app uses is named here, so a
- * visual change is a change to this file rather than a hunt through components.
- * The palette is deliberately plain at this stage — the design pass replaces the
- * values, not the names.
+ * Two layers, and the split matters:
+ *
+ *   1. PRIMITIVES  raw values (`--ink-800`, `--violet-500`). Named after what
+ *      they are. Components never use these directly.
+ *   2. SEMANTICS   roles (`--surface-raised`, `--accent`, `--danger`). Named
+ *      after what they mean. Components use only these.
+ *
+ * So retuning the palette is an edit to layer 1, and rethinking a role — "cards
+ * should sit one step lighter" — is an edit to layer 2. Neither is a hunt
+ * through components.
+ *
+ * The reasoning behind the choices is written up in docs/DESIGN.md.
  */
 
 :root {
-  /* Surfaces, from the page backwards */
-  --surface-page: #0e1116;
-  --surface-raised: #161b22;
-  --surface-overlay: #1c2230;
-  --surface-sunken: #0a0d12;
+  /* ------------------------------------------------------------------ *
+   * 1. Primitives — colour
+   * ------------------------------------------------------------------ */
 
-  /* Ink */
-  --text-strong: #f2f5f9;
-  --text: #c8d1dc;
-  --text-muted: #8b97a6;
-  --text-inverse: #0e1116;
+  /*
+   * Neutrals. Cool, with a faint violet cast borrowed from the accent so the
+   * greys belong to the same family — and never #000, which flattens every
+   * shadow and makes the whole app look like one sheet of paper.
+   *
+   * Eight dark steps, because a bracket page stacks a lot of panels: page →
+   * card → row → input, each needing to read as a distinct plane.
+   */
+  --ink-950: #08090d;
+  --ink-900: #0d0f15;
+  --ink-850: #12151d;
+  --ink-800: #181c26;
+  --ink-750: #1f2431;
+  --ink-700: #272d3d;
+  --ink-600: #333b4f;
+  --ink-500: #4a5468;
+  --ink-400: #78849c;
+  --ink-300: #8e99ae;
+  --ink-200: #c3cbdb;
+  --ink-100: #e4e8f1;
+  --ink-050: #f2f5fb;
+
+  /*
+   * Brand violet. 500 is the brand hue — used for glow, borders, and artwork,
+   * never for text on a dark surface, where it only reaches AA-large. 400 and
+   * 300 are the readable text steps; 600 is the fill that carries white text.
+   */
+  --violet-300: #b3a4ff;
+  --violet-400: #9a86ff;
+  --violet-500: #7c5cff;
+  --violet-600: #6541e8;
+  --violet-700: #5029c4;
+
+  /* Semantic hues. Each has a readable step for text and a solid step for fills. */
+  --green-400: #35d07f;
+  --green-600: #1a8f52;
+  --red-400: #ff6b70;
+  --red-600: #cf3239;
+  --amber-400: #f5b93a;
+  --amber-600: #b07f10;
+
+  /*
+   * Artwork hues. Used only by the category cards, which need thirteen
+   * distinguishable identities that still sit inside one palette. Kept apart
+   * from the semantic hues on purpose: a green category card must not be
+   * mistaken for a success state.
+   */
+  --art-violet: #7c5cff;
+  --art-indigo: #5b7cff;
+  --art-azure: #2f9dff;
+  --art-cyan: #16c2c9;
+  --art-mint: #24c47f;
+  --art-lime: #86c33a;
+  --art-amber: #eda92c;
+  --art-orange: #ff7a3d;
+  --art-rose: #ff5f87;
+  --art-magenta: #c95cff;
+
+  /* ------------------------------------------------------------------ *
+   * 2. Semantics — colour
+   * ------------------------------------------------------------------ */
+
+  /* Surfaces, from the page backwards. Every step is visible without a border. */
+  --surface-page: var(--ink-900);
+  --surface-sunken: var(--ink-950);
+  --surface-raised: var(--ink-850);
+  --surface-overlay: var(--ink-800);
+  --surface-hover: var(--ink-750);
+
+  /* Ink. `--text-faint` clears AA on every surface above; nothing sits below it. */
+  --text-strong: var(--ink-050);
+  --text: var(--ink-200);
+  --text-muted: var(--ink-300);
+  --text-faint: var(--ink-400);
+  --text-inverse: var(--ink-950);
 
   /* Lines */
-  --border: #2a323d;
-  --border-strong: #3b4553;
+  --border: var(--ink-700);
+  --border-strong: var(--ink-600);
+  --border-accent: color-mix(in srgb, var(--violet-500) 55%, transparent);
 
-  /* Accents */
-  --accent: #5b8def;
-  --accent-hover: #6f9bf2;
+  /* Accent */
+  --accent: var(--violet-400);
+  --accent-hover: var(--violet-300);
+  --accent-solid: var(--violet-600);
+  --accent-solid-hover: var(--violet-500);
   --accent-ink: #ffffff;
-  --danger: #e5534b;
-  --danger-hover: #f0736c;
-  --success: #3fb950;
-  --warning: #d29922;
+  --accent-glow: color-mix(in srgb, var(--violet-500) 22%, transparent);
+  --accent-wash: color-mix(in srgb, var(--violet-500) 12%, transparent);
 
-  /* Spacing — a 4px scale */
+  /* Status. Success doubles as the credits colour: money in this app is a win. */
+  --success: var(--green-400);
+  --success-solid: var(--green-600);
+  --danger: var(--red-400);
+  --danger-solid: var(--red-600);
+  --danger-solid-hover: #e0454c;
+  --warning: var(--amber-400);
+  --warning-solid: var(--amber-600);
+  --credits: var(--green-400);
+
+  /* ------------------------------------------------------------------ *
+   * 3. Type
+   * ------------------------------------------------------------------ */
+
+  /*
+   * Archivo for display: a grotesque with a width axis, set slightly expanded
+   * so headings and scores read like a scoreboard rather than a UI label.
+   * Instrument Sans for body: quiet, narrow-ish, stays out of the way.
+   * Both self-hosted through @fontsource-variable — no CDN, no tracking.
+   */
+  --font-display: 'Archivo Variable', 'Archivo', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Instrument Sans Variable', 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* The expanded width used for display type. */
+  --stretch-display: 112%;
+
+  /* A ~1.22 scale, fluid at the two sizes that carry a page. */
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.6875rem;
+  --text-3xl: clamp(1.875rem, 1.55rem + 1.4vw, 2.375rem);
+  --text-4xl: clamp(2.375rem, 1.6rem + 3.2vw, 3.5rem);
+
+  --leading-tight: 1.08;
+  --leading-snug: 1.25;
+  --leading-body: 1.6;
+
+  /* Tracking. Display type is set tight; small caps labels are set wide. */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.08em;
+  --tracking-caps: 0.14em;
+
+  /* ------------------------------------------------------------------ *
+   * 4. Space, shape, depth
+   * ------------------------------------------------------------------ */
+
+  /* A 4px scale. */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -42,30 +171,54 @@
   --space-6: 2rem;
   --space-7: 3rem;
   --space-8: 4rem;
+  --space-9: 6rem;
 
-  /* Type */
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.375rem;
-  --text-2xl: 1.75rem;
-  --text-3xl: 2.25rem;
-
-  /* Shape */
-  --radius-sm: 4px;
-  --radius: 8px;
+  --radius-sm: 5px;
+  --radius: 9px;
   --radius-lg: 14px;
+  --radius-xl: 20px;
   --radius-pill: 999px;
 
-  --shadow: 0 1px 2px rgb(0 0 0 / 40%);
-  --shadow-lg: 0 12px 32px rgb(0 0 0 / 45%);
+  /*
+   * Shadows on a dark UI do most of their work with a light top edge rather
+   * than a dark drop — a raised panel catches the light, it does not cast ink.
+   */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 45%);
+  --shadow: 0 6px 18px -6px rgb(0 0 0 / 55%);
+  --shadow-lg: 0 24px 60px -20px rgb(0 0 0 / 75%);
+  --shadow-accent: 0 0 0 1px var(--border-accent), 0 12px 32px -14px var(--accent-glow);
+  --edge-light: inset 0 1px 0 rgb(255 255 255 / 6%);
 
-  /* Layout */
-  --page-max: 1120px;
-  --nav-height: 60px;
+  /* ------------------------------------------------------------------ *
+   * 5. Motion
+   * ------------------------------------------------------------------ */
 
-  --focus-ring: 0 0 0 2px var(--surface-page), 0 0 0 4px var(--accent);
+  --duration-fast: 120ms;
+  --duration: 180ms;
+  --duration-slow: 320ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.6, 0, 0.35, 1);
+
+  /* ------------------------------------------------------------------ *
+   * 6. Layering
+   * ------------------------------------------------------------------ */
+
+  --z-base: 1;
+  --z-sticky: 10;
+  --z-nav: 20;
+  --z-dropdown: 30;
+  --z-modal: 50;
+  --z-toast: 60;
+  --z-skip-link: 100;
+
+  /* ------------------------------------------------------------------ *
+   * 7. Layout
+   * ------------------------------------------------------------------ */
+
+  --page-max: 1140px;
+  --page-max-wide: 1400px;
+  --page-max-narrow: 34rem;
+  --nav-height: 64px;
+
+  --focus-ring: 0 0 0 2px var(--surface-page), 0 0 0 4px var(--violet-400);
 }

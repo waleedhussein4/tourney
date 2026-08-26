@@ -1,0 +1,28 @@
+/*
+ * The frame every category figure sits in. The hue arrives as `--art-hue`,
+ * set inline from the category table, so one stylesheet serves all thirteen.
+ */
+.art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--surface-sunken);
+}
+
+.figure {
+  color: var(--art-hue);
+}
+
+.name {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-weight: 650;
+  letter-spacing: 2.6px;
+  text-transform: uppercase;
+  fill: var(--ink-050);
+}
+
+/* The house motif, small and in the corner, tying the thirteen into one set. */
+.watermark {
+  color: var(--ink-050);
+}

@@ -2,7 +2,8 @@ import { useId } from 'react'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import { toPlainText } from '/src/lib/richText.js'
-import './RichTextField.css'
+import fieldStyles from './Field.module.css'
+import styles from './RichTextField.module.css'
 
 /**
  * A rich text editor for fields the server stores and renders as HTML.
@@ -29,12 +30,14 @@ export function RichTextField({ label, value, onChange, limit, hint, error }) {
   const over = used > limit
 
   return (
-    <div className={`field ${error || over ? 'field--invalid' : ''}`}>
-      <label className="field__label" htmlFor={id}>
+    <div
+      className={`${fieldStyles.field} ${error || over ? `${fieldStyles.invalid} ${styles.invalid}` : ''}`}
+    >
+      <label className={fieldStyles.label} htmlFor={id}>
         {label}
       </label>
 
-      <div className="richtext">
+      <div className={styles.richtext}>
         <ReactQuill
           id={id}
           theme="snow"
@@ -51,13 +54,13 @@ export function RichTextField({ label, value, onChange, limit, hint, error }) {
         />
       </div>
 
-      <p className={`field__hint ${over ? 'field__error' : ''}`} id={countId}>
+      <p className={`${fieldStyles.hint} ${over ? fieldStyles.error : ''}`} id={countId}>
         {hint ? `${hint} ` : ''}
         {used} of {limit} characters{over ? ' — too long' : ''}
       </p>
 
       {error && (
-        <p className="field__error" id={errorId} role="alert">
+        <p className={fieldStyles.error} id={errorId} role="alert">
           {error}
         </p>
       )}

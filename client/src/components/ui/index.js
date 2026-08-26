@@ -1,5 +1,5 @@
 export { Button } from './Button.jsx'
-export { Field, Input, Select, Textarea } from './Field.jsx'
+export { Checkbox, Field, Input, Select, Textarea } from './Field.jsx'
 export { RichTextField } from './RichTextField.jsx'
 export { Modal } from './Modal.jsx'
 export { ConfirmDialog } from './ConfirmDialog.jsx'

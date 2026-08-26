@@ -1,53 +1,54 @@
 /* Quill ships a light theme; these bring it into the app's palette. */
-.richtext .ql-toolbar {
+.richtext :global(.ql-toolbar) {
   background: var(--surface-overlay);
   border-color: var(--border-strong);
   border-top-left-radius: var(--radius);
   border-top-right-radius: var(--radius);
 }
 
-.richtext .ql-container {
+.richtext :global(.ql-container) {
   background: var(--surface-sunken);
   border-color: var(--border-strong);
   border-bottom-left-radius: var(--radius);
   border-bottom-right-radius: var(--radius);
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-size: var(--text-base);
   min-height: 8rem;
 }
 
-.richtext .ql-editor {
+.richtext :global(.ql-editor) {
   color: var(--text-strong);
+  line-height: var(--leading-body);
 }
 
-.richtext .ql-editor.ql-blank::before {
-  color: var(--text-muted);
+.richtext :global(.ql-editor.ql-blank)::before {
+  color: var(--text-faint);
   font-style: normal;
 }
 
-.richtext .ql-stroke {
+.richtext :global(.ql-stroke) {
   stroke: var(--text-muted);
 }
 
-.richtext .ql-fill {
+.richtext :global(.ql-fill) {
   fill: var(--text-muted);
 }
 
-.richtext .ql-picker-label {
+.richtext :global(.ql-picker-label) {
   color: var(--text-muted);
 }
 
-.richtext button:hover .ql-stroke,
-.richtext button.ql-active .ql-stroke {
+.richtext :global(button:hover .ql-stroke),
+.richtext :global(button.ql-active .ql-stroke) {
   stroke: var(--accent) !important;
 }
 
-.richtext button:hover .ql-fill,
-.richtext button.ql-active .ql-fill {
+.richtext :global(button:hover .ql-fill),
+.richtext :global(button.ql-active .ql-fill) {
   fill: var(--accent) !important;
 }
 
-.field--invalid .richtext .ql-container,
-.field--invalid .richtext .ql-toolbar {
+.invalid .richtext :global(.ql-container),
+.invalid .richtext :global(.ql-toolbar) {
   border-color: var(--danger);
 }

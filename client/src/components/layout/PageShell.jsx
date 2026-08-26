@@ -1,5 +1,5 @@
 import { Nav } from './Nav.jsx'
-import './PageShell.css'
+import styles from './PageShell.module.css'
 
 /**
  * The frame every page sits in: skip link, nav, and a centred main column.
@@ -17,22 +17,32 @@ export function PageShell({ width = 'default', children }) {
         Skip to content
       </a>
       <Nav />
-      <main id="main" className={`page page--${width}`} tabIndex={-1}>
+      <main
+        id="main"
+        className={`${styles.page} ${width === 'default' ? '' : styles[width]}`}
+        tabIndex={-1}
+      >
         {children}
       </main>
     </>
   )
 }
 
-/** A page title with optional supporting line and trailing actions. */
-export function PageHeader({ title, description, actions }) {
+/**
+ * A page title with optional eyebrow, supporting line, and trailing actions.
+ *
+ * @param {object} props
+ * @param {string} [props.eyebrow] Where in the app the reader is.
+ */
+export function PageHeader({ eyebrow, title, description, actions }) {
   return (
-    <header className="page__header">
+    <header className={styles.header}>
       <div>
-        <h1>{title}</h1>
-        {description && <p className="page__description">{description}</p>}
+        {eyebrow && <span className={styles.eyebrow}>{eyebrow}</span>}
+        <h1 className={styles.title}>{title}</h1>
+        {description && <p className={styles.description}>{description}</p>}
       </div>
-      {actions && <div className="page__header-actions">{actions}</div>}
+      {actions && <div className={styles.actions}>{actions}</div>}
     </header>
   )
 }

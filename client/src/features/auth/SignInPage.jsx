@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { signIn } from '/src/api/auth.js'
 import { PageShell } from '/src/components/layout/PageShell.jsx'
-import { Button, Card, Field, Input } from '/src/components/ui/index.js'
+import { Button, Card, Checkbox, Field, Input } from '/src/components/ui/index.js'
 import { useAuth } from './useAuth.js'
 import './auth.css'
 
@@ -63,13 +63,10 @@ export function SignInPage() {
             )}
           </Field>
 
-          <label className="checkbox">
-            <input type="checkbox" {...register('rememberMe')} />
-            {/* All this does is ask the server for a longer-lived session
-                cookie. The original also wrote the password itself into
-                localStorage so it could prefill the field. */}
-            Keep me signed in for 30 days
-          </label>
+          {/* All this does is ask the server for a longer-lived session cookie.
+              The original also wrote the password itself into localStorage so it
+              could prefill the field. */}
+          <Checkbox label="Keep me signed in for 30 days" {...register('rememberMe')} />
 
           {errors.root && (
             <p className="auth__error" role="alert">

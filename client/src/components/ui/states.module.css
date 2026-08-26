@@ -1,0 +1,109 @@
+.state {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-5);
+  text-align: center;
+  border-radius: var(--radius-lg);
+}
+
+/* The motif, large and almost invisible, behind a page with nothing on it. */
+.backdrop {
+  position: absolute;
+  right: -3rem;
+  top: 50%;
+  translate: 0 -50%;
+  width: 26rem;
+  max-width: 70%;
+  color: var(--violet-500);
+  opacity: 0.13;
+  pointer-events: none;
+}
+
+.title,
+.body,
+.actions {
+  position: relative;
+}
+
+.title {
+  font-size: var(--text-xl);
+}
+
+.body {
+  max-width: 44ch;
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.error {
+  border: 1px solid color-mix(in srgb, var(--danger) 50%, transparent);
+  background: color-mix(in srgb, var(--danger) 7%, transparent);
+}
+
+.error .backdrop {
+  color: var(--danger);
+  opacity: 0.1;
+}
+
+.empty {
+  border: 1px dashed var(--border-strong);
+  background: color-mix(in srgb, var(--surface-raised) 55%, transparent);
+}
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.skeleton {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--surface-raised) 25%,
+    var(--surface-hover) 37%,
+    var(--surface-raised) 63%
+  );
+  background-size: 400% 100%;
+  animation: sweep 1.4s ease infinite;
+}
+
+@keyframes sweep {
+  from {
+    background-position: 100% 50%;
+  }
+  to {
+    background-position: 0 50%;
+  }
+}
+
+.spinner {
+  display: inline-flex;
+}
+
+.ring {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: turn 700ms linear infinite;
+}
+
+@keyframes turn {
+  to {
+    transform: rotate(360deg);
+  }
+}

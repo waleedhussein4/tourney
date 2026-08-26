@@ -1,4 +1,4 @@
-import './Badge.css'
+import styles from './Badge.module.css'
 
 /**
  * A short status label.
@@ -7,5 +7,5 @@ import './Badge.css'
  * @param {'neutral'|'accent'|'success'|'warning'|'danger'} [props.tone]
  */
 export function Badge({ tone = 'neutral', children }) {
-  return <span className={`badge badge--${tone}`}>{children}</span>
+  return <span className={`${styles.badge} ${styles[tone]}`}>{children}</span>
 }
