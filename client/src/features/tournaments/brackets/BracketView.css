@@ -1,0 +1,89 @@
+.bracket {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.bracket__champion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+/* A bracket is wider than the page on anything but the smallest capacities. */
+.bracket__scroll {
+  overflow-x: auto;
+  padding-bottom: var(--space-3);
+}
+
+.seed__team {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  background: var(--surface-overlay);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: var(--text-sm);
+  padding: 0.4rem var(--space-3);
+}
+
+.seed__team + .seed__team {
+  border-top: none;
+}
+
+.seed__team[role='button'] {
+  cursor: pointer;
+}
+
+.seed__team[role='button']:hover {
+  border-color: var(--accent);
+  color: var(--text-strong);
+}
+
+.seed__team--winner {
+  border-left: 3px solid var(--success);
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.seed__team--out {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.seed__team--tba {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.seed__score {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.bracket__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.bracket__details dt {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.bracket__details dd {
+  margin: 0;
+  color: var(--text-strong);
+}
+
+.bracket__roster ul {
+  margin: 0;
+  padding-left: var(--space-4);
+}

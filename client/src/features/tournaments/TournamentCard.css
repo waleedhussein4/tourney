@@ -1,0 +1,90 @@
+.tcard {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color 140ms ease;
+}
+
+.tcard:hover {
+  border-color: var(--border-strong);
+}
+
+/*
+ * A placeholder panel keyed to the category. Original artwork replaces it in
+ * the design pass; what it must never be is a hotlinked cover image, which is
+ * what the original shipped.
+ */
+.tcard__art {
+  display: flex;
+  align-items: flex-end;
+  height: 6.5rem;
+  padding: var(--space-3);
+  background: linear-gradient(135deg, #1d2440, #3a2a5e 55%, #16324f);
+  color: rgb(255 255 255 / 62%);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.tcard__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  flex: 1;
+}
+
+.tcard__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tcard__title {
+  font-size: var(--text-lg);
+}
+
+.tcard__title a {
+  color: var(--text-strong);
+}
+
+/* The card is the click target; the title carries the accessible name. */
+.tcard__title a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.tcard {
+  position: relative;
+}
+
+.tcard__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: auto;
+}
+
+.tcard__facts dt {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tcard__facts dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-strong);
+  font-size: var(--text-sm);
+}
+
+.tournament-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: var(--space-4);
+}
