@@ -2,8 +2,8 @@
 //
 // The pages that call it are still the original ones and speak in usernames,
 // team names, and the old field names; the API speaks in ids and the new ones.
-// Translating in one module keeps that seam in a single file, which Phase 4 of
-// PLAN.md deletes along with the pages themselves.
+// Translating in one module keeps that seam in a single file, to be deleted
+// along with the pages when the client is rewritten.
 
 const json = { 'Content-Type': 'application/json' }
 

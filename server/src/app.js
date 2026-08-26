@@ -1,6 +1,6 @@
 // Builds and exports the Express app. Nothing here listens on a port or opens a
 // database connection: `src/index.js` does that for local development, and the
-// serverless deployment added in Phase 6 imports the app directly.
+// serverless deployment imports the app directly.
 
 import express from 'express'
 import cookieParser from 'cookie-parser'

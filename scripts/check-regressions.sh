@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Grep gates for the server half of PLAN.md Appendix B.
+# Regression gates.
 #
-# Every bug and vulnerability the plan lists has a behavioural fix; these are the
-# textual tripwires that stop one creeping back. Each gate must find nothing.
+# Every bug and vulnerability fixed during the rewrite has a behavioural test;
+# these are the textual tripwires that stop one creeping back in. Each gate must
+# find nothing.
 #
-#   npm run check:appendix-b
+#   npm run check:regressions
 
 cd "$(dirname "$0")/.." || exit 1
 
@@ -24,7 +25,7 @@ gate() {
 
 S=server
 
-echo "Appendix B grep gates (server)"
+echo "Regression gates"
 
 gate "no Access-Control-* headers set by hand" \
   grep -rn "Access-Control-" $S/src $S/scripts
