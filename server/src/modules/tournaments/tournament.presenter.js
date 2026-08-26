@@ -67,6 +67,7 @@ export function toListItem(tournament) {
     description: tournament.description,
     category: tournament.category,
     type: tournament.type,
+    accessibility: tournament.accessibility,
     teamSize: tournament.teamSize,
     entryFee: tournament.entryFee,
     maxCapacity: tournament.maxCapacity,

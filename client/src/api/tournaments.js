@@ -1,198 +1,88 @@
-// A thin client for the rewritten tournament API.
-//
-// The pages that call it are still the original ones and speak in usernames,
-// team names, and the old field names; the API speaks in ids and the new ones.
-// Translating in one module keeps that seam in a single file, to be deleted
-// along with the pages when the client is rewritten.
+import { del, get, patch, post } from './client.js'
 
-const json = { 'Content-Type': 'application/json' }
+// --- reading ------------------------------------------------------------------
 
-async function request(path, options = {}) {
-  const response = await fetch(path, { credentials: 'include', ...options })
-  const body = response.status === 204 ? null : await response.json().catch(() => null)
-  if (!response.ok) {
-    const error = new Error(body?.error?.message ?? 'Something went wrong')
-    error.status = response.status
-    error.details = body?.error?.details
-    throw error
-  }
-  return body
-}
+/**
+ * The browse list.
+ *
+ * @param {{page?: number, limit?: number, search?: string, category?: string,
+ *          type?: string, accessibility?: string, minEntryFee?: number,
+ *          maxEntryFee?: number, status?: string}} params
+ */
+export const listTournaments = (params, options) =>
+  get('/api/tournaments', { ...options, query: params })
 
-/** Turns the API's participant list back into the two arrays the pages read. */
-function toLegacyShape(view) {
-  const isTeamBased = view.teamSize > 1
-  const nameById = new Map(view.participants.map((p) => [p.id, p.name]))
+export const getTournament = (id, options) => get(`/api/tournaments/${id}`, options)
 
-  const enrolledUsers = isTeamBased
-    ? []
-    : view.participants.map((p) => ({
-        UUID: p.id,
-        username: p.name,
-        score: p.score,
-        eliminated: p.eliminated,
-      }))
+/** The host's view: everything public, plus the applications queue and the bank. */
+export const getManageView = (id) => get(`/api/tournaments/${id}/manage`)
 
-  const enrolledTeams = isTeamBased
-    ? view.participants.map((p) => ({
-        UUID: p.id,
-        teamName: p.name,
-        score: p.score,
-        eliminated: p.eliminated,
-        players: (p.members ?? []).map((m) => ({
-          UUID: m.id,
-          username: m.name,
-          score: m.score,
-          eliminated: m.eliminated,
-        })),
-      }))
-    : []
+export const listTrending = (limit = 8) => get('/api/tournaments/trending', { query: { limit } })
 
-  return {
-    ...view,
-    UUID: view.id,
-    // The old pages branch on `earnings` being a number or a rank table.
-    earnings: view.type === 'brackets' ? view.prize : view.prizes,
-    application: view.applicationForm,
-    enrolledUsers,
-    enrolledTeams,
-    // Stored as participant ids; rendered as the names the bracket shows.
-    matches: (view.matches ?? []).map((id) => (id ? (nameById.get(id) ?? null) : null)),
-    isHost: view.viewer.isHost,
-    isJoined: view.viewer.isJoined,
-    hasApplied: view.viewer.hasApplied,
-    isAccepted: view.viewer.isAccepted,
-    applications: (view.applications ?? []).map((application) => ({
-      UUID: application.id,
-      ...(application.isTeam ? { teamName: application.name } : { username: application.name }),
-      application: application.fields,
-    })),
-    // Kept so writes can translate names back into ids.
-    _participants: view.participants,
-    _nameToId: new Map(view.participants.map((p) => [p.name, p.id])),
-  }
-}
+export const listCategories = () => get('/api/tournaments/categories')
 
-export const getTournament = (id) =>
-  request(`/api/tournaments/${id}`).then((data) => toLegacyShape(data.tournament))
+/** Everything the caller hosts or competes in. */
+export const listMyTournaments = () => get('/api/tournaments/mine')
 
-export const getManagedTournament = (id) =>
-  request(`/api/tournaments/${id}/manage`).then((data) => toLegacyShape(data.tournament))
+// --- writing ------------------------------------------------------------------
 
-export const listTournaments = (params) =>
-  request(`/api/tournaments?${new URLSearchParams(params)}`)
+export const createTournament = (payload) => post('/api/tournaments', payload)
 
-export const getTrending = () =>
-  request('/api/tournaments/trending').then((data) => data.tournaments)
+export const updateTournament = (id, changes) => patch(`/api/tournaments/${id}`, changes)
 
-export const getMyTournaments = () =>
-  request('/api/tournaments/mine').then((data) => data.tournaments)
+export const cancelTournament = (id) => del(`/api/tournaments/${id}`)
 
-export const getCategories = () =>
-  request('/api/tournaments/categories').then((data) => data.categories)
+export const postUpdate = (id, content) => post(`/api/tournaments/${id}/updates`, { content })
 
-export const createTournament = (payload) =>
-  request('/api/tournaments', { method: 'POST', headers: json, body: JSON.stringify(payload) })
+// --- entering -----------------------------------------------------------------
 
-export const patchTournament = (id, patch) =>
-  request(`/api/tournaments/${id}`, {
-    method: 'PATCH',
-    headers: json,
-    body: JSON.stringify(patch),
-  })
+export const joinSolo = (id) => post(`/api/tournaments/${id}/join/solo`)
 
-export const postUpdate = (id, content) =>
-  request(`/api/tournaments/${id}/updates`, {
-    method: 'POST',
-    headers: json,
-    body: JSON.stringify({ content }),
-  })
+export const joinAsTeam = (id, teamId) => post(`/api/tournaments/${id}/join/team`, { teamId })
 
-export const joinSolo = (id) => request(`/api/tournaments/${id}/join/solo`, { method: 'POST' })
-
-export const joinAsTeam = (id, teamId) =>
-  request(`/api/tournaments/${id}/join/team`, {
-    method: 'POST',
-    headers: json,
-    body: JSON.stringify({ teamId }),
-  })
-
-export const apply = (id, { teamId, fields }) =>
-  request(`/api/tournaments/${id}/applications`, {
-    method: 'POST',
-    headers: json,
-    body: JSON.stringify({ teamId, fields }),
-  })
+/**
+ * @param {string} id
+ * @param {{teamId?: string, fields: {label: string, input: string}[]}} application
+ */
+export const applyToTournament = (id, application) =>
+  post(`/api/tournaments/${id}/applications`, application)
 
 export const acceptApplication = (id, applicationId) =>
-  request(`/api/tournaments/${id}/applications/${applicationId}/accept`, { method: 'POST' })
+  post(`/api/tournaments/${id}/applications/${applicationId}/accept`)
 
 export const rejectApplication = (id, applicationId) =>
-  request(`/api/tournaments/${id}/applications/${applicationId}/reject`, { method: 'POST' })
+  post(`/api/tournaments/${id}/applications/${applicationId}/reject`)
 
-export const deposit = (id, amount) =>
-  request(`/api/tournaments/${id}/bank/deposit`, {
-    method: 'POST',
-    headers: json,
-    body: JSON.stringify({ amount }),
-  })
+// --- running it ---------------------------------------------------------------
 
-export const shuffleBrackets = (id) => request(`/api/tournaments/${id}/shuffle`, { method: 'POST' })
+export const depositIntoBank = (id, amount) =>
+  post(`/api/tournaments/${id}/bank/deposit`, { amount })
 
-export const startTournament = (id) => request(`/api/tournaments/${id}/start`, { method: 'POST' })
+export const shuffleBracket = (id) => post(`/api/tournaments/${id}/shuffle`)
 
-export const endTournament = (id) => request(`/api/tournaments/${id}/end`, { method: 'POST' })
+export const startTournament = (id) => post(`/api/tournaments/${id}/start`)
 
-/** Match winners are edited by name on screen and stored by id. */
-export const saveMatches = (id, winnerNames, tournament) =>
-  request(`/api/tournaments/${id}/matches`, {
-    method: 'PATCH',
-    headers: json,
-    body: JSON.stringify({
-      matches: winnerNames.map((name) => (name ? (tournament._nameToId.get(name) ?? null) : null)),
-    }),
-  })
+export const endTournament = (id) => post(`/api/tournaments/${id}/end`)
 
-/** Solo score / elimination edits, keyed by username on screen. */
-export const saveSoloParticipants = (id, participants, tournament) =>
-  request(`/api/tournaments/${id}/participants`, {
-    method: 'PATCH',
-    headers: json,
-    body: JSON.stringify({
-      participants: participants
-        .map((participant) => ({
-          id: tournament._nameToId.get(participant.username),
-          score: Number(participant.score) || 0,
-          eliminated: Boolean(participant.eliminated),
-        }))
-        .filter((participant) => participant.id),
-    }),
-  })
+/** Winners by match index; `null` where the result is not in yet. */
+export const saveMatches = (id, matches) => patch(`/api/tournaments/${id}/matches`, { matches })
 
-/** Team score / elimination edits, keyed by team name and username on screen. */
-export const saveTeamParticipants = (id, teams, tournament) =>
-  request(`/api/tournaments/${id}/participants`, {
-    method: 'PATCH',
-    headers: json,
-    body: JSON.stringify({
-      participants: teams
-        .map((team) => {
-          const source = tournament._participants.find((p) => p.name === team.teamName)
-          if (!source) return null
-          const memberIdByName = new Map((source.members ?? []).map((m) => [m.name, m.id]))
-          return {
-            id: source.id,
-            score: Number(team.score) || 0,
-            eliminated: Boolean(team.eliminated),
-            members: (team.players ?? [])
-              .map((player) => ({
-                id: memberIdByName.get(player.username),
-                score: Number(player.score) || 0,
-                eliminated: Boolean(player.eliminated),
-              }))
-              .filter((member) => member.id),
-          }
-        })
-        .filter(Boolean),
-    }),
-  })
+/** Score and elimination edits, by participant id. */
+export const saveParticipants = (id, participants) =>
+  patch(`/api/tournaments/${id}/participants`, { participants })
+
+// --- query keys ---------------------------------------------------------------
+
+/**
+ * One place the cache keys are spelled, so an invalidation after a mutation
+ * cannot miss the query it was meant to refresh.
+ */
+export const tournamentKeys = {
+  all: ['tournaments'],
+  list: (params) => ['tournaments', 'list', params],
+  detail: (id) => ['tournaments', 'detail', id],
+  manage: (id) => ['tournaments', 'manage', id],
+  trending: ['tournaments', 'trending'],
+  categories: ['tournaments', 'categories'],
+  mine: ['tournaments', 'mine'],
+}

@@ -3,7 +3,7 @@ import { Nav } from '/src/components/layout/Nav.jsx'
 
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import * as api from '/src/api/tournaments.js';
+import * as api from '/src/api/legacy-tournaments.js';
 
 /** What the bank has to hold before the tournament can start. */
 function maxEarningsOf(tournament) {
