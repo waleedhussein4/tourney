@@ -4,14 +4,12 @@
 // normalised here exactly once. Import this module instead of touching
 // `process.env` directly, so a missing or malformed variable fails at boot with
 // a readable message rather than as an undefined value deep inside a request.
-//
-// Phase 2 of PLAN.md rewrites the server as ESM; this file stays CommonJS until
-// then so the legacy entry point can require it.
 
-const path = require('node:path')
-const dotenv = require('dotenv')
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import dotenv from 'dotenv'
 
-const serverRoot = path.resolve(__dirname, '..', '..')
+const serverRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 const nodeEnv = process.env.NODE_ENV || 'development'
 
 // dotenv never overwrites a variable that is already set, so the first file to
@@ -21,9 +19,9 @@ const nodeEnv = process.env.NODE_ENV || 'development'
 dotenv.config({ path: path.join(serverRoot, `.env.${nodeEnv}`) })
 dotenv.config({ path: path.join(serverRoot, '.env') })
 
-// The names on the left are the ones the codebase is moving to; the aliases are
-// what the original project used. Both are accepted until Phase 2 finishes the
-// rename, so an existing local `.env` keeps working.
+// The names on the left are the ones the codebase uses; the aliases are what the
+// original project used. Both are accepted so an existing local `.env` keeps
+// working.
 const ALIASES = {
   MONGODB_URI: 'DATABASE_URL',
   JWT_SECRET: 'SECRET',
@@ -104,4 +102,12 @@ function loadConfig() {
   })
 }
 
-module.exports = loadConfig()
+const config = loadConfig()
+
+// Temporary bridge for the legacy modules still mounted while Phase 2 replaces
+// them module by module: they read `process.env.SECRET` directly. Writing the
+// validated value back under the legacy name means a `.env` using the new names
+// keeps the old code working. Removed with the last legacy file.
+process.env.SECRET = config.jwtSecret
+
+export default config
