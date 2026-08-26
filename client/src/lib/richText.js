@@ -49,6 +49,19 @@ const OPTIONS = {
 
 export const toSafeHtml = (html) => sanitizeHtml(String(html ?? ''), OPTIONS)
 
+/**
+ * The text a reader actually sees, with every tag stripped.
+ *
+ * Length limits are measured against this, not the markup, so a hundred bytes
+ * of formatting cannot smuggle a thousand characters of prose past a cap. The
+ * server measures the same way.
+ */
+export const toPlainText = (html) =>
+  sanitizeHtml(String(html ?? ''), { allowedTags: [], allowedAttributes: {} }).trim()
+
 /** True when the rich text has no actual content, so an empty state can show instead. */
-export const isEmptyRichText = (html) =>
-  sanitizeHtml(String(html ?? ''), { allowedTags: [], allowedAttributes: {} }).trim().length === 0
+export const isEmptyRichText = (html) => toPlainText(html).length === 0
+
+/** A react-hook-form rule enforcing a plain-text limit on a rich text field. */
+export const richTextLimit = (limit, label) => (value) =>
+  toPlainText(value).length <= limit || `${label} is limited to ${limit} characters`

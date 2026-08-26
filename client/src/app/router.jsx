@@ -7,11 +7,11 @@ import { NotFoundPage } from '/src/features/misc/NotFoundPage.jsx'
 import { HomePage } from '/src/features/home/HomePage.jsx'
 import { BrowsePage } from '/src/features/tournaments/BrowsePage.jsx'
 import { TournamentPage } from '/src/features/tournaments/TournamentPage.jsx'
+import { CreateTournamentPage } from '/src/features/host/CreateTournamentPage.jsx'
+import { ManagePage } from '/src/features/manage/ManagePage.jsx'
 
 // Legacy pages, replaced one feature at a time. Each import disappears with the
 // PR that rewrites the page behind it.
-import Host from '/src/pages/host/host.jsx'
-import Manage from '/src/pages/manage/Manage.jsx'
 import Team from '/src/pages/team/Team.jsx'
 import ViewTeam from '/src/pages/team/view/View.jsx'
 import JoinTeam from '/src/pages/team/join/Join.jsx'
@@ -54,8 +54,8 @@ export function Router() {
 
       {/* Hosts. */}
       <Route element={<HostRoute />}>
-        <Route path="/host" element={<Host />} />
-        <Route path="/tournament/:UUID/manage" element={<Manage />} />
+        <Route path="/host" element={<CreateTournamentPage />} />
+        <Route path="/tournament/:UUID/manage" element={<ManagePage />} />
       </Route>
 
       {/* Administrators. */}
