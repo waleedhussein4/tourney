@@ -1,23 +1,16 @@
-// this file is a copy of server.js
-// vercel requires the entry point to be called index.js, hence you should make this file available for production/deployment on vercel
-
-// the way it works now is that it checks if the NODE_ENV is production or development from '.env'
-// if it is production, it will use the .env file, which in the source code only contains the NODE_ENV variable
-// vercel adds its own environment variables, so you don't need to add them in the .env file
-// otherwise if its in development, it will use the .env.development file
-// so .env.production is useless until we migrate to another host other than vercel
+// Vercel requires the serverless entry point to be named index.js.
 
 const dns = require("dns");
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
-
-console.log('NODE_ENV: ' + require('dotenv').config({ path: `.env` }).parsed.NODE_ENV)
-
-if (process.env.NODE_ENV === 'production') {
-  require('dotenv').config({ path: `.env` })
-}
-else {
-  require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
+// Loads, validates, and normalises the environment. A missing or malformed
+// required variable stops the server here, naming what is wrong.
+let config;
+try {
+  config = require("./src/config/env");
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
 }
 
 const express = require("express");
@@ -30,7 +23,7 @@ const teamRoute = require("./routes/teamRoutes");
 const adminRoute = require("./routes/adminRoutes");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
-const port = 2000;
+const port = config.port;
 
 const Tournament = require("./models/tourneyModels"); // your tournaments model file name
 const { createTournaments } = require("./scripts/generateTestTournaments");
@@ -43,7 +36,6 @@ app.use((req, res, next) => {
   console.log(req.path, req.method);
   next();
 });
-// app.use(cors({ origin: `${process.env.FRONTEND_URL}`, credentials: true }));
 app.use(cors({
   origin: true,
   credentials: true
@@ -55,7 +47,6 @@ app.options("*", cors({
 }));
 
 
-console.log(`FRONTEND_URL: ${process.env.FRONTEND_URL}`)
 app.use(cookieParser());
 
 //route
@@ -86,7 +77,7 @@ async function seedTestDataIfTournamentsEmpty() {
 
 
 mongoose
-  .connect(`${process.env.DATABASE_URL}`)
+  .connect(config.mongodbUri)
   .then(async () => {
     await seedTestDataIfTournamentsEmpty();
 
