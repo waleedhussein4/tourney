@@ -1,5 +1,5 @@
 import { forwardRef, useId } from 'react'
-import './Field.css'
+import styles from './Field.module.css'
 
 /**
  * A labelled form control.
@@ -21,11 +21,11 @@ export function Field({ label, error, hint, required = false, children }) {
   const describedBy = error ? errorId : hint ? hintId : undefined
 
   return (
-    <div className={`field ${error ? 'field--invalid' : ''}`}>
-      <label className="field__label" htmlFor={id}>
+    <div className={`${styles.field} ${error ? styles.invalid : ''}`}>
+      <label className={styles.label} htmlFor={id}>
         {label}
         {required && (
-          <span className="field__required" aria-hidden="true">
+          <span className={styles.required} aria-hidden="true">
             *
           </span>
         )}
@@ -34,11 +34,11 @@ export function Field({ label, error, hint, required = false, children }) {
       {children({ id, describedBy, invalid: Boolean(error) })}
 
       {error ? (
-        <p className="field__error" id={errorId} role="alert">
+        <p className={styles.error} id={errorId} role="alert">
           {error}
         </p>
       ) : hint ? (
-        <p className="field__hint" id={hintId}>
+        <p className={styles.hint} id={hintId}>
           {hint}
         </p>
       ) : null}
@@ -63,7 +63,7 @@ export const Input = forwardRef(function Input(
   return (
     <input
       ref={ref}
-      className={`control ${className}`}
+      className={`${styles.control} ${className}`}
       aria-describedby={describedBy}
       aria-invalid={invalid || undefined}
       {...rest}
@@ -78,7 +78,7 @@ export const Textarea = forwardRef(function Textarea(
   return (
     <textarea
       ref={ref}
-      className={`control control--multiline ${className}`}
+      className={`${styles.control} ${styles.multiline} ${className}`}
       aria-describedby={describedBy}
       aria-invalid={invalid || undefined}
       {...rest}
@@ -93,12 +93,28 @@ export const Select = forwardRef(function Select(
   return (
     <select
       ref={ref}
-      className={`control ${className}`}
+      className={`${styles.control} ${className}`}
       aria-describedby={describedBy}
       aria-invalid={invalid || undefined}
       {...rest}
     >
       {children}
     </select>
+  )
+})
+
+/**
+ * A checkbox and its label, as one click target.
+ *
+ * A bare `<input type="checkbox">` with a sibling `<label>` is the shape that
+ * most often ends up unlabelled; wrapping it means the pairing cannot be
+ * forgotten and the words are part of the hit area.
+ */
+export const Checkbox = forwardRef(function Checkbox({ label, className = '', ...rest }, ref) {
+  return (
+    <label className={`${styles.checkbox} ${className}`}>
+      <input type="checkbox" ref={ref} {...rest} />
+      {label}
+    </label>
   )
 })

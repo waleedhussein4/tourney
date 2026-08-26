@@ -1,5 +1,6 @@
+import { BracketTree } from '/src/components/brand/index.js'
 import { Button } from './Button.jsx'
-import './states.css'
+import styles from './states.module.css'
 
 /**
  * The three things every page has to be able to say: I am working on it, I
@@ -12,25 +13,29 @@ import './states.css'
 /** A spinner with an accessible label. */
 export function Spinner({ label = 'Loading' }) {
   return (
-    <span className="spinner" role="status">
-      <span className="spinner__ring" aria-hidden="true" />
+    <span className={styles.spinner} role="status">
+      <span className={styles.ring} aria-hidden="true" />
       <span className="visually-hidden">{label}</span>
     </span>
   )
 }
 
 /** A block-level placeholder for content that has not arrived yet. */
-export function Skeleton({ height = '1rem', width = '100%', radius = 'var(--radius-sm)' }) {
+export function Skeleton({ height = '1rem', width = '100%', radius = 'var(--radius)' }) {
   return (
-    <span className="skeleton" style={{ height, width, borderRadius: radius }} aria-hidden="true" />
+    <span
+      className={styles.skeleton}
+      style={{ height, width, borderRadius: radius }}
+      aria-hidden="true"
+    />
   )
 }
 
 export function LoadingState({ label = 'Loading', rows = 3 }) {
   return (
-    <div className="state" role="status" aria-live="polite">
+    <div role="status" aria-live="polite">
       <span className="visually-hidden">{label}</span>
-      <div className="state__skeletons">
+      <div className={styles.skeletons}>
         {Array.from({ length: rows }, (_, index) => (
           <Skeleton key={index} height="4.5rem" />
         ))}
@@ -48,10 +53,11 @@ export function LoadingState({ label = 'Loading', rows = 3 }) {
  */
 export function ErrorState({ title = 'That did not work', error, onRetry, action }) {
   return (
-    <div className="state state--error" role="alert">
-      <h2 className="state__title">{title}</h2>
-      <p className="state__body">{error?.message ?? 'Something went wrong. Please try again.'}</p>
-      <div className="state__actions">
+    <div className={`${styles.state} ${styles.error}`} role="alert">
+      <BracketTree className={styles.backdrop} entrants={4} />
+      <h2 className={styles.title}>{title}</h2>
+      <p className={styles.body}>{error?.message ?? 'Something went wrong. Please try again.'}</p>
+      <div className={styles.actions}>
         {onRetry && (
           <Button variant="primary" onClick={onRetry}>
             Try again
@@ -66,14 +72,17 @@ export function ErrorState({ title = 'That did not work', error, onRetry, action
 /**
  * Nothing here yet — with the thing to do about it.
  *
- * An empty state without a call to action is a dead end.
+ * An empty state without a call to action is a dead end. The bracket behind it
+ * is the one place the motif is allowed to be big: an empty page is exactly
+ * where the product can afford to say what it is.
  */
 export function EmptyState({ title, body, action }) {
   return (
-    <div className="state state--empty">
-      <h2 className="state__title">{title}</h2>
-      {body && <p className="state__body">{body}</p>}
-      {action && <div className="state__actions">{action}</div>}
+    <div className={`${styles.state} ${styles.empty}`}>
+      <BracketTree className={styles.backdrop} entrants={8} />
+      <h2 className={styles.title}>{title}</h2>
+      {body && <p className={styles.body}>{body}</p>}
+      {action && <div className={styles.actions}>{action}</div>}
     </div>
   )
 }

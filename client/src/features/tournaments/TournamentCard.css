@@ -13,20 +13,13 @@
 }
 
 /*
- * A placeholder panel keyed to the category. Original artwork replaces it in
- * the design pass; what it must never be is a hotlinked cover image, which is
- * what the original shipped.
+ * The category's own artwork — original, abstract, drawn from the palette. What
+ * it must never be is a hotlinked cover image, which is what the original
+ * shipped.
  */
 .tcard__art {
-  display: flex;
-  align-items: flex-end;
-  height: 6.5rem;
-  padding: var(--space-3);
-  background: linear-gradient(135deg, #1d2440, #3a2a5e 55%, #16324f);
-  color: rgb(255 255 255 / 62%);
-  font-size: var(--text-xs);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  height: 8.5rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .tcard__body {

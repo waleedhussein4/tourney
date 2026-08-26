@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
+import { CategoryArt } from '/src/components/brand/index.js'
 import { Badge } from '/src/components/ui/index.js'
 import {
   formatCapacity,
-  formatCategory,
   formatCredits,
   formatDate,
   formatType,
@@ -22,8 +22,8 @@ export function TournamentCard({ tournament }) {
 
   return (
     <article className="tcard">
-      <div className="tcard__art" data-category={tournament.category} aria-hidden="true">
-        <span>{formatCategory(tournament.category)}</span>
+      <div className="tcard__art">
+        <CategoryArt slug={tournament.category} />
       </div>
 
       <div className="tcard__body">

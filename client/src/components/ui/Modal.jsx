@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import './Modal.css'
+import styles from './Modal.module.css'
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -18,8 +18,9 @@ const FOCUSABLE =
  * @param {() => void} props.onClose
  * @param {string} props.title Announced as the dialog's accessible name.
  * @param {React.ReactNode} [props.footer] Actions, laid out at the end.
+ * @param {boolean} [props.wide] For dialogs carrying a form rather than a question.
  */
-export function Modal({ open, onClose, title, description, footer, children }) {
+export function Modal({ open, onClose, title, description, footer, wide = false, children }) {
   const dialogRef = useRef(null)
   const returnFocusRef = useRef(null)
   const titleId = useId()
@@ -82,13 +83,13 @@ export function Modal({ open, onClose, title, description, footer, children }) {
 
   return createPortal(
     <div
-      className="modal__backdrop"
+      className={styles.backdrop}
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
       {/* The keydown handler here is the focus trap and the Escape key, not a
           control — the dialog itself is what receives them. */}
       <div
-        className="modal"
+        className={`${styles.modal} ${wide ? styles.wide : ''}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
@@ -97,13 +98,13 @@ export function Modal({ open, onClose, title, description, footer, children }) {
         tabIndex={-1}
         onKeyDown={handleKeyDown}
       >
-        <header className="modal__header">
-          <h2 className="modal__title" id={titleId}>
+        <header className={styles.header}>
+          <h2 className={styles.title} id={titleId}>
             {title}
           </h2>
           <button
             type="button"
-            className="modal__close"
+            className={styles.close}
             onClick={onClose}
             aria-label="Close dialog"
           >
@@ -112,14 +113,14 @@ export function Modal({ open, onClose, title, description, footer, children }) {
         </header>
 
         {description && (
-          <p className="modal__description" id={descriptionId}>
+          <p className={styles.description} id={descriptionId}>
             {description}
           </p>
         )}
 
-        <div className="modal__body">{children}</div>
+        <div className={styles.body}>{children}</div>
 
-        {footer && <footer className="modal__footer">{footer}</footer>}
+        {footer && <footer className={styles.footer}>{footer}</footer>}
       </div>
     </div>,
     document.body

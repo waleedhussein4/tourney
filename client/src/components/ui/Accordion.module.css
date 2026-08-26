@@ -2,18 +2,23 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface-raised);
+  overflow: hidden;
 }
 
 .accordion + .accordion {
   margin-top: var(--space-2);
 }
 
-.accordion__heading {
+.open {
+  border-color: var(--border-strong);
+}
+
+.heading {
   margin: 0;
   font-size: inherit;
 }
 
-.accordion__trigger {
+.trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -22,33 +27,35 @@
   padding: var(--space-3) var(--space-4);
   background: none;
   border: none;
-  border-radius: var(--radius);
   color: var(--text-strong);
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
   font-size: var(--text-base);
-  font-weight: 600;
+  font-weight: 650;
   text-align: left;
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-out);
 }
 
-.accordion__trigger:hover {
-  background: var(--surface-overlay);
+.trigger:hover {
+  background: var(--surface-hover);
 }
 
-.accordion__chevron {
+.chevron {
   width: 0.5rem;
   height: 0.5rem;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
+  border-right: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
   transform: rotate(45deg) translate(-2px, -2px);
-  transition: transform 150ms ease;
+  transition: transform var(--duration) var(--ease-out);
   flex-shrink: 0;
 }
 
-.accordion--open .accordion__chevron {
+.open .chevron {
   transform: rotate(-135deg) translate(-2px, -2px);
 }
 
-.accordion__panel {
+.panel {
   padding: 0 var(--space-4) var(--space-4);
   color: var(--text);
 }
