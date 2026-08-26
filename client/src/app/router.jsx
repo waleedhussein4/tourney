@@ -16,17 +16,6 @@ import { CheckoutPage } from '/src/features/credits/CheckoutPage.jsx'
 import { ProfilePage } from '/src/features/profile/ProfilePage.jsx'
 import { AdminPage } from '/src/features/admin/AdminPage.jsx'
 import { NotFoundPage } from '/src/features/misc/NotFoundPage.jsx'
-import { ManagePage } from '/src/features/manage/ManagePage.jsx'
-
-// Legacy pages, replaced one feature at a time. Each import disappears with the
-// PR that rewrites the page behind it.
-import Team from '/src/pages/team/Team.jsx'
-import ViewTeam from '/src/pages/team/view/View.jsx'
-import JoinTeam from '/src/pages/team/join/Join.jsx'
-import Credits from '/src/pages/credits/Credits.jsx'
-import Purchase from '/src/pages/purchase/Purchase.jsx'
-import BecomeHost from '/src/pages/BecomeHost/BecomeHost.jsx'
-import Admin from '/src/pages/admin/Admin.jsx'
 
 /**
  * Every route in the app, and who is allowed to see it.
