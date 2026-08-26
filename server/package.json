@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "test": "node -e \"console.log('server: no tests yet — added in Phase 3 (PLAN.md 5)')\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "seed": "node scripts/seed.js",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --fix --report-unused-disable-directives"
@@ -30,6 +31,9 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "eslint": "^8.57.1"
+    "eslint": "^8.57.1",
+    "mongodb-memory-server": "^11.2.0",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.11"
   }
 }
