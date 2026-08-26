@@ -1,9 +1,7 @@
 import jwt from 'jsonwebtoken'
 import config from '../config/env.js'
 import { ApiError } from '../utils/ApiError.js'
-// Phase 2 PR 2 replaces this with `../models/user.model.js`; until then the
-// legacy schema is still the one registered with mongoose.
-import User from '../../models/userModel.js'
+import User from '../models/user.model.js'
 
 export const AUTH_COOKIE = 'token'
 

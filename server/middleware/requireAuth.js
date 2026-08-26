@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import User from '../models/userModel.js'
+import User from '../src/models/user.model.js'
 
 const auth = async (req, res, next) => {
   try {
@@ -7,7 +7,8 @@ const auth = async (req, res, next) => {
 
     if (!token) return res.status(401).json({ error: "Request is not authorized" })
 
-    const { _id } = jwt.verify(token, process.env.SECRET)
+    const payload = jwt.verify(token, process.env.SECRET)
+    const _id = payload.sub ?? payload._id
 
     await User.findOne({ _id }).select('_id')
     req.user = _id
@@ -28,9 +29,10 @@ const getAuth = async (req, res, next) => {
       return next()
     }
 
-    const { _id } = jwt.verify(token, process.env.SECRET)
+    const payload = jwt.verify(token, process.env.SECRET)
+    const _id = payload.sub ?? payload._id
 
-    const user = await User.findOne({ _id }).select('_id')
+    await User.findOne({ _id }).select('_id')
     req.user = _id
     next()
 
@@ -47,7 +49,8 @@ const admin = async (req, res, next) => {
 
     if (!token) return res.status(401).json({ error: "Request is not authorized" })
 
-    const { _id } = jwt.verify(token, process.env.SECRET)
+    const payload = jwt.verify(token, process.env.SECRET)
+    const _id = payload.sub ?? payload._id
 
     const user = await User.findOne({ _id }).select('role')
     if (user.role !== 'admin') return res.status(401).json({ error: "Request is not authorized" })

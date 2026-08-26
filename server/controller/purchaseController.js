@@ -1,5 +1,5 @@
 import Product from '../models/productModels.js'
-import User from '../models/userModel.js'
+import User from '../src/models/user.model.js'
 
 // Function to get a product by ID from the database
 async function getProductById(productId) {

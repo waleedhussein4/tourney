@@ -1,5 +1,5 @@
 import Tournament from '../models/tourneyModels.js'
-import User from '../models/userModel.js'
+import User from '../src/models/user.model.js'
 import { v4 as uuidv4 } from 'uuid'
 
 // CREATE TEST TOURNAMENTS
