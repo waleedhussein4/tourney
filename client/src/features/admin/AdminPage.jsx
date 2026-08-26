@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import { clearDemoData, seedDemoData } from '/src/api/admin.js'
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
 import { Button, Card, CardHeader, ConfirmDialog } from '/src/components/ui/index.js'
-import './admin.css'
+import styles from './admin.module.css'
 
 /**
  * The demo-data page.
@@ -46,6 +46,7 @@ export function AdminPage() {
   return (
     <PageShell width="narrow">
       <PageHeader
+        eyebrow="Administration"
         title="Demo data"
         description="Reset the demo to a database worth showing someone."
       />
@@ -71,7 +72,7 @@ export function AdminPage() {
       </Card>
 
       {result && (
-        <p className="admin__result" role="status">
+        <p className={styles.result} role="status">
           {result}
         </p>
       )}

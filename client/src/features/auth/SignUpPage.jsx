@@ -3,9 +3,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { signUp } from '/src/api/auth.js'
 import { PageShell } from '/src/components/layout/PageShell.jsx'
+import { BracketTree, Logo } from '/src/components/brand/index.js'
 import { Button, Card, Field, Input } from '/src/components/ui/index.js'
 import { useAuth } from './useAuth.js'
-import './auth.css'
+import styles from './auth.module.css'
 
 /** Mirrors the server's password policy, so the rule is stated before it is broken. */
 const PASSWORD_RULES = {
@@ -55,94 +56,100 @@ export function SignUpPage() {
 
   return (
     <PageShell width="narrow">
-      <Card className="auth">
-        <h1 className="auth__title">Create an account</h1>
-        <p className="auth__subtitle">It takes a moment, and it is free.</p>
+      <div className={styles.shell}>
+        <BracketTree className={styles.tree} entrants={8} />
+        <Logo size="lg" />
 
-        <form className="auth__form" onSubmit={handleSubmit(onSubmit)} noValidate>
-          <Field
-            label="Username"
-            required
-            error={errors.username?.message}
-            hint="Letters, numbers, dot, dash and underscore."
-          >
-            {(field) => (
-              <Input
-                {...field}
-                autoComplete="username"
-                autoFocus
-                {...register('username', {
-                  required: 'Choose a username',
-                  minLength: { value: 3, message: 'At least 3 characters' },
-                  maxLength: { value: 24, message: 'At most 24 characters' },
-                  pattern: {
-                    value: /^[a-zA-Z0-9_.-]+$/,
-                    message: 'Only letters, numbers, dot, dash and underscore',
-                  },
-                })}
-              />
+        <Card className={styles.card}>
+          <h1 className={styles.title}>Create an account</h1>
+          <p className={styles.subtitle}>It takes a moment, and it is free.</p>
+
+          <form className={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
+            <Field
+              label="Username"
+              required
+              error={errors.username?.message}
+              hint="Letters, numbers, dot, dash and underscore."
+            >
+              {(field) => (
+                <Input
+                  {...field}
+                  autoComplete="username"
+                  autoFocus
+                  {...register('username', {
+                    required: 'Choose a username',
+                    minLength: { value: 3, message: 'At least 3 characters' },
+                    maxLength: { value: 24, message: 'At most 24 characters' },
+                    pattern: {
+                      value: /^[a-zA-Z0-9_.-]+$/,
+                      message: 'Only letters, numbers, dot, dash and underscore',
+                    },
+                  })}
+                />
+              )}
+            </Field>
+
+            <Field label="Email" required error={errors.email?.message}>
+              {(field) => (
+                <Input
+                  {...field}
+                  type="email"
+                  autoComplete="email"
+                  {...register('email', {
+                    required: 'Enter your email address',
+                    pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email address' },
+                  })}
+                />
+              )}
+            </Field>
+
+            <Field
+              label="Password"
+              required
+              error={errors.password?.message}
+              hint="At least 8 characters, with upper and lower case and a number."
+            >
+              {(field) => (
+                <Input
+                  {...field}
+                  type="password"
+                  autoComplete="new-password"
+                  {...register('password', PASSWORD_RULES)}
+                />
+              )}
+            </Field>
+
+            <Field label="Confirm password" required error={errors.confirm?.message}>
+              {(field) => (
+                <Input
+                  {...field}
+                  type="password"
+                  autoComplete="new-password"
+                  {...register('confirm', {
+                    required: 'Type the password again',
+                    validate: (value) =>
+                      value === watch('password') || 'The passwords do not match',
+                  })}
+                />
+              )}
+            </Field>
+
+            {errors.root && (
+              <p className={styles.error} role="alert">
+                {errors.root.message}
+              </p>
             )}
-          </Field>
 
-          <Field label="Email" required error={errors.email?.message}>
-            {(field) => (
-              <Input
-                {...field}
-                type="email"
-                autoComplete="email"
-                {...register('email', {
-                  required: 'Enter your email address',
-                  pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email address' },
-                })}
-              />
-            )}
-          </Field>
+            <Button type="submit" variant="primary" loading={isSubmitting}>
+              Create account
+            </Button>
+          </form>
 
-          <Field
-            label="Password"
-            required
-            error={errors.password?.message}
-            hint="At least 8 characters, with upper and lower case and a number."
-          >
-            {(field) => (
-              <Input
-                {...field}
-                type="password"
-                autoComplete="new-password"
-                {...register('password', PASSWORD_RULES)}
-              />
-            )}
-          </Field>
-
-          <Field label="Confirm password" required error={errors.confirm?.message}>
-            {(field) => (
-              <Input
-                {...field}
-                type="password"
-                autoComplete="new-password"
-                {...register('confirm', {
-                  required: 'Type the password again',
-                  validate: (value) => value === watch('password') || 'The passwords do not match',
-                })}
-              />
-            )}
-          </Field>
-
-          {errors.root && (
-            <p className="auth__error" role="alert">
-              {errors.root.message}
-            </p>
-          )}
-
-          <Button type="submit" variant="primary" loading={isSubmitting}>
-            Create account
-          </Button>
-        </form>
-
-        <p className="auth__alt">
-          Already have an account? <Link to="/signin">Sign in</Link>
-        </p>
-      </Card>
+          <p className={styles.alt}>
+            Already have an account? <Link to="/signin">Sign in</Link>
+          </p>
+        </Card>
+      </div>
     </PageShell>
   )
 }

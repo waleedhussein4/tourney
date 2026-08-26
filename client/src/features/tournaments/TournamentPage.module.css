@@ -1,0 +1,323 @@
+/*
+ * One tournament. The order answers the three questions a visitor arrives with,
+ * in the order they ask them: what is this, what is at stake, and who is winning.
+ */
+
+/* The category artwork as a banner, with the title sitting on it. */
+.banner {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: var(--space-5);
+}
+
+.bannerArt {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+
+.bannerScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    var(--ink-950) 12%,
+    color-mix(in srgb, var(--ink-950) 78%, transparent) 55%,
+    color-mix(in srgb, var(--ink-950) 30%, transparent)
+  );
+}
+
+.header {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  padding: var(--space-6) var(--space-5);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.title {
+  font-size: var(--text-4xl);
+}
+
+.host {
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+}
+
+.host strong {
+  color: var(--text-strong);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.note {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+/* The numbers, given the room numbers deserve. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: var(--space-4);
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--edge-light);
+}
+
+.fact dt {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+  color: var(--text-faint);
+}
+
+.fact dd {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xl);
+  font-weight: 650;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+}
+
+.factAccent dd {
+  color: var(--credits);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 21rem;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.main,
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+  color: var(--accent);
+  margin-bottom: var(--space-4);
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.prose {
+  color: var(--text);
+}
+
+.prose > * + * {
+  margin-top: var(--space-3);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: var(--space-5);
+}
+
+.prizeSingle {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  color: var(--credits);
+}
+
+.prizeSingle span {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  letter-spacing: normal;
+  color: var(--text-muted);
+}
+
+.prizeList {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.prizeList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.prizeList span {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-weight: 650;
+  color: var(--text-faint);
+}
+
+.prizeList strong {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-strong);
+}
+
+/*
+ * The escrow bank, as a meter. A tournament cannot start until this is full,
+ * which is the single most important rule in the product — so it is drawn,
+ * not just stated.
+ */
+.bank {
+  margin-top: var(--space-5);
+}
+
+.bankLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.bankLabel strong {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-strong);
+}
+
+.bankTrack {
+  height: 6px;
+  margin-top: var(--space-2);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.bankFill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--success-solid), var(--success));
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+.updates {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.updates li {
+  position: relative;
+  padding-left: var(--space-4);
+}
+
+/* Each update hangs off a spine — the motif, at list scale. */
+.updates li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.45rem;
+  bottom: -0.9rem;
+  width: 1px;
+  background: var(--border-strong);
+}
+
+.updates li:last-child::before {
+  bottom: auto;
+  height: 0.6rem;
+}
+
+.updates li::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 0.4rem;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.updates time {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+}
+
+.updates p {
+  margin-top: var(--space-1);
+}
+
+.contact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.contact dt {
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-faint);
+}
+
+.contact dd {
+  margin: 0;
+  color: var(--text-strong);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .header {
+    padding: var(--space-5) var(--space-4);
+  }
+}

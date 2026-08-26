@@ -1,11 +1,10 @@
-import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { listProducts } from '/src/api/credits.js'
 import { useAuth } from '/src/features/auth/useAuth.js'
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
-import { Card, ErrorState, LoadingState } from '/src/components/ui/index.js'
+import { ButtonLink, Card, ErrorState, LoadingState } from '/src/components/ui/index.js'
 import { DemoNotice } from './DemoNotice.jsx'
-import './credits.css'
+import styles from './credits.module.css'
 
 export function CreditsPage() {
   const { user } = useAuth()
@@ -15,11 +14,12 @@ export function CreditsPage() {
   return (
     <PageShell>
       <PageHeader
+        eyebrow="Wallet"
         title="Buy credits"
         description="Credits pay tournament entry fees, fund the prize banks you host, and buy the host upgrade."
         actions={
           user && (
-            <p className="credits__balance">
+            <p className={styles.balance}>
               You have <strong>{user.credits}</strong> credits
             </p>
           )
@@ -33,17 +33,17 @@ export function CreditsPage() {
       ) : products.isError ? (
         <ErrorState error={products.error} onRetry={() => products.refetch()} />
       ) : (
-        <ul className="credits__grid">
+        <ul className={styles.grid}>
           {products.data.products.map((product) => (
             <li key={product.id}>
-              <Card className="credits__card">
-                <h2 className="credits__name">{product.name}</h2>
-                <p className="credits__amount">{product.credits}</p>
-                <p className="credits__unit">credits</p>
-                <p className="credits__price">${product.price}</p>
-                <Link className="btn btn--primary btn--md" to={`/purchase/${product.id}`}>
+              <Card className={styles.card}>
+                <h2 className={styles.name}>{product.name}</h2>
+                <p className={styles.amount}>{product.credits}</p>
+                <p className={styles.unit}>credits</p>
+                <p className={styles.price}>${product.price}</p>
+                <ButtonLink variant="primary" to={`/purchase/${product.id}`}>
                   Choose
-                </Link>
+                </ButtonLink>
               </Card>
             </li>
           ))}

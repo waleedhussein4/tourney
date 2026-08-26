@@ -47,11 +47,18 @@ const FIGURES = {
  * as real text elsewhere in the card, so announcing it twice would only be
  * noise. Pass `labelled` where the art stands alone.
  *
+ * The panel it fills is almost always a different shape from the artwork, so
+ * the art is cropped to cover. Which edge it holds on to depends on the shape:
+ * a card is anchored to its bottom, because the name must survive the crop; a
+ * wide banner is centred, because the name is not the point there — the page
+ * has a title of its own.
+ *
  * @param {object} props
  * @param {string} props.slug
+ * @param {'card'|'banner'} [props.variant]
  * @param {boolean} [props.labelled] Expose the name to assistive technology.
  */
-export function CategoryArt({ slug, labelled = false, className = '' }) {
+export function CategoryArt({ slug, variant = 'card', labelled = false, className = '' }) {
   const id = useId()
   const name = categoryName(slug)
   const Figure = FIGURES[slug]
@@ -60,7 +67,7 @@ export function CategoryArt({ slug, labelled = false, className = '' }) {
     <svg
       className={`${styles.art} ${className}`}
       viewBox="0 0 320 180"
-      preserveAspectRatio="xMidYMid slice"
+      preserveAspectRatio={variant === 'banner' ? 'xMidYMid slice' : 'xMidYMax slice'}
       style={{ '--art-hue': `var(--art-${categoryHue(slug)})` }}
       role={labelled ? 'img' : undefined}
       aria-label={labelled ? `${name} artwork` : undefined}
@@ -87,7 +94,9 @@ export function CategoryArt({ slug, labelled = false, className = '' }) {
         </g>
       )}
 
-      <rect y="96" width="320" height="84" fill={`url(#${id}-scrim)`} />
+      {/* A card has to name itself. A banner does not: the page it sits behind
+          has a title, a category badge, and no room for a third label. */}
+      {variant === 'card' && <rect y="96" width="320" height="84" fill={`url(#${id}-scrim)`} />}
 
       <g className={styles.watermark} opacity="0.34">
         <path
@@ -101,9 +110,11 @@ export function CategoryArt({ slug, labelled = false, className = '' }) {
         <path d="M296 28h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       </g>
 
-      <text className={styles.name} x="20" y="156" fontSize="19">
-        {name}
-      </text>
+      {variant === 'card' && (
+        <text className={styles.name} x="20" y="156" fontSize="19">
+          {name}
+        </text>
+      )}
     </svg>
   )
 }

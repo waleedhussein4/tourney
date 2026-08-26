@@ -2,7 +2,7 @@
   position: sticky;
   top: 0;
   z-index: var(--z-nav);
-  height: var(--nav-height);
+  min-height: var(--nav-height);
   background: color-mix(in srgb, var(--surface-page) 82%, transparent);
   backdrop-filter: blur(14px) saturate(140%);
   border-bottom: 1px solid var(--border);
@@ -106,12 +106,32 @@
   color: var(--text-strong);
 }
 
+/*
+ * Below 720px the bar becomes two rows rather than one crowded one: identity
+ * and account on top, navigation underneath. Everything stays reachable — at
+ * 360px a single row could only fit by hiding links, and a hidden link is a
+ * feature the reader has to guess at.
+ */
 @media (max-width: 720px) {
   .inner {
-    gap: var(--space-3);
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+  .brand {
+    order: 1;
+  }
+  .account {
+    order: 2;
+    margin-left: auto;
   }
   .links {
+    order: 3;
+    width: 100%;
+    margin-right: 0;
     gap: 0;
+    padding-top: var(--space-1);
+    border-top: 1px solid var(--border);
   }
   .link {
     padding: var(--space-2);

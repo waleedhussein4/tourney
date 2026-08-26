@@ -1,0 +1,113 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-4);
+}
+
+.statLabel {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.statValue {
+  margin-top: var(--space-2);
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+  line-height: 1.1;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.link {
+  display: inline-block;
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.section {
+  margin-top: var(--space-4);
+}
+
+.tournaments {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: var(--space-4);
+}
+
+.ledger {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.ledger th,
+.ledger td {
+  padding: var(--space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.ledger tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ledger thead th {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-faint);
+}
+
+.ledger time {
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.ledgerKind {
+  display: block;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.ledgerDetail {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+/* Money in is green, money out is quiet — the ledger reads at a glance. */
+.amount {
+  text-align: right;
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.amountIn {
+  color: var(--credits);
+}
+
+.amountOut {
+  color: var(--text-muted);
+}

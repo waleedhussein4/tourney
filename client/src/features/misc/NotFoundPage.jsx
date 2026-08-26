@@ -1,26 +1,29 @@
-import { useNavigate } from 'react-router-dom'
 import { PageShell } from '/src/components/layout/PageShell.jsx'
-import { Button, EmptyState } from '/src/components/ui/index.js'
+import { BracketTree } from '/src/components/brand/index.js'
+import { ButtonLink } from '/src/components/ui/index.js'
+import styles from './NotFoundPage.module.css'
 
 export function NotFoundPage() {
-  const navigate = useNavigate()
-
   return (
     <PageShell width="narrow">
-      <EmptyState
-        title="That page does not exist"
-        body="The link may be out of date, or the tournament may have been cancelled."
-        action={
-          <>
-            <Button variant="primary" onClick={() => navigate('/tournaments')}>
-              Browse tournaments
-            </Button>
-            <Button variant="ghost" onClick={() => navigate('/')}>
-              Go home
-            </Button>
-          </>
-        }
-      />
+      <div className={styles.page}>
+        <BracketTree className={styles.tree} entrants={8} />
+
+        <p className={styles.code}>404</p>
+        <h1 className={styles.title}>This one did not advance</h1>
+        <p className={styles.body}>
+          The link may be out of date, or the tournament may have been cancelled.
+        </p>
+
+        <div className={styles.actions}>
+          <ButtonLink variant="primary" to="/tournaments">
+            Browse tournaments
+          </ButtonLink>
+          <ButtonLink variant="ghost" to="/">
+            Go home
+          </ButtonLink>
+        </div>
+      </div>
     </PageShell>
   )
 }

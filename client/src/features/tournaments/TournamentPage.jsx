@@ -1,10 +1,18 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getTournament, tournamentKeys } from '/src/api/tournaments.js'
 import { useAuth } from '/src/features/auth/useAuth.js'
 import { PageShell } from '/src/components/layout/PageShell.jsx'
-import { Badge, Button, Card, ErrorState, LoadingState } from '/src/components/ui/index.js'
+import { CategoryArt } from '/src/components/brand/index.js'
+import {
+  Badge,
+  Button,
+  ButtonLink,
+  Card,
+  ErrorState,
+  LoadingState,
+} from '/src/components/ui/index.js'
 import {
   formatCapacity,
   formatCategory,
@@ -17,7 +25,7 @@ import { isEmptyRichText, toSafeHtml } from '/src/lib/richText.js'
 import { BracketView } from './brackets/BracketView.jsx'
 import { StandingsTable } from './StandingsTable.jsx'
 import { EnterDialog } from './EnterDialog.jsx'
-import './TournamentPage.css'
+import styles from './TournamentPage.module.css'
 
 export function TournamentPage() {
   const { UUID: id } = useParams()
@@ -45,9 +53,9 @@ export function TournamentPage() {
           error={query.error}
           onRetry={() => query.refetch()}
           action={
-            <Link className="btn btn--ghost btn--md" to="/tournaments">
+            <ButtonLink variant="ghost" to="/tournaments">
               Back to browse
-            </Link>
+            </ButtonLink>
           }
         />
       </PageShell>
@@ -63,29 +71,34 @@ export function TournamentPage() {
 
   return (
     <PageShell width="wide">
-      <header className="tp__header">
-        <div className="tp__heading">
-          <div className="tp__badges">
-            <Badge tone={status.tone}>{status.label}</Badge>
-            <Badge>{formatType(tournament.type)}</Badge>
-            <Badge>{formatCategory(tournament.category)}</Badge>
-            {isTeamBased && <Badge>Teams of {tournament.teamSize}</Badge>}
+      <div className={styles.banner}>
+        <CategoryArt slug={tournament.category} variant="banner" className={styles.bannerArt} />
+        <div className={styles.bannerScrim} />
+
+        <header className={styles.header}>
+          <div>
+            <div className={styles.badges}>
+              <Badge tone={status.tone}>{status.label}</Badge>
+              <Badge>{formatType(tournament.type)}</Badge>
+              <Badge>{formatCategory(tournament.category)}</Badge>
+              {isTeamBased && <Badge>Teams of {tournament.teamSize}</Badge>}
+            </div>
+            <h1 className={styles.title}>{tournament.title}</h1>
+            <p className={styles.host}>
+              Hosted by <strong>{tournament.host.name}</strong>
+            </p>
           </div>
-          <h1>{tournament.title}</h1>
-          <p className="tp__host">
-            Hosted by <strong>{tournament.host.name}</strong>
-          </p>
-        </div>
 
-        <EntryActions
-          tournament={tournament}
-          onJoin={() => setEntering('join')}
-          onApply={() => setEntering('apply')}
-        />
-      </header>
+          <EntryActions
+            tournament={tournament}
+            onJoin={() => setEntering('join')}
+            onApply={() => setEntering('apply')}
+          />
+        </header>
+      </div>
 
-      <dl className="tp__facts">
-        <Fact label="Prize pool" value={formatCredits(tournament.totalPrize)} />
+      <dl className={styles.facts}>
+        <Fact label="Prize pool" value={formatCredits(tournament.totalPrize)} accent />
         <Fact label="Entry fee" value={formatCredits(tournament.entryFee)} />
         <Fact
           label="Entrants"
@@ -99,10 +112,10 @@ export function TournamentPage() {
         <Fact label="Ends" value={formatDateTime(tournament.endDate)} />
       </dl>
 
-      <div className="tp__columns">
-        <div className="tp__main">
+      <div className={styles.columns}>
+        <div className={styles.main}>
           <Card>
-            <h2 className="tp__section-title">
+            <h2 className={styles.sectionTitle}>
               {tournament.type === 'brackets' ? 'Bracket' : 'Standings'}
             </h2>
             {tournament.type === 'brackets' ? (
@@ -120,7 +133,7 @@ export function TournamentPage() {
           <RichTextCard title="Rules" html={tournament.rules} empty="No rules have been posted." />
         </div>
 
-        <aside className="tp__side">
+        <aside className={styles.side}>
           <PrizeCard tournament={tournament} />
           <UpdatesCard updates={tournament.updates} />
           <ContactCard contact={tournament.contactInfo} />
@@ -139,9 +152,9 @@ export function TournamentPage() {
   )
 }
 
-function Fact({ label, value }) {
+function Fact({ label, value, accent = false }) {
   return (
-    <div className="tp__fact">
+    <div className={`${styles.fact} ${accent ? styles.factAccent : ''}`}>
       <dt>{label}</dt>
       <dd>{value}</dd>
     </div>
@@ -161,17 +174,17 @@ function EntryActions({ tournament, onJoin, onApply }) {
 
   if (viewer.isHost) {
     return (
-      <div className="tp__actions">
-        <Link className="btn btn--primary btn--md" to={`/tournament/${tournament.id}/manage`}>
+      <div className={styles.actions}>
+        <ButtonLink variant="primary" to={`/tournament/${tournament.id}/manage`}>
           Manage tournament
-        </Link>
+        </ButtonLink>
       </div>
     )
   }
 
   if (viewer.isJoined) {
     return (
-      <div className="tp__actions">
+      <div className={styles.actions}>
         <Badge tone="success">You are in this tournament</Badge>
       </div>
     )
@@ -181,18 +194,18 @@ function EntryActions({ tournament, onJoin, onApply }) {
 
   if (tournament.hasStarted) {
     return (
-      <div className="tp__actions">
-        <p className="tp__note">This tournament is under way — entries are closed.</p>
+      <div className={styles.actions}>
+        <p className={styles.note}>This tournament is under way — entries are closed.</p>
       </div>
     )
   }
 
   if (!isAuthenticated) {
     return (
-      <div className="tp__actions">
-        <Link className="btn btn--primary btn--md" to="/signin">
+      <div className={styles.actions}>
+        <ButtonLink variant="primary" to="/signin">
           Sign in to enter
-        </Link>
+        </ButtonLink>
       </div>
     )
   }
@@ -202,7 +215,7 @@ function EntryActions({ tournament, onJoin, onApply }) {
   if (tournament.accessibility === 'application required') {
     if (viewer.isAccepted) {
       return (
-        <div className="tp__actions">
+        <div className={styles.actions}>
           <Badge tone="success">Accepted</Badge>
           <Button variant="primary" onClick={onJoin}>
             Take your slot
@@ -212,14 +225,14 @@ function EntryActions({ tournament, onJoin, onApply }) {
     }
     if (viewer.hasApplied) {
       return (
-        <div className="tp__actions">
+        <div className={styles.actions}>
           <Badge tone="accent">Application sent</Badge>
-          <p className="tp__note">The host will let you know.</p>
+          <p className={styles.note}>The host will let you know.</p>
         </div>
       )
     }
     return (
-      <div className="tp__actions">
+      <div className={styles.actions}>
         <Button variant="primary" onClick={onApply} disabled={isFull}>
           {isFull ? 'Full' : 'Apply to enter'}
         </Button>
@@ -228,7 +241,7 @@ function EntryActions({ tournament, onJoin, onApply }) {
   }
 
   return (
-    <div className="tp__actions">
+    <div className={styles.actions}>
       <Button variant="primary" onClick={onJoin} disabled={isFull}>
         {isFull ? 'Full' : `Join for ${formatCredits(tournament.entryCost)}`}
       </Button>
@@ -239,11 +252,11 @@ function EntryActions({ tournament, onJoin, onApply }) {
 function RichTextCard({ title, html, empty }) {
   return (
     <Card>
-      <h2 className="tp__section-title">{title}</h2>
+      <h2 className={styles.sectionTitle}>{title}</h2>
       {isEmptyRichText(html) ? (
-        <p className="tp__muted">{empty}</p>
+        <p className={styles.muted}>{empty}</p>
       ) : (
-        <div className="tp__prose" dangerouslySetInnerHTML={{ __html: toSafeHtml(html) }} />
+        <div className={styles.prose} dangerouslySetInnerHTML={{ __html: toSafeHtml(html) }} />
       )}
     </Card>
   )
@@ -252,13 +265,13 @@ function RichTextCard({ title, html, empty }) {
 function PrizeCard({ tournament }) {
   return (
     <Card>
-      <h2 className="tp__section-title">Prizes</h2>
+      <h2 className={styles.sectionTitle}>Prizes</h2>
       {tournament.type === 'brackets' ? (
-        <p className="tp__prize-single">
+        <p className={styles.prizeSingle}>
           {formatCredits(tournament.prize)} <span>to the winner</span>
         </p>
       ) : (
-        <ul className="tp__prize-list">
+        <ul className={styles.prizeList}>
           {(tournament.prizes ?? []).map((entry) => (
             <li key={entry.rank}>
               <span>#{entry.rank}</span>
@@ -267,21 +280,51 @@ function PrizeCard({ tournament }) {
           ))}
         </ul>
       )}
-      <p className="tp__muted tp__bank">
-        Prize bank: {formatCredits(tournament.bank)} of {formatCredits(tournament.totalPrize)}
-      </p>
+      <BankMeter bank={tournament.bank} target={tournament.totalPrize} />
     </Card>
+  )
+}
+
+/**
+ * How full the escrow bank is.
+ *
+ * Entry fees are held here, and the tournament cannot start until the bank
+ * covers the advertised prizes. That is the rule the whole economy rests on, so
+ * it gets drawn rather than only written.
+ */
+function BankMeter({ bank, target }) {
+  const filled = target > 0 ? Math.min(1, bank / target) : 1
+
+  return (
+    <div className={styles.bank}>
+      <p className={styles.bankLabel}>
+        <span>Prize bank</span>
+        <span>
+          <strong>{bank}</strong> of <strong>{target}</strong> credits
+        </span>
+      </p>
+      <div
+        className={styles.bankTrack}
+        role="meter"
+        aria-valuenow={bank}
+        aria-valuemin={0}
+        aria-valuemax={target}
+        aria-label="Prize bank"
+      >
+        <div className={styles.bankFill} style={{ width: `${filled * 100}%` }} />
+      </div>
+    </div>
   )
 }
 
 function UpdatesCard({ updates }) {
   return (
     <Card>
-      <h2 className="tp__section-title">Updates</h2>
+      <h2 className={styles.sectionTitle}>Updates</h2>
       {updates.length === 0 ? (
-        <p className="tp__muted">No updates from the host yet.</p>
+        <p className={styles.muted}>No updates from the host yet.</p>
       ) : (
-        <ol className="tp__updates">
+        <ol className={styles.updates}>
           {[...updates].reverse().map((update, index) => (
             <li key={`${update.date}-${index}`}>
               <time dateTime={update.date}>{formatDateTime(update.date)}</time>
@@ -309,8 +352,8 @@ function ContactCard({ contact }) {
 
   return (
     <Card>
-      <h2 className="tp__section-title">Contact the host</h2>
-      <dl className="tp__contact">
+      <h2 className={styles.sectionTitle}>Contact the host</h2>
+      <dl className={styles.contact}>
         {entries.map(([label, value]) => (
           <div key={label}>
             <dt>{label}</dt>

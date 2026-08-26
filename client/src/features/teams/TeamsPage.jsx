@@ -16,7 +16,7 @@ import {
   Modal,
 } from '/src/components/ui/index.js'
 import { teamKeys } from './queries.js'
-import './teams.css'
+import styles from './teams.module.css'
 
 /** The teams you are on, and the two ways to get onto another. */
 export function TeamsPage() {
@@ -59,17 +59,17 @@ export function TeamsPage() {
           }
         />
       ) : (
-        <ul className="teams__grid">
+        <ul className={styles.grid}>
           {teams.data.teams.map((team) => (
             <li key={team.id}>
-              <Card className="teams__card">
-                <h2 className="teams__name">
+              <Card className={styles.card}>
+                <h2 className={styles.name}>
                   <Link to={`/team/view?UUID=${team.id}`}>{team.name}</Link>
                 </h2>
-                <p className="teams__members">
+                <p className={styles.members}>
                   {team.members.map((member) => member.username).join(', ')}
                 </p>
-                <p className="teams__meta">
+                <p className={styles.meta}>
                   {team.members.length} {team.members.length === 1 ? 'member' : 'members'}
                   {team.isLeader && ' · you lead this team'}
                 </p>

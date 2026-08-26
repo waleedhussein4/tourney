@@ -1,4 +1,5 @@
-.teams__grid {
+/* The team list, one team, and the invite landing page. */
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
   gap: var(--space-4);
@@ -6,38 +7,38 @@
   padding: 0;
 }
 
-.teams__card {
+.card {
   height: 100%;
 }
 
-.teams__name {
+.name {
   font-size: var(--text-lg);
 }
 
-.teams__name a {
+.name a {
   color: var(--text-strong);
 }
 
-.teams__members {
+.members {
   margin-top: var(--space-2);
   color: var(--text);
   font-size: var(--text-sm);
 }
 
-.teams__meta {
+.meta {
   margin-top: var(--space-2);
-  color: var(--text-muted);
+  color: var(--text-faint);
   font-size: var(--text-xs);
 }
 
-.team__roster {
+.roster {
   list-style: none;
   padding: 0;
   display: flex;
   flex-direction: column;
 }
 
-.team__member {
+.member {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -46,11 +47,11 @@
   border-bottom: 1px solid var(--border);
 }
 
-.team__member:last-child {
+.member:last-child {
   border-bottom: none;
 }
 
-.team__member-name {
+.memberName {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -58,64 +59,64 @@
   font-weight: 600;
 }
 
-.team__member-actions {
+.memberActions {
   display: flex;
   gap: var(--space-2);
 }
 
-.team__invite-card {
+/* Cards on the team page stack with a gap. */
+.stack > * + * {
   margin-top: var(--space-4);
 }
 
-.team__invite {
+.invite {
   display: flex;
   align-items: center;
   gap: var(--space-3);
 }
 
-.team__code {
+/*
+ * The join code, set as the one piece of monospace in the app: it is read out
+ * loud and typed in by hand, so the characters have to be unambiguous.
+ */
+.code {
   flex: 1;
   padding: var(--space-3);
   background: var(--surface-sunken);
-  border: 1px solid var(--border-strong);
+  border: 1px dashed var(--border-strong);
   border-radius: var(--radius);
   font-family: var(--font-mono);
   font-size: var(--text-xl);
   letter-spacing: 0.25em;
   text-align: center;
-  color: var(--text-strong);
+  color: var(--accent);
 }
 
-.team__invite-link {
+.inviteLink {
   margin-top: var(--space-3);
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  color: var(--text-faint);
   overflow-wrap: anywhere;
 }
 
-.team__invite-landing {
+.inviteLanding {
   text-align: center;
   margin-top: var(--space-6);
 }
 
-.team__invited {
+.invited {
   color: var(--text-muted);
   font-size: var(--text-sm);
 }
 
-.team__meta {
+.teamMeta {
   margin-top: var(--space-2);
   color: var(--text-muted);
 }
 
-.team__invite-actions {
+.inviteActions {
   display: flex;
   justify-content: center;
   gap: var(--space-3);
   margin-top: var(--space-5);
-}
-
-/* Cards on the team page stack with a gap. */
-.page .card + .card {
-  margin-top: var(--space-4);
 }

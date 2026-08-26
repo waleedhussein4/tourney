@@ -4,9 +4,22 @@ import { useQuery } from '@tanstack/react-query'
 import { listMyTournaments, listTrending, tournamentKeys } from '/src/api/tournaments.js'
 import { useAuth } from '/src/features/auth/useAuth.js'
 import { PageShell } from '/src/components/layout/PageShell.jsx'
-import { Button, EmptyState, ErrorState, LoadingState } from '/src/components/ui/index.js'
+import {
+  BracketRule,
+  BracketTree,
+  CATEGORY_SLUGS,
+  CategoryArt,
+} from '/src/components/brand/index.js'
+import {
+  Button,
+  ButtonLink,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from '/src/components/ui/index.js'
 import { TournamentCard } from '/src/features/tournaments/TournamentCard.jsx'
-import './HomePage.css'
+import { categoryName } from '/src/components/brand/categories.js'
+import styles from './HomePage.module.css'
 
 export function HomePage() {
   const { isAuthenticated, isHost } = useAuth()
@@ -21,29 +34,48 @@ export function HomePage() {
 
   return (
     <PageShell width="wide">
-      <section className="hero">
-        <h1 className="hero__title">Run the tournament. Or win it.</h1>
-        <p className="hero__body">
-          Brackets and battle royales, solo or in teams. Entry fees go into an escrow bank that has
-          to cover the prizes before anything starts.
-        </p>
-        <div className="hero__actions">
-          <Link className="btn btn--primary btn--md" to="/tournaments">
-            Browse tournaments
-          </Link>
-          {isHost ? (
-            <Link className="btn btn--secondary btn--md" to="/host">
-              Create a tournament
-            </Link>
-          ) : (
-            <Link
-              className="btn btn--secondary btn--md"
-              to={isAuthenticated ? '/become-host' : '/signup'}
-            >
-              {isAuthenticated ? 'Become a host' : 'Create an account'}
-            </Link>
-          )}
+      <section className={styles.hero}>
+        <div className={styles.heroCopy}>
+          <span className={styles.eyebrow}>Brackets &amp; battle royale</span>
+          <h1 className={styles.title}>
+            Run the tournament. Or <em>win it.</em>
+          </h1>
+          <p className={styles.body}>
+            Solo or in teams, open to all or by application. Entry fees go into an escrow bank that
+            has to cover the prizes before anything starts.
+          </p>
+          <div className={styles.actions}>
+            <ButtonLink variant="primary" to="/tournaments">
+              Browse tournaments
+            </ButtonLink>
+            {isHost ? (
+              <ButtonLink to="/host">Create a tournament</ButtonLink>
+            ) : (
+              <ButtonLink to={isAuthenticated ? '/become-host' : '/signup'}>
+                {isAuthenticated ? 'Become a host' : 'Create an account'}
+              </ButtonLink>
+            )}
+          </div>
         </div>
+
+        <BracketTree className={styles.heroArt} entrants={8} />
+      </section>
+
+      <section className={styles.categories}>
+        <BracketRule label="Browse by category" />
+        <ul className={styles.categoryGrid}>
+          {CATEGORY_SLUGS.map((slug) => (
+            <li key={slug}>
+              <Link
+                className={styles.categoryTile}
+                to={`/tournaments?category=${slug}`}
+                aria-label={`Browse ${categoryName(slug)} tournaments`}
+              >
+                <CategoryArt slug={slug} />
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <Carousel
@@ -62,9 +94,9 @@ export function HomePage() {
           emptyTitle="You are not in any tournaments yet"
           emptyBody="Browsing is the quickest way to find one."
           emptyAction={
-            <Link className="btn btn--primary btn--md" to="/tournaments">
+            <ButtonLink variant="primary" to="/tournaments">
               Browse tournaments
-            </Link>
+            </ButtonLink>
           }
         />
       )}
@@ -91,14 +123,14 @@ function Carousel({ title, description, query, emptyTitle, emptyBody, emptyActio
   const tournaments = query.data?.tournaments ?? []
 
   return (
-    <section className="rail">
-      <header className="rail__header">
+    <section className={styles.rail}>
+      <header className={styles.railHeader}>
         <div>
-          <h2 className="rail__title">{title}</h2>
-          <p className="rail__description">{description}</p>
+          <h2 className={styles.railTitle}>{title}</h2>
+          <p className={styles.railDescription}>{description}</p>
         </div>
         {tournaments.length > 0 && (
-          <div className="rail__controls">
+          <div className={styles.railControls}>
             <Button size="sm" onClick={() => scrollBy(-1)} aria-label={`Scroll ${title} left`}>
               &larr;
             </Button>
@@ -116,9 +148,9 @@ function Carousel({ title, description, query, emptyTitle, emptyBody, emptyActio
       ) : tournaments.length === 0 ? (
         <EmptyState title={emptyTitle} body={emptyBody} action={emptyAction} />
       ) : (
-        <ul className="rail__track" ref={rail}>
+        <ul className={styles.railTrack} ref={rail}>
           {tournaments.map((tournament) => (
-            <li key={tournament.id} className="rail__item">
+            <li key={tournament.id} className={styles.railItem}>
               <TournamentCard tournament={tournament} />
             </li>
           ))}
