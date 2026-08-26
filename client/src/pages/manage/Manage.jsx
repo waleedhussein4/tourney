@@ -3,6 +3,14 @@ import Nav from '/src/components/Nav.jsx'
 
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import * as api from '/src/api/tournaments.js';
+
+/** What the bank has to hold before the tournament can start. */
+function maxEarningsOf(tournament) {
+  return tournament.type === 'brackets'
+    ? tournament.earnings
+    : (tournament.earnings ?? []).reduce((total, entry) => total + entry.prize, 0)
+}
 
 import './Manage.css'
 import pencil from '/src/assets/pencil.svg'
@@ -35,37 +43,22 @@ function Manage() {
   const navigate = useNavigate();
 
   const [tournament, setTournament] = useState({});
+  // Errors from the host's control actions, which used to be written straight
+  // into the DOM with document.querySelector.
+  const [actionError, setActionError] = useState('');
+  const [showDepositPopup, setShowDepositPopup] = useState(false);
   const [tournamentType, setTournamentType] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchTournamentData = async () => {
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/manage`
-    await fetch(
-      URL +
-      "?" +
-      new URLSearchParams({
-        UUID: UUID,
-      }),
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      }
-    )
-      .then((res) => {
-        if (!res.ok) {
-          navigate('/page-not-found')
-        }
-        return res.json()
-      })
-      .then((data) => {
-        setTournament(data);
-        setTournamentType(data.type);
-        setIsLoading(false);
-        console.log(data)
-      });
+    try {
+      const data = await api.getManagedTournament(UUID)
+      setTournament(data)
+      setTournamentType(data.type)
+      setIsLoading(false)
+    } catch {
+      navigate('/page-not-found')
+    }
   };
 
   useEffect(() => {
@@ -122,28 +115,12 @@ function Manage() {
 
     const handleEditTitle = async () => {
       if (newTitle) {
-        const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editTitle`
-        await fetch(URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            UUID: UUID,
-            title: newTitle,
-          }),
-        })
-          .then((res) => {
-            if (res.ok) {
-              navigate(0)
-            }
-            else {
-              res.json().then(data => {
-                setError(data.error)
-              })
-            }
-          })
+        try {
+          await api.patchTournament(UUID, { title: newTitle })
+          navigate(0)
+        } catch (failure) {
+          setError(failure.message)
+        }
       }
     }
 
@@ -164,28 +141,12 @@ function Manage() {
 
     const handleEditStartDate = async () => {
       if (newStartDate) {
-        const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editStartDate`
-        await fetch(URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            UUID: UUID,
-            startDate: newStartDate,
-          }),
-        })
-          .then((res) => {
-            if (res.ok) {
-              navigate(0)
-            }
-            else {
-              res.json().then(data => {
-                setError(data.error)
-              })
-            }
-          })
+        try {
+          await api.patchTournament(UUID, { startDate: newStartDate })
+          navigate(0)
+        } catch (failure) {
+          setError(failure.message)
+        }
       }
     }
 
@@ -227,28 +188,12 @@ function Manage() {
 
     const handleEditEndDate = async () => {
       if (newEndDate) {
-        const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editEndDate`
-        await fetch(URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            UUID: UUID,
-            endDate: newEndDate,
-          }),
-        })
-          .then((res) => {
-            if (res.ok) {
-              navigate(0)
-            }
-            else {
-              res.json().then(data => {
-                setError(data.error)
-              })
-            }
-          })
+        try {
+          await api.patchTournament(UUID, { endDate: newEndDate })
+          navigate(0)
+        } catch (failure) {
+          setError(failure.message)
+        }
       }
     }
 
@@ -295,28 +240,12 @@ function Manage() {
       }
 
       if (newUpdate) {
-        const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/postUpdate`
-        await fetch(URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            UUID: UUID,
-            update: newUpdate,
-          }),
-        })
-          .then((res) => {
-            if (res.ok) {
-              navigate(0)
-            }
-            else {
-              res.json().then(data => {
-                setError(data.error)
-              })
-            }
-          })
+        try {
+          await api.postUpdate(UUID, newUpdate)
+          navigate(0)
+        } catch (failure) {
+          setError(failure.message)
+        }
       }
     }
 
@@ -388,46 +317,24 @@ function Manage() {
     const parent = event.target.parentElement.parentElement
     const application = tournament.applications.map(app => app.UUID === parent.dataset.uuid ? app : null).filter(app => app !== null)[0]
     const uuid = application.UUID
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/acceptApplication`
-    await fetch(URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        tournamentUUID: UUID,
-        applicationUUID: uuid,
-      }),
-    })
-      .then((res) => {
-        if (res.ok) {
-          navigate(0)
-        }
-      })
+    try {
+      await api.acceptApplication(UUID, uuid)
+      navigate(0)
+    } catch (failure) {
+      setActionError(failure.message)
+    }
   }
 
   const handleRejectApplication = async (event) => {
     const parent = event.target.parentElement.parentElement
     const application = tournament.applications.map(app => app.UUID === parent.dataset.uuid ? app : null).filter(app => app !== null)[0]
     const uuid = application.UUID
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/rejectApplication`
-    await fetch(URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        tournamentUUID: UUID,
-        applicationUUID: uuid,
-      }),
-    })
-      .then((res) => {
-        if (res.ok) {
-          navigate(0)
-        }
-      })
+    try {
+      await api.rejectApplication(UUID, uuid)
+      navigate(0)
+    } catch (failure) {
+      setActionError(failure.message)
+    }
   }
 
   const SoloParticipants = () => {
@@ -478,28 +385,12 @@ function Manage() {
     const [error, setError] = useState('');
 
     const handleEditSoloParticipants = async () => {
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editSoloParticipants`
-      await fetch(URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          UUID: UUID,
-          participants: tournament.enrolledUsers,
-        }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            navigate(0)
-          }
-          else {
-            res.json().then(data => {
-              setError(data.error)
-            })
-          }
-        })
+      try {
+        await api.saveSoloParticipants(UUID, tournament.enrolledUsers, tournament)
+        navigate(0)
+      } catch (failure) {
+        setError(failure.message)
+      }
     }
 
     function editSolo(user) {
@@ -566,18 +457,12 @@ function Manage() {
       setEditTeamParticipantsPopupOpen(false);
 
       // Send the updated data to the backend
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editTeamParticipants`;
-      await fetch(URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ UUID: UUID, participants: updatedTeams }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            navigate(0);
-          }
-        });
+      try {
+        await api.saveTeamParticipants(UUID, updatedTeams, tournament)
+        navigate(0)
+      } catch (failure) {
+        setActionError(failure.message)
+      }
     };
 
     return (
@@ -666,18 +551,12 @@ function Manage() {
       setShowEditSoloBracketsParticipantsPopup(false);
 
       // Send the updated data to the backend
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editSoloParticipants`;
-      await fetch(URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ UUID: UUID, participants: updatedParticipants }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            navigate(0);
-          }
-        });
+      try {
+        await api.saveSoloParticipants(UUID, updatedParticipants, tournament)
+        navigate(0)
+      } catch (failure) {
+        setActionError(failure.message)
+      }
     };
 
     return (
@@ -732,18 +611,12 @@ function Manage() {
       setShowEditTeamBracketsParticipantsPopup(false);
 
       // Send the updated data to the backend
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editTeamParticipants`;
-      await fetch(URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ UUID: UUID, participants: updatedTeams }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            navigate(0);
-          }
-        });
+      try {
+        await api.saveTeamParticipants(UUID, updatedTeams, tournament)
+        navigate(0)
+      } catch (failure) {
+        setActionError(failure.message)
+      }
     };
 
     return (
@@ -856,65 +729,30 @@ function Manage() {
 
     const [editedMatches, setEditedMatches] = useState([...tournament.matches]);
 
-    const handleEdit = (index) => {
+    const handleEdit = (index, name) => {
       const newEditedMatches = [...editedMatches];
-      const editedMatch = prompt('Edit the string:', editedMatches[index]);
-      if (editedMatch !== null) {
-        newEditedMatches[index] = editedMatch;
-        setEditedMatches(newEditedMatches);
-      }
+      newEditedMatches[index] = name || null;
+      setEditedMatches(newEditedMatches);
     };
 
     const handleSaveAll = async () => {
 
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/editMatches`
-      await fetch(URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          UUID: UUID,
-          matches: editedMatches,
-        }),
-      })
-        .then((res) => {
-          if (res.ok) {
-            navigate(0)
-          }
-          else {
-            res.json().then(data => {
-              document.querySelector('#matchesEditor .error').innerText = data.error
-            })
-          }
-        })
+      try {
+        await api.saveMatches(UUID, editedMatches, tournament)
+        navigate(0)
+      } catch (failure) {
+        setMatchesEditorError(failure.message)
+      }
     };
 
     const handleShuffleBrackets = async () => {
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/shuffleBrackets`
-      await fetch(URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          UUID: UUID,
-        }),
-      })
-        .then(async (res) => {
-          if (res.ok) {
-            setMatchesEditorError('');
-            tournament.teamSize == 1 ? tournament.enrolledUsers = await res.json() : tournament.enrolledTeams = await res.json();
-            navigate(0);
-          }
-          else {
-            res.json().then(data => {
-              setMatchesEditorError(data.error)
-            })
-          }
-        })
+      try {
+        await api.shuffleBrackets(UUID)
+        setMatchesEditorError('')
+        navigate(0)
+      } catch (failure) {
+        setMatchesEditorError(failure.message)
+      }
     }
 
     return (
@@ -928,9 +766,18 @@ function Manage() {
               {
                 editedMatches.map((match, i) =>
                   <div className='match' key={i}>
-                    <span className="matchNumber">Match {i}</span>
-                    <span className="matchWinner">{match || "N/A"}</span>
-                    <button onClick={() => handleEdit(i)}>Edit</button>
+                    <label className="matchNumber" htmlFor={`match-${i}`}>Match {i}</label>
+                    <select
+                      id={`match-${i}`}
+                      className="matchWinner"
+                      value={match ?? ''}
+                      onChange={(e) => handleEdit(i, e.target.value)}
+                    >
+                      <option value="">Not decided</option>
+                      {(tournament._participants ?? []).map((participant) => (
+                        <option key={participant.id} value={participant.name}>{participant.name}</option>
+                      ))}
+                    </select>
                   </div>
                 )
               }
@@ -946,53 +793,21 @@ function Manage() {
   }
 
   const startTournament = async () => {
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/startTournament`
-    await fetch(URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        UUID: UUID,
-      }),
-    })
-      .then((res) => {
-        if (res.ok) {
-          navigate(0)
-        }
-        else {
-          return res.json()
-        }
-      })
-      .then((data) => {
-        document.querySelector('.controlButtons .error').innerText = data.error
-      })
+    try {
+      await api.startTournament(UUID)
+      navigate(0)
+    } catch (failure) {
+      setActionError(failure.message)
+    }
   }
 
   const endTournament = async () => {
-    const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/endTournament`
-    await fetch(URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        UUID: UUID,
-      }),
-    })
-      .then((res) => {
-        if (res.ok) {
-          navigate(0)
-        }
-        else {
-          return res.json()
-        }
-      })
-      .then((data) => {
-        document.querySelector('.controlButtons .error').innerText = data.error
-      })
+    try {
+      await api.endTournament(UUID)
+      navigate(0)
+    } catch (failure) {
+      setActionError(failure.message)
+    }
   }
 
   const Earnings = () => {
@@ -1017,7 +832,7 @@ function Manage() {
   }
 
   const Bank = () => {
-    const maxEarnings = tournament.type == 'brackets' ? tournament.earnings : tournament.earnings.reduce((acc, curr) => acc + curr.prize, 0)
+    const maxEarnings = maxEarningsOf(tournament)
 
     const percentage = Math.min(100, Math.floor((tournament.bank / maxEarnings) * 100))
 
@@ -1036,96 +851,60 @@ function Manage() {
           </div>
           <div className="amount">{`${tournament.bank}/${maxEarnings} credits`}</div>
         </div>
-        {percentage == 100 ? <span>Bank is full. You may now start the tournament.</span> : <button onClick={handleDepositeCredits}>Deposit credits</button>}
+        {percentage == 100 ? <span>Bank is full. You may now start the tournament.</span> : <button onClick={() => setShowDepositPopup(true)}>Deposit credits</button>}
         <span className="error"></span>
       </div>
     )
   }
 
-  const handleDepositeCredits = async () => {
-    const maxEarnings = tournament.type == 'brackets' ? tournament.earnings : tournament.earnings.reduce((acc, curr) => acc + curr.prize, 0)
+  const DepositPopup = () => {
+    const [amount, setAmount] = useState('')
+    const [error, setError] = useState('')
 
-    let popup = document.createElement('div');
-    popup.id = 'depositCreditsPopup';
-    popup.classList.add('popup');
+    const remaining = Math.max(0, maxEarningsOf(tournament) - tournament.bank)
 
-    let h2 = document.createElement('h2');
-    h2.innerHTML = 'Deposit Credits';
-
-    let input = document.createElement('input');
-    input.type = 'number';
-    input.id = 'depositAmount';
-    input.oninput = (e) => {
-      const field = document.getElementById('depositAmount');
-      field.value = field.value.replace(/[^0-9]/g, '');
-
-      const depositAmount = field.value;
-      const currentBank = tournament.bank;
-      const maxDeposit = currentBank + parseInt(depositAmount);
-      if (depositAmount < 1) {
-        document.querySelector('#depositCreditsPopup .error').innerText = 'Deposit amount must be greater than 0';
-        field.value = '';
-      } else if (maxDeposit > maxEarnings) {
-        document.querySelector('#depositCreditsPopup .error').innerText = `Deposit amount cannot exceed the maximum earnings of ${maxEarnings}`;
-        field.value = maxEarnings - currentBank;
-      } else {
-        document.querySelector('#depositCreditsPopup .error').innerText = '';
+    const handleDeposit = async () => {
+      const credits = Number(amount)
+      if (!Number.isInteger(credits) || credits < 1) {
+        setError('Enter a whole number of credits')
+        return
+      }
+      try {
+        await api.deposit(UUID, credits)
+        navigate(0)
+      } catch (failure) {
+        setError(failure.message)
       }
     }
 
-    let button = document.createElement('button');
-    button.innerHTML = 'Confirm';
-    button.onclick = async () => {
-      await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/tournement/depositIntoTournamentBank`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          UUID: UUID,
-          amount: document.getElementById('depositAmount').value
-        })
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.error) {
-            document.querySelector('#depositCreditsPopup .error').innerText = data.error;
-          } else {
-            navigate(0);
-          }
-        });
-    }
-
-    let cancel = document.createElement('button');
-    cancel.innerHTML = 'Cancel';
-    cancel.onclick = () => popup.remove();
-
-    let error = document.createElement('span')
-    error.classList.add('error')
-
-    popup.appendChild(h2);
-    popup.appendChild(input);
-    popup.appendChild(button);
-    popup.appendChild(cancel);
-    popup.appendChild(error);
-
-    document.getElementById('Manage').appendChild(popup);
+    return (
+      <div id="depositCreditsPopup" className="popup">
+        <h2>Deposit Credits</h2>
+        <p>The bank still needs {remaining} credits.</p>
+        <input
+          type="number"
+          min="1"
+          max={remaining}
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
+        <button onClick={handleDeposit}>Confirm</button>
+        <button onClick={() => setShowDepositPopup(false)}>Cancel</button>
+        <span className="error">{error}</span>
+      </div>
+    )
   }
 
   const EditDescriptionModal = () => {
     const [description, setDescription] = useState(tournament.description);
 
     const handleSave = async () => {
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editDescription`;
-      await fetch(URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ UUID: UUID, description }),
-      }).then((res) => {
-        if (res.ok) navigate(0);
-      });
+      try {
+        await api.patchTournament(UUID, { description })
+        navigate(0)
+      } catch (failure) {
+        setActionError(failure.message)
+      }
       setShowEditDescriptionModal(false);
     };
 
@@ -1143,15 +922,12 @@ function Manage() {
     const [rules, setRules] = useState(tournament.rules);
 
     const handleSave = async () => {
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editRules`;
-      await fetch(URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ UUID: UUID, rules }),
-      }).then((res) => {
-        if (res.ok) navigate(0);
-      });
+      try {
+        await api.patchTournament(UUID, { rules })
+        navigate(0)
+      } catch (failure) {
+        setActionError(failure.message)
+      }
       setShowEditRulesModal(false);
     };
 
@@ -1178,15 +954,12 @@ function Manage() {
     });
 
     const handleSave = async () => {
-      const URL = `${import.meta.env.VITE_BACKEND_URL}/api/tournement/tournament/editContactInfo`;
-      await fetch(URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ UUID: tournament.UUID, contactInfo }),
-      }).then((res) => {
-        if (res.ok) navigate(0);
-      });
+      try {
+        await api.patchTournament(UUID, { contactInfo })
+        navigate(0)
+      } catch (failure) {
+        setActionError(failure.message)
+      }
       setShowEditContactInfoModal(false);
     };
 
@@ -1262,6 +1035,7 @@ function Manage() {
 
   return (
     <div id="Manage">
+      {showDepositPopup && <DepositPopup />}
       {showEditTitlePopup && <EditTitlePopup />}
       {showEditDescriptionModal && <EditDescriptionModal />}
       {showEditRulesModal && <EditRulesModal />}
@@ -1391,7 +1165,7 @@ function Manage() {
                   ? <button onClick={endTournament} className="endTournament">End Tournament</button>
                   : <button onClick={startTournament} className="startTournament">Start Tournament</button>
                 }
-                <div className="error"></div>
+                <div className="error">{actionError}</div>
               </div>
             </>
           )}

@@ -14,12 +14,12 @@ import { healthRouter } from './modules/health/health.routes.js'
 import { authRouter } from './modules/auth/auth.routes.js'
 import { userRouter } from './modules/users/user.routes.js'
 import { teamRouter } from './modules/teams/team.routes.js'
+import { tournamentRouter } from './modules/tournaments/tournament.routes.js'
+import { adminRouter } from './modules/admin/admin.routes.js'
 
 // Legacy routers, still mounted at their original paths. Each is deleted by the
 // Phase 2 PR that replaces it; the last one to go takes these imports with it.
-import legacyTournamentRoutes from '../routes/tourneyRoutes.js'
 import legacyPurchaseRoutes from '../routes/purchaseRoutes.js'
-import legacyAdminRoutes from '../routes/adminRoutes.js'
 
 export function createApp() {
   const app = express()
@@ -50,10 +50,10 @@ export function createApp() {
   app.use('/api/auth', authRouter)
   app.use('/api/users', userRouter)
   app.use('/api/teams', teamRouter)
+  app.use('/api/tournaments', tournamentRouter)
+  app.use('/api/admin', adminRouter)
 
-  app.use('/api/tournement', legacyTournamentRoutes)
   app.use('/api/purchase', legacyPurchaseRoutes)
-  app.use('/api/admin', legacyAdminRoutes)
 
   app.use(notFound)
   app.use(errorHandler)

@@ -74,6 +74,18 @@
   object-fit: cover;
 }
 
+.carousel-item__art {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 1rem;
+  background: linear-gradient(140deg, #1d2440 0%, #3a2a5e 55%, #16324f 100%);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .carousel-item__details {
   background: -webkit-gradient(
     linear,

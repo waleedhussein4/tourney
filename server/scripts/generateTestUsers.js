@@ -19,19 +19,18 @@ const users = [
 ]
 
 async function createUsers() {
+  const created = []
   for (const user of users) {
-    try {
-      const created = await registerUser(user)
-      console.log(`User created: ${created.username}`)
-    } catch (error) {
-      console.error(`Error creating user ${user.username}: ${error.message}`)
-    }
+    // An account that already exists is not a failure — the seed is re-runnable.
+    await registerUser(user)
+      .then((account) => created.push(account))
+      .catch(() => {})
   }
+  return created
 }
 
-async function deleteUsers() {
-  const result = await User.deleteMany({ role: { $ne: 'admin' } })
-  console.log(`${result.deletedCount} users deleted successfully.`)
+function deleteUsers() {
+  return User.deleteMany({ role: { $ne: 'admin' } })
 }
 
 export { createUsers, deleteUsers }

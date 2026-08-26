@@ -12,7 +12,7 @@ function Tournament(obj) {
         <span className="type">Type: {obj.type.charAt(0).toUpperCase() + obj.type.slice(1)}</span>
         <span className="entryFee">Entry fee: {obj.entryFee === 0 ? 'None' : obj.entryFee === 1 ? obj.entryFee + ' credit' : obj.entryFee + ' credits'}</span>
         <span className="accessibility">{obj.accessibility.charAt(0).toUpperCase() + obj.accessibility.slice(1)}</span>
-        <span className="capacity">{obj.enrolledUsers.length}/{obj.maxCapacity} players</span>
+        <span className="capacity">{obj.participantCount}/{obj.maxCapacity} {obj.teamSize > 1 ? 'teams' : 'players'}</span>
         <a className="view" href={tournamentLink}>View</a>
       </div>
     </div>
