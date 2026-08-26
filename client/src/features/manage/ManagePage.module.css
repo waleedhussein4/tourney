@@ -1,39 +1,43 @@
-.manage {
+/*
+ * The host's console. Shared by ManagePage and every section under sections/,
+ * because they are one screen split into files rather than seven screens.
+ */
+.page {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
 }
 
-.manage__actions {
+.actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-3);
 }
 
-.manage__blockers {
-  padding: var(--space-3);
+.blockers {
+  padding: var(--space-3) var(--space-4);
   background: color-mix(in srgb, var(--warning) 10%, transparent);
-  border: 1px solid var(--warning);
+  border: 1px solid color-mix(in srgb, var(--warning) 50%, transparent);
   border-radius: var(--radius);
   color: var(--text-strong);
   font-size: var(--text-sm);
 }
 
-.manage__hint {
+.hint {
   margin-top: var(--space-3);
   font-size: var(--text-sm);
   color: var(--text-muted);
 }
 
-.manage__form {
+.form {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-4);
 }
 
-.manage__fieldset {
+.fieldset {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -43,119 +47,135 @@
   margin: 0;
 }
 
-.manage__grid {
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: var(--space-3);
 }
 
-.manage__updates {
+.updates {
   list-style: none;
-  padding: 0;
+  padding: var(--space-4) 0 0;
   margin-top: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   border-top: 1px solid var(--border);
-  padding-top: var(--space-4);
 }
 
-.manage__updates time {
+.updates time {
   display: block;
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  color: var(--text-faint);
 }
 
-.manage__applied-at {
+.appliedAt {
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  color: var(--text-faint);
   margin-bottom: var(--space-3);
 }
 
-.manage__answers {
+.answers {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-.manage__answers dt {
-  font-size: var(--text-xs);
+.answers dt {
+  font-size: var(--text-2xs);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-faint);
 }
 
-.manage__answers dd {
+.answers dd {
   margin: 0;
   color: var(--text-strong);
 }
 
-.manage__table {
+.table {
   width: 100%;
   border-collapse: collapse;
   font-size: var(--text-sm);
 }
 
-.manage__table th,
-.manage__table td {
+.table th,
+.table td {
   padding: var(--space-2) var(--space-3);
   text-align: left;
   border-bottom: 1px solid var(--border);
 }
 
-.manage__table thead th {
-  font-size: var(--text-xs);
+.table thead th {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-size: var(--text-2xs);
+  font-weight: 650;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-faint);
 }
 
-.manage__table tbody th {
+.table tbody th {
   color: var(--text-strong);
   font-weight: 600;
 }
 
-.manage__roster {
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.roster {
   display: block;
   font-weight: 400;
   font-size: var(--text-xs);
   color: var(--text-muted);
 }
 
-.manage__number {
+.number {
   width: 6rem;
-  padding: 0.3rem var(--space-2);
+  padding: 0.35rem var(--space-2);
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-variant-numeric: tabular-nums;
 }
 
+/* The escrow bank, and how far it is from covering the prizes. */
 .bank {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
-.bank__bar {
-  height: 0.6rem;
+.bankBar {
+  height: 0.5rem;
   background: var(--surface-sunken);
+  border: 1px solid var(--border);
   border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
-.bank__fill {
+.bankFill {
   height: 100%;
-  background: var(--success);
-  transition: width 200ms ease;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--success-solid), var(--success));
+  transition: width var(--duration-slow) var(--ease-out);
 }
 
-.bank__figures {
+.bankFigures {
   font-size: var(--text-sm);
   color: var(--text-muted);
 }
 
-.bank__figures strong {
+.bankFigures strong {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-variant-numeric: tabular-nums;
   color: var(--text-strong);
 }
 
-.bank__short {
+.bankShort {
   color: var(--warning);
 }
 
@@ -166,33 +186,37 @@
   padding-bottom: var(--space-3);
 }
 
-.matches__round {
-  min-width: 12rem;
+.round {
+  min-width: 13rem;
 }
 
-.matches__round-title {
-  font-size: var(--text-xs);
+.roundTitle {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-size: var(--text-2xs);
+  font-weight: 650;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  margin-bottom: var(--space-2);
+  letter-spacing: var(--tracking-caps);
+  color: var(--accent);
+  margin-bottom: var(--space-3);
 }
 
-.matches__match {
+.match {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  background: var(--surface-overlay);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: var(--space-2);
+  padding: var(--space-3);
   margin: 0 0 var(--space-2);
 }
 
-.matches__match:disabled {
+.match:disabled {
   opacity: 0.6;
 }
 
-.matches__option {
+.option {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -200,17 +224,17 @@
   cursor: pointer;
 }
 
-.matches__option input {
-  accent-color: var(--accent);
+.option input {
+  accent-color: var(--violet-500);
 }
 
-.matches__pending {
+.pending {
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  color: var(--text-faint);
   font-style: italic;
 }
 
-.matches__clear {
+.clear {
   align-self: flex-start;
   background: none;
   border: none;
@@ -219,4 +243,8 @@
   font-size: var(--text-xs);
   text-decoration: underline;
   cursor: pointer;
+}
+
+.clear:hover {
+  color: var(--accent);
 }

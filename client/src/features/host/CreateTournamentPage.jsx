@@ -23,7 +23,7 @@ import {
   totalPrize,
   visibleSteps,
 } from './wizardSteps.js'
-import './CreateTournamentPage.css'
+import styles from './CreateTournamentPage.module.css'
 
 /** Tomorrow, and the day after, as the datetime-local inputs want them. */
 function defaultSchedule() {
@@ -108,23 +108,23 @@ export function CreateTournamentPage() {
 
   return (
     <PageShell width="narrow">
-      <PageHeader title="Create a tournament" description={step.summary} />
+      <PageHeader eyebrow="Hosting" title="Create a tournament" description={step.summary} />
 
-      <ol className="wizard__progress">
+      <ol className={styles.progress}>
         {steps.map((candidate, index) => (
           <li
             key={candidate.id}
             className={[
-              'wizard__step',
-              index === stepIndex && 'wizard__step--current',
-              index < stepIndex && 'wizard__step--done',
+              styles.step,
+              index === stepIndex && styles.current,
+              index < stepIndex && styles.done,
             ]
               .filter(Boolean)
               .join(' ')}
             aria-current={index === stepIndex ? 'step' : undefined}
           >
-            <span className="wizard__step-number">{index + 1}</span>
-            <span className="wizard__step-title">{candidate.title}</span>
+            <span className={styles.stepNumber}>{index + 1}</span>
+            <span>{candidate.title}</span>
           </li>
         ))}
       </ol>
@@ -137,12 +137,12 @@ export function CreateTournamentPage() {
             else goNext()
           }}
         >
-          <fieldset className="wizard__fields" disabled={create.isPending}>
+          <fieldset className={styles.fields} disabled={create.isPending}>
             <legend className="visually-hidden">{step.title}</legend>
             <StepFields step={step} form={form} categories={categories} values={values} />
           </fieldset>
 
-          <footer className="wizard__actions">
+          <footer className={styles.actions}>
             <Button
               variant="ghost"
               onClick={() => setStepIndex((index) => Math.max(0, index - 1))}
@@ -150,7 +150,7 @@ export function CreateTournamentPage() {
             >
               Back
             </Button>
-            <span className="wizard__position">
+            <span className={styles.position}>
               Step {stepIndex + 1} of {steps.length}
             </span>
             <Button type="submit" variant="primary" loading={create.isPending}>
@@ -171,7 +171,7 @@ function StepFields({ step, form, categories, values }) {
     case 'format':
       return (
         <>
-          <fieldset className="choices">
+          <fieldset className={styles.choices}>
             <legend>Format</legend>
             <Choice
               value="brackets"
@@ -309,7 +309,7 @@ function StepFields({ step, form, categories, values }) {
     case 'entry':
       return (
         <>
-          <fieldset className="choices">
+          <fieldset className={styles.choices}>
             <legend>Who can enter</legend>
             <Choice
               value="open"
@@ -387,7 +387,7 @@ function StepFields({ step, form, categories, values }) {
 
           <BankForecast values={values} />
 
-          <div className="wizard__dates">
+          <div className={styles.dates}>
             <Field label="Starts" required error={errors.startDate?.message}>
               {(field) => (
                 <Input
@@ -456,11 +456,11 @@ function StepFields({ step, form, categories, values }) {
 /** A large, clickable radio card. */
 function Choice({ value, checked, title, description, onSelect }) {
   return (
-    <label className={`choice ${checked ? 'choice--on' : ''}`}>
+    <label className={`${styles.choice} ${checked ? styles.choiceOn : ''}`}>
       <input type="radio" checked={checked} onChange={onSelect} value={value} />
       <span>
-        <span className="choice__title">{title}</span>
-        <span className="choice__description">{description}</span>
+        <span className={styles.choiceTitle}>{title}</span>
+        <span className={styles.choiceDescription}>{description}</span>
       </span>
     </label>
   )
@@ -470,13 +470,13 @@ function PrizeTable({ control, register, errors }) {
   const { fields, append, remove } = useFieldArray({ control, name: 'prizes' })
 
   return (
-    <div className="repeater">
-      <p className="repeater__intro">
+    <div className={styles.repeater}>
+      <p className={styles.repeaterIntro}>
         Prizes are paid down the leaderboard: first place takes the top row.
       </p>
 
       {fields.map((field, index) => (
-        <div className="repeater__row" key={field.id}>
+        <div className={styles.repeaterRow} key={field.id}>
           <Field label={`Place ${index + 1}`} error={errors.prizes?.[index]?.prize?.message}>
             {(inner) => (
               <Input
@@ -513,13 +513,13 @@ function ApplicationBuilder({ control, register, errors }) {
   const { fields, append, remove } = useFieldArray({ control, name: 'applicationForm' })
 
   return (
-    <div className="repeater">
-      <p className="repeater__intro">
+    <div className={styles.repeater}>
+      <p className={styles.repeaterIntro}>
         Applicants answer these when they apply, and you see the answers on the manage page.
       </p>
 
       {fields.map((field, index) => (
-        <div className="repeater__row" key={field.id}>
+        <div className={styles.repeaterRow} key={field.id}>
           <Field
             label={`Question ${index + 1}`}
             error={errors.applicationForm?.[index]?.label?.message}
@@ -566,7 +566,7 @@ function BankForecast({ values }) {
   const shortfall = Math.max(0, prizes - income)
 
   return (
-    <div className="forecast">
+    <div className={styles.forecast}>
       <div>
         <dt>Prize pool</dt>
         <dd>{formatCredits(prizes)}</dd>
@@ -575,7 +575,7 @@ function BankForecast({ values }) {
         <dt>Entry fees, if it fills</dt>
         <dd>{formatCredits(income)}</dd>
       </div>
-      <div className={shortfall > 0 ? 'forecast--warn' : ''}>
+      <div className={shortfall > 0 ? styles.forecastWarn : ''}>
         <dt>You would top up</dt>
         <dd>{formatCredits(shortfall)}</dd>
       </div>
@@ -603,7 +603,7 @@ function Review({ values, categories }) {
 
   return (
     <>
-      <dl className="review">
+      <dl className={styles.review}>
         {rows.map(([label, value]) => (
           <div key={label}>
             <dt>{label}</dt>
@@ -611,7 +611,7 @@ function Review({ values, categories }) {
           </div>
         ))}
       </dl>
-      <p className="review__note">
+      <p className={styles.reviewNote}>
         You can edit the details, dates and rules until the tournament starts. The format, capacity
         and prizes are fixed once it exists, because people enter on the strength of them.
       </p>

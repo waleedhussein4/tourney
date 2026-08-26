@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { becomeHost } from '/src/api/users.js'
 import { currentUserKey } from '/src/features/auth/queries.js'
 import { useAuth } from '/src/features/auth/useAuth.js'
 import { PageShell } from '/src/components/layout/PageShell.jsx'
-import { Button, Card, ConfirmDialog } from '/src/components/ui/index.js'
+import { Button, ButtonLink, Card, ConfirmDialog } from '/src/components/ui/index.js'
 import { formatCredits } from '/src/lib/format.js'
-import './become-host.css'
+import styles from './become-host.module.css'
 
 const PRICE = 20
 
@@ -36,25 +36,25 @@ export function BecomeHostPage() {
 
   return (
     <PageShell width="narrow">
-      <Card className="become-host">
+      <Card className={styles.card}>
         <h1>Become a host</h1>
-        <p className="become-host__lead">
+        <p className={styles.lead}>
           Hosting lets you create tournaments, set the prizes, review applications, record the
           results, and pay out the winners.
         </p>
 
-        <ul className="become-host__list">
+        <ul className={styles.list}>
           <li>Run brackets or battle royales, solo or in teams</li>
           <li>Set your own entry fees and prize table</li>
           <li>Keep whatever the entry fees raise above the prizes</li>
         </ul>
 
-        <div className="become-host__price">
+        <div className={styles.price}>
           <span>One-off cost</span>
           <strong>{formatCredits(PRICE)}</strong>
         </div>
 
-        <p className="become-host__balance">You have {formatCredits(user?.credits ?? 0)}.</p>
+        <p className={styles.balance}>You have {formatCredits(user?.credits ?? 0)}.</p>
 
         {canAfford ? (
           <Button variant="primary" onClick={() => setConfirming(true)} loading={upgrade.isPending}>
@@ -62,12 +62,12 @@ export function BecomeHostPage() {
           </Button>
         ) : (
           <>
-            <p className="become-host__short" role="alert">
+            <p className={styles.short} role="alert">
               You need {formatCredits(PRICE - (user?.credits ?? 0))} more.
             </p>
-            <Link className="btn btn--primary btn--md" to="/credits">
+            <ButtonLink variant="primary" to="/credits">
               Buy credits
-            </Link>
+            </ButtonLink>
           </>
         )}
       </Card>

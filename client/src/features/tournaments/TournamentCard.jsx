@@ -8,7 +8,7 @@ import {
   formatType,
   tournamentStatus,
 } from '/src/lib/format.js'
-import './TournamentCard.css'
+import styles from './TournamentCard.module.css'
 
 /**
  * One tournament in a list.
@@ -21,25 +21,25 @@ export function TournamentCard({ tournament }) {
   const status = tournamentStatus(tournament)
 
   return (
-    <article className="tcard">
-      <div className="tcard__art">
+    <article className={styles.card}>
+      <div className={styles.art}>
         <CategoryArt slug={tournament.category} />
       </div>
 
-      <div className="tcard__body">
-        <div className="tcard__badges">
+      <div className={styles.body}>
+        <div className={styles.badges}>
           <Badge tone={status.tone}>{status.label}</Badge>
           <Badge>{formatType(tournament.type)}</Badge>
           {tournament.teamSize > 1 && <Badge>Teams of {tournament.teamSize}</Badge>}
           {tournament.accessibility === 'application required' && <Badge>Application</Badge>}
         </div>
 
-        <h3 className="tcard__title">
+        <h3 className={styles.title}>
           <Link to={`/tournament/${tournament.id}`}>{tournament.title}</Link>
         </h3>
 
-        <dl className="tcard__facts">
-          <div>
+        <dl className={styles.facts}>
+          <div className={styles.prize}>
             <dt>Prize pool</dt>
             <dd>{formatCredits(tournament.totalPrize)}</dd>
           </div>
