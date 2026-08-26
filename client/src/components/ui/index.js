@@ -1,4 +1,4 @@
-export { Button } from './Button.jsx'
+export { Button, ButtonLink } from './Button.jsx'
 export { Checkbox, Field, Input, Select, Textarea } from './Field.jsx'
 export { RichTextField } from './RichTextField.jsx'
 export { Modal } from './Modal.jsx'

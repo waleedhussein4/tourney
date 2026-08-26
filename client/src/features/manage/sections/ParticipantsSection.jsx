@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { saveParticipants } from '/src/api/tournaments.js'
 import { Button, Card, CardHeader, EmptyState, Input } from '/src/components/ui/index.js'
 import { useManageMutation } from '../useManageMutation.js'
+import styles from '../ManagePage.module.css'
 
 function toDraft(participants) {
   return Object.fromEntries(
@@ -88,7 +89,7 @@ export function ParticipantsSection({ tournament }) {
         }
       />
 
-      <table className="manage__table">
+      <table className={styles.table}>
         <thead>
           <tr>
             <th scope="col">{isTeamBased ? 'Team' : 'Player'}</th>
@@ -102,7 +103,7 @@ export function ParticipantsSection({ tournament }) {
               <th scope="row">
                 {participant.name}
                 {isTeamBased && (
-                  <span className="manage__roster">
+                  <span className={styles.roster}>
                     {(participant.members ?? []).map((member) => member.name).join(', ')}
                   </span>
                 )}
@@ -113,7 +114,7 @@ export function ParticipantsSection({ tournament }) {
                 </label>
                 <Input
                   id={`score-${participant.id}`}
-                  className="manage__number"
+                  className={styles.number}
                   type="number"
                   disabled={!editable}
                   value={draft[participant.id]?.score ?? 0}

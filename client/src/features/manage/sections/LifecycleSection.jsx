@@ -9,6 +9,7 @@ import {
 import { Button, Card, CardHeader, ConfirmDialog } from '/src/components/ui/index.js'
 import { formatCredits } from '/src/lib/format.js'
 import { useManageMutation } from '../useManageMutation.js'
+import styles from '../ManagePage.module.css'
 
 /**
  * Starting, ending, and cancelling.
@@ -85,10 +86,10 @@ export function LifecycleSection({ tournament }) {
       />
 
       {!tournament.hasStarted && blockers.length > 0 && (
-        <p className="manage__blockers">Before you can start: {blockers.join('; ')}.</p>
+        <p className={styles.blockers}>Before you can start: {blockers.join('; ')}.</p>
       )}
 
-      <div className="manage__actions">
+      <div className={styles.actions}>
         {tournament.hasStarted ? (
           <Button
             variant="primary"
@@ -121,7 +122,7 @@ export function LifecycleSection({ tournament }) {
       </div>
 
       {finalUndecided && tournament.hasStarted && (
-        <p className="manage__hint">Record the winner of the final before ending.</p>
+        <p className={styles.hint}>Record the winner of the final before ending.</p>
       )}
 
       <ConfirmDialog

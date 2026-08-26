@@ -5,6 +5,7 @@ import { useAuth } from '/src/features/auth/useAuth.js'
 import { Button, Card, CardHeader, Field, Input, Modal } from '/src/components/ui/index.js'
 import { formatCredits } from '/src/lib/format.js'
 import { useManageMutation } from '../useManageMutation.js'
+import styles from '../ManagePage.module.css'
 
 /**
  * The prize bank.
@@ -54,21 +55,22 @@ export function BankSection({ tournament }) {
         }
       />
 
-      <div className="bank">
+      <div className={styles.bank}>
         <div
-          className="bank__bar"
+          className={styles.bankBar}
           role="progressbar"
           aria-valuenow={percent}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label="Prize bank"
         >
-          <div className="bank__fill" style={{ width: `${percent}%` }} />
+          <div className={styles.bankFill} style={{ width: `${percent}%` }} />
         </div>
-        <p className="bank__figures">
-          <strong>{formatCredits(tournament.bank)}</strong> of{' '}
-          {formatCredits(tournament.bankRequired)}
-          {needed > 0 && <span className="bank__short"> — {formatCredits(needed)} short</span>}
+        {/* Plain numbers, not `formatCredits`: "Free of 150 credits" is what
+            that helper makes of an empty bank. */}
+        <p className={styles.bankFigures}>
+          <strong>{tournament.bank}</strong> of <strong>{tournament.bankRequired}</strong> credits
+          {needed > 0 && <span className={styles.bankShort}> — {needed} short</span>}
         </p>
       </div>
 

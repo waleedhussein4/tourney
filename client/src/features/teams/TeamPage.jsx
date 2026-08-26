@@ -14,7 +14,7 @@ import {
   LoadingState,
 } from '/src/components/ui/index.js'
 import { teamKeys } from './queries.js'
-import './teams.css'
+import styles from './teams.module.css'
 
 /**
  * One team: its roster, its invite link, and what the leader can do about both.
@@ -94,112 +94,115 @@ export function TeamPage() {
         title={team.name}
         description={`${team.members.length} ${team.members.length === 1 ? 'member' : 'members'}`}
         actions={team.isLeader && <Badge tone="accent">You lead this team</Badge>}
+        eyebrow="Team"
       />
 
-      <Card>
-        <CardHeader title="Members" />
-        <ul className="team__roster">
-          {team.members.map((member) => (
-            <li key={member.id} className="team__member">
-              <span className="team__member-name">
-                {member.username}
-                {member.isLeader && <Badge tone="accent">Leader</Badge>}
-              </span>
-
-              {team.isLeader && !member.isLeader && (
-                <span className="team__member-actions">
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      setPending({
-                        title: `Make ${member.username} the leader?`,
-                        description:
-                          'They take over paying entry fees and managing the roster. You stay on the team.',
-                        confirmLabel: 'Transfer leadership',
-                        success: 'Leadership transferred',
-                        run: () => transferLeadership(team.id, member.username),
-                      })
-                    }
-                  >
-                    Make leader
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() =>
-                      setPending({
-                        title: `Remove ${member.username}?`,
-                        description: 'They can rejoin later with the team code.',
-                        confirmLabel: 'Remove',
-                        destructive: true,
-                        success: `${member.username} removed`,
-                        run: () => kickMember(team.id, member.username),
-                      })
-                    }
-                  >
-                    Remove
-                  </Button>
+      <div className={styles.stack}>
+        <Card>
+          <CardHeader title="Members" />
+          <ul className={styles.roster}>
+            {team.members.map((member) => (
+              <li key={member.id} className={styles.member}>
+                <span className={styles.memberName}>
+                  {member.username}
+                  {member.isLeader && <Badge tone="accent">Leader</Badge>}
                 </span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </Card>
 
-      <Card className="team__invite-card">
-        <CardHeader title="Invite" subtitle="Anyone with this link or code can join the team." />
-        <div className="team__invite">
-          <code className="team__code">{team.joinCode}</code>
-          <Button onClick={copyInvite}>{copied ? 'Copied' : 'Copy link'}</Button>
-        </div>
-        <p className="team__invite-link">{inviteLink}</p>
-      </Card>
+                {team.isLeader && !member.isLeader && (
+                  <span className={styles.memberActions}>
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        setPending({
+                          title: `Make ${member.username} the leader?`,
+                          description:
+                            'They take over paying entry fees and managing the roster. You stay on the team.',
+                          confirmLabel: 'Transfer leadership',
+                          success: 'Leadership transferred',
+                          run: () => transferLeadership(team.id, member.username),
+                        })
+                      }
+                    >
+                      Make leader
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        setPending({
+                          title: `Remove ${member.username}?`,
+                          description: 'They can rejoin later with the team code.',
+                          confirmLabel: 'Remove',
+                          destructive: true,
+                          success: `${member.username} removed`,
+                          run: () => kickMember(team.id, member.username),
+                        })
+                      }
+                    >
+                      Remove
+                    </Button>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Card>
 
-      <Card>
-        <CardHeader
-          title={team.isLeader ? 'Delete this team' : 'Leave this team'}
-          subtitle={
-            team.isLeader
-              ? 'The team is removed for everyone. Not possible while it is competing.'
-              : 'You can rejoin later with the code. Not possible while the team is competing.'
-          }
-        />
-        {team.isLeader ? (
-          <Button
-            variant="danger"
-            onClick={() =>
-              setPending({
-                title: `Delete ${team.name}?`,
-                description: 'The team is removed for everyone on it. This cannot be undone.',
-                confirmLabel: 'Delete team',
-                destructive: true,
-                success: 'Team deleted',
-                leave: true,
-                run: () => deleteTeam(team.id),
-              })
+        <Card>
+          <CardHeader title="Invite" subtitle="Anyone with this link or code can join the team." />
+          <div className={styles.invite}>
+            <code className={styles.code}>{team.joinCode}</code>
+            <Button onClick={copyInvite}>{copied ? 'Copied' : 'Copy link'}</Button>
+          </div>
+          <p className={styles.inviteLink}>{inviteLink}</p>
+        </Card>
+
+        <Card>
+          <CardHeader
+            title={team.isLeader ? 'Delete this team' : 'Leave this team'}
+            subtitle={
+              team.isLeader
+                ? 'The team is removed for everyone. Not possible while it is competing.'
+                : 'You can rejoin later with the code. Not possible while the team is competing.'
             }
-          >
-            Delete team
-          </Button>
-        ) : (
-          <Button
-            variant="danger"
-            onClick={() =>
-              setPending({
-                title: `Leave ${team.name}?`,
-                description: 'You can rejoin later with the team code.',
-                confirmLabel: 'Leave',
-                destructive: true,
-                success: 'You left the team',
-                leave: true,
-                run: () => leaveTeam(team.id),
-              })
-            }
-          >
-            Leave team
-          </Button>
-        )}
-      </Card>
+          />
+          {team.isLeader ? (
+            <Button
+              variant="danger"
+              onClick={() =>
+                setPending({
+                  title: `Delete ${team.name}?`,
+                  description: 'The team is removed for everyone on it. This cannot be undone.',
+                  confirmLabel: 'Delete team',
+                  destructive: true,
+                  success: 'Team deleted',
+                  leave: true,
+                  run: () => deleteTeam(team.id),
+                })
+              }
+            >
+              Delete team
+            </Button>
+          ) : (
+            <Button
+              variant="danger"
+              onClick={() =>
+                setPending({
+                  title: `Leave ${team.name}?`,
+                  description: 'You can rejoin later with the team code.',
+                  confirmLabel: 'Leave',
+                  destructive: true,
+                  success: 'You left the team',
+                  leave: true,
+                  run: () => leaveTeam(team.id),
+                })
+              }
+            >
+              Leave team
+            </Button>
+          )}
+        </Card>
+      </div>
 
       <ConfirmDialog
         open={Boolean(pending)}

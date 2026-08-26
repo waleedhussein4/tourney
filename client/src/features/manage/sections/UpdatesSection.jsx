@@ -3,6 +3,7 @@ import { postUpdate } from '/src/api/tournaments.js'
 import { Button, Card, CardHeader, Field, Textarea } from '/src/components/ui/index.js'
 import { formatDateTime } from '/src/lib/format.js'
 import { useManageMutation } from '../useManageMutation.js'
+import styles from '../ManagePage.module.css'
 
 /** Announcements, shown on the public tournament page. */
 export function UpdatesSection({ tournament }) {
@@ -24,7 +25,7 @@ export function UpdatesSection({ tournament }) {
     <Card>
       <CardHeader title="Updates" subtitle="Everyone watching this tournament sees these." />
 
-      <form className="manage__form" onSubmit={handleSubmit((values) => post.mutate(values))}>
+      <form className={styles.form} onSubmit={handleSubmit((values) => post.mutate(values))}>
         <Field label="New update" error={errors.content?.message}>
           {(field) => (
             <Textarea
@@ -44,7 +45,7 @@ export function UpdatesSection({ tournament }) {
       </form>
 
       {tournament.updates.length > 0 && (
-        <ol className="manage__updates">
+        <ol className={styles.updates}>
           {[...tournament.updates].reverse().map((update, index) => (
             <li key={`${update.date}-${index}`}>
               <time dateTime={update.date}>{formatDateTime(update.date)}</time>

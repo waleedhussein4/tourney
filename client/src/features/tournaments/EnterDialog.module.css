@@ -1,0 +1,83 @@
+.enter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.cost {
+  color: var(--text);
+  font-size: var(--text-sm);
+}
+
+.cost strong {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--credits);
+}
+
+.warning {
+  padding: var(--space-3);
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warning) 50%, transparent);
+  border-radius: var(--radius);
+  color: var(--text-strong);
+  font-size: var(--text-sm);
+}
+
+.teams {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.teams legend {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 0 var(--space-2);
+}
+
+.team {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+.team:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-accent);
+}
+
+.team input {
+  margin-top: 0.2rem;
+  accent-color: var(--violet-500);
+}
+
+.teamName {
+  display: block;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.teamRoster {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
