@@ -1,4 +1,4 @@
-import Nav from "/src/components/Nav.jsx";
+import { Nav } from '/src/components/layout/Nav.jsx'
 import "./styles/App.css";
 import crown from "./assets/crown.webp";
 import { ConfirmationPopup } from "../../../components/ConfirmationPopup";

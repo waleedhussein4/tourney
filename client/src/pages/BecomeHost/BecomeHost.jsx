@@ -1,12 +1,12 @@
-import Nav from '../../components/Nav'; // Ensure this import path is correct
+import { useAuth } from '/src/features/auth/useAuth.js'
+import { Nav } from '/src/components/layout/Nav.jsx'
 import './BecomeHost.css';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
-import AuthContext from '../../context/AuthContext';
 
 const BecomeHost = () => {
 
-  const { loggedIn, isHost, refreshUser } = useContext(AuthContext);
+  const { isAuthenticated, isHost, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -50,11 +50,11 @@ const BecomeHost = () => {
   };
 
   useEffect(() => {
-    if (loggedIn === undefined) return
-    if (!loggedIn) {
+    if (isAuthenticated === undefined) return
+    if (!isAuthenticated) {
       navigate('/signin')
     }
-  }, [loggedIn])
+  }, [isAuthenticated])
 
   useEffect(() => {
     if (isHost === undefined) return

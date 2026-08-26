@@ -1,15 +1,15 @@
-import Nav from '/src/components/Nav.jsx'
+import { useAuth } from '/src/features/auth/useAuth.js'
+import { Nav } from '/src/components/layout/Nav.jsx'
 import Main from './components/Main.jsx'
 
 import './styles/App.css'
 
 import { useEffect, useState, useContext } from 'react'
-import AuthContext from '../../context/AuthContext.jsx'
 import { useNavigate } from 'react-router-dom'
 
 function Team() {
 
-  const { loggedIn } = useContext(AuthContext)
+  const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
 
   const [teams, setTeams] = useState([])
@@ -27,11 +27,11 @@ function Team() {
   }, [])
 
   useEffect(() => {
-    if (loggedIn === undefined) return
-    if (!loggedIn) {
+    if (isAuthenticated === undefined) return
+    if (!isAuthenticated) {
       navigate('/signin')
     }
-  }, [loggedIn])
+  }, [isAuthenticated])
 
   return (
     <div id='Team'>

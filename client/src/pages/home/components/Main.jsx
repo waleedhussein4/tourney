@@ -1,7 +1,7 @@
+import { useAuth } from '/src/features/auth/useAuth.js'
 import { useEffect, useState, useContext } from "react";
 import Carousel from "./Carousel";
 import { Link } from "react-router-dom";
-import { AuthContext } from "/src/context/AuthContext";
 
 function Main() {
   const [trendingTournaments, setTrendingTournaments] = useState([]);
@@ -9,7 +9,7 @@ function Main() {
   const [bracketDescription, setBracketDescription] = useState("");
   const [battleRoyaleDescription, setBattleRoyaleDescription] = useState("");
 
-  const { loggedIn } = useContext(AuthContext)
+  const { isAuthenticated } = useAuth()
 
   const getTrendingTournaments = async () => {
     const response = await fetch('/api/tournaments/trending')
@@ -88,7 +88,7 @@ function Main() {
          title="Trending"
          data={trendingTournaments}
         />}
-        {loggedIn && myTournaments.length > 0 && <Carousel
+        {isAuthenticated && myTournaments.length > 0 && <Carousel
           title="My Tournaments"
           data={myTournaments}
         />}

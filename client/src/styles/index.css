@@ -28,10 +28,10 @@ html {
 body {
   height: 100%;
   background-image: url(../assets/body1.jpeg);
-  background-repeat:no-repeat ;
-  background-attachment:fixed ;
-  background-position:center ;
-  background-size:cover ;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
 }
 
 #root {

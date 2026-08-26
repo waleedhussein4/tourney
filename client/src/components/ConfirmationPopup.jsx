@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import "../styles/Popup.css";
+import React, { useState } from 'react'
+import '../styles/Popup.css'
 
 export function ConfirmationPopup({ message, onConfirm, onCancel }) {
   return (
@@ -12,5 +12,5 @@ export function ConfirmationPopup({ message, onConfirm, onCancel }) {
         </div>
       </div>
     </div>
-  );
+  )
 }

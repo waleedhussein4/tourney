@@ -1,15 +1,15 @@
+import { useAuth } from '/src/features/auth/useAuth.js'
 import { useEffect, useState, useContext } from "react";
-import { AuthContext } from "/src/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 function Main() {
-  const { loggedIn, isAdmin } = useContext(AuthContext)
+  const { isAuthenticated, isAdmin } = useAuth()
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (loggedIn === undefined) return
-    if (!loggedIn) {
+    if (isAuthenticated === undefined) return
+    if (!isAuthenticated) {
       navigate('/page-not-found')
     }
 
@@ -17,7 +17,7 @@ function Main() {
     if(!isAdmin) {
       navigate('/page-not-found')
     }
-  }, [loggedIn, isAdmin]);
+  }, [isAuthenticated, isAdmin]);
 
   const [status, setStatus] = useState('')
 
