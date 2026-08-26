@@ -1,4 +1,4 @@
-import Nav from "/src/components/Nav.jsx";
+import { Nav } from '/src/components/layout/Nav.jsx'
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 

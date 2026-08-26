@@ -1,4 +1,4 @@
-import Nav from "/src/components/Nav";
+import { Nav } from '/src/components/layout/Nav.jsx'
 import Main from "./components/Main";
 
 import './styles/Home.css'
