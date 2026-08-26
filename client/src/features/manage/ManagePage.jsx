@@ -11,7 +11,7 @@ import { ParticipantsSection } from './sections/ParticipantsSection.jsx'
 import { MatchesSection } from './sections/MatchesSection.jsx'
 import { UpdatesSection } from './sections/UpdatesSection.jsx'
 import { LifecycleSection } from './sections/LifecycleSection.jsx'
-import './ManagePage.css'
+import styles from './ManagePage.module.css'
 
 /**
  * The host's control panel.
@@ -59,12 +59,13 @@ export function ManagePage() {
   return (
     <PageShell>
       <PageHeader
+        eyebrow="Managing"
         title={tournament.title}
         description="Everything you can change about this tournament, and everything it needs before it can start."
         actions={<Badge tone={status.tone}>{status.label}</Badge>}
       />
 
-      <div className="manage">
+      <div className={styles.page}>
         <LifecycleSection tournament={tournament} />
         <BankSection tournament={tournament} />
         {tournament.accessibility === 'application required' && (

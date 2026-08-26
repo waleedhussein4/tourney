@@ -1,8 +1,10 @@
-.admin__result {
+/* The one place the app prints a raw server reply, so it is set in mono. */
+.result {
   margin-top: var(--space-4);
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background: var(--surface-sunken);
   border: 1px solid var(--border);
+  border-left: 2px solid var(--border-accent);
   border-radius: var(--radius);
   font-family: var(--font-mono);
   font-size: var(--text-sm);

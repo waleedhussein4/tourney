@@ -5,7 +5,7 @@ import { joinTeamByCode, previewTeamByCode } from '/src/api/teams.js'
 import { PageShell } from '/src/components/layout/PageShell.jsx'
 import { Button, Card, EmptyState, ErrorState, LoadingState } from '/src/components/ui/index.js'
 import { teamKeys } from './queries.js'
-import './teams.css'
+import styles from './teams.module.css'
 
 /** What an invite link lands on: the team's name, and a button. */
 export function JoinTeamPage() {
@@ -67,14 +67,14 @@ export function JoinTeamPage() {
 
   return (
     <PageShell width="narrow">
-      <Card className="team__invite-landing">
-        <p className="team__invited">You have been invited to join</p>
+      <Card className={styles.inviteLanding}>
+        <p className={styles.invited}>You have been invited to join</p>
         <h1>{team.name}</h1>
-        <p className="team__meta">
+        <p className={styles.teamMeta}>
           {team.memberCount} {team.memberCount === 1 ? 'member' : 'members'}
         </p>
 
-        <div className="team__invite-actions">
+        <div className={styles.inviteActions}>
           <Button variant="primary" onClick={() => join.mutate()} loading={join.isPending}>
             Join this team
           </Button>

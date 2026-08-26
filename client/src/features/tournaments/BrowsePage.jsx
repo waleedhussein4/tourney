@@ -14,7 +14,7 @@ import {
 } from '/src/components/ui/index.js'
 import { useDebounced } from '/src/lib/useDebounced.js'
 import { TournamentCard } from './TournamentCard.jsx'
-import './BrowsePage.css'
+import styles from './BrowsePage.module.css'
 
 const PAGE_SIZE = 12
 
@@ -103,13 +103,14 @@ export function BrowsePage() {
   return (
     <PageShell width="wide">
       <PageHeader
+        eyebrow="Catalogue"
         title="Browse tournaments"
         description="Every open tournament, and everything currently under way."
       />
 
-      <div className="browse">
-        <form className="browse__filters" onSubmit={(event) => event.preventDefault()}>
-          <h2 className="browse__filters-title">Filters</h2>
+      <div className={styles.browse}>
+        <form className={styles.filters} onSubmit={(event) => event.preventDefault()}>
+          <h2 className={styles.filtersTitle}>Filters</h2>
 
           <Field label="Search">
             {(field) => (
@@ -183,7 +184,7 @@ export function BrowsePage() {
             )}
           </Field>
 
-          <div className="browse__fee-range">
+          <div className={styles.feeRange}>
             <Field label="Min fee">
               {(field) => (
                 <Input
@@ -221,7 +222,7 @@ export function BrowsePage() {
           )}
         </form>
 
-        <section className="browse__results" aria-live="polite" aria-busy={query.isFetching}>
+        <section className={styles.results} aria-live="polite" aria-busy={query.isFetching}>
           <Results
             query={query}
             filters={filters}
@@ -268,22 +269,22 @@ function Results({ query, filters, hasFilters, onPage, onClear }) {
 
   return (
     <>
-      <p className="browse__count">
-        {pagination.total} {pagination.total === 1 ? 'tournament' : 'tournaments'}
+      <p className={styles.count}>
+        <strong>{pagination.total}</strong> {pagination.total === 1 ? 'tournament' : 'tournaments'}
       </p>
 
-      <div className="tournament-grid">
+      <div className={styles.grid}>
         {tournaments.map((tournament) => (
           <TournamentCard key={tournament.id} tournament={tournament} />
         ))}
       </div>
 
       {pagination.pages > 1 && (
-        <nav className="browse__pager" aria-label="Pagination">
+        <nav className={styles.pager} aria-label="Pagination">
           <Button disabled={filters.page <= 1} onClick={() => onPage(filters.page - 1)}>
             Previous
           </Button>
-          <span className="browse__page-of">
+          <span className={styles.pageOf}>
             Page {pagination.page} of {pagination.pages}
           </span>
           <Button

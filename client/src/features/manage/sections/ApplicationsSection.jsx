@@ -2,6 +2,7 @@ import { acceptApplication, rejectApplication } from '/src/api/tournaments.js'
 import { Accordion, Button, Card, CardHeader, EmptyState } from '/src/components/ui/index.js'
 import { formatDateTime } from '/src/lib/format.js'
 import { useManageMutation } from '../useManageMutation.js'
+import styles from '../ManagePage.module.css'
 
 /** The queue of people asking to be let in. */
 export function ApplicationsSection({ tournament }) {
@@ -42,9 +43,9 @@ export function ApplicationsSection({ tournament }) {
             key={application.id}
             title={`${application.name}${application.isTeam ? ' (team)' : ''}`}
           >
-            <p className="manage__applied-at">Applied {formatDateTime(application.createdAt)}</p>
+            <p className={styles.appliedAt}>Applied {formatDateTime(application.createdAt)}</p>
 
-            <dl className="manage__answers">
+            <dl className={styles.answers}>
               {application.fields.map((field) => (
                 <div key={field.label}>
                   <dt>{field.label}</dt>
@@ -53,7 +54,7 @@ export function ApplicationsSection({ tournament }) {
               ))}
             </dl>
 
-            <div className="manage__actions">
+            <div className={styles.actions}>
               <Button
                 variant="primary"
                 size="sm"

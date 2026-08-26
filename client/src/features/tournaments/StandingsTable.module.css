@@ -1,0 +1,92 @@
+.standings {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table tbody tr {
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.table tbody tr:hover {
+  background: var(--surface-overlay);
+}
+
+.table th {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-faint);
+  font-weight: 650;
+}
+
+/* The top three get the accent; the rest are quiet. */
+.rank {
+  width: 3.5rem;
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-faint);
+}
+
+.podium {
+  color: var(--accent);
+}
+
+.number {
+  text-align: right;
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  color: var(--text-strong);
+}
+
+.prize {
+  color: var(--credits);
+}
+
+.name {
+  display: block;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.roster {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.muted {
+  color: var(--text-faint);
+  font-weight: 400;
+}
+
+.out .name {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--danger);
+}

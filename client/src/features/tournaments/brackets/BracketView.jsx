@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets'
 import { Badge, Modal } from '/src/components/ui/index.js'
 import { buildRounds, championOf } from './buildRounds.js'
-import './BracketView.css'
+import styles from './BracketView.module.css'
 
 /**
  * The single-elimination bracket, for both solo and team tournaments.
@@ -20,17 +20,17 @@ export function BracketView({ tournament }) {
   const isTeamBased = tournament.teamSize > 1
 
   const renderSeed = ({ seed, breakpoint }) => (
-    <Seed mobileBreakpoint={breakpoint} className="seed">
-      <SeedItem>
+    <Seed mobileBreakpoint={breakpoint} className={styles.seed}>
+      <SeedItem className={styles.seedItem}>
         <div>
           {seed.teams.map((team, index) => (
             <SeedTeam
               key={`${seed.id}-${index}`}
               className={[
-                'seed__team',
-                team.isWinner && 'seed__team--winner',
-                team.eliminated && 'seed__team--out',
-                !team.name && 'seed__team--tba',
+                styles.team,
+                team.isWinner && styles.winner,
+                team.eliminated && styles.out,
+                !team.name && styles.tba,
               ]
                 .filter(Boolean)
                 .join(' ')}
@@ -49,9 +49,9 @@ export function BracketView({ tournament }) {
                   : undefined
               }
             >
-              <span className="seed__name">{team.name ?? 'TBA'}</span>
+              <span className={styles.name}>{team.name ?? 'TBA'}</span>
               {team.score !== null && team.score !== 0 && (
-                <span className="seed__score">{team.score}</span>
+                <span className={styles.score}>{team.score}</span>
               )}
             </SeedTeam>
           ))}
@@ -63,15 +63,20 @@ export function BracketView({ tournament }) {
   const inspected = (tournament.participants ?? []).find((entry) => entry.id === inspecting)
 
   return (
-    <div className="bracket">
+    <div className={styles.bracket}>
       {champion && (
-        <p className="bracket__champion">
+        <p className={styles.champion}>
           <Badge tone="success">Winner</Badge> {champion.name}
         </p>
       )}
 
-      <div className="bracket__scroll">
-        <Bracket rounds={rounds} renderSeedComponent={renderSeed} mobileBreakpoint={0} />
+      <div className={styles.scroll}>
+        <Bracket
+          rounds={rounds}
+          renderSeedComponent={renderSeed}
+          roundTitleComponent={(title) => <div className={styles.roundTitle}>{title}</div>}
+          mobileBreakpoint={0}
+        />
       </div>
 
       <Modal
@@ -81,7 +86,7 @@ export function BracketView({ tournament }) {
         description={isTeamBased ? 'Team roster' : undefined}
       >
         {inspected && (
-          <dl className="bracket__details">
+          <dl className={styles.details}>
             <div>
               <dt>Score</dt>
               <dd>{inspected.score ?? 0}</dd>
@@ -91,7 +96,7 @@ export function BracketView({ tournament }) {
               <dd>{inspected.eliminated ? 'Eliminated' : 'Still in'}</dd>
             </div>
             {isTeamBased && (
-              <div className="bracket__roster">
+              <div className={styles.roster}>
                 <dt>Players</dt>
                 <dd>
                   <ul>

@@ -1,6 +1,6 @@
 import { Badge, EmptyState } from '/src/components/ui/index.js'
 import { formatCredits } from '/src/lib/format.js'
-import './StandingsTable.css'
+import styles from './StandingsTable.module.css'
 
 /**
  * The battle-royale leaderboard.
@@ -30,21 +30,21 @@ export function StandingsTable({ tournament }) {
   const isTeamBased = tournament.teamSize > 1
 
   return (
-    <div className="standings">
-      <table className="standings__table">
+    <div className={styles.standings}>
+      <table className={styles.table}>
         <caption className="visually-hidden">
           Standings, ordered by score. {standings.length} entrants.
         </caption>
         <thead>
           <tr>
-            <th scope="col" className="standings__rank">
+            <th scope="col" className={styles.rank}>
               #
             </th>
             <th scope="col">{isTeamBased ? 'Team' : 'Player'}</th>
-            <th scope="col" className="standings__number">
+            <th scope="col" className={styles.number}>
               Score
             </th>
-            <th scope="col" className="standings__number">
+            <th scope="col" className={styles.number}>
               Prize
             </th>
             <th scope="col">Status</th>
@@ -56,22 +56,19 @@ export function StandingsTable({ tournament }) {
             const prize = prizeByRank.get(rank)
 
             return (
-              <tr
-                key={participant.id}
-                className={participant.eliminated ? 'standings__row--out' : ''}
-              >
-                <td className="standings__rank">{rank}</td>
+              <tr key={participant.id} className={participant.eliminated ? styles.out : ''}>
+                <td className={`${styles.rank} ${rank <= 3 ? styles.podium : ''}`}>{rank}</td>
                 <td>
-                  <span className="standings__name">{participant.name}</span>
+                  <span className={styles.name}>{participant.name}</span>
                   {isTeamBased && participant.members?.length > 0 && (
-                    <span className="standings__roster">
+                    <span className={styles.roster}>
                       {participant.members.map((member) => member.name).join(', ')}
                     </span>
                   )}
                 </td>
-                <td className="standings__number">{participant.score ?? 0}</td>
-                <td className="standings__number">
-                  {prize ? formatCredits(prize) : <span className="standings__muted">—</span>}
+                <td className={styles.number}>{participant.score ?? 0}</td>
+                <td className={`${styles.number} ${prize ? styles.prize : ''}`}>
+                  {prize ? formatCredits(prize) : <span className={styles.muted}>—</span>}
                 </td>
                 <td>
                   {participant.eliminated ? (

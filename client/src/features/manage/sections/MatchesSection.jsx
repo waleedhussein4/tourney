@@ -3,6 +3,7 @@ import { saveMatches } from '/src/api/tournaments.js'
 import { Button, Card, CardHeader, EmptyState } from '/src/components/ui/index.js'
 import { buildRounds } from '/src/features/tournaments/brackets/buildRounds.js'
 import { useManageMutation } from '../useManageMutation.js'
+import styles from '../ManagePage.module.css'
 
 /**
  * Recording who won each match.
@@ -65,10 +66,10 @@ export function MatchesSection({ tournament }) {
         }
       />
 
-      <div className="matches">
+      <div className={styles.matches}>
         {rounds.map((round) => (
-          <section key={round.title} className="matches__round">
-            <h4 className="matches__round-title">{round.title}</h4>
+          <section key={round.title} className={styles.round}>
+            <h4 className={styles.roundTitle}>{round.title}</h4>
 
             {round.seeds.map((seed) => {
               const [home, away] = seed.teams
@@ -77,7 +78,7 @@ export function MatchesSection({ tournament }) {
               return (
                 <fieldset
                   key={seed.id}
-                  className="matches__match"
+                  className={styles.match}
                   disabled={!playable || tournament.hasEnded}
                 >
                   <legend className="visually-hidden">
@@ -86,7 +87,7 @@ export function MatchesSection({ tournament }) {
 
                   {playable ? (
                     [home, away].map((competitor) => (
-                      <label key={competitor.id} className="matches__option">
+                      <label key={competitor.id} className={styles.option}>
                         <input
                           type="radio"
                           name={`match-${seed.id}`}
@@ -97,13 +98,13 @@ export function MatchesSection({ tournament }) {
                       </label>
                     ))
                   ) : (
-                    <p className="matches__pending">Waiting on the previous round</p>
+                    <p className={styles.pending}>Waiting on the previous round</p>
                   )}
 
                   {playable && draft[seed.id] && (
                     <button
                       type="button"
-                      className="matches__clear"
+                      className={styles.clear}
                       onClick={() => setWinner(seed.id, null)}
                     >
                       Clear

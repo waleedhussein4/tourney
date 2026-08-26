@@ -11,6 +11,7 @@ import {
 } from '/src/components/ui/index.js'
 import { richTextLimit, toPlainText } from '/src/lib/richText.js'
 import { useManageMutation } from '../useManageMutation.js'
+import styles from '../ManagePage.module.css'
 
 /** `2030-01-05T18:00:00.000Z` as a `datetime-local` value in the reader's zone. */
 function toLocalInput(iso) {
@@ -89,8 +90,8 @@ export function DetailsSection({ tournament }) {
         }
       />
 
-      <form className="manage__form" onSubmit={handleSubmit((values) => save.mutate(values))}>
-        <fieldset className="manage__fieldset" disabled={locked || save.isPending}>
+      <form className={styles.form} onSubmit={handleSubmit((values) => save.mutate(values))}>
+        <fieldset className={styles.fieldset} disabled={locked || save.isPending}>
           <legend className="visually-hidden">Tournament details</legend>
 
           <Field label="Title" required error={errors.title?.message}>
@@ -136,7 +137,7 @@ export function DetailsSection({ tournament }) {
             )}
           />
 
-          <div className="manage__grid">
+          <div className={styles.grid}>
             <Field label="Starts" error={errors.startDate?.message}>
               {(field) => (
                 <Input
@@ -161,7 +162,7 @@ export function DetailsSection({ tournament }) {
             </Field>
           </div>
 
-          <div className="manage__grid">
+          <div className={styles.grid}>
             <Field label="Contact email" error={errors.contactEmail?.message}>
               {(field) => (
                 <Input

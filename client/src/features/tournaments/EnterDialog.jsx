@@ -9,7 +9,7 @@ import { currentUserKey } from '/src/features/auth/queries.js'
 import { useAuth } from '/src/features/auth/useAuth.js'
 import { Button, Field, Input, Modal, Spinner } from '/src/components/ui/index.js'
 import { formatCredits } from '/src/lib/format.js'
-import './EnterDialog.css'
+import styles from './EnterDialog.module.css'
 
 /**
  * Entering a tournament: joining directly, or applying to be let in.
@@ -93,11 +93,11 @@ export function EnterDialog({ tournament, mode, open, onClose }) {
     >
       <form
         id="enter-form"
-        className="enter"
+        className={styles.enter}
         onSubmit={handleSubmit((values) => enter.mutate(values))}
       >
         {!isApplication && (
-          <p className="enter__cost">
+          <p className={styles.cost}>
             Entry costs <strong>{formatCredits(cost)}</strong>
             {isTeamBased &&
               ` — ${formatCredits(tournament.entryFee)} for each of the ${tournament.teamSize} players, paid by you as leader`}
@@ -106,7 +106,7 @@ export function EnterDialog({ tournament, mode, open, onClose }) {
         )}
 
         {!canAfford && (
-          <p className="enter__warning" role="alert">
+          <p className={styles.warning} role="alert">
             You need {formatCredits(cost - (user?.credits ?? 0))} more.{' '}
             <Link to="/credits">Buy credits</Link>
           </p>
@@ -140,7 +140,7 @@ function TeamPicker({ teams, eligible, value, onChange, tournament }) {
 
   if (eligible.length === 0) {
     return (
-      <p className="enter__warning">
+      <p className={styles.warning}>
         You need to lead a team of exactly {tournament.teamSize} to enter this one.{' '}
         <Link to="/teams">Manage your teams</Link>
       </p>
@@ -148,10 +148,10 @@ function TeamPicker({ teams, eligible, value, onChange, tournament }) {
   }
 
   return (
-    <fieldset className="enter__teams">
+    <fieldset className={styles.teams}>
       <legend>Enter with</legend>
       {eligible.map((team) => (
-        <label key={team.id} className="enter__team">
+        <label key={team.id} className={styles.team}>
           <input
             type="radio"
             name="team"
@@ -160,8 +160,8 @@ function TeamPicker({ teams, eligible, value, onChange, tournament }) {
             onChange={(event) => onChange(event.target.value)}
           />
           <span>
-            <span className="enter__team-name">{team.name}</span>
-            <span className="enter__team-roster">
+            <span className={styles.teamName}>{team.name}</span>
+            <span className={styles.teamRoster}>
               {team.members.map((member) => member.username).join(', ')}
             </span>
           </span>

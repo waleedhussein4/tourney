@@ -7,7 +7,7 @@ import { currentUserKey } from '/src/features/auth/queries.js'
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
 import { Button, Card, ErrorState, Field, Input, LoadingState } from '/src/components/ui/index.js'
 import { DemoNotice } from './DemoNotice.jsx'
-import './credits.css'
+import styles from './credits.module.css'
 
 /** Groups a card number in fours, which is all the old `cleave-zen` was for. */
 const formatCardNumber = (value) =>
@@ -90,22 +90,22 @@ export function CheckoutPage() {
 
       <DemoNotice />
 
-      <Card className="checkout__summary">
+      <Card className={styles.summary}>
         <div>
           <h2>{item.name}</h2>
-          <p className="checkout__credits">{item.credits} credits</p>
+          <p className={styles.summaryCredits}>{item.credits} credits</p>
         </div>
-        <p className="checkout__price">${item.price}</p>
+        <p className={styles.summaryPrice}>${item.price}</p>
       </Card>
 
       <Card>
-        <h2 className="checkout__heading">Payment</h2>
-        <p className="checkout__mock-note">
+        <h2 className={styles.heading}>Payment</h2>
+        <p className={styles.mockNote}>
           These fields are a mock-up so the flow feels real. They are never sent anywhere — the
           request below carries only which package you picked.
         </p>
 
-        <form className="checkout__form" onSubmit={handleSubmit(() => buy.mutate())}>
+        <form className={styles.form} onSubmit={handleSubmit(() => buy.mutate())}>
           <Field label="Name on card" required error={errors.name?.message}>
             {(field) => (
               <Input
@@ -134,7 +134,7 @@ export function CheckoutPage() {
             )}
           </Field>
 
-          <div className="checkout__row">
+          <div className={styles.row}>
             <Field label="Expiry" required error={errors.expiry?.message}>
               {(field) => (
                 <Input
