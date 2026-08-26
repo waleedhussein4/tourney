@@ -75,9 +75,9 @@ export default function Host() {
 
     const checkHostStatus = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/isHost`, { credentials: 'include' });
-        const data = await response.json();
-        if (!data) {
+        const response = await fetch('/api/users/me', { credentials: 'include' });
+        const data = response.ok ? await response.json() : null;
+        if (!data?.user?.isHost) {
           navigate('/become-host')
         }
         setIsLoading(false);

@@ -1,40 +1,35 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthContext } from "/src/hooks/useAuthContext";
+import AuthContext from "../../context/AuthContext";
 
 export const useSignup = (props) => {
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { refreshUser } = useContext(AuthContext);
 
-  const navigate = useNavigate()
-
-  const signup = async (email, userName, password) => {
+  const signup = async (email, username, password) => {
     setIsLoading(true);
     setError(null);
 
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }, 
-      body: JSON.stringify({ email, userName, password }),
-      credentials: "include"
+    const response = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, username, password }),
+      credentials: "include",
     });
+
+    setIsLoading(false);
 
     if (!response.ok) {
       const json = await response.json();
-      setIsLoading(false);
-      setError(json.error);
+      setError(json.error?.message ?? "Could not create the account");
+      return;
     }
 
-    if (response.ok) {
-      setIsLoading(false);
-      if(props) {
-        navigate(props.from);
-      } else {
-        navigate("/")
-      }
-      navigate(0)
-    }
+    await refreshUser();
+    navigate(props ? props.from : "/");
   };
 
-  return [ signup, isLoading, error ];
+  return [signup, isLoading, error];
 };

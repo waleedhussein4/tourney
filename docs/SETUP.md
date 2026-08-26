@@ -4,8 +4,18 @@
 
 - **Node.js 20 or newer** (`node --version`) — the repo uses npm workspaces and
   `node --watch`.
-- **MongoDB** — either a local `mongod` on the default port, or a free
-  [MongoDB Atlas M0](https://www.mongodb.com/cloud/atlas/register) cluster.
+- **MongoDB, as a replica set.** Every credit movement runs inside a MongoDB
+  transaction, and transactions require a replica set. Two options:
+  - A free [MongoDB Atlas M0](https://www.mongodb.com/cloud/atlas/register)
+    cluster — already a replica set, nothing to configure. Recommended.
+  - A local `mongod` started as a single-node replica set:
+    ```bash
+    mongod --replSet rs0 --dbpath /your/data/path
+    mongosh --eval "rs.initiate()"     # once, the first time
+    ```
+    A plain `mongod` will serve every read and every non-financial write, but
+    joining a tournament, buying credits, and paying out will fail with a clear
+    "database does not support transactions" error.
 
 ## Five commands
 
