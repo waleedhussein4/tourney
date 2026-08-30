@@ -29,6 +29,8 @@ export async function setup() {
   process.env.CLIENT_URL = ''
   process.env.FRONTEND_URL = ''
   process.env.SEED_PASSWORD = ''
+  // The scheduled reseed route reads this through config/env.js at import time.
+  process.env.CRON_SECRET = 'test-cron-secret-long-enough'
 }
 
 export async function teardown() {
