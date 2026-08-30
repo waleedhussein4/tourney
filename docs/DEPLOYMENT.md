@@ -141,6 +141,7 @@ deploys production on every push to it.
 | `SEED_DEMO_EMAIL`, `SEED_ADMIN_EMAIL` | Vercel, local        | no       | Default to `demo@tourney.app` and `admin@tourney.app`.                                                                         |
 | `VITE_API_URL`                        | client build         | no       | **Leave empty.** An empty value makes the client call a relative `/api`, which is the point of the single-project setup.       |
 | `VITE_FRONTEND_URL`                   | client build         | no       | Only used to build team invite links.                                                                                          |
+| `CRON_SECRET`                         | Vercel               | no       | Bearer token for the scheduled reseed. Unset means the route refuses to run at all. At least 16 characters.                    |
 
 The `SEED_*` passwords matter in production because the admin page can reseed
 the live database. Left unset, the seeder generates a password per run and
@@ -171,6 +172,99 @@ really did move credits and write ledger rows. That means it needs transactions
 a replica set) works unchanged.
 
 An admin can also reseed from the live site, at `/admin`.
+
+---
+
+## The scheduled reseed
+
+The demo credentials are published in the README, so the demo account gets
+spent down and the tournaments fill with strangers' test entries. The site
+repairs itself once a day.
+
+`GET /api/cron/reseed` runs the same clear-then-seed the CLI does, and
+`vercel.json` schedules it:
+
+```json
+"crons": [{ "path": "/api/cron/reseed", "schedule": "0 4 * * *" }]
+```
+
+04:00 UTC, because Hobby cron granularity is one run per day and that is a
+quiet hour. It is a `GET` because that is the only method Vercel Cron issues;
+`POST` is accepted too, for triggering one by hand.
+
+### Guarding it
+
+This route empties the production database. It is the most dangerous endpoint
+in the application and it is not protected by obscurity:
+
+1. **Unset `CRON_SECRET` means it does not run.** Not "runs unauthenticated" —
+   `503 CRON_NOT_CONFIGURED`, before touching anything. A development machine or
+   a preview deployment that never configured the variable cannot be talked into
+   wiping a database.
+2. **The secret is required as a bearer token**, compared in constant time after
+   hashing both sides so neither the value nor its length leaks through timing.
+   Vercel Cron sends `Authorization: Bearer $CRON_SECRET` automatically once the
+   variable exists on the project.
+3. **It is rate limited** to ten requests an hour, so the token cannot be probed
+   for.
+
+`server/tests/cron.test.js` covers every one of those branches, including that a
+request without the token changes nothing.
+
+Set the secret like the others:
+
+```bash
+printf '%s' "$(openssl rand -hex 32)" | vercel env add CRON_SECRET production
+```
+
+### Triggering one by hand
+
+```bash
+curl -s https://<domain>/api/cron/reseed -H "Authorization: Bearer $CRON_SECRET"
+```
+
+```json
+{
+  "ok": true,
+  "cleared": { "tournaments": 10, "teams": 4, "users": 13, "transactions": 35 },
+  "seeded": { "users": 14, "teams": 4, "products": 0, "tournaments": 10 },
+  "durationMs": 4008
+}
+```
+
+`products` is `0` on a rebuild because the credit packages are catalogue rows
+rather than demo data: the reset leaves them in place.
+
+### The timeout, measured
+
+A reseed creates fourteen accounts — each one a bcrypt hash at cost 10 — and
+then drives ten tournaments through the real services, several of them inside
+transactions. That is enough work to be worth measuring against the function's
+deadline rather than assuming.
+
+Measured on the deployed function, in `fra1`, against the Atlas cluster:
+
+|                                |           |
+| ------------------------------ | --------- |
+| Reseed work, cold invocation   | **4.0 s** |
+| Reseed work, warm invocation   | **4.0 s** |
+| `maxDuration` in `vercel.json` | **60 s**  |
+
+A fifteen-fold margin, so nothing here needs weakening — in particular the
+seeded accounts are hashed at the same cost 10 as a real signup. The `fra1`
+pinning is doing most of the work: the same script from a laptop outside the
+region takes noticeably longer, because it pays the round trip on every one of
+those writes.
+
+`maxDuration` was raised from 15 s to 60 s (the Hobby ceiling) anyway, so that
+the margin is the deadline's and not a guess. If the demo dataset ever grows
+enough to threaten it, the fix in order of preference is: batch the account
+creation, then lower the bcrypt cost **for seeded demo accounts only** — never
+for `registerUser`'s real path.
+
+If a run were ever cut off between the clear and the seed, the database would be
+left empty rather than corrupt, and the next daily run rebuilds it — `seedDemoData`
+is additive and idempotent. An admin can also reseed immediately from `/admin`.
 
 ---
 
