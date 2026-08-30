@@ -15,4 +15,16 @@ export default defineConfig({
       },
     },
   },
+  // `vite preview` serves the built bundle, which is the only way to exercise
+  // the split chunks locally — the dev server does not produce them. It needs
+  // the same proxy, or the built client has no API to talk to.
+  preview: {
+    port: 4173,
+    proxy: {
+      '/api': {
+        target: process.env.VITE_DEV_API_TARGET || 'http://localhost:2000',
+        changeOrigin: true,
+      },
+    },
+  },
 })
