@@ -7,9 +7,15 @@
   "regions": ["fra1"],
   "functions": {
     "api/index.js": {
-      "maxDuration": 15
+      "maxDuration": 60
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/reseed",
+      "schedule": "0 4 * * *"
+    }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/(.*)", "destination": "/index.html" }

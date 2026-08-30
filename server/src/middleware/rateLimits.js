@@ -36,3 +36,14 @@ export const creditsLimiter = limiter({
   keyGenerator: (req) => req.userId ?? req.ip,
   message: 'Too many credit purchases in the last hour.',
 })
+
+/**
+ * The scheduled reseed. One caller (Vercel Cron) hits it once a day, so a cap
+ * this low costs nothing legitimate and takes brute-forcing the bearer token
+ * off the table entirely.
+ */
+export const cronLimiter = limiter({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  message: 'Too many requests.',
+})

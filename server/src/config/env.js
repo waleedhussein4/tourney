@@ -75,6 +75,13 @@ function loadConfig() {
 
   const clientUrl = read('CLIENT_URL')
 
+  // Optional. Unset means the scheduled reseed endpoint refuses to run at all,
+  // which is the safe default: that route can empty the production database.
+  const cronSecret = read('CRON_SECRET')
+  if (cronSecret && cronSecret.length < 16) {
+    problems.push('CRON_SECRET must be at least 16 characters when it is set')
+  }
+
   if (problems.length > 0) {
     throw new Error(
       [
@@ -99,6 +106,8 @@ function loadConfig() {
     // API, which is the target setup (Vite proxy locally, one Vercel project in
     // production) and needs no CORS at all.
     clientUrl,
+    // Optional: the bearer token Vercel Cron presents to /api/cron/*.
+    cronSecret,
   })
 }
 
