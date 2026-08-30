@@ -43,7 +43,15 @@ export function TeamPage() {
   const act = useMutation({
     mutationFn: ({ run }) => run(),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: teamKeys.all })
+      if (variables.leave) {
+        // A team the caller has just left or deleted no longer exists for them,
+        // so its detail query is dropped rather than invalidated — invalidating
+        // it refetches a 404 on the way out of the page.
+        queryClient.removeQueries({ queryKey: teamKeys.detail(teamId) })
+        queryClient.invalidateQueries({ queryKey: teamKeys.mine })
+      } else {
+        queryClient.invalidateQueries({ queryKey: teamKeys.all })
+      }
       toast.success(variables.success)
       setPending(null)
       if (variables.leave) navigate('/teams')

@@ -172,23 +172,27 @@ export async function deleteTeam(teamId, userId) {
 }
 
 /**
- * Refuses roster changes while the team is enrolled in a tournament that is
- * under way.
+ * Refuses roster changes while the team is entered in a tournament that has not
+ * finished.
  *
- * Without this a leader could kick every teammate the moment the bracket was
- * drawn, or dissolve the team after the entry fee had gone into the bank — the
- * tournament would then be paying out to a roster that no longer exists.
+ * The window that matters opens when the team *enters*, not when the tournament
+ * starts: the entry fee is in the bank from that moment, and the tournament has
+ * snapshotted the roster it will pay out to. A leader who could dissolve the
+ * team in between would leave the tournament holding a phantom entrant, and a
+ * member who could leave would still collect a share of the prize.
+ *
+ * Once the tournament has ended the roster is free again — the snapshot has
+ * already been paid out against.
  */
 async function assertRosterIsMutable(team, action) {
-  const active = await Tournament.exists({
-    hasStarted: true,
+  const entered = await Tournament.exists({
     hasEnded: { $ne: true },
     'enrolledTeams.teamId': team._id,
   })
 
-  if (active) {
+  if (entered) {
     throw ApiError.conflict(
-      `You cannot ${action} this team while it is competing in a tournament that has started`
+      `You cannot ${action} this team while it is entered in a tournament that has not finished`
     )
   }
 }
