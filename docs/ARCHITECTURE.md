@@ -242,17 +242,33 @@ barrel before looking at the routes.
 ### A note on measuring it
 
 Lighthouse numbers for this app are dominated by whether the browser already
-holds the JavaScript bundle, not by which page is under test. Measured with a
-cold cache every run, the home, browse and tournament pages score within a point
-of each other; measured in sequence with the cache left warm, whichever page
-runs _first_ scores 10-20 points lower than the two after it, whichever page
-that is.
+holds the JavaScript bundle, not by which page is under test.
 
-That is worth knowing before drawing a conclusion from a table of three numbers.
-The honest characterisation of the deployed site is **~80 on a first visit with
-an empty cache, ~98 once the bundle is cached**, on any of the three pages.
+Measured against the deployed site with a **fresh browser per run**, so every
+run starts with an empty cache:
 
-The remaining cold-visit cost is the render delay before the first paint: the
+|            | first visit | repeat visit |
+| ---------- | ----------- | ------------ |
+| Home       | 80          | 98           |
+| Browse     | 80          | 98           |
+| Tournament | 78          | 98           |
+
+Accessibility is 100 on all three either way.
+
+The trap is measuring the three pages in sequence in one browser. They share a
+bundle, so the first page downloads it and the other two do not — 359 KiB of
+transfer against 2 KiB. Whichever page runs first then scores 15-20 points lower
+than the two after it, _whichever page that is_, and it looks exactly like a
+page-specific problem. It is not.
+
+**A local run is not a proxy for a first visit either.** There is no real network
+between the browser and the server, so Lighthouse's simulated throttling is
+modelling from unrealistic inputs, and the machine is usually also running the
+API and the database. It can land either side of the deployed number: on the
+same build, localhost scored 66-67 where production scored 78-80. Use it to
+compare two builds against each other, not to predict what a visitor sees.
+
+The remaining first-visit cost is the render delay before the first paint: the
 page is client-rendered, so the hero heading does not exist until the bundle has
 downloaded, parsed and mounted. Removing that means prerendering or server
 rendering the shell, which is a different architecture rather than an
