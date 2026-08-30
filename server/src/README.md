@@ -16,6 +16,7 @@ modules/
   tournaments/    create, browse, join, apply, bank, lifecycle, payouts
   credits/        the demo checkout and its catalogue
   admin/          seed and clear demo data
+  cron/           the daily reseed, bearer-token gated
   health/         GET /api/health
 utils/            ApiError, asyncHandler, text sanitising
 ```
