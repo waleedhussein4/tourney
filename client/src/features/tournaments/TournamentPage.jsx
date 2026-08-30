@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getTournament, tournamentKeys } from '/src/api/tournaments.js'
@@ -21,11 +21,24 @@ import {
   formatType,
   tournamentStatus,
 } from '/src/lib/format.js'
-import { isEmptyRichText, toSafeHtml } from '/src/lib/richText.js'
-import { BracketView } from './brackets/BracketView.jsx'
 import { StandingsTable } from './StandingsTable.jsx'
 import { EnterDialog } from './EnterDialog.jsx'
 import styles from './TournamentPage.module.css'
+
+/*
+ * The two heaviest things on this page, loaded only when they are actually
+ * needed. The header, the facts strip and the prize table — everything a reader
+ * looks at first — render from the main bundle while these arrive.
+ *
+ * `BracketView` pulls react-brackets, styled-components and a swipeable-views
+ * dependency; a battle royale never loads any of it. `RichText` pulls
+ * sanitize-html and its HTML parser, which together are the largest dependency
+ * in the client.
+ */
+const BracketView = lazy(() =>
+  import('./brackets/BracketView.jsx').then((module) => ({ default: module.BracketView }))
+)
+const RichText = lazy(() => import('./RichText.jsx'))
 
 export function TournamentPage() {
   const { UUID: id } = useParams()
@@ -119,7 +132,9 @@ export function TournamentPage() {
               {tournament.type === 'brackets' ? 'Bracket' : 'Standings'}
             </h2>
             {tournament.type === 'brackets' ? (
-              <BracketView tournament={tournament} />
+              <Suspense fallback={<LoadingState label="Loading the bracket" rows={2} />}>
+                <BracketView tournament={tournament} />
+              </Suspense>
             ) : (
               <StandingsTable tournament={tournament} />
             )}
@@ -253,11 +268,9 @@ function RichTextCard({ title, html, empty }) {
   return (
     <Card>
       <h2 className={styles.sectionTitle}>{title}</h2>
-      {isEmptyRichText(html) ? (
-        <p className={styles.muted}>{empty}</p>
-      ) : (
-        <div className={styles.prose} dangerouslySetInnerHTML={{ __html: toSafeHtml(html) }} />
-      )}
+      <Suspense fallback={<p className={styles.muted}>Loading…</p>}>
+        <RichText html={html} empty={empty} />
+      </Suspense>
     </Card>
   )
 }

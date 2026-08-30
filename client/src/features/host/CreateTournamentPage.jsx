@@ -5,15 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { createTournament, listCategories, tournamentKeys } from '/src/api/tournaments.js'
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
-import {
-  Button,
-  Card,
-  Field,
-  Input,
-  RichTextField,
-  Select,
-  Textarea,
-} from '/src/components/ui/index.js'
+import { Button, Card, Field, Input, Select, Textarea } from '/src/components/ui/index.js'
+import { RichTextField } from '/src/components/ui/RichTextField.jsx'
 import { formatCredits } from '/src/lib/format.js'
 import { richTextLimit } from '/src/lib/richText.js'
 import {
