@@ -35,10 +35,26 @@ import styles from './TournamentPage.module.css'
  * sanitize-html and its HTML parser, which together are the largest dependency
  * in the client.
  */
+const loadBracketView = () => import('./brackets/BracketView.jsx')
+const loadRichText = () => import('./RichText.jsx')
+
 const BracketView = lazy(() =>
-  import('./brackets/BracketView.jsx').then((module) => ({ default: module.BracketView }))
+  loadBracketView().then((module) => ({ default: module.BracketView }))
 )
-const RichText = lazy(() => import('./RichText.jsx'))
+const RichText = lazy(loadRichText)
+
+/*
+ * Start both chunks the moment this module is evaluated — which is when the
+ * router first renders this route, before the tournament has been fetched.
+ *
+ * `React.lazy` alone only begins loading when the component renders, and that
+ * cannot happen until the query resolves. The two would then run one after the
+ * other. Kicking them off here overlaps the chunk fetch with the API round
+ * trip, which is what keeps the split from costing this page its paint: without
+ * it the measured LCP went from 1.4s to 2.0s.
+ */
+loadRichText()
+loadBracketView()
 
 export function TournamentPage() {
   const { UUID: id } = useParams()
