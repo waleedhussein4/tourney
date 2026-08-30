@@ -205,6 +205,59 @@ its callers pass. Mitigated with JSDoc on shared components and the exported
 API-layer functions, so an editor still autocompletes and still complains, but
 it is a mitigation and not a type system.
 
+### Why `components/ui/index.js` does not export everything
+
+The barrel re-exports the small, common pieces — `Button`, `Card`, `Field` — and
+deliberately leaves out `RichTextField`.
+
+**Why.** `RichTextField` imports Quill, and Quill's stylesheet with it. A CSS
+import is a side effect, so a bundler cannot prove the module is unused and
+cannot drop it. Through the barrel, that made **every page that imported a
+`Button` also import a 216 kB rich text editor** — which was most of the reason
+the client shipped as one 889 kB chunk to every visitor.
+
+The measurement is worth keeping, because the intuition is wrong in an
+instructive way. Splitting the two routes that actually use the editor moved
+almost nothing:
+
+|                                                     | main chunk    | gzipped       |
+| --------------------------------------------------- | ------------- | ------------- |
+| before                                              | 889.54 kB     | 296.60 kB     |
+| after lazy-loading the two host routes              | 800.57 kB     | 266.75 kB     |
+| after also taking `RichTextField` out of the barrel | **334.99 kB** | **107.74 kB** |
+
+Route splitting was worth 30 kB. The one-line barrel change was worth 159 kB.
+The lazy import could not work while a static import chain still reached the
+same module from the entry point.
+
+**What it cost.** Two call sites import `RichTextField` from its own module
+rather than the barrel, which is marginally less tidy. That is the whole price.
+
+**The rule this generalises to:** a barrel file is only free when every module
+behind it is side-effect free. One CSS import inside one component is enough to
+pin the entire dependency to the entry chunk, silently, with no warning from
+anything. When a bundle is bigger than the sum of what a page uses, look for a
+barrel before looking at the routes.
+
+### A note on measuring it
+
+Lighthouse numbers for this app are dominated by whether the browser already
+holds the JavaScript bundle, not by which page is under test. Measured with a
+cold cache every run, the home, browse and tournament pages score within a point
+of each other; measured in sequence with the cache left warm, whichever page
+runs _first_ scores 10-20 points lower than the two after it, whichever page
+that is.
+
+That is worth knowing before drawing a conclusion from a table of three numbers.
+The honest characterisation of the deployed site is **~80 on a first visit with
+an empty cache, ~98 once the bundle is cached**, on any of the three pages.
+
+The remaining cold-visit cost is the render delay before the first paint: the
+page is client-rendered, so the hero heading does not exist until the bundle has
+downloaded, parsed and mounted. Removing that means prerendering or server
+rendering the shell, which is a different architecture rather than an
+optimisation, and is not worth it for this application.
+
 ---
 
 ## Layout
