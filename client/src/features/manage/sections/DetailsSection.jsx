@@ -1,14 +1,7 @@
 import { Controller, useForm } from 'react-hook-form'
 import { updateTournament } from '/src/api/tournaments.js'
-import {
-  Button,
-  Card,
-  CardHeader,
-  Field,
-  Input,
-  RichTextField,
-  Textarea,
-} from '/src/components/ui/index.js'
+import { Button, Card, CardHeader, Field, Input, Textarea } from '/src/components/ui/index.js'
+import { RichTextField } from '/src/components/ui/RichTextField.jsx'
 import { richTextLimit, toPlainText } from '/src/lib/richText.js'
 import { useManageMutation } from '../useManageMutation.js'
 import styles from '../ManagePage.module.css'
