@@ -20,7 +20,7 @@ export function AdminPage() {
   const seed = useMutation({
     mutationFn: seedDemoData,
     onSuccess: (data) => {
-      queryClient.clear()
+      queryClient.invalidateQueries()
       setResult(`Seeded ${data.users} users, ${data.teams} teams, ${data.tournaments} tournaments.`)
       toast.success('Demo data seeded')
     },
@@ -30,7 +30,7 @@ export function AdminPage() {
   const clear = useMutation({
     mutationFn: clearDemoData,
     onSuccess: (data) => {
-      queryClient.clear()
+      queryClient.invalidateQueries()
       setResult(
         `Cleared ${data.tournaments} tournaments, ${data.teams} teams, ${data.users} users, ${data.transactions} ledger rows.`
       )

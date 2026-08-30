@@ -93,7 +93,8 @@ processed, and the card fields never leave your browser.
 - Create a team, invite by link or six-character join code, promote a new
   leader, remove a member, or leave.
 - The leader enters the team and pays the entry fee.
-- A team competing cannot be deleted or left out from under the tournament.
+- A team that has entered a tournament is frozen until it finishes — nobody can
+  leave, be removed, or dissolve it out from under the prize table.
 
 ### The credits economy
 

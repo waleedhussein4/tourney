@@ -215,9 +215,60 @@ describe('leader-only operations', () => {
   })
 })
 
-// A tournament draws its bracket and funds its bank from the roster that entered
-// it. Letting the leader empty that roster mid-tournament would leave prizes
-// owed to people who are no longer on the team.
+// A tournament funds its bank and snapshots its roster the moment a team enters
+// — before it starts. Letting the leader empty that roster in between would
+// leave prizes owed to people who are no longer on the team, and the tournament
+// holding an entrant that no longer exists.
+describe('roster changes while the team is entered but the tournament has not started', () => {
+  let team
+  let host
+  let tournament
+
+  beforeEach(async () => {
+    host = await signUp('hostie', { credits: 1000, isHost: true })
+    team = await createTeam(ada.agent, [bob.agent], 'Night Owls')
+
+    tournament = await createTournament(host.agent, {
+      type: 'battle royale',
+      teamSize: 2,
+      maxCapacity: 2,
+      entryFee: 0,
+      prize: undefined,
+      prizes: [{ rank: 1, prize: 0 }],
+    })
+
+    await ada.agent
+      .post(`/api/tournaments/${tournament.id}/join/team`)
+      .send({ teamId: team.id })
+      .expect(200)
+  })
+
+  it('refuses deleting the team', async () => {
+    await ada.agent.delete(`/api/teams/${team.id}`).expect(409)
+    expect(await Team.findById(team.id)).not.toBeNull()
+  })
+
+  it('refuses a member leaving', async () => {
+    await bob.agent.post(`/api/teams/${team.id}/leave`).expect(409)
+    expect((await Team.findById(team.id)).members).toHaveLength(2)
+  })
+
+  it('refuses a kick', async () => {
+    await ada.agent.delete(`/api/teams/${team.id}/members/bob`).expect(409)
+    expect((await Team.findById(team.id)).members).toHaveLength(2)
+  })
+
+  it('refuses a new member joining', async () => {
+    const { body } = await ada.agent.get(`/api/teams/${team.id}`).expect(200)
+    await cleo.agent.post(`/api/teams/join/${body.team.joinCode}`).expect(409)
+  })
+
+  it('allows roster changes again once the host cancels the tournament', async () => {
+    await host.agent.delete(`/api/tournaments/${tournament.id}`).expect(200)
+    await ada.agent.delete(`/api/teams/${team.id}`).expect(204)
+  })
+})
+
 describe('roster changes while the team is competing', () => {
   let team
   let host
