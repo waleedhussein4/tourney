@@ -82,6 +82,13 @@ gate "no checkMember middleware" \
 gate "no prompt/confirm/alert in the pages the server rewrite touched" \
   grep -rn "window\.prompt\|[^.]\bprompt(" client/src/pages/manage/Manage.jsx client/src/pages/tournament/Tournament.jsx
 
+# The original reloaded the whole SPA after almost every mutation, which threw
+# away the cache and re-authenticated on the way back. React Query invalidation
+# replaced it. The leading [^*/]* keeps the gate off comment lines: a couple of
+# files explain what they replaced, and naming the old bug is not committing it.
+gate "no full-page reloads in the client" \
+  grep -rnE "^[^*/]*(navigate\(0\)|window\.location\.reload)" client/src
+
 gate "no VITE_BACKEND_URL left in the client" \
   grep -rn "VITE_BACKEND_URL" client/src
 
