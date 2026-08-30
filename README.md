@@ -179,7 +179,7 @@ the two measures diverge and the suite fails.
 | Validation   | zod 3                                        | Every `params`, `query`, and `body` validated before a controller runs     |
 | Database     | MongoDB Atlas M0 + mongoose 8                | Transactions for every multi-document credit movement                      |
 | Auth         | JWT in an `httpOnly` cookie                  | No token in `localStorage` for a script to read                            |
-| Tests        | vitest 4 + supertest + mongodb-memory-server | 209 tests against a real replica set, not mocks                            |
+| Tests        | vitest 4 + supertest + mongodb-memory-server | 214 tests against a real replica set, not mocks                            |
 | Hosting      | Vercel Hobby + Atlas M0                      | $0, and neither sleeps                                                     |
 
 ---
@@ -209,7 +209,7 @@ set locally. Full setup notes are in [docs/SETUP.md](docs/SETUP.md).
 |                             |                                             |
 | --------------------------- | ------------------------------------------- |
 | `npm run dev`               | API and client together                     |
-| `npm test`                  | The server suite (209 tests)                |
+| `npm test`                  | The server suite (214 tests)                |
 | `npm run lint`              | ESLint across both workspaces               |
 | `npm run build`             | Production client build                     |
 | `npm run seed`              | Seed demo data (`-- --reset` to wipe first) |
