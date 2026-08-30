@@ -31,10 +31,20 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     await signOut()
-    // Everything cached was fetched as the previous user. Dropping it all is the
-    // only way to be sure none of it leaks into the next session.
-    queryClient.clear()
+
+    // Answer the identity query first. It is the one the whole app renders from,
+    // and it has a live observer in this component — `queryClient.clear()`
+    // destroys the cache entry that observer is attached to, so a `setQueryData`
+    // afterwards seeds a *new* entry that nothing is listening to. The nav then
+    // goes on showing the signed-out user until something forces a re-render,
+    // which is a sign-out button that visibly does nothing.
     queryClient.setQueryData(currentUserKey, null)
+
+    // Then drop everything else: it was all fetched as the previous user, and
+    // none of it should survive into the next session.
+    queryClient.removeQueries({
+      predicate: (query) => query.queryKey[0] !== currentUserKey[0],
+    })
   }, [queryClient])
 
   const value = useMemo(
