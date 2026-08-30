@@ -67,9 +67,14 @@
   margin-top: var(--space-6);
 }
 
+/*
+ * The tiles have to stay wider than the artwork's 16:9, or the crop starts
+ * eating the category name off the left edge. 11rem against a 6rem tile is
+ * 1.83:1, and the mobile step below holds the same ratio at a smaller size.
+ */
 .categoryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
   gap: var(--space-3);
   margin-top: var(--space-4);
   padding: 0;
@@ -134,6 +139,15 @@
 .railItem {
   flex: 0 0 18rem;
   scroll-snap-align: start;
+}
+
+@media (max-width: 560px) {
+  .categoryGrid {
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  }
+  .categoryTile {
+    height: 4.75rem;
+  }
 }
 
 @media (max-width: 900px) {
