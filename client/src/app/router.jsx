@@ -16,6 +16,7 @@ import { CreditsPage } from '/src/features/credits/CreditsPage.jsx'
 import { CheckoutPage } from '/src/features/credits/CheckoutPage.jsx'
 import { ProfilePage } from '/src/features/profile/ProfilePage.jsx'
 import { AdminPage } from '/src/features/admin/AdminPage.jsx'
+import { PublishRequestsPage } from '/src/features/admin/PublishRequestsPage.jsx'
 import { NotFoundPage } from '/src/features/misc/NotFoundPage.jsx'
 
 /**
@@ -95,6 +96,7 @@ export function Router() {
         {/* Administrators. */}
         <Route element={<AdminRoute />}>
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/publish-requests" element={<PublishRequestsPage />} />
         </Route>
 
         {/* The team list used to live at /team; keep old links working. */}
