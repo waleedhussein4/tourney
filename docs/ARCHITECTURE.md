@@ -317,7 +317,7 @@ error shape unwrapped in one place.
 
 ## Testing
 
-216 tests, run against an **in-memory MongoDB replica set** — the real database
+254 tests, run against an **in-memory MongoDB replica set** — the real database
 engine, not a mock and not a standalone that would reject the transactions the
 app depends on. Each test file gets its own database inside the shared replica
 set, so files run in parallel without interfering.
@@ -329,6 +329,7 @@ The suites are split by what they defend:
 | `auth`, `teams`, `credits` | the everyday paths, and their failure modes                          |
 | `tournaments.guards`       | who is allowed to do what, and what the state forbids                |
 | `tournaments.lifecycle`    | create → join → bank → start → results → payout                      |
+| `tournaments.publish`      | draft → pending payment → published; who can see and confirm what    |
 | `conservation`             | credits are conserved; the ledger reconstructs every balance         |
 | `seed`                     | the demo data is buildable, idempotent, and commits no passwords     |
 | `cron`                     | the reseed's lock, including that a rejected request changes nothing |
