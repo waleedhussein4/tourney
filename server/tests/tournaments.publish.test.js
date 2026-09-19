@@ -129,6 +129,22 @@ describe('POST /api/tournaments/:id/publish', () => {
   })
 })
 
+describe('GET /api/publishing/pricing', () => {
+  it('is public, so the landing page can quote the price list', async () => {
+    const { body } = await guest().get('/api/publishing/pricing').expect(200)
+    expect(body.tiers).toEqual(PUBLISH_TIERS)
+    // The landing page's WhatsApp link is built from this, so it never holds a
+    // number of its own — the regression gate would fail the build if it did.
+    expect(body.whatsapp).toBeTruthy()
+  })
+
+  it('does not leak the payment number to the public', async () => {
+    const { text } = await guest().get('/api/publishing/pricing').expect(200)
+    expect(text.toLowerCase()).not.toContain('whish')
+    expect(text.toLowerCase()).not.toContain('whishnumber')
+  })
+})
+
 describe('GET /api/tournaments/:id/publish', () => {
   it('quotes the fee and how to pay it, to the host', async () => {
     const created = await paidDraft()
