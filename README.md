@@ -13,12 +13,12 @@ score-ranked battle royales, solo or in teams — with entry fees held in escrow
 until the prizes are covered.
 
 [![CI](https://github.com/waleedhussein4/tourney/actions/workflows/ci.yml/badge.svg)](https://github.com/waleedhussein4/tourney/actions/workflows/ci.yml)
-[![Live demo](https://img.shields.io/badge/live-tourney--host.vercel.app-7c5cff)](https://tourney-host.vercel.app)
+[![Live demo](https://img.shields.io/badge/live-tourneylb.com-7c5cff)](https://tourneylb.com)
 [![License: MIT](https://img.shields.io/badge/license-MIT-3fb950)](LICENSE)
 ![Node](https://img.shields.io/badge/node-%E2%89%A520-339933)
 ![React](https://img.shields.io/badge/react-18-61dafb)
 
-**[→ Open the live demo](https://tourney-host.vercel.app)**
+**[→ Open the live demo](https://tourneylb.com)**
 
 </div>
 
