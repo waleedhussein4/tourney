@@ -152,7 +152,9 @@ describe('tournaments that predate publishState', () => {
 
     await seedDemoData()
 
-    const after = await Tournament.find({ _id: { $in: ids } }).select('publishState').lean()
+    const after = await Tournament.find({ _id: { $in: ids } })
+      .select('publishState')
+      .lean()
     expect(after).toHaveLength(ids.length)
     expect(after.every((entry) => entry.publishState === 'published')).toBe(true)
   })
