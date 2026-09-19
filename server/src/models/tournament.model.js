@@ -84,6 +84,9 @@ const tournamentSchema = new Schema(
     hasStarted: { type: Boolean, default: false },
     hasEnded: { type: Boolean, default: false },
 
+    /** Set by the seed script and nothing else. The demo reset deletes only these. */
+    isDemo: { type: Boolean, default: false, index: true },
+
     description: { type: String, default: '' },
     rules: { type: String, default: '' },
 

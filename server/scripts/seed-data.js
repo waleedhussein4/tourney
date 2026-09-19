@@ -17,6 +17,8 @@ import Transaction from '../src/models/transaction.model.js'
 import Product from '../src/models/product.model.js'
 import { DEFAULT_PRODUCTS } from '../src/config/products.js'
 import { registerUser } from '../src/modules/auth/auth.service.js'
+import { withTransaction } from '../src/db/withTransaction.js'
+import { creditUser, recordTransaction } from '../src/modules/tournaments/bank.service.js'
 import * as tournaments from '../src/modules/tournaments/tournament.service.js'
 
 const DAY = 24 * 60 * 60 * 1000
@@ -97,7 +99,9 @@ async function findOrCreateUser({ username, email, password, credits = 0, isHost
   let user = await User.findOne({ email })
   if (!user) user = await registerUser({ email, username, password })
 
-  const update = { credits, isHost }
+  // Matching by the seed's own email is also what flags accounts seeded before
+  // `isDemo` existed. The admin is seeded but is not demo data: it is never cleared.
+  const update = { credits, isHost, isDemo: !role }
   if (role) update.role = role
   await User.updateOne({ _id: user._id }, { $set: update })
 
@@ -396,15 +400,30 @@ export async function seedDemoData() {
         leader: leader._id,
         createdBy: leader._id,
         members: [leader._id, ...blueprint.members.map((name) => people.get(name)._id)],
+        isDemo: true,
       })
     }
     teams.set(blueprint.name, team)
   }
 
+  // Documents seeded before `isDemo` existed carry no flag. They are recognised
+  // by the seed's natural key *and* a seeded owner, so a real host's tournament
+  // that happens to share a title is never claimed.
+  const seededIds = [...people.values()].filter((user) => user.isDemo).map((user) => user._id)
+  await Team.updateMany(
+    { name: { $in: TEAMS.map((team) => team.name) }, leader: { $in: seededIds } },
+    { $set: { isDemo: true } }
+  )
+  await Tournament.updateMany(
+    { title: { $in: blueprints().map((b) => b.payload.title) }, host: { $in: seededIds } },
+    { $set: { isDemo: true } }
+  )
+
   let created = 0
   for (const blueprint of blueprints()) {
     if (await Tournament.exists({ title: blueprint.payload.title })) continue
-    await buildTournament(blueprint, people, teams)
+    const tournament = await buildTournament(blueprint, people, teams)
+    await Tournament.updateOne({ _id: tournament._id }, { $set: { isDemo: true } })
     created += 1
   }
 
@@ -452,7 +471,7 @@ async function buildTournament(blueprint, people, teams) {
     }
   }
 
-  if (blueprint.state !== 'started' && blueprint.state !== 'ended') return
+  if (blueprint.state !== 'started' && blueprint.state !== 'ended') return tournament
 
   const funded = await tournaments.loadTournament(id)
   await fillBank(funded, host._id)
@@ -461,6 +480,7 @@ async function buildTournament(blueprint, people, teams) {
   await recordResults(id, host._id, blueprint, people, teams)
 
   if (blueprint.state === 'ended') await tournaments.endTournament(id, host._id)
+  return tournament
 }
 
 /** Fills in whatever the tournament's format uses to decide who won. */
@@ -506,17 +526,88 @@ async function recordResults(id, hostId, blueprint, people, teams) {
   await tournaments.updateParticipants(id, hostId, participants)
 }
 
-/** Removes the demo dataset. Admin accounts are left alone. */
+/** Every user or team id a tournament refers to. */
+function idsReferencedBy(tournament) {
+  return [
+    tournament.host,
+    ...tournament.enrolledUsers.map((entry) => entry.userId),
+    ...tournament.enrolledTeams.flatMap((entry) => [
+      entry.teamId,
+      entry.paidBy,
+      ...entry.members.map((member) => member.userId),
+    ]),
+    ...tournament.applications.map((application) => application.applicantId),
+  ].map(String)
+}
+
+/**
+ * Removes the demo dataset, and nothing else.
+ *
+ * Demo data is what the seed flagged `isDemo`, plus whatever was made *with* a
+ * demo account — the demo login is public, so a tournament it hosts or a team it
+ * leads is a visitor's leftovers. Real accounts, and everything they own, stay.
+ *
+ * The two worlds can touch, and both directions are handled:
+ *   - a real player in a demo tournament gets their entry fee back, with a ledger
+ *     row, before the tournament and its bank disappear;
+ *   - a demo user or team that a real tournament refers to is kept (the seed
+ *     resets it in place), so a paying host's bracket never points at nobody.
+ */
 export async function clearDemoData() {
-  const [tournamentResult, teamResult, userResult, transactionResult] = await Promise.all([
-    Tournament.deleteMany({}),
-    Team.deleteMany({}),
-    User.deleteMany({ role: { $ne: 'admin' } }),
-    Transaction.deleteMany({}),
+  const demoUserIds = (await User.find({ isDemo: true }).select('_id').lean()).map((u) => u._id)
+  const isDemoUser = new Set(demoUserIds)
+
+  const demoTournaments = await Tournament.find({
+    $or: [{ isDemo: true }, { host: { $in: demoUserIds } }],
+  })
+  const demoTournamentIds = demoTournaments.map((tournament) => tournament._id)
+
+  const realTournaments = await Tournament.find({ _id: { $nin: demoTournamentIds } })
+  const realTournamentIds = realTournaments.map((tournament) => tournament._id)
+  const keep = [...new Set(realTournaments.flatMap(idsReferencedBy))]
+
+  for (const tournament of demoTournaments) {
+    await withTransaction(async (session) => {
+      // An ended tournament has already paid its bank out; there is no fee left to return.
+      for (const participant of tournament.hasEnded ? [] : tournament.participants()) {
+        const payer = String(tournament.isTeamBased ? participant.paidBy : participant.userId)
+        if (isDemoUser.has(payer) || tournament.entryCost <= 0) continue
+
+        await creditUser(payer, tournament.entryCost, session)
+        await recordTransaction(
+          {
+            userId: payer,
+            type: 'refund',
+            amount: tournament.entryCost,
+            tournamentId: tournament._id,
+            description: `Refund for "${tournament.title}", removed by the demo reset`,
+          },
+          session
+        )
+      }
+      await Tournament.deleteOne({ _id: tournament._id }, { session })
+    })
+  }
+
+  const doomedUsers = { isDemo: true, role: { $ne: 'admin' }, _id: { $nin: keep } }
+  const doomedUserIds = (await User.find(doomedUsers).select('_id').lean()).map((u) => u._id)
+
+  const [teamResult, transactionResult] = await Promise.all([
+    Team.deleteMany({
+      $or: [{ isDemo: true }, { leader: { $in: demoUserIds } }],
+      _id: { $nin: keep },
+    }),
+    // A demo user's rows go, except those a real tournament's bank is built from.
+    Transaction.deleteMany({
+      userId: { $in: demoUserIds },
+      tournamentId: { $nin: realTournamentIds },
+    }),
   ])
+  await Team.updateMany({}, { $pull: { members: { $in: doomedUserIds } } })
+  const userResult = await User.deleteMany({ _id: { $in: doomedUserIds } })
 
   return {
-    tournaments: tournamentResult.deletedCount,
+    tournaments: demoTournaments.length,
     teams: teamResult.deletedCount,
     users: userResult.deletedCount,
     transactions: transactionResult.deletedCount,

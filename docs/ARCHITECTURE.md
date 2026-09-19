@@ -317,7 +317,7 @@ error shape unwrapped in one place.
 
 ## Testing
 
-214 tests, run against an **in-memory MongoDB replica set** — the real database
+216 tests, run against an **in-memory MongoDB replica set** — the real database
 engine, not a mock and not a standalone that would reject the transactions the
 app depends on. Each test file gets its own database inside the shared replica
 set, so files run in parallel without interfering.
