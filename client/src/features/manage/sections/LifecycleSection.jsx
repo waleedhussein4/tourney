@@ -56,7 +56,10 @@ export function LifecycleSection({ tournament }) {
     onDone: () => navigate('/tournaments'),
   })
 
+  const published = tournament.publishState === 'published'
+
   const blockers = [
+    !published && 'it has not been published yet',
     bankShort && `the bank is ${formatCredits(tournament.bankShortfall)} short of the prizes`,
     bracketUnfilled &&
       `${entrants} of ${tournament.maxCapacity} slots are filled — a bracket starts full`,
@@ -81,7 +84,9 @@ export function LifecycleSection({ tournament }) {
         subtitle={
           tournament.hasStarted
             ? 'Record the results, then end it to pay out the prizes.'
-            : 'Entrants can still join, and you can still edit the details.'
+            : published
+              ? 'Entrants can still join, and you can still edit the details.'
+              : 'Nobody can find or join it until it is published. You can still edit everything.'
         }
       />
 

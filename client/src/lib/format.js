@@ -15,9 +15,24 @@ const DATE_TIME = new Intl.DateTimeFormat(undefined, {
   minute: '2-digit',
 })
 
+const LBP = new Intl.NumberFormat('en-US')
+
 export const formatDate = (value) => (value ? DATE.format(new Date(value)) : '')
 
 export const formatDateTime = (value) => (value ? DATE_TIME.format(new Date(value)) : '')
+
+/**
+ * Lebanese pounds, grouped: "150,000 LBP".
+ *
+ * Publishing fees are real money and are the one amount in the app that is not
+ * credits — the unit is always spelled out so the two can never be read as the
+ * same thing.
+ */
+export function formatLbp(amount) {
+  if (amount === 0) return 'Free'
+  if (amount == null) return ''
+  return `${LBP.format(amount)} LBP`
+}
 
 /** "12 credits", "1 credit", "Free". */
 export function formatCredits(amount) {
@@ -48,6 +63,18 @@ export function tournamentStatus(tournament) {
   if (full) return { label: 'Full', tone: 'warning' }
 
   return { label: 'Open', tone: 'accent' }
+}
+
+/**
+ * The publishing badge, or `null` once it is published.
+ *
+ * A published tournament says nothing — that is the normal state, and a badge
+ * on every tournament that is working correctly is a badge nobody reads.
+ */
+export function publishStatus(publishState) {
+  if (publishState === 'draft') return { label: 'Draft', tone: 'neutral' }
+  if (publishState === 'pending_payment') return { label: 'Awaiting payment', tone: 'warning' }
+  return null
 }
 
 /** "3 of 8 players" / "2 of 4 teams". */

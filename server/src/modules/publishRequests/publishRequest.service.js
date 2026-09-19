@@ -1,5 +1,5 @@
 import PublishRequest from '../../models/publishRequest.model.js'
-import { tierFor } from '../../config/publishing.js'
+import { WHISH_NUMBER, tierFor } from '../../config/publishing.js'
 import { withTransaction } from '../../db/withTransaction.js'
 import { ApiError } from '../../utils/ApiError.js'
 import { loadAsHost, loadTournament } from '../tournaments/tournament.service.js'
@@ -14,6 +14,30 @@ import { loadAsHost, loadTournament } from '../tournaments/tournament.service.js
 // app, and an admin says so by hand. Every transition that touches both the
 // tournament and its request row runs in one transaction, so the queue and the
 // tournaments can never disagree about what is waiting.
+
+/**
+ * What this tournament would cost to publish, and how to pay it.
+ *
+ * The host's screen cannot hold the Whish number itself — a regression gate
+ * keeps it out of every file but the config — so the instructions are served
+ * from here, to the host of the tournament and nobody else.
+ */
+export async function quote(tournamentId, hostId) {
+  const tournament = await loadAsHost(tournamentId, hostId)
+  const tier = tierFor(tournament.maxCapacity)
+
+  return {
+    publishState: tournament.publishState,
+    tier: tier?.tier ?? null,
+    amountLbp: tier?.amountLbp ?? null,
+    maxCapacity: tournament.maxCapacity,
+    // The host pays from their own phone, so the reference has to be something
+    // they can read off the screen and type into a transfer: the tournament's id.
+    reference: String(tournament._id),
+    whishNumber: tier && tier.amountLbp > 0 ? WHISH_NUMBER : null,
+    requestedAt: tournament.publishRequest?.requestedAt ?? null,
+  }
+}
 
 /**
  * The host asks for their tournament to go live.

@@ -34,6 +34,19 @@ export const cancelTournament = (id) => del(`/api/tournaments/${id}`)
 
 export const postUpdate = (id, content) => post(`/api/tournaments/${id}/updates`, { content })
 
+// --- publishing ---------------------------------------------------------------
+
+/**
+ * What it costs to publish this tournament, and where to send the money.
+ *
+ * The payment number is served rather than shipped in the bundle: it lives in
+ * one server config file, and a regression gate keeps it out of everywhere else.
+ */
+export const getPublishInfo = (id) => get(`/api/tournaments/${id}/publish`)
+
+/** Free tiers go live at once; paid ones start waiting for a confirmed payment. */
+export const publishTournament = (id) => post(`/api/tournaments/${id}/publish`)
+
 // --- entering -----------------------------------------------------------------
 
 export const joinSolo = (id) => post(`/api/tournaments/${id}/join/solo`)
@@ -82,6 +95,7 @@ export const tournamentKeys = {
   list: (params) => ['tournaments', 'list', params],
   detail: (id) => ['tournaments', 'detail', id],
   manage: (id) => ['tournaments', 'manage', id],
+  publish: (id) => ['tournaments', 'publish', id],
   trending: ['tournaments', 'trending'],
   categories: ['tournaments', 'categories'],
   mine: ['tournaments', 'mine'],

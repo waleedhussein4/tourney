@@ -129,6 +129,52 @@ describe('POST /api/tournaments/:id/publish', () => {
   })
 })
 
+describe('GET /api/tournaments/:id/publish', () => {
+  it('quotes the fee and how to pay it, to the host', async () => {
+    const created = await paidDraft()
+
+    const { body } = await host.agent.get(`/api/tournaments/${created.id}/publish`).expect(200)
+
+    expect(body.publishing).toMatchObject({
+      publishState: 'draft',
+      tier: 'small',
+      amountLbp: 150_000,
+      maxCapacity: 16,
+      // What the host types into the transfer, so it can be matched by hand.
+      reference: created.id,
+    })
+    expect(body.publishing.whishNumber).toBeTruthy()
+  })
+
+  it('gives a free tier no number to pay', async () => {
+    const created = await draft({ maxCapacity: 8, prize: 80 })
+    const { body } = await host.agent.get(`/api/tournaments/${created.id}/publish`).expect(200)
+    expect(body.publishing).toMatchObject({ tier: 'free', amountLbp: 0, whishNumber: null })
+  })
+
+  it('reports no tier for a cap the price list does not cover', async () => {
+    const created = await draft({ maxCapacity: 128, prize: 1280 })
+    const { body } = await host.agent.get(`/api/tournaments/${created.id}/publish`).expect(200)
+    expect(body.publishing).toMatchObject({ tier: null, amountLbp: null, whishNumber: null })
+  })
+
+  it('says when a waiting tournament asked, so the host can see how long it has been', async () => {
+    const { tournament } = await pendingPayment()
+    const { body } = await host.agent.get(`/api/tournaments/${tournament.id}/publish`).expect(200)
+    expect(body.publishing.publishState).toBe('pending_payment')
+    expect(body.publishing.requestedAt).toBeTruthy()
+  })
+
+  it('never shows the Whish number to anyone but the host', async () => {
+    const created = await paidDraft()
+
+    await guest().get(`/api/tournaments/${created.id}/publish`).expect(401)
+    await mei.agent.get(`/api/tournaments/${created.id}/publish`).expect(403)
+    await stranger.agent.get(`/api/tournaments/${created.id}/publish`).expect(403)
+    await admin.agent.get(`/api/tournaments/${created.id}/publish`).expect(403)
+  })
+})
+
 describe('an unpublished tournament', () => {
   for (const state of ['draft', 'pending_payment']) {
     describe(`in ${state}`, () => {

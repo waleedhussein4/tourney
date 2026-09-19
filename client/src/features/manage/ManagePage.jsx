@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getManageView, tournamentKeys } from '/src/api/tournaments.js'
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
 import { Badge, ErrorState, LoadingState } from '/src/components/ui/index.js'
-import { tournamentStatus } from '/src/lib/format.js'
+import { publishStatus, tournamentStatus } from '/src/lib/format.js'
 import { DetailsSection } from './sections/DetailsSection.jsx'
 import { BankSection } from './sections/BankSection.jsx'
 import { ApplicationsSection } from './sections/ApplicationsSection.jsx'
@@ -11,6 +11,7 @@ import { ParticipantsSection } from './sections/ParticipantsSection.jsx'
 import { MatchesSection } from './sections/MatchesSection.jsx'
 import { UpdatesSection } from './sections/UpdatesSection.jsx'
 import { LifecycleSection } from './sections/LifecycleSection.jsx'
+import { PublishSection } from './sections/PublishSection.jsx'
 import styles from './ManagePage.module.css'
 
 /**
@@ -55,6 +56,7 @@ export function ManagePage() {
     ...tournament,
     participantCount: tournament.participants.length,
   })
+  const publish = publishStatus(tournament.publishState)
 
   return (
     <PageShell>
@@ -62,10 +64,16 @@ export function ManagePage() {
         eyebrow="Managing"
         title={tournament.title}
         description="Everything you can change about this tournament, and everything it needs before it can start."
-        actions={<Badge tone={status.tone}>{status.label}</Badge>}
+        actions={
+          <>
+            {publish && <Badge tone={publish.tone}>{publish.label}</Badge>}
+            <Badge tone={status.tone}>{status.label}</Badge>
+          </>
+        }
       />
 
       <div className={styles.page}>
+        <PublishSection tournament={tournament} />
         <LifecycleSection tournament={tournament} />
         <BankSection tournament={tournament} />
         {tournament.accessibility === 'application required' && (

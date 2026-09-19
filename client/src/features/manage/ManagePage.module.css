@@ -248,3 +248,75 @@
 .clear:hover {
   color: var(--accent);
 }
+
+/*
+ * Publishing.
+ *
+ * The one card on this page that is about getting started rather than running
+ * something, so it is the only one marked with the accent edge — it is what the
+ * host has to deal with before the rest of the page means anything.
+ */
+.publish {
+  border-color: var(--border-accent);
+}
+
+/* Nothing on this card is the host's to act on while a transfer is in the air,
+   so it takes the pending tone rather than the accent that means "do this". */
+.publishWaiting {
+  border-color: color-mix(in srgb, var(--warning) 50%, transparent);
+}
+
+.payment {
+  margin: var(--space-4) 0 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-sunken);
+}
+
+.paymentRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.paymentRow + .paymentRow {
+  border-top: 1px solid var(--border);
+}
+
+/* A long value wraps under its label on a narrow screen. Left to the flex
+   fallback, only the rows that happen to be too wide would do that, and three
+   rows of a transfer read as one instruction or not at all. */
+@media (width < 30rem) {
+  .paymentRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.paymentLabel {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.paymentValue {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-size: var(--text-lg);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-strong);
+}
+
+/* A UUID is not a number a reader parses — it is a string they compare
+   character by character against a banking app, which is what mono is for. */
+.paymentMono {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  word-break: break-all;
+}
