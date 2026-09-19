@@ -11,6 +11,14 @@
  */
 export const WHISH_NUMBER = '+961 00 000 000'
 
+/**
+ * The number hosts message to ask about publishing, in the form wa.me wants:
+ * country code and digits, nothing else.
+ *
+ * PLACEHOLDER — replace alongside WHISH_NUMBER.
+ */
+export const WHATSAPP_NUMBER = '96100000000'
+
 /** Where a tournament is on its way to being visible. */
 export const PUBLISH_STATES = ['draft', 'pending_payment', 'published']
 

@@ -17,6 +17,7 @@ import { CheckoutPage } from '/src/features/credits/CheckoutPage.jsx'
 import { ProfilePage } from '/src/features/profile/ProfilePage.jsx'
 import { AdminPage } from '/src/features/admin/AdminPage.jsx'
 import { PublishRequestsPage } from '/src/features/admin/PublishRequestsPage.jsx'
+import { HostsPage } from '/src/features/hosts/HostsPage.jsx'
 import { NotFoundPage } from '/src/features/misc/NotFoundPage.jsx'
 
 /**
@@ -70,6 +71,8 @@ export function Router() {
         <Route path="/tournaments" element={<BrowsePage />} />
         <Route path="/tournament/:UUID" element={<TournamentPage />} />
         <Route path="/credits" element={<CreditsPage />} />
+        {/* Outside the app shell on purpose: it is a sales page, not a screen. */}
+        <Route path="/hosts" element={<HostsPage />} />
 
         {/* Signed out only. */}
         <Route element={<GuestRoute />}>

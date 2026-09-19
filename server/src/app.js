@@ -21,6 +21,7 @@ import { adminRouter } from './modules/admin/admin.routes.js'
 import {
   publishRequestAdminRouter,
   publishRouter,
+  publishingRouter,
 } from './modules/publishRequests/publishRequest.routes.js'
 import { cronRouter } from './modules/cron/cron.routes.js'
 import { creditsRouter, productRouter } from './modules/credits/credits.routes.js'
@@ -83,6 +84,7 @@ export function createApp() {
   app.use('/api/teams', teamRouter)
   app.use('/api/tournaments', tournamentRouter)
   app.use('/api/tournaments', publishRouter)
+  app.use('/api/publishing', publishingRouter)
   app.use('/api/products', productRouter)
   app.use('/api/credits', creditsRouter)
   app.use('/api/admin/publish-requests', publishRequestAdminRouter)
