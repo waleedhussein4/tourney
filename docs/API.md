@@ -1,7 +1,7 @@
 # API reference
 
 Base URL: `/api`, same origin as the client. In production that is
-`https://tourney-host.vercel.app/api`; in development Vite proxies `/api` to
+`https://tourneylb.com/api`; in development Vite proxies `/api` to
 `http://localhost:2000`.
 
 This document is written against the route definitions and the zod schemas in
