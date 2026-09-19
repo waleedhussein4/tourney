@@ -126,6 +126,8 @@ export function TournamentPage() {
         </header>
       </div>
 
+      <HostNotice tournament={tournament} />
+
       <dl className={styles.facts}>
         <Fact label="Prize pool" value={formatCredits(tournament.totalPrize)} accent />
         <Fact label="Entry fee" value={formatCredits(tournament.entryFee)} />
@@ -189,6 +191,39 @@ function Fact({ label, value, accent = false }) {
       <dt>{label}</dt>
       <dd>{value}</dd>
     </div>
+  )
+}
+
+/**
+ * What the host sees on a tournament nobody else can.
+ *
+ * A draft looks exactly like a live tournament from this page, which is the one
+ * thing a host must not be left to assume — so the page says which it is, and
+ * where to fix it, before any of the detail.
+ */
+function HostNotice({ tournament }) {
+  if (!tournament.viewer.isHost) return null
+  if (tournament.publishState === 'published') return null
+
+  const waiting = tournament.publishState === 'pending_payment'
+
+  return (
+    <aside className={`${styles.hostNotice} ${waiting ? styles.hostNoticeWaiting : ''}`}>
+      <p className={styles.hostNoticeBody}>
+        <strong>{waiting ? 'Waiting for your payment' : 'This is a draft'}</strong> — only you can
+        see it.{' '}
+        {waiting
+          ? 'We will put it live as soon as the transfer is confirmed.'
+          : 'Publish it to open it up for entries.'}
+      </p>
+      <ButtonLink
+        variant={waiting ? 'ghost' : 'primary'}
+        size="sm"
+        to={`/tournament/${tournament.id}/manage`}
+      >
+        {waiting ? 'See the details' : 'Publish it'}
+      </ButtonLink>
+    </aside>
   )
 }
 
