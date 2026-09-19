@@ -6,6 +6,7 @@ import {
   formatCredits,
   formatDate,
   formatType,
+  publishStatus,
   tournamentStatus,
 } from '/src/lib/format.js'
 import styles from './TournamentCard.module.css'
@@ -19,6 +20,7 @@ import styles from './TournamentCard.module.css'
  */
 export function TournamentCard({ tournament }) {
   const status = tournamentStatus(tournament)
+  const publish = publishStatus(tournament.publishState)
 
   return (
     <article className={styles.card}>
@@ -28,6 +30,9 @@ export function TournamentCard({ tournament }) {
 
       <div className={styles.body}>
         <div className={styles.badges}>
+          {/* Only ever set on the host's own list: nobody else is served an
+              unpublished tournament in the first place. */}
+          {publish && <Badge tone={publish.tone}>{publish.label}</Badge>}
           <Badge tone={status.tone}>{status.label}</Badge>
           <Badge>{formatType(tournament.type)}</Badge>
           {tournament.teamSize > 1 && <Badge>Teams of {tournament.teamSize}</Badge>}
