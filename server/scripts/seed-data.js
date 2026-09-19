@@ -13,6 +13,7 @@ import crypto from 'node:crypto'
 import User from '../src/models/user.model.js'
 import Team from '../src/models/team.model.js'
 import Tournament from '../src/models/tournament.model.js'
+import { migratePublishState } from './migrate-publish-state.js'
 import Transaction from '../src/models/transaction.model.js'
 import Product from '../src/models/product.model.js'
 import { DEFAULT_PRODUCTS } from '../src/config/products.js'
@@ -406,6 +407,11 @@ export async function seedDemoData() {
     teams.set(blueprint.name, team)
   }
 
+  // Tournaments that predate `publishState` were, by definition, already public.
+  // Running it here as well as in the migration script means a deployment whose
+  // database was never migrated heals itself at the next reseed, with no shell.
+  await migratePublishState()
+
   // Documents seeded before `isDemo` existed carry no flag. They are recognised
   // by the seed's natural key *and* a seeded owner, so a real host's tournament
   // that happens to share a title is never claimed.
@@ -442,6 +448,11 @@ async function buildTournament(blueprint, people, teams) {
   const host = people.get(blueprint.host)
   const tournament = await tournaments.createTournament(host._id, blueprint.payload)
   const id = tournament._id
+
+  // Demo data is there to be browsed, so it skips the publishing fee: nobody is
+  // going to confirm a payment for a fixture at four in the morning.
+  tournament.publishState = 'published'
+  await tournament.save()
 
   // Entrants pay their way in, exactly as they would through the API.
   for (const username of blueprint.entrants ?? []) {

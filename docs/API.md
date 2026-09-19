@@ -143,7 +143,7 @@ transaction, with a ledger row. `200 { user }`.
 
 ### `GET /api/tournaments` — public
 
-The catalogue.
+The catalogue. **Published tournaments only** — see [Publishing](#publishing).
 
 | Query                        |                                  |                               |
 | ---------------------------- | -------------------------------- | ----------------------------- |
@@ -189,7 +189,8 @@ The full tournament: participants, matches, prizes, updates, contact info, and
 a `viewer` object — `{ isHost, isJoined, hasApplied, isAccepted }` — computed by
 the server. The client never infers those from the participant list.
 
-`404` if there is no such tournament.
+`404` if there is no such tournament — or if it is not published yet and the
+caller is not its host. The two are deliberately indistinguishable.
 
 ### `POST /api/tournaments` — auth, host
 
@@ -216,7 +217,8 @@ elimination bracket cannot pair an odd round) and `prize`.
 `{ rank, prize }` — at least one, each rank at most once, and no rank beyond the
 capacity.
 
-`201 { tournament }`. `403` if the account is not a host.
+`201 { tournament }`, with `publishState: "draft"`. `403` if the account is not a
+host.
 
 ### `PATCH /api/tournaments/:tournamentId` — host
 
@@ -242,7 +244,36 @@ cancelled tournament leaves the same number of credits in the world as it found.
 
 ---
 
+### Publishing
+
+A tournament is created as a `draft`, which only its host can see. Only a
+`published` tournament is listed, can be viewed by anyone else, can be joined or
+applied to, or can be started. The design and the pricing are in
+[MONETISATION.md](MONETISATION.md).
+
+```
+draft ──(free tier)──▶ published
+draft ──(paid tier)──▶ pending_payment ──(admin confirms)──▶ published
+                       pending_payment ──(admin rejects)───▶ draft
+```
+
+#### `POST /api/tournaments/:tournamentId/publish` — host
+
+No body. The tier is derived from `maxCapacity` — up to 8 slots is free, up to 16
+is `small`, up to 64 is `large` — so there is nothing for a caller to choose.
+
+A free tier is published on the spot. A paid tier moves to `pending_payment`,
+records `publishRequest: { tier, amountLbp, requestedAt }` on the tournament, and
+adds a row to the admin queue. The fee is paid outside the app; no credits move.
+
+`200 { tournament }`. `409` unless the tournament is a `draft`. `400` if it has
+more than 64 slots, which no tier covers.
+
+---
+
 ### Entering
+
+Every route here answers `404` for a tournament that is not published.
 
 #### `POST /api/tournaments/:tournamentId/join/solo` — auth
 
@@ -303,8 +334,8 @@ Reseeds the bracket order. `400` once started.
 
 #### `POST /api/tournaments/:tournamentId/start` — host
 
-The gate the whole economy rests on. `400` unless **the bank covers the
-advertised prize total**, and:
+The gate the whole economy rests on. `400` unless the tournament is published,
+**the bank covers the advertised prize total**, and:
 
 - a **bracket** has every slot filled — a single-elimination draw cannot pair a
   half-empty field;
@@ -378,12 +409,48 @@ because credits are free money here.
 
 ## Admin
 
-Both require `role: "admin"`.
+All require `role: "admin"`, which is set by the seed or by hand in the database
+— there is no endpoint that grants it.
 
 |                          |                                                                                |
 | ------------------------ | ------------------------------------------------------------------------------ |
 | `POST /api/admin/seed`   | Add whatever demo data is missing                                              |
 | `DELETE /api/admin/seed` | Clear demo data — all tournaments, teams, transactions, and non-admin accounts |
+
+### `GET /api/admin/publish-requests` — admin
+
+Every publishing fee waiting to be confirmed, newest first.
+
+```json
+{
+  "requests": [
+    {
+      "id": "…",
+      "tournamentId": "…",
+      "tournamentTitle": "Beirut Open",
+      "host": { "id": "…", "name": "hostie", "email": "…" },
+      "tier": "small",
+      "amountLbp": 150000,
+      "status": "pending",
+      "requestedAt": "…"
+    }
+  ]
+}
+```
+
+### `POST /api/admin/publish-requests/:requestId/confirm` — admin
+
+`{ "whishRef": "WH-12345" }` — optional. Publishes the tournament and records
+`confirmedAt`, `confirmedBy`, and the reference.
+
+### `POST /api/admin/publish-requests/:requestId/reject` — admin
+
+`{ "reason": "No transfer received" }` — optional. Returns the tournament to
+`draft`; the host can publish again, which opens a new request. The rejected row
+is kept.
+
+Both answer `200 { request }`, and `409` if the request has already been resolved
+or its tournament is no longer `pending_payment`. Unknown body keys are a `400`.
 
 ---
 

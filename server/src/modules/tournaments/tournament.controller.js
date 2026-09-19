@@ -26,7 +26,7 @@ export const mine = asyncHandler(async (req, res) => {
 })
 
 export const getOne = asyncHandler(async (req, res) => {
-  const tournament = await service.loadTournament(req.params.tournamentId)
+  const tournament = await service.loadVisible(req.params.tournamentId, req.userId)
   res.json({ tournament: await toPublicView(tournament, req.userId) })
 })
 
