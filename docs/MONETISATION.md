@@ -12,7 +12,7 @@ that does not serve it gets built.
 demo, the conservation invariant stays exactly as it is, and the card-field gate
 in `check:regressions` stays. Real money never touches the credits system.
 
-**New:** a *publishing fee*, paid outside the app, that gates whether a
+**New:** a _publishing fee_, paid outside the app, that gates whether a
 tournament becomes visible. This is a separate concern from credits and lives
 in its own module. It reverses "why the demo checkout is a demo" for one narrow
 path only, and does it without a payment processor: the host pays by Whish
@@ -23,11 +23,11 @@ work that is worth nothing until there are paying hosts. Automate after five.
 
 ## Pricing
 
-| tier   | max players | fee (LBP) |
-| ------ | ----------- | --------- |
-| free   | 8           | 0         |
-| small  | 16          | 150,000   |
-| large  | 64          | 300,000   |
+| tier  | max players | fee (LBP) |
+| ----- | ----------- | --------- |
+| free  | 8           | 0         |
+| small | 16          | 150,000   |
+| large | 64          | 300,000   |
 
 Tier is derived from the tournament's configured player cap at publish time.
 Prices live in one config file, not scattered through services.
