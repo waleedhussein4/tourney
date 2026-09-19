@@ -24,6 +24,10 @@ function toView(request) {
   }
 }
 
+export const quote = asyncHandler(async (req, res) => {
+  res.json({ publishing: await service.quote(req.params.tournamentId, req.userId) })
+})
+
 export const publish = asyncHandler(async (req, res) => {
   const tournament = await service.publish(req.params.tournamentId, req.userId)
   res.json({ tournament: await toPublicView(tournament, req.userId) })

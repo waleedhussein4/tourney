@@ -11,6 +11,13 @@ import * as controller from './publishRequest.controller.js'
 /** Mounted at /api/tournaments. */
 export const publishRouter = Router()
 
+publishRouter.get(
+  '/:tournamentId/publish',
+  requireAuth,
+  validate({ params: schemas.tournamentIdParams }),
+  controller.quote
+)
+
 publishRouter.post(
   '/:tournamentId/publish',
   requireAuth,
