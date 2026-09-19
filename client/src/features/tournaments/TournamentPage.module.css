@@ -321,3 +321,32 @@
     padding: var(--space-5) var(--space-4);
   }
 }
+
+/*
+ * The host's own notice on an unpublished tournament. Amber while a payment is
+ * in the air, accent while it is a draft the host can act on — the tone says
+ * which of the two is waiting on them.
+ */
+.hostNotice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius);
+  background: var(--accent-wash);
+}
+
+.hostNoticeWaiting {
+  border-color: color-mix(in srgb, var(--warning) 50%, transparent);
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+}
+
+.hostNoticeBody {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-strong);
+}
