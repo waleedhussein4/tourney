@@ -50,6 +50,11 @@ export const PUBLISH_TIERS = [
   { tier: 'large', maxCapacity: 64, amountCents: 600 },
 ]
 
+// What a tier costs is here; the gateway object that charges it is named by
+// PADDLE_PRICE_SMALL / PADDLE_PRICE_LARGE, because those differ between the
+// sandbox and the live account. The two are checked against each other on
+// every payment — see the amount check in the webhook.
+
 /**
  * The tier for a tournament's configured cap, or `null` when it is larger than
  * anything on the price list.
