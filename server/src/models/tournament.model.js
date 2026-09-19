@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
 import { ACCESSIBILITY, CATEGORY_SLUGS, LIMITS, TOURNAMENT_TYPES } from '../config/constants.js'
+import { PUBLISH_STATES } from '../config/publishing.js'
 
 const { Schema } = mongoose
 
@@ -86,6 +87,20 @@ const tournamentSchema = new Schema(
 
     /** Set by the seed script and nothing else. The demo reset deletes only these. */
     isDemo: { type: Boolean, default: false, index: true },
+
+    /**
+     * Whether anyone but the host can see this. A tournament is born a `draft`;
+     * only `published` ones are listed, joinable, or startable. The rules live in
+     * the publishRequests module — see docs/MONETISATION.md.
+     */
+    publishState: { type: String, enum: PUBLISH_STATES, default: 'draft', index: true },
+    /** What the host was asked to pay, recorded when a paid tier asks to publish. */
+    publishRequest: {
+      _id: false,
+      tier: String,
+      amountLbp: Number,
+      requestedAt: Date,
+    },
 
     description: { type: String, default: '' },
     rules: { type: String, default: '' },
@@ -188,6 +203,10 @@ tournamentSchema.methods.hasParticipant = function hasParticipant(userId) {
     this.enrolledTeams.some((team) => team.members.some((member) => String(member.userId) === id))
   )
 }
+
+tournamentSchema.virtual('isPublished').get(function isPublished() {
+  return this.publishState === 'published'
+})
 
 tournamentSchema.methods.isHostedBy = function isHostedBy(userId) {
   return String(this.host) === String(userId)

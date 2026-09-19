@@ -144,6 +144,20 @@ describe('what the seed creates', () => {
   })
 })
 
+describe('tournaments that predate publishState', () => {
+  it('are published by the seed, so a database nobody migrated heals itself', async () => {
+    await seedDemoData()
+    const ids = (await Tournament.find().select('_id').lean()).map((entry) => entry._id)
+    await Tournament.collection.updateMany({}, { $unset: { publishState: '' } })
+
+    await seedDemoData()
+
+    const after = await Tournament.find({ _id: { $in: ids } }).select('publishState').lean()
+    expect(after).toHaveLength(ids.length)
+    expect(after.every((entry) => entry.publishState === 'published')).toBe(true)
+  })
+})
+
 describe('running the seed twice', () => {
   it('adds nothing the second time', async () => {
     const first = await seedDemoData()

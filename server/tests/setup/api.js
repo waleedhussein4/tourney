@@ -75,13 +75,23 @@ export function tournamentPayload(overrides = {}) {
   }
 }
 
-/** Creates a tournament as `host` and returns the public view of it. */
-export async function createTournament(host, overrides = {}) {
+/**
+ * Creates a tournament as `host` and returns the public view of it.
+ *
+ * Published by default, applied straight to the document: how a tournament gets
+ * published is the subject of `tournaments.publish`, not a precondition of every
+ * other suite. Pass `{ published: false }` to get the draft the API really makes.
+ */
+export async function createTournament(host, overrides = {}, { published = true } = {}) {
   const { body } = await host
     .post('/api/tournaments')
     .send(tournamentPayload(overrides))
     .expect(201)
-  return body.tournament
+
+  if (!published) return body.tournament
+
+  await Tournament.updateOne({ _id: body.tournament.id }, { $set: { publishState: 'published' } })
+  return { ...body.tournament, publishState: 'published' }
 }
 
 /**
