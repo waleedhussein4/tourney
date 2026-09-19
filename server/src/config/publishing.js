@@ -18,7 +18,7 @@ export const CURRENCY = 'USD'
  * An email address rather than a phone number: this is published on a page
  * anyone can read, and a personal number cannot be taken back once it is out.
  */
-export const CONTACT_EMAIL = 'hosts@tourney.app'
+export const CONTACT_EMAIL = 'contact@walenehq.com'
 
 /** Where a tournament is on its way to being visible. */
 export const PUBLISH_STATES = ['draft', 'pending_payment', 'published']
