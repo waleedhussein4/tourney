@@ -51,10 +51,10 @@ describe('pricing', () => {
   })
 
   it('charges what docs/MONETISATION.md says', () => {
-    expect(PUBLISH_TIERS.map((entry) => [entry.tier, entry.amountLbp])).toEqual([
+    expect(PUBLISH_TIERS.map((entry) => [entry.tier, entry.amountCents])).toEqual([
       ['free', 0],
-      ['small', 150_000],
-      ['large', 300_000],
+      ['small', 500],
+      ['large', 1000],
     ])
   })
 })
@@ -80,18 +80,18 @@ describe('POST /api/tournaments/:id/publish', () => {
     const { body } = await host.agent.post(`/api/tournaments/${created.id}/publish`).expect(200)
 
     expect(body.tournament.publishState).toBe('pending_payment')
-    expect(body.tournament.publishRequest).toMatchObject({ tier: 'small', amountLbp: 150_000 })
+    expect(body.tournament.publishRequest).toMatchObject({ tier: 'small', amountCents: 500 })
     expect(body.tournament.publishRequest.requestedAt).toBeTruthy()
 
     const stored = await Tournament.findById(created.id)
     expect(stored.publishRequest.tier).toBe('small')
-    expect(stored.publishRequest.amountLbp).toBe(150_000)
+    expect(stored.publishRequest.amountCents).toBe(500)
   })
 
   it('prices the large tier', async () => {
     const created = await draft({ maxCapacity: 64, prize: 640 })
     const { body } = await host.agent.post(`/api/tournaments/${created.id}/publish`).expect(200)
-    expect(body.tournament.publishRequest).toMatchObject({ tier: 'large', amountLbp: 300_000 })
+    expect(body.tournament.publishRequest).toMatchObject({ tier: 'large', amountCents: 1000 })
   })
 
   it('refuses a cap no tier covers, and leaves the draft alone', async () => {
@@ -133,15 +133,17 @@ describe('GET /api/publishing/pricing', () => {
   it('is public, so the landing page can quote the price list', async () => {
     const { body } = await guest().get('/api/publishing/pricing').expect(200)
     expect(body.tiers).toEqual(PUBLISH_TIERS)
-    // The landing page's WhatsApp link is built from this, so it never holds a
-    // number of its own — the regression gate would fail the build if it did.
-    expect(body.whatsapp).toBeTruthy()
+    // The landing page's contact link is built from this, so it never holds an
+    // address of its own — the regression gate would fail the build if it did.
+    expect(body.contactEmail).toBeTruthy()
+    expect(body.currency).toBe('USD')
   })
 
-  it('does not leak the payment number to the public', async () => {
-    const { text } = await guest().get('/api/publishing/pricing').expect(200)
-    expect(text.toLowerCase()).not.toContain('whish')
-    expect(text.toLowerCase()).not.toContain('whishnumber')
+  it('quotes prices in whole cents, which is what a card is charged in', async () => {
+    const { body } = await guest().get('/api/publishing/pricing').expect(200)
+    for (const tier of body.tiers) {
+      expect(Number.isInteger(tier.amountCents)).toBe(true)
+    }
   })
 })
 
@@ -154,24 +156,24 @@ describe('GET /api/tournaments/:id/publish', () => {
     expect(body.publishing).toMatchObject({
       publishState: 'draft',
       tier: 'small',
-      amountLbp: 150_000,
+      amountCents: 500,
       maxCapacity: 16,
       // What the host types into the transfer, so it can be matched by hand.
       reference: created.id,
     })
-    expect(body.publishing.whishNumber).toBeTruthy()
+    expect(body.publishing.contactEmail).toBeTruthy()
   })
 
   it('gives a free tier no number to pay', async () => {
     const created = await draft({ maxCapacity: 8, prize: 80 })
     const { body } = await host.agent.get(`/api/tournaments/${created.id}/publish`).expect(200)
-    expect(body.publishing).toMatchObject({ tier: 'free', amountLbp: 0, whishNumber: null })
+    expect(body.publishing).toMatchObject({ tier: 'free', amountCents: 0, contactEmail: null })
   })
 
   it('reports no tier for a cap the price list does not cover', async () => {
     const created = await draft({ maxCapacity: 128, prize: 1280 })
     const { body } = await host.agent.get(`/api/tournaments/${created.id}/publish`).expect(200)
-    expect(body.publishing).toMatchObject({ tier: null, amountLbp: null, whishNumber: null })
+    expect(body.publishing).toMatchObject({ tier: null, amountCents: null, contactEmail: null })
   })
 
   it('says when a waiting tournament asked, so the host can see how long it has been', async () => {
@@ -181,7 +183,7 @@ describe('GET /api/tournaments/:id/publish', () => {
     expect(body.publishing.requestedAt).toBeTruthy()
   })
 
-  it('never shows the Whish number to anyone but the host', async () => {
+  it('never shows the payment details to anyone but the host', async () => {
     const created = await paidDraft()
 
     await guest().get(`/api/tournaments/${created.id}/publish`).expect(401)
@@ -298,7 +300,7 @@ describe('the admin queue', () => {
       tournamentTitle: 'Second Cup',
       host: { id: host.user.id, name: 'hostie' },
       tier: 'large',
-      amountLbp: 300_000,
+      amountCents: 1000,
       status: 'pending',
     })
     expect(body.requests[0].requestedAt).toBeTruthy()
@@ -333,18 +335,18 @@ describe('the admin queue', () => {
 })
 
 describe('confirm', () => {
-  it('publishes the tournament and records who confirmed, when, and the Whish reference', async () => {
+  it('publishes the tournament and records who confirmed, when, and the payment reference', async () => {
     const { tournament, request } = await pendingPayment()
 
     const { body } = await admin.agent
       .post(`/api/admin/publish-requests/${request.id}/confirm`)
-      .send({ whishRef: 'WH-12345' })
+      .send({ paymentRef: 'WH-12345' })
       .expect(200)
 
     expect(body.request).toMatchObject({
       status: 'confirmed',
       confirmedBy: admin.user.id,
-      whishRef: 'WH-12345',
+      paymentRef: 'WH-12345',
     })
     expect(body.request.confirmedAt).toBeTruthy()
 
@@ -353,19 +355,19 @@ describe('confirm', () => {
     expect(browse.body.tournaments.map((entry) => entry.id)).toEqual([tournament.id])
   })
 
-  it('does not need a Whish reference', async () => {
+  it('does not need a payment reference', async () => {
     const { request } = await pendingPayment()
     const { body } = await admin.agent
       .post(`/api/admin/publish-requests/${request.id}/confirm`)
       .expect(200)
-    expect(body.request.whishRef).toBeUndefined()
+    expect(body.request.paymentRef).toBeUndefined()
   })
 
   it('rejects a body it does not recognise, rather than losing a misspelt reference', async () => {
     const { request } = await pendingPayment()
     await admin.agent
       .post(`/api/admin/publish-requests/${request.id}/confirm`)
-      .send({ whishref: 'WH-12345' })
+      .send({ paymentref: 'WH-12345' })
       .expect(400)
     expect((await PublishRequest.findById(request.id)).status).toBe('pending')
   })
@@ -447,7 +449,7 @@ describe('the audit trail', () => {
     for (const tournament of asked) {
       const matching = rows.filter((row) => row.tournamentId === String(tournament._id))
       expect(matching).toHaveLength(1)
-      expect(matching[0].amountLbp).toBe(tournament.publishRequest.amountLbp)
+      expect(matching[0].amountCents).toBe(tournament.publishRequest.amountCents)
       expect(matching[0].tier).toBe(tournament.publishRequest.tier)
       expect(matching[0].hostId).toBe(host.user.id)
     }

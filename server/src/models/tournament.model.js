@@ -105,7 +105,7 @@ const tournamentSchema = new Schema(
     publishRequest: {
       _id: false,
       tier: String,
-      amountLbp: Number,
+      amountCents: Number,
       requestedAt: Date,
     },
 
