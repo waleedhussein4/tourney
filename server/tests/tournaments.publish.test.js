@@ -468,20 +468,35 @@ describe('the audit trail', () => {
 describe('the migration', () => {
   /** Inserted through the driver, so the document has no `publishState` — as every pre-existing one does. */
   async function legacyTournament(title) {
-    const created = await draft({ title })
+    const created = await draft({ title, maxCapacity: 2, prize: 20 })
     await Tournament.collection.updateOne({ _id: created.id }, { $unset: { publishState: '' } })
     return created
   }
 
-  it('marks tournaments that predate publishState as published', async () => {
+  it('is not what keeps a legacy tournament visible — it is browsable before it runs', async () => {
     const legacy = await legacyTournament('Old Cup')
-    const browseBefore = await guest().get('/api/tournaments').expect(200)
-    expect(browseBefore.body.tournaments).toEqual([])
+
+    // No migration, no seed: straight from a database that has never seen this
+    // feature. This is the state production is in the moment the code deploys.
+    const browse = await guest().get('/api/tournaments').expect(200)
+    expect(browse.body.tournaments.map((entry) => entry.id)).toEqual([legacy.id])
+
+    const trending = await guest().get('/api/tournaments/trending').expect(200)
+    expect(trending.body.tournaments.map((entry) => entry.id)).toEqual([legacy.id])
+
+    await guest().get(`/api/tournaments/${legacy.id}`).expect(200)
+    await mei.agent.post(`/api/tournaments/${legacy.id}/join/solo`).expect(200)
+  })
+
+  it('writes the state down, so the field means the same thing on every row', async () => {
+    const legacy = await legacyTournament('Old Cup')
+    expect((await Tournament.findById(legacy.id).lean()).publishState).toBeUndefined()
 
     expect(await migratePublishState()).toEqual({ migrated: 1 })
 
-    const browseAfter = await guest().get('/api/tournaments').expect(200)
-    expect(browseAfter.body.tournaments.map((entry) => entry.id)).toEqual([legacy.id])
+    expect((await Tournament.findById(legacy.id).lean()).publishState).toBe('published')
+    const browse = await guest().get('/api/tournaments').expect(200)
+    expect(browse.body.tournaments.map((entry) => entry.id)).toEqual([legacy.id])
   })
 
   it('is idempotent, and never promotes a real draft or a pending payment', async () => {

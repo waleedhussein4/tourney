@@ -3,6 +3,7 @@ import PublishRequest from '../../models/publishRequest.model.js'
 import Team from '../../models/team.model.js'
 import User from '../../models/user.model.js'
 import { LIMITS, PAGE_SIZE } from '../../config/constants.js'
+import { UNPUBLISHED } from '../../config/publishing.js'
 import { withTransaction } from '../../db/withTransaction.js'
 import { ApiError } from '../../utils/ApiError.js'
 import { sanitizeRichText, toPlainText } from '../../utils/text.js'
@@ -73,6 +74,7 @@ export async function createTournament(hostId, input) {
 
   return Tournament.create({
     host: hostId,
+    publishState: 'draft',
     title: input.title,
     type: input.type,
     category: input.category,
@@ -131,8 +133,10 @@ export async function listTournaments(query) {
 }
 
 function buildFilter(query) {
-  // Browse is for tournaments that are live to the public, whatever else is asked.
-  const filter = { publishState: 'published' }
+  // Browse is for tournaments that are live to the public, whatever else is
+  // asked. `$nin` also matches a document with no `publishState` field, which
+  // is how everything written before this feature stays visible.
+  const filter = { publishState: { $nin: UNPUBLISHED } }
 
   if (query.search) filter.$text = { $search: query.search }
   if (query.category) filter.category = query.category
@@ -161,7 +165,7 @@ function buildFilter(query) {
  */
 export async function listTrending(limit) {
   return Tournament.aggregate([
-    { $match: { publishState: 'published', hasStarted: false, hasEnded: false } },
+    { $match: { publishState: { $nin: UNPUBLISHED }, hasStarted: false, hasEnded: false } },
     {
       $addFields: {
         _entrants: { $add: [{ $size: '$enrolledUsers' }, { $size: '$enrolledTeams' }] },

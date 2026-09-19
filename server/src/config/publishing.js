@@ -22,6 +22,15 @@ export const WHATSAPP_NUMBER = '96100000000'
 /** Where a tournament is on its way to being visible. */
 export const PUBLISH_STATES = ['draft', 'pending_payment', 'published']
 
+/**
+ * The states that hide a tournament from everyone but its host.
+ *
+ * Visibility is decided by this list rather than by `=== 'published'`, so a
+ * document written before the field existed — which has no `publishState` at
+ * all — reads as public, which is what it was.
+ */
+export const UNPUBLISHED = ['draft', 'pending_payment']
+
 /** Ordered smallest first: a tournament gets the first tier its cap fits in. */
 export const PUBLISH_TIERS = [
   { tier: 'free', maxCapacity: 8, amountLbp: 0 },

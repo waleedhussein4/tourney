@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
 import { ACCESSIBILITY, CATEGORY_SLUGS, LIMITS, TOURNAMENT_TYPES } from '../config/constants.js'
-import { PUBLISH_STATES } from '../config/publishing.js'
+import { PUBLISH_STATES, UNPUBLISHED } from '../config/publishing.js'
 
 const { Schema } = mongoose
 
@@ -93,7 +93,14 @@ const tournamentSchema = new Schema(
      * only `published` ones are listed, joinable, or startable. The rules live in
      * the publishRequests module — see docs/MONETISATION.md.
      */
-    publishState: { type: String, enum: PUBLISH_STATES, default: 'draft', index: true },
+    /**
+     * No schema default on purpose. Mongoose applies a default when it hydrates
+     * a document that lacks the field, so `default: 'draft'` would turn every
+     * tournament written before this feature into a draft the moment it was
+     * read — invisible, with nothing in the database to show why. New
+     * tournaments are given the state explicitly when they are created.
+     */
+    publishState: { type: String, enum: PUBLISH_STATES, index: true },
     /** What the host was asked to pay, recorded when a paid tier asks to publish. */
     publishRequest: {
       _id: false,
@@ -204,8 +211,16 @@ tournamentSchema.methods.hasParticipant = function hasParticipant(userId) {
   )
 }
 
+/**
+ * Public unless it is explicitly waiting to be published.
+ *
+ * Stated as a negative on purpose: a tournament written before `publishState`
+ * existed has no such field, and it was public when it was written. Asking
+ * "is it published?" would hide every one of them the moment this code
+ * deployed, before any migration had a chance to run.
+ */
 tournamentSchema.virtual('isPublished').get(function isPublished() {
-  return this.publishState === 'published'
+  return !UNPUBLISHED.includes(this.publishState)
 })
 
 tournamentSchema.methods.isHostedBy = function isHostedBy(userId) {
