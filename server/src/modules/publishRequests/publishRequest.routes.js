@@ -25,6 +25,11 @@ publishRouter.post(
   controller.publish
 )
 
+/** Mounted at /api/publishing. Public: the price list the landing page quotes. */
+export const publishingRouter = Router()
+
+publishingRouter.get('/pricing', controller.pricing)
+
 /** Mounted at /api/admin/publish-requests. */
 export const publishRequestAdminRouter = Router()
 

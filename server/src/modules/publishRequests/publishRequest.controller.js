@@ -1,4 +1,5 @@
 import { asyncHandler } from '../../utils/asyncHandler.js'
+import { PUBLISH_TIERS, WHATSAPP_NUMBER } from '../../config/publishing.js'
 import { toPublicView } from '../tournaments/tournament.presenter.js'
 import * as service from './publishRequest.service.js'
 
@@ -23,6 +24,12 @@ function toView(request) {
     reason: request.reason,
   }
 }
+
+export const pricing = asyncHandler(async (_req, res) => {
+  // The price list and the number to ask on. Not the Whish number: a host is
+  // given that once they have a tournament to pay for.
+  res.json({ tiers: PUBLISH_TIERS, whatsapp: WHATSAPP_NUMBER })
+})
 
 export const quote = asyncHandler(async (req, res) => {
   res.json({ publishing: await service.quote(req.params.tournamentId, req.userId) })
