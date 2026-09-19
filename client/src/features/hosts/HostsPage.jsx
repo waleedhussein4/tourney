@@ -26,7 +26,7 @@ export function HostsPage() {
     queryKey: publishingKeys.pricing,
     queryFn: getPublishingPricing,
   })
-  const whatsapp = pricing.data?.whatsapp ? `https://wa.me/${pricing.data.whatsapp}` : null
+  const mailto = pricing.data?.contactEmail ? `mailto:${pricing.data.contactEmail}` : null
   const direction = directionOf(language)
   const t = COPY[language]
 
@@ -76,8 +76,8 @@ export function HostsPage() {
           <h1 className={styles.heroTitle}>{t.heroTitle}</h1>
           <p className={styles.heroLead}>{t.heroBody}</p>
           <div className={styles.heroActions}>
-            {whatsapp && (
-              <a className={styles.primary} href={whatsapp} target="_blank" rel="noreferrer">
+            {mailto && (
+              <a className={styles.primary} href={mailto}>
                 {t.heroAction}
               </a>
             )}
@@ -129,8 +129,8 @@ export function HostsPage() {
       <section className={styles.closing}>
         <h2 className={styles.closingTitle}>{t.closingTitle}</h2>
         <p className={styles.closingBody}>{t.closingBody}</p>
-        {whatsapp && (
-          <a className={styles.primary} href={whatsapp} target="_blank" rel="noreferrer">
+        {mailto && (
+          <a className={styles.primary} href={mailto}>
             {t.closingAction}
           </a>
         )}
@@ -163,7 +163,7 @@ function Pricing({ t, tiers }) {
             {tiers.map((tier) => (
               <tr key={tier.tier}>
                 <th scope="row">{t.upTo(formatNumber(tier.maxCapacity))}</th>
-                <td>{tier.amountLbp === 0 ? t.free : t.lbp(formatNumber(tier.amountLbp))}</td>
+                <td>{tier.amountCents === 0 ? t.free : t.price(formatMoney(tier.amountCents))}</td>
               </tr>
             ))}
           </tbody>
@@ -175,6 +175,11 @@ function Pricing({ t, tiers }) {
       </p>
     </section>
   )
+}
+
+/** Dollars from cents, isolated so Arabic does not reorder the amount. */
+function formatMoney(cents) {
+  return `⁨$${(cents / 100).toLocaleString('en-US')}⁩`
 }
 
 /**

@@ -1,23 +1,24 @@
 // Paid publishing: the tiers, their prices, and where the money is sent.
 //
-// This is the only file either may appear in. `npm run check:regressions` has a
-// gate that fails the build if the Whish number turns up anywhere else, so the
-// number a host is told to pay can never disagree with itself.
+// This is the only file any of it may appear in. `npm run check:regressions`
+// fails the build if the payment contact turns up anywhere else, so what a host
+// is told can never disagree with itself.
 
 /**
- * The Whish Money number hosts pay the publishing fee to.
+ * The currency every fee is quoted and charged in.
  *
- * PLACEHOLDER — replace with the real number before taking a payment.
+ * Lebanon prices digital services in US dollars, and a card payment settles in
+ * dollars whatever the card was issued in — so the lira never appears here.
  */
-export const WHISH_NUMBER = '+961 00 000 000'
+export const CURRENCY = 'USD'
 
 /**
- * The number hosts message to ask about publishing, in the form wa.me wants:
- * country code and digits, nothing else.
+ * Where a host asks a question before paying.
  *
- * PLACEHOLDER — replace alongside WHISH_NUMBER.
+ * An email address rather than a phone number: this is published on a page
+ * anyone can read, and a personal number cannot be taken back once it is out.
  */
-export const WHATSAPP_NUMBER = '96100000000'
+export const CONTACT_EMAIL = 'hosts@tourney.app'
 
 /** Where a tournament is on its way to being visible. */
 export const PUBLISH_STATES = ['draft', 'pending_payment', 'published']
@@ -31,11 +32,16 @@ export const PUBLISH_STATES = ['draft', 'pending_payment', 'published']
  */
 export const UNPUBLISHED = ['draft', 'pending_payment']
 
-/** Ordered smallest first: a tournament gets the first tier its cap fits in. */
+/**
+ * Ordered smallest first: a tournament gets the first tier its cap fits in.
+ *
+ * Amounts are in cents, which is what every payment processor charges in and
+ * the only way to hold money that never rounds wrong.
+ */
 export const PUBLISH_TIERS = [
-  { tier: 'free', maxCapacity: 8, amountLbp: 0 },
-  { tier: 'small', maxCapacity: 16, amountLbp: 150_000 },
-  { tier: 'large', maxCapacity: 64, amountLbp: 300_000 },
+  { tier: 'free', maxCapacity: 8, amountCents: 0 },
+  { tier: 'small', maxCapacity: 16, amountCents: 500 },
+  { tier: 'large', maxCapacity: 64, amountCents: 1000 },
 ]
 
 /**

@@ -260,11 +260,13 @@ draft ──(paid tier)──▶ pending_payment ──(admin confirms)──▶
 #### `POST /api/tournaments/:tournamentId/publish` — host
 
 No body. The tier is derived from `maxCapacity` — up to 8 slots is free, up to 16
-is `small`, up to 64 is `large` — so there is nothing for a caller to choose.
+is `small` ($5), up to 64 is `large` ($10) — so there is nothing for a caller to
+choose. Amounts are in **cents**.
 
 A free tier is published on the spot. A paid tier moves to `pending_payment`,
-records `publishRequest: { tier, amountLbp, requestedAt }` on the tournament, and
-adds a row to the admin queue. The fee is paid outside the app; no credits move.
+records `publishRequest: { tier, amountCents, requestedAt }` on the tournament,
+and adds a row to the admin queue. The fee is paid outside the app; no credits
+move.
 
 `200 { tournament }`. `409` unless the tournament is a `draft`. `400` if it has
 more than 64 slots, which no tier covers.
@@ -430,7 +432,7 @@ Every publishing fee waiting to be confirmed, newest first.
       "tournamentTitle": "Beirut Open",
       "host": { "id": "…", "name": "hostie", "email": "…" },
       "tier": "small",
-      "amountLbp": 150000,
+      "amountCents": 500,
       "status": "pending",
       "requestedAt": "…"
     }
@@ -440,7 +442,7 @@ Every publishing fee waiting to be confirmed, newest first.
 
 ### `POST /api/admin/publish-requests/:requestId/confirm` — admin
 
-`{ "whishRef": "WH-12345" }` — optional. Publishes the tournament and records
+`{ "paymentRef": "INV-12345" }` — optional. Publishes the tournament and records
 `confirmedAt`, `confirmedBy`, and the reference.
 
 ### `POST /api/admin/publish-requests/:requestId/reject` — admin

@@ -1,5 +1,5 @@
 import PublishRequest from '../../models/publishRequest.model.js'
-import { WHISH_NUMBER, tierFor } from '../../config/publishing.js'
+import { CONTACT_EMAIL, tierFor } from '../../config/publishing.js'
 import { withTransaction } from '../../db/withTransaction.js'
 import { ApiError } from '../../utils/ApiError.js'
 import { loadAsHost, loadTournament } from '../tournaments/tournament.service.js'
@@ -16,11 +16,11 @@ import { loadAsHost, loadTournament } from '../tournaments/tournament.service.js
 // tournaments can never disagree about what is waiting.
 
 /**
- * What this tournament would cost to publish, and how to pay it.
+ * What this tournament would cost to publish, and who to ask about paying it.
  *
- * The host's screen cannot hold the Whish number itself — a regression gate
- * keeps it out of every file but the config — so the instructions are served
- * from here, to the host of the tournament and nobody else.
+ * Served rather than held in the client, because where the money goes is a
+ * business detail that changes without a deploy — and a regression gate keeps
+ * it out of every file but the config.
  */
 export async function quote(tournamentId, hostId) {
   const tournament = await loadAsHost(tournamentId, hostId)
@@ -29,12 +29,12 @@ export async function quote(tournamentId, hostId) {
   return {
     publishState: tournament.publishState,
     tier: tier?.tier ?? null,
-    amountLbp: tier?.amountLbp ?? null,
+    amountCents: tier?.amountCents ?? null,
     maxCapacity: tournament.maxCapacity,
     // The host pays from their own phone, so the reference has to be something
     // they can read off the screen and type into a transfer: the tournament's id.
     reference: String(tournament._id),
-    whishNumber: tier && tier.amountLbp > 0 ? WHISH_NUMBER : null,
+    contactEmail: tier && tier.amountCents > 0 ? CONTACT_EMAIL : null,
     requestedAt: tournament.publishRequest?.requestedAt ?? null,
   }
 }
@@ -63,7 +63,7 @@ export async function publish(tournamentId, hostId) {
       )
     }
 
-    if (tier.amountLbp === 0) {
+    if (tier.amountCents === 0) {
       tournament.publishState = 'published'
       await tournament.save({ session })
       return tournament
@@ -71,7 +71,7 @@ export async function publish(tournamentId, hostId) {
 
     const requestedAt = new Date()
     tournament.publishState = 'pending_payment'
-    tournament.publishRequest = { tier: tier.tier, amountLbp: tier.amountLbp, requestedAt }
+    tournament.publishRequest = { tier: tier.tier, amountCents: tier.amountCents, requestedAt }
     await tournament.save({ session })
 
     await PublishRequest.create(
@@ -81,7 +81,7 @@ export async function publish(tournamentId, hostId) {
           tournamentTitle: tournament.title,
           hostId,
           tier: tier.tier,
-          amountLbp: tier.amountLbp,
+          amountCents: tier.amountCents,
           requestedAt,
         },
       ],
@@ -100,12 +100,12 @@ export async function listPending() {
 }
 
 /** An admin has seen the money arrive. */
-export async function confirm(requestId, adminId, whishRef) {
+export async function confirm(requestId, adminId, paymentRef) {
   return resolve(requestId, (request, tournament) => {
     request.status = 'confirmed'
     request.confirmedAt = new Date()
     request.confirmedBy = adminId
-    if (whishRef) request.whishRef = whishRef
+    if (paymentRef) request.paymentRef = paymentRef
     tournament.publishState = 'published'
   })
 }

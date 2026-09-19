@@ -23,7 +23,7 @@ export const COPY = {
     heroTitle: 'Run your tournament. We handle the rest.',
     heroBody:
       'Sign-ups, brackets, teams, prize money held until the results are in. You run the competition; the site keeps track of it.',
-    heroAction: 'Talk to us on WhatsApp',
+    heroAction: 'Email us',
     heroSecondary: 'See a live tournament',
 
     stepsTitle: 'How it works',
@@ -34,7 +34,7 @@ export const COPY = {
       },
       {
         title: 'Pay the fee',
-        body: 'By Whish Money, to a number we show you. We confirm it the same day, usually within the hour.',
+        body: 'Email us and we send you a payment link. We put the tournament live the same day, usually within the hour.',
       },
       {
         title: 'Share the link',
@@ -66,9 +66,9 @@ export const COPY = {
     priceHeading: 'Fee',
     upTo: (players) => `Up to ${players} players`,
     free: 'Free',
-    lbp: (amount) => `${amount} LBP`,
+    price: (amount) => amount,
     biggerTitle: 'Bigger than 64 players?',
-    biggerBody: 'Message us and we will price it.',
+    biggerBody: 'Email us and we will price it.',
 
     faqTitle: 'The questions we get',
     faq: [
@@ -92,7 +92,7 @@ export const COPY = {
 
     closingTitle: 'Running something soon?',
     closingBody: 'Send us a message. We will set the first one up with you.',
-    closingAction: 'Message us on WhatsApp',
+    closingAction: 'Email us',
   },
 
   ar: {
@@ -103,7 +103,7 @@ export const COPY = {
     heroTitle: 'نظّم بطولتك ونحن نتكفّل بالباقي.',
     heroBody:
       'التسجيل، جداول المباريات، الفرق، وأموال الجوائز محفوظة حتى تظهر النتائج. أنت تدير المنافسة، والموقع يتابع كل التفاصيل.',
-    heroAction: 'تواصل معنا على واتساب',
+    heroAction: 'راسلنا بالبريد',
     heroSecondary: 'شاهد بطولة جارية',
 
     stepsTitle: 'كيف تعمل',
@@ -114,7 +114,7 @@ export const COPY = {
       },
       {
         title: 'ادفع الرسوم',
-        body: 'عبر ويش موني، إلى رقم نعرضه لك. نؤكّد الدفعة في اليوم نفسه، غالباً خلال ساعة.',
+        body: 'راسلنا ونرسل لك رابط الدفع. ننشر البطولة في اليوم نفسه، غالباً خلال ساعة.',
       },
       {
         title: 'شارك الرابط',
@@ -140,7 +140,7 @@ export const COPY = {
     priceHeading: 'الرسوم',
     upTo: (players) => `حتى ${players} لاعباً`,
     free: 'مجاناً',
-    lbp: (amount) => `${amount} ل.ل.`,
+    price: (amount) => amount,
     biggerTitle: 'أكبر من ٦٤ لاعباً؟',
     biggerBody: 'راسلنا وسنحدّد لك السعر.',
 
@@ -166,6 +166,6 @@ export const COPY = {
 
     closingTitle: 'عندك بطولة قريباً؟',
     closingBody: 'راسلنا وسنجهّز الأولى معك.',
-    closingAction: 'راسلنا على واتساب',
+    closingAction: 'راسلنا بالبريد',
   },
 }

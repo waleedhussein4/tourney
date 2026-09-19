@@ -6,12 +6,12 @@ export const clearDemoData = () => del('/api/admin/seed')
 
 // --- publishing payments ------------------------------------------------------
 
-/** Every tournament waiting on a Whish transfer, newest first. */
+/** Every tournament waiting on a payment, newest first. */
 export const listPublishRequests = () => get('/api/admin/publish-requests')
 
-/** The money arrived. `whishRef` is whatever identifies the transfer. */
-export const confirmPublishRequest = (id, whishRef) =>
-  post(`/api/admin/publish-requests/${id}/confirm`, whishRef ? { whishRef } : {})
+/** The money arrived. `paymentRef` is whatever identifies the transfer. */
+export const confirmPublishRequest = (id, paymentRef) =>
+  post(`/api/admin/publish-requests/${id}/confirm`, paymentRef ? { paymentRef } : {})
 
 /** It did not. The tournament goes back to a draft its host can resubmit. */
 export const rejectPublishRequest = (id, reason) =>

@@ -15,23 +15,28 @@ const DATE_TIME = new Intl.DateTimeFormat(undefined, {
   minute: '2-digit',
 })
 
-const LBP = new Intl.NumberFormat('en-US')
+const USD = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  // $5 rather than $5.00, but $12.50 keeps its cents.
+  trailingZeroDisplay: 'stripIfInteger',
+})
 
 export const formatDate = (value) => (value ? DATE.format(new Date(value)) : '')
 
 export const formatDateTime = (value) => (value ? DATE_TIME.format(new Date(value)) : '')
 
 /**
- * Lebanese pounds, grouped: "150,000 LBP".
+ * Real money, from cents: "$5", "$12.50".
  *
- * Publishing fees are real money and are the one amount in the app that is not
- * credits — the unit is always spelled out so the two can never be read as the
- * same thing.
+ * Publishing fees are the one amount in the app that is not credits, so the
+ * dollar sign is always shown — a bare number next to a credit balance is how
+ * the two get read as the same thing.
  */
-export function formatLbp(amount) {
-  if (amount === 0) return 'Free'
-  if (amount == null) return ''
-  return `${LBP.format(amount)} LBP`
+export function formatUsd(cents) {
+  if (cents === 0) return 'Free'
+  if (cents == null) return ''
+  return USD.format(cents / 100)
 }
 
 /** "12 credits", "1 credit", "Free". */

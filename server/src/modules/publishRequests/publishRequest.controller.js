@@ -1,5 +1,5 @@
 import { asyncHandler } from '../../utils/asyncHandler.js'
-import { PUBLISH_TIERS, WHATSAPP_NUMBER } from '../../config/publishing.js'
+import { CONTACT_EMAIL, CURRENCY, PUBLISH_TIERS } from '../../config/publishing.js'
 import { toPublicView } from '../tournaments/tournament.presenter.js'
 import * as service from './publishRequest.service.js'
 
@@ -14,21 +14,19 @@ function toView(request) {
       ? { id: String(host._id), name: host.username, email: host.email }
       : { id: String(host) },
     tier: request.tier,
-    amountLbp: request.amountLbp,
+    amountCents: request.amountCents,
     status: request.status,
     requestedAt: request.requestedAt,
     confirmedAt: request.confirmedAt,
     confirmedBy: request.confirmedBy,
-    whishRef: request.whishRef,
+    paymentRef: request.paymentRef,
     rejectedAt: request.rejectedAt,
     reason: request.reason,
   }
 }
 
 export const pricing = asyncHandler(async (_req, res) => {
-  // The price list and the number to ask on. Not the Whish number: a host is
-  // given that once they have a tournament to pay for.
-  res.json({ tiers: PUBLISH_TIERS, whatsapp: WHATSAPP_NUMBER })
+  res.json({ tiers: PUBLISH_TIERS, currency: CURRENCY, contactEmail: CONTACT_EMAIL })
 })
 
 export const quote = asyncHandler(async (req, res) => {
@@ -46,7 +44,7 @@ export const list = asyncHandler(async (_req, res) => {
 })
 
 export const confirm = asyncHandler(async (req, res) => {
-  const request = await service.confirm(req.params.requestId, req.userId, req.body.whishRef)
+  const request = await service.confirm(req.params.requestId, req.userId, req.body.paymentRef)
   res.json({ request: toView(request) })
 })
 

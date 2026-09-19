@@ -101,16 +101,20 @@ gate "no env file is tracked by git" \
 gate "no secret ever entered git history" \
   bash -c 'git log --all --diff-filter=A --name-only --pretty=format: | grep -E "(^|/)\.env(\.|$)" | grep -v example'
 
-# The number hosts send money to lives in one file. The gate reads it from there
-# and looks for its digits — spaced, dashed, or bare — everywhere else, so a copy
-# pasted into a component or a doc cannot drift from the one that is true.
-gate "no Whish number outside config/publishing.js"   bash -c '
+# Where the money goes lives in one file. A copy pasted into a component or a
+# doc is how the page and the checkout come to disagree, so the gate reads the
+# contact out of the config and looks for it everywhere else.
+gate "no payment contact outside config/publishing.js"   bash -c '
     config=server/src/config/publishing.js
-    digits=$(grep "WHISH_NUMBER *=" $config | grep -o "[0-9]" | tr -d "
-")
-    [ -n "$digits" ] || { echo "could not read WHISH_NUMBER from $config"; exit; }
-    pattern=$(echo "$digits" | sed "s/./&[ -]*/g")
-    git grep --untracked -nE "$pattern" -- . ":!$config"
+    contact=$(grep "CONTACT_EMAIL" $config | cut -d"'"'"'" -f2)
+    [ -n "$contact" ] || { echo "could not read CONTACT_EMAIL from $config"; exit; }
+    git grep --untracked -I -nF "$contact" -- . ":!$config"
+  '
+
+# No phone number anywhere in the repository. A personal number cannot be taken
+# back once it is published, and this project has no reason to hold one.
+gate "no Lebanese phone number committed"   bash -c '
+    git grep --untracked -nE "(\+?961[ -]?[0-9]{2}[ -]?[0-9]{3}[ -]?[0-9]{3})|wa\.me/[0-9]"       -- . ":!scripts/check-regressions.sh"
   '
 
 echo
