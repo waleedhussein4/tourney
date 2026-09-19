@@ -443,6 +443,11 @@ async function buildTournament(blueprint, people, teams) {
   const tournament = await tournaments.createTournament(host._id, blueprint.payload)
   const id = tournament._id
 
+  // Demo data is there to be browsed, so it skips the publishing fee: nobody is
+  // going to confirm a payment for a fixture at four in the morning.
+  tournament.publishState = 'published'
+  await tournament.save()
+
   // Entrants pay their way in, exactly as they would through the API.
   for (const username of blueprint.entrants ?? []) {
     await tournaments.joinSolo(id, people.get(username)._id)
