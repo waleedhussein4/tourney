@@ -1,4 +1,5 @@
 import Tournament from '../../models/tournament.model.js'
+import PublishRequest from '../../models/publishRequest.model.js'
 import Team from '../../models/team.model.js'
 import User from '../../models/user.model.js'
 import { LIMITS, PAGE_SIZE } from '../../config/constants.js'
@@ -21,6 +22,21 @@ import { payOutTournament } from './payout.service.js'
 export async function loadTournament(tournamentId, session) {
   const tournament = await Tournament.findById(tournamentId).session(session ?? null)
   if (!tournament) throw ApiError.notFound('Tournament not found')
+  return tournament
+}
+
+/**
+ * Loads a tournament for someone to look at.
+ *
+ * Until it is published a tournament is visible only to its host. Everyone else
+ * gets the same 404 a made-up id would, so the response does not confirm that an
+ * unpublished tournament exists.
+ */
+export async function loadVisible(tournamentId, viewerId) {
+  const tournament = await loadTournament(tournamentId)
+  if (!tournament.isPublished && !tournament.isHostedBy(viewerId)) {
+    throw ApiError.notFound('Tournament not found')
+  }
   return tournament
 }
 
@@ -115,7 +131,8 @@ export async function listTournaments(query) {
 }
 
 function buildFilter(query) {
-  const filter = {}
+  // Browse is for tournaments that are live to the public, whatever else is asked.
+  const filter = { publishState: 'published' }
 
   if (query.search) filter.$text = { $search: query.search }
   if (query.category) filter.category = query.category
@@ -144,7 +161,7 @@ function buildFilter(query) {
  */
 export async function listTrending(limit) {
   return Tournament.aggregate([
-    { $match: { hasStarted: false, hasEnded: false } },
+    { $match: { publishState: 'published', hasStarted: false, hasEnded: false } },
     {
       $addFields: {
         _entrants: { $add: [{ $size: '$enrolledUsers' }, { $size: '$enrolledTeams' }] },
@@ -156,7 +173,7 @@ export async function listTrending(limit) {
   ]).then((docs) => docs.map((doc) => Tournament.hydrate(doc)))
 }
 
-/** Everything the user hosts or competes in. */
+/** Everything the user hosts or competes in. A host sees their own drafts here. */
 export async function listMine(userId) {
   return Tournament.find({
     $or: [
@@ -260,12 +277,35 @@ export async function deleteTournament(tournamentId, hostId) {
       )
     }
 
+    // A cancelled tournament must not linger in the admin queue as a payment to chase.
+    await PublishRequest.updateMany(
+      { tournamentId: tournament._id, status: 'pending' },
+      { status: 'rejected', rejectedAt: new Date(), reason: 'Tournament cancelled by its host' },
+      { session }
+    )
+
     await Tournament.deleteOne({ _id: tournament._id }, { session })
     return { refunds }
   })
 }
 
 // --- joining ----------------------------------------------------------------
+
+/**
+ * Loads a tournament for someone trying to get into it.
+ *
+ * Checked at the door, before any other rule gets to answer: to a would-be
+ * entrant an unpublished tournament does not exist, and a 400 about team sizes
+ * or application forms would say otherwise.
+ */
+async function loadForEntry(tournamentId, userId, session) {
+  const tournament = await loadTournament(tournamentId, session)
+  if (tournament.isPublished) return tournament
+  if (tournament.isHostedBy(userId)) {
+    throw ApiError.badRequest('This tournament has not been published yet')
+  }
+  throw ApiError.notFound('Tournament not found')
+}
 
 /** The checks that apply however a participant gets in. */
 function assertJoinable(tournament, userId) {
@@ -284,7 +324,7 @@ function assertJoinable(tournament, userId) {
 /** Enters a solo tournament, paying the entry fee into the bank. */
 export async function joinSolo(tournamentId, userId) {
   return withTransaction(async (session) => {
-    const tournament = await loadTournament(tournamentId, session)
+    const tournament = await loadForEntry(tournamentId, userId, session)
     if (tournament.isTeamBased) throw ApiError.badRequest('This tournament is played in teams')
 
     assertJoinable(tournament, userId)
@@ -315,7 +355,7 @@ export async function joinSolo(tournamentId, userId) {
  */
 export async function joinTeam(tournamentId, userId, teamId) {
   return withTransaction(async (session) => {
-    const tournament = await loadTournament(tournamentId, session)
+    const tournament = await loadForEntry(tournamentId, userId, session)
     if (!tournament.isTeamBased) throw ApiError.badRequest('This tournament is played solo')
 
     const team = await Team.findById(teamId).session(session)
@@ -391,7 +431,7 @@ async function collectEntryFee(tournament, payerId, session) {
 
 /** Files an application against the host's form. */
 export async function apply(tournamentId, userId, { teamId, fields }) {
-  const tournament = await loadTournament(tournamentId)
+  const tournament = await loadForEntry(tournamentId, userId)
 
   if (tournament.accessibility !== 'application required') {
     throw ApiError.badRequest('This tournament is open — join it directly')
@@ -547,6 +587,9 @@ export async function startTournament(tournamentId, hostId) {
   const tournament = await loadAsHost(tournamentId, hostId)
   if (tournament.hasStarted) throw ApiError.badRequest('This tournament has already started')
   if (tournament.hasEnded) throw ApiError.badRequest('This tournament has already ended')
+  if (!tournament.isPublished) {
+    throw ApiError.badRequest('Publish this tournament before starting it')
+  }
 
   const count = tournament.participantCount()
   if (tournament.type === 'brackets') {
