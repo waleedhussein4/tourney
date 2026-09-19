@@ -53,8 +53,8 @@ describe('pricing', () => {
   it('charges what docs/MONETISATION.md says', () => {
     expect(PUBLISH_TIERS.map((entry) => [entry.tier, entry.amountCents])).toEqual([
       ['free', 0],
-      ['small', 500],
-      ['large', 1000],
+      ['small', 300],
+      ['large', 600],
     ])
   })
 })
@@ -80,18 +80,18 @@ describe('POST /api/tournaments/:id/publish', () => {
     const { body } = await host.agent.post(`/api/tournaments/${created.id}/publish`).expect(200)
 
     expect(body.tournament.publishState).toBe('pending_payment')
-    expect(body.tournament.publishRequest).toMatchObject({ tier: 'small', amountCents: 500 })
+    expect(body.tournament.publishRequest).toMatchObject({ tier: 'small', amountCents: 300 })
     expect(body.tournament.publishRequest.requestedAt).toBeTruthy()
 
     const stored = await Tournament.findById(created.id)
     expect(stored.publishRequest.tier).toBe('small')
-    expect(stored.publishRequest.amountCents).toBe(500)
+    expect(stored.publishRequest.amountCents).toBe(300)
   })
 
   it('prices the large tier', async () => {
     const created = await draft({ maxCapacity: 64, prize: 640 })
     const { body } = await host.agent.post(`/api/tournaments/${created.id}/publish`).expect(200)
-    expect(body.tournament.publishRequest).toMatchObject({ tier: 'large', amountCents: 1000 })
+    expect(body.tournament.publishRequest).toMatchObject({ tier: 'large', amountCents: 600 })
   })
 
   it('refuses a cap no tier covers, and leaves the draft alone', async () => {
@@ -156,7 +156,7 @@ describe('GET /api/tournaments/:id/publish', () => {
     expect(body.publishing).toMatchObject({
       publishState: 'draft',
       tier: 'small',
-      amountCents: 500,
+      amountCents: 300,
       maxCapacity: 16,
       // What the host types into the transfer, so it can be matched by hand.
       reference: created.id,
@@ -300,7 +300,7 @@ describe('the admin queue', () => {
       tournamentTitle: 'Second Cup',
       host: { id: host.user.id, name: 'hostie' },
       tier: 'large',
-      amountCents: 1000,
+      amountCents: 600,
       status: 'pending',
     })
     expect(body.requests[0].requestedAt).toBeTruthy()

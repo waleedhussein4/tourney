@@ -260,7 +260,7 @@ draft ──(paid tier)──▶ pending_payment ──(admin confirms)──▶
 #### `POST /api/tournaments/:tournamentId/publish` — host
 
 No body. The tier is derived from `maxCapacity` — up to 8 slots is free, up to 16
-is `small` ($5), up to 64 is `large` ($10) — so there is nothing for a caller to
+is `small` ($3), up to 64 is `large` ($6) — so there is nothing for a caller to
 choose. Amounts are in **cents**.
 
 A free tier is published on the spot. A paid tier moves to `pending_payment`,
@@ -432,7 +432,7 @@ Every publishing fee waiting to be confirmed, newest first.
       "tournamentTitle": "Beirut Open",
       "host": { "id": "…", "name": "hostie", "email": "…" },
       "tier": "small",
-      "amountCents": 500,
+      "amountCents": 300,
       "status": "pending",
       "requestedAt": "…"
     }
