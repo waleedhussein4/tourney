@@ -64,11 +64,11 @@ payout really did move credits and write its ledger rows.
 
 The script prints the three sign-ins when it finishes:
 
-| Account | Set with |
-| --- | --- |
-| `demo@tourney.app` — a host with credits | `SEED_DEMO_EMAIL` / `SEED_DEMO_PASSWORD` |
+| Account                                      | Set with                                   |
+| -------------------------------------------- | ------------------------------------------ |
+| `demo@tourney.app` — a host with credits     | `SEED_DEMO_EMAIL` / `SEED_DEMO_PASSWORD`   |
 | `admin@tourney.app` — reaches the admin page | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` |
-| The twelve demo players | `SEED_PASSWORD` |
+| The twelve demo players                      | `SEED_PASSWORD`                            |
 
 **No password is committed.** Anything left unset is generated for that run and
 printed once — so read the output, or set the variables in `server/.env` and
@@ -81,18 +81,18 @@ choose your own.
 
 ## Everyday commands
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Runs the API and the client together |
-| `npm run dev -w server` | Runs just the API |
-| `npm run dev -w client` | Runs just the client |
-| `npm run lint` | Lints both workspaces |
-| `npm run lint:fix` | Lints and applies safe fixes |
-| `npm run format` | Formats with Prettier |
-| `npm run build` | Production build of the client |
-| `npm test` | Server test suite (vitest) |
-| `npm test -w server -- --watch` | The suite, re-running on change |
-| `npm run seed` | Seeds demo data |
+| Command                         | What it does                         |
+| ------------------------------- | ------------------------------------ |
+| `npm run dev`                   | Runs the API and the client together |
+| `npm run dev -w server`         | Runs just the API                    |
+| `npm run dev -w client`         | Runs just the client                 |
+| `npm run lint`                  | Lints both workspaces                |
+| `npm run lint:fix`              | Lints and applies safe fixes         |
+| `npm run format`                | Formats with Prettier                |
+| `npm run build`                 | Production build of the client       |
+| `npm test`                      | Server test suite (vitest)           |
+| `npm test -w server -- --watch` | The suite, re-running on change      |
+| `npm run seed`                  | Seeds demo data                      |
 
 ## Tests
 

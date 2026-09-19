@@ -199,7 +199,7 @@ account, tournaments, teams and ledger rows are never in scope. Demo data is:
 
 - users, teams and tournaments flagged `isDemo: true` — a field only the seed
   script sets (no API schema accepts it);
-- anything made *with* a demo account (a tournament it hosts, a team it leads),
+- anything made _with_ a demo account (a tournament it hosts, a team it leads),
   because the demo login is public and those are visitors' leftovers.
 
 Where the two worlds touch: a real player enrolled in a demo tournament is
