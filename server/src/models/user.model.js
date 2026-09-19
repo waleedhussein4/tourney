@@ -36,6 +36,9 @@ const userSchema = new Schema(
     isHost: { type: Boolean, default: false },
 
     credits: { type: Number, default: 0, min: 0 },
+
+    /** Set by the seed script and nothing else. The demo reset deletes only these. */
+    isDemo: { type: Boolean, default: false, index: true },
   },
   { timestamps: true }
 )
