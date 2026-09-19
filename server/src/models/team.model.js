@@ -29,6 +29,9 @@ const teamSchema = new Schema(
     leader: { type: String, ref: 'User', required: true },
 
     createdBy: { type: String, ref: 'User', required: true },
+
+    /** Set by the seed script and nothing else. The demo reset deletes only these. */
+    isDemo: { type: Boolean, default: false, index: true },
   },
   { timestamps: true }
 )

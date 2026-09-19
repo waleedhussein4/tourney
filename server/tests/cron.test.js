@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { useDatabase } from './setup/database.js'
-import { guest } from './setup/api.js'
+import { createTeam, createTournament, creditsOf, guest, signUp } from './setup/api.js'
 import User from '../src/models/user.model.js'
 import Tournament from '../src/models/tournament.model.js'
 import Product from '../src/models/product.model.js'
+import Team from '../src/models/team.model.js'
+import Transaction from '../src/models/transaction.model.js'
+import { joinSolo } from '../src/modules/tournaments/tournament.service.js'
 import { assertCronAuthorised } from '../src/modules/cron/cron.routes.js'
 import { seedDemoData } from '../scripts/seed-data.js'
 
@@ -68,7 +71,7 @@ describe('POST/GET /api/cron/reseed', () => {
   it('rebuilds the demo data on GET, which is what Vercel Cron sends', async () => {
     await seedDemoData()
 
-    // Something a visitor left behind: it should not survive the reset.
+    // A real account. The reset is for the demo data; it must not touch this.
     await guest()
       .post('/api/auth/signup')
       .send({ email: 'visitor@example.com', username: 'visitor', password: 'Passw0rdy' })
@@ -85,9 +88,89 @@ describe('POST/GET /api/cron/reseed', () => {
     expect(response.body.seeded.users).toBeGreaterThan(0)
     expect(response.body.durationMs).toBeGreaterThanOrEqual(0)
 
-    expect(await User.exists({ email: 'visitor@example.com' })).toBeNull()
+    expect(await User.exists({ email: 'visitor@example.com' })).toBeTruthy()
     expect(await User.exists({ email: 'demo@tourney.app' })).toBeTruthy()
     expect(await Tournament.countDocuments()).toBe(response.body.seeded.tournaments)
+  })
+
+  // The case that matters once hosts pay: a real host, their tournament, their
+  // team and their ledger all outlive the nightly reset, and the books balance.
+  it('leaves a real host, their tournament, team and ledger rows alone', async () => {
+    await seedDemoData()
+
+    const host = await signUp('realhost', { credits: 400, isHost: true })
+    const player = await signUp('realplayer', { credits: 400 })
+    const team = await createTeam(host.agent, [player.agent], 'Real Deal')
+    const tournament = await createTournament(host.agent, { title: 'Paid Cup' })
+    await player.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
+
+    // The two worlds touching, in both directions: the real player is in a demo
+    // tournament, and a demo player is in the real one.
+    const melee = await Tournament.findOne({ title: 'Midweek Melee' })
+    await player.agent.post(`/api/tournaments/${melee._id}/join/solo`).expect(200)
+    const lena = await User.findOne({ username: 'lena' })
+    await joinSolo(tournament.id, lena._id)
+
+    const realRows = () =>
+      Transaction.find({ userId: { $in: [host.user.id, player.user.id] } }).lean()
+    const rowsBefore = await realRows()
+    expect(rowsBefore.length).toBeGreaterThan(0)
+
+    const reseed = () => guest().get('/api/cron/reseed').set('Authorization', AUTHORISED)
+    await reseed().expect(200)
+    await reseed().expect(200)
+
+    expect(await User.exists({ _id: host.user.id })).toBeTruthy()
+    expect(await User.exists({ _id: player.user.id })).toBeTruthy()
+    expect((await Team.findById(team.id)).members).toHaveLength(2)
+
+    const survivor = await Tournament.findById(tournament.id)
+    expect(survivor.bank).toBe(20)
+    // The demo entrant is still a real document, so the bracket can be played out.
+    for (const entry of survivor.enrolledUsers) {
+      expect(await User.exists({ _id: entry.userId }), entry.userId).toBeTruthy()
+    }
+
+    // Every row the real accounts had is still there, plus the refund for the
+    // demo tournament that was reset from under the player.
+    const rowsAfter = await realRows()
+    const ids = new Set(rowsAfter.map((row) => row._id))
+    for (const row of rowsBefore) expect(ids.has(row._id), row.description).toBe(true)
+    expect(rowsAfter.filter((row) => row.type === 'refund')).toHaveLength(1)
+
+    // Conservation, per real account: opening balance plus ledger equals wallet.
+    for (const account of [host, player]) {
+      const ledger = rowsAfter
+        .filter((row) => row.userId === account.user.id)
+        .reduce((sum, row) => sum + row.amount, 0)
+      expect(await creditsOf(account.user.id)).toBe(400 + ledger)
+    }
+    expect(await creditsOf(player.user.id)).toBe(390)
+
+    // And the reseed is still idempotent with real data present.
+    expect(await Tournament.countDocuments()).toBe(11)
+    expect(await User.countDocuments()).toBe(16)
+  })
+
+  it('adopts demo documents seeded before the isDemo flag existed', async () => {
+    await seedDemoData()
+    for (const model of [User, Team, Tournament]) {
+      await model.collection.updateMany({}, { $unset: { isDemo: '' } })
+    }
+    const before = await User.findOne({ username: 'mei' })
+
+    // First run: nothing is flagged, so nothing is cleared — and the seed flags it.
+    const first = await guest().get('/api/cron/reseed').set('Authorization', AUTHORISED)
+    expect(first.body.cleared).toMatchObject({ users: 0, tournaments: 0, teams: 0 })
+    expect(await Tournament.countDocuments({ isDemo: true })).toBe(10)
+    expect(await Team.countDocuments({ isDemo: true })).toBe(4)
+    expect(await User.countDocuments({ isDemo: true })).toBe(13)
+
+    // Second run: a normal rebuild.
+    const second = await guest().get('/api/cron/reseed').set('Authorization', AUTHORISED)
+    expect(second.body.cleared).toMatchObject({ users: 13, tournaments: 10, teams: 4 })
+    expect((await User.findOne({ username: 'mei' }))._id).not.toBe(before._id)
+    expect(await Tournament.countDocuments()).toBe(10)
   })
 
   it('is idempotent — running it twice leaves the same dataset', async () => {

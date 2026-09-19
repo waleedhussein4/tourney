@@ -192,6 +192,35 @@ repairs itself once a day.
 quiet hour. It is a `GET` because that is the only method Vercel Cron issues;
 `POST` is accepted too, for triggering one by hand.
 
+### What it deletes — demo data only
+
+The reset and the admin page's "clear" touch **only demo data**; a real host's
+account, tournaments, teams and ledger rows are never in scope. Demo data is:
+
+- users, teams and tournaments flagged `isDemo: true` — a field only the seed
+  script sets (no API schema accepts it);
+- anything made *with* a demo account (a tournament it hosts, a team it leads),
+  because the demo login is public and those are visitors' leftovers.
+
+Where the two worlds touch: a real player enrolled in a demo tournament is
+refunded their entry fee, with a `refund` ledger row, before it is removed; a
+demo user or team that a real tournament refers to is kept and reset in place,
+so a real bracket never points at a deleted account. The seeded `admin` is never
+deleted.
+
+#### Migrating a database seeded before `isDemo`
+
+No script to run. Documents seeded before the flag existed carry no `isDemo`, so
+the first reseed after deploying clears nothing (`cleared` is all zeros) and the
+seed half then flags the existing demo documents — users by the seed's emails,
+teams and tournaments by name/title **and** a seeded owner. From the second run
+on it is a normal rebuild. It is idempotent; to do both steps at once, trigger
+the reseed by hand twice (below).
+
+Accounts visitors signed up before the migration are now indistinguishable from
+real users and are left alone. Delete them by hand in Atlas before launch if
+wanted.
+
 ### Guarding it
 
 This route empties the production database. It is the most dangerous endpoint
