@@ -1,5 +1,7 @@
 import PublishRequest from '../../models/publishRequest.model.js'
+import config from '../../config/env.js'
 import { CONTACT_EMAIL, tierFor } from '../../config/publishing.js'
+import * as gateway from '../../payments/paddle.js'
 import { withTransaction } from '../../db/withTransaction.js'
 import { ApiError } from '../../utils/ApiError.js'
 import { loadAsHost, loadTournament } from '../tournaments/tournament.service.js'
@@ -34,8 +36,20 @@ export async function quote(tournamentId, hostId) {
     // The host pays from their own phone, so the reference has to be something
     // they can read off the screen and type into a transfer: the tournament's id.
     reference: String(tournament._id),
-    contactEmail: tier && tier.amountCents > 0 ? CONTACT_EMAIL : null,
+    // Only when there is no card gateway: it is the fallback route, and
+    // offering it beside a working checkout invites a host to take the slow one.
+    contactEmail: tier && tier.amountCents > 0 && !gateway.canTakeCards() ? CONTACT_EMAIL : null,
     requestedAt: tournament.publishRequest?.requestedAt ?? null,
+    // What the browser needs to open the gateway's checkout. The client token is
+    // published on purpose — it identifies the account, it does not authorise
+    // anything. The API key never leaves the server.
+    gateway: gateway.canTakeCards()
+      ? {
+          provider: 'paddle',
+          clientToken: config.paddle.clientToken,
+          environment: config.paddle.environment,
+        }
+      : null,
   }
 }
 
@@ -66,7 +80,7 @@ export async function publish(tournamentId, hostId) {
     if (tier.amountCents === 0) {
       tournament.publishState = 'published'
       await tournament.save({ session })
-      return tournament
+      return { tournament, checkout: null }
     }
 
     const requestedAt = new Date()
@@ -74,7 +88,7 @@ export async function publish(tournamentId, hostId) {
     tournament.publishRequest = { tier: tier.tier, amountCents: tier.amountCents, requestedAt }
     await tournament.save({ session })
 
-    await PublishRequest.create(
+    const [request] = await PublishRequest.create(
       [
         {
           tournamentId: tournament._id,
@@ -88,7 +102,19 @@ export async function publish(tournamentId, hostId) {
       { session }
     )
 
-    return tournament
+    // A gateway that is configured opens a checkout the host pays right now. One
+    // that is not leaves the request for a human, which is the same row either
+    // way — the difference is only who confirms it.
+    let checkout = null
+    if (gateway.canTakeCards()) {
+      checkout = await gateway.createCheckout({
+        priceId: config.paddle.prices[tier.tier],
+        tournamentId: String(tournament._id),
+        publishRequestId: String(request._id),
+      })
+    }
+
+    return { tournament, checkout }
   })
 }
 
@@ -107,6 +133,53 @@ export async function confirm(requestId, adminId, paymentRef) {
     request.confirmedBy = adminId
     if (paymentRef) request.paymentRef = paymentRef
     tournament.publishState = 'published'
+  })
+}
+
+/**
+ * A payment provider says the money is in. Publishes the tournament.
+ *
+ * This is the whole of what a webhook does, and it is deliberately the same
+ * transition an admin performs by hand — one path to `published`, whoever
+ * triggered it.
+ *
+ * Idempotent in two independent ways, because a provider may deliver the same
+ * event more than once and two deliveries can land at the same moment:
+ * a replay finds the request already confirmed and returns it unchanged, and
+ * `providerRef` carries a unique index, so a genuine race loses at the database
+ * rather than confirming twice.
+ *
+ * @param {string} tournamentId
+ * @param {{provider: string, providerRef: string}} payment
+ */
+export async function markPaid(tournamentId, { provider, providerRef }) {
+  const already = await PublishRequest.findOne({ providerRef })
+  if (already) return { request: already, published: false }
+
+  return withTransaction(async (session) => {
+    const request = await PublishRequest.findOne({ tournamentId, status: 'pending' })
+      .sort({ requestedAt: -1 })
+      .session(session)
+
+    // A payment for something we are not waiting on. Worth knowing about, but
+    // not worth failing the webhook over — the provider would retry forever.
+    if (!request) return { request: null, published: false }
+
+    const tournament = await loadTournament(request.tournamentId, session)
+    if (tournament.publishState !== 'pending_payment') {
+      return { request, published: false }
+    }
+
+    request.status = 'confirmed'
+    request.confirmedAt = new Date()
+    request.provider = provider
+    request.providerRef = providerRef
+    tournament.publishState = 'published'
+
+    await tournament.save({ session })
+    await request.save({ session })
+
+    return { request, published: true }
   })
 }
 

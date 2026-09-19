@@ -56,7 +56,7 @@ gate "no raw Set-Cookie header" \
   grep -rn "setHeader('Set-Cookie'\|setHeader(\"Set-Cookie\"" $S/src
 
 gate "no process.env read outside config/env.js" \
-  grep -rn --include=*.js "process\.env\." $S/src/app.js $S/src/models $S/src/modules $S/src/middleware $S/src/utils $S/src/db
+  grep -rn --include=*.js "process\.env\." $S/src/app.js $S/src/models $S/src/modules $S/src/middleware $S/src/utils $S/src/db $S/src/payments
 
 gate "no Jaro-Winkler implementation left" \
   grep -rni "jarowinkler" $S/src client/src

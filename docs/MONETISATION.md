@@ -31,13 +31,36 @@ Squeezy's case — block Lebanese buyers outright. Two options remain, both loca
 - **Whish Pay**, the wallet's merchant gateway. Onboards an individual on ID
   alone, settles in dollars, and reaches hosts who have no working card.
 
-Whichever lands first, the shape in this codebase is the same and is already
-half-built: the `PublishRequest` row is the record, and a provider webhook
-calls one function that marks it paid and publishes the tournament. Providers
-differ only in how their signature is checked.
+**Paddle is the one that is built.** Lebanon is absent from its unsupported
+list, it onboards by human review rather than a country gate, and it pays out
+to Payoneer, which works here — that last link was the unverified one, and it
+is verified now.
 
-Until a merchant account exists, payment is arranged by email against the
-tournament id, and an admin confirms it — the flow that is live today.
+How it hangs together:
+
+- `server/src/payments/paddle.js` is the only file that knows the gateway
+  exists. Three functions: open a checkout, verify a delivery, read what it
+  says.
+- Publishing a paid tournament creates the `PublishRequest` row **and** a
+  gateway transaction, server-side. Paddle will open a checkout from a price id
+  alone, but then the amount and the tournament are chosen by the page, and a
+  host who edits them pays for the tier they picked rather than the one they
+  are buying.
+- `POST /api/webhooks/paddle` verifies the signature over the **raw** body —
+  which is why that router is mounted ahead of the JSON parser — and on
+  `transaction.completed` marks the row paid and publishes the tournament.
+- The charged amount is checked against the tier's price on the way through.
+  The price object lives in Paddle's dashboard and the amount lives in
+  `config/publishing.js`; that check is the only place the two are held to each
+  other.
+- Confirmation is idempotent twice over: a replayed event finds the row already
+  confirmed, and `providerRef` carries a unique index, so a genuine race loses
+  at the database rather than publishing twice.
+
+With no Paddle credentials set the app takes no cards at all and falls back to
+a human confirming — the same `PublishRequest` row, a different signature on
+it. That is what runs until the merchant account is live, and it is also the
+fallback if a webhook is ever missed.
 
 ## Pricing
 
