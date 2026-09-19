@@ -268,8 +268,19 @@ records `publishRequest: { tier, amountCents, requestedAt }` on the tournament,
 and adds a row to the admin queue. The fee is paid outside the app; no credits
 move.
 
-`200 { tournament }`. `409` unless the tournament is a `draft`. `400` if it has
-more than 64 slots, which no tier covers.
+`200 { tournament, checkout }`. `checkout` is `{ transactionId }` when a card
+gateway is configured and the tier is paid — the browser opens the gateway's
+overlay with it — and `null` otherwise. `409` unless the tournament is a
+`draft`. `400` if it has more than 64 slots, which no tier covers.
+
+### `POST /api/webhooks/paddle` — the payment gateway
+
+Not for callers. Verifies the gateway's signature over the raw request body and,
+on a settled payment whose amount matches the tier, publishes the tournament.
+
+Answers `400` to a delivery it cannot verify and `200` to everything else,
+including events it does nothing with — a gateway retries a non-2xx for days, so
+the only failures worth reporting are the ones a retry could fix.
 
 ---
 

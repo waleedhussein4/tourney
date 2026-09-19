@@ -23,6 +23,7 @@ import {
   publishRouter,
   publishingRouter,
 } from './modules/publishRequests/publishRequest.routes.js'
+import { webhookRouter } from './modules/publishRequests/webhook.routes.js'
 import { cronRouter } from './modules/cron/cron.routes.js'
 import { creditsRouter, productRouter } from './modules/credits/credits.routes.js'
 
@@ -69,6 +70,11 @@ export function createApp() {
   if (config.isDevelopment) {
     app.use(morgan('dev'))
   }
+
+  // Before the JSON parser and before `ensureDatabase`: a webhook's signature
+  // is over the raw bytes, so this router must see them unparsed. It opens its
+  // own database connection through the service it calls.
+  app.use('/api/webhooks', ensureDatabase, webhookRouter)
 
   app.use(express.json({ limit: '100kb' }))
   app.use(cookieParser())
