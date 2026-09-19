@@ -37,11 +37,17 @@ export const UNPUBLISHED = ['draft', 'pending_payment']
  *
  * Amounts are in cents, which is what every payment processor charges in and
  * the only way to hold money that never rounds wrong.
+ *
+ * The prices are set to cover what the app costs to run, not to make a margin.
+ * They have a floor a long way above zero even so: a card fee is roughly a few
+ * percent *plus* a fixed charge of about 30 cents, so a $1 fee would hand a
+ * third of itself straight to the processor. Three dollars is about where the
+ * fixed part stops hurting.
  */
 export const PUBLISH_TIERS = [
   { tier: 'free', maxCapacity: 8, amountCents: 0 },
-  { tier: 'small', maxCapacity: 16, amountCents: 500 },
-  { tier: 'large', maxCapacity: 64, amountCents: 1000 },
+  { tier: 'small', maxCapacity: 16, amountCents: 300 },
+  { tier: 'large', maxCapacity: 64, amountCents: 600 },
 ]
 
 /**

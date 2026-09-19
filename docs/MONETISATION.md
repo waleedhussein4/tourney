@@ -44,11 +44,16 @@ tournament id, and an admin confirms it — the flow that is live today.
 | tier  | max players | fee (USD) |
 | ----- | ----------- | --------- |
 | free  | 8           | 0         |
-| small | 16          | 5         |
-| large | 64          | 10        |
+| small | 16          | 3         |
+| large | 64          | 6         |
 
 Amounts are held in cents, which is what a card is charged in. Lebanon prices
 digital services in dollars, so the lira never appears in the code.
+
+The prices cover what the app costs to run rather than earning a margin, but
+they do not go lower than this: a card fee is a few percent **plus** about 30
+cents fixed, so a one-dollar fee would give a third of itself away. Three
+dollars is where the fixed part stops hurting.
 
 Tier is derived from the tournament's configured player cap at publish time.
 Prices live in one config file, not scattered through services.
