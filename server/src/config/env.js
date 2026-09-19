@@ -82,6 +82,47 @@ function loadConfig() {
     problems.push('CRON_SECRET must be at least 16 characters when it is set')
   }
 
+  // Optional as a group: with none of them set the app takes no card payments
+  // and publishing falls back to a human confirming. With some but not all of
+  // them set it would take a payment it cannot verify, which is worse than not
+  // taking one — so the three are required together or not at all.
+  const paddle = {
+    apiKey: read('PADDLE_API_KEY'),
+    webhookSecret: read('PADDLE_WEBHOOK_SECRET'),
+    clientToken: read('PADDLE_CLIENT_TOKEN'),
+    environment: read('PADDLE_ENV') ?? 'sandbox',
+    // The gateway's id for each paid tier's price, created in its dashboard.
+    prices: Object.freeze({
+      small: read('PADDLE_PRICE_SMALL'),
+      large: read('PADDLE_PRICE_LARGE'),
+    }),
+  }
+  const paddleSet = Object.entries(paddle).filter(
+    ([name]) => !['environment', 'prices'].includes(name)
+  )
+  const paddleGiven = paddleSet.filter(([, value]) => value)
+  if (paddleGiven.length > 0 && paddleGiven.length < paddleSet.length) {
+    const missing = paddleSet.filter(([, value]) => !value).map(([name]) => name)
+    problems.push(
+      `Card payments need PADDLE_API_KEY, PADDLE_WEBHOOK_SECRET and PADDLE_CLIENT_TOKEN together — missing ${missing.join(', ')}`
+    )
+  }
+  if (!['sandbox', 'production'].includes(paddle.environment)) {
+    problems.push(`PADDLE_ENV must be sandbox or production, got "${paddle.environment}"`)
+  }
+  // A configured gateway with no price for a paid tier would take the host to a
+  // checkout that cannot charge anything.
+  if (paddleGiven.length === paddleSet.length) {
+    const missingPrices = Object.entries(paddle.prices)
+      .filter(([, value]) => !value)
+      .map(([tier]) => `PADDLE_PRICE_${tier.toUpperCase()}`)
+    if (missingPrices.length > 0) {
+      problems.push(
+        `Card payments need a price for every paid tier — missing ${missingPrices.join(', ')}`
+      )
+    }
+  }
+
   if (problems.length > 0) {
     throw new Error(
       [
@@ -108,6 +149,9 @@ function loadConfig() {
     clientUrl,
     // Optional: the bearer token Vercel Cron presents to /api/cron/*.
     cronSecret,
+    // Card payments. `enabled` is what the rest of the code asks: unset
+    // credentials mean the publish flow waits for a human instead.
+    paddle: Object.freeze({ ...paddle, enabled: paddleGiven.length === paddleSet.length }),
   })
 }
 

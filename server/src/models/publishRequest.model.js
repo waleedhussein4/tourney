@@ -28,6 +28,17 @@ const publishRequestSchema = new mongoose.Schema(
       default: 'pending',
       index: true,
     },
+
+    /**
+     * Who took the money. `manual` is an admin saying so by hand; anything else
+     * is a payment provider that told us over a webhook.
+     */
+    provider: { type: String, default: 'manual' },
+    /**
+     * The provider's own id for the payment. Unique when present, which is what
+     * makes a replayed webhook a no-op rather than a second confirmation.
+     */
+    providerRef: { type: String, index: true, sparse: true, unique: true },
     requestedAt: { type: Date, required: true },
 
     confirmedAt: Date,

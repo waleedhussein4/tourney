@@ -34,8 +34,8 @@ export const quote = asyncHandler(async (req, res) => {
 })
 
 export const publish = asyncHandler(async (req, res) => {
-  const tournament = await service.publish(req.params.tournamentId, req.userId)
-  res.json({ tournament: await toPublicView(tournament, req.userId) })
+  const { tournament, checkout } = await service.publish(req.params.tournamentId, req.userId)
+  res.json({ tournament: await toPublicView(tournament, req.userId), checkout })
 })
 
 export const list = asyncHandler(async (_req, res) => {
