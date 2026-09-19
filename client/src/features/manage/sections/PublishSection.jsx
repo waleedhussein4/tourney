@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { getPublishInfo, publishTournament, tournamentKeys } from '/src/api/tournaments.js'
 import { Button, Card, CardHeader, Skeleton } from '/src/components/ui/index.js'
-import { formatDateTime, formatLbp } from '/src/lib/format.js'
+import { formatDateTime, formatUsd } from '/src/lib/format.js'
 import { useManageMutation } from '../useManageMutation.js'
 import styles from '../ManagePage.module.css'
 
@@ -12,8 +12,8 @@ import styles from '../ManagePage.module.css'
  * A tournament is a draft until it is published, and a draft is visible to
  * nobody but its host — so this is the first thing on the page until it is done,
  * and it disappears afterwards. Small tournaments publish for nothing; larger
- * ones are paid for by a Whish transfer that a human confirms, which is why the
- * paid path is a set of instructions and not a checkout.
+ * ones are paid for, and until the card gateway is live that payment is arranged
+ * by email and confirmed by a human.
  */
 export function PublishSection({ tournament }) {
   const { publishState } = tournament
@@ -28,7 +28,7 @@ export function PublishSection({ tournament }) {
     tournamentId: tournament.id,
     mutationFn: () => publishTournament(tournament.id),
     success:
-      publishState === 'draft' && info.data?.amountLbp === 0
+      publishState === 'draft' && info.data?.amountCents === 0
         ? 'Your tournament is live'
         : 'Thanks — we will confirm your payment shortly',
   })
@@ -43,7 +43,10 @@ export function PublishSection({ tournament }) {
           subtitle="We are checking for your transfer. This is usually the same day — you do not need to send it again."
         />
         <dl className={styles.payment}>
-          <PaymentRow label="Amount sent" value={formatLbp(tournament.publishRequest?.amountLbp)} />
+          <PaymentRow
+            label="Amount sent"
+            value={formatUsd(tournament.publishRequest?.amountCents)}
+          />
           <PaymentRow label="Reference" value={tournament.id} copyable mono />
           <PaymentRow label="Sent" value={formatDateTime(tournament.publishRequest?.requestedAt)} />
         </dl>
@@ -64,7 +67,7 @@ export function PublishSection({ tournament }) {
     )
   }
 
-  const { tier, amountLbp, whishNumber, reference, maxCapacity } = info.data ?? {}
+  const { tier, amountCents, contactEmail, reference, maxCapacity } = info.data ?? {}
 
   // Above the largest tier there is no price to quote, so the honest answer is
   // to say so and give them a way to ask, not to show a button that 400s.
@@ -93,7 +96,7 @@ export function PublishSection({ tournament }) {
     )
   }
 
-  if (amountLbp === 0) {
+  if (amountCents === 0) {
     return (
       <Card className={styles.publish}>
         <CardHeader
@@ -113,23 +116,23 @@ export function PublishSection({ tournament }) {
     <Card className={styles.publish}>
       <CardHeader
         title="Publish this tournament"
-        subtitle={`Up to ${maxCapacity} players. Send ${formatLbp(amountLbp)} by Whish Money and we will put it live.`}
+        subtitle={`Up to ${maxCapacity} players, ${formatUsd(amountCents)} to publish. Email us and we will send you a payment link.`}
       />
 
       <dl className={styles.payment}>
-        <PaymentRow label="Send to" value={whishNumber} copyable />
-        <PaymentRow label="Amount" value={formatLbp(amountLbp)} />
+        <PaymentRow label="Amount" value={formatUsd(amountCents)} />
+        <PaymentRow label="Email" value={contactEmail} copyable />
         <PaymentRow label="Reference" value={reference} copyable mono />
       </dl>
 
       <p className={styles.hint}>
-        Put the reference in the transfer note so we can match it to this tournament. Tell us once
-        you have sent it — we confirm by hand, usually the same day.
+        Quote the reference so we can match your payment to this tournament. Once you have paid,
+        press the button below and we will put it live — usually the same day.
       </p>
 
       <div className={styles.actions}>
         <Button variant="primary" onClick={() => publish.mutate()} loading={publish.isPending}>
-          I have sent the payment
+          I have paid
         </Button>
       </div>
     </Card>

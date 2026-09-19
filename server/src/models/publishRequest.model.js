@@ -20,7 +20,7 @@ const publishRequestSchema = new mongoose.Schema(
     tournamentTitle: { type: String, required: true },
 
     tier: { type: String, enum: PUBLISH_TIERS.map((entry) => entry.tier), required: true },
-    amountLbp: { type: Number, required: true, min: 0 },
+    amountCents: { type: Number, required: true, min: 0 },
 
     status: {
       type: String,
@@ -32,7 +32,7 @@ const publishRequestSchema = new mongoose.Schema(
 
     confirmedAt: Date,
     confirmedBy: { type: String, ref: 'User' },
-    whishRef: String,
+    paymentRef: String,
 
     rejectedAt: Date,
     rejectedBy: { type: String, ref: 'User' },

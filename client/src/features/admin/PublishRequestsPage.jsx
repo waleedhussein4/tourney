@@ -19,13 +19,13 @@ import {
   LoadingState,
   Modal,
 } from '/src/components/ui/index.js'
-import { formatDateTime, formatLbp } from '/src/lib/format.js'
+import { formatDateTime, formatUsd } from '/src/lib/format.js'
 import styles from './admin.module.css'
 
 /**
  * The payment queue.
  *
- * Every paid tournament waiting on a Whish transfer, oldest complaint first —
+ * Every paid tournament waiting on a payment, oldest complaint first —
  * newest request first, rather — with the two answers a human can give it. This
  * is the manual half of paid publishing: there is no payment processor, so
  * somebody checks the transfer arrived and says so here.
@@ -44,7 +44,7 @@ export function PublishRequestsPage() {
       <PageHeader
         eyebrow="Administration"
         title="Publishing payments"
-        description="Tournaments waiting on a Whish transfer. Confirm one and it goes live; reject it and the host can try again."
+        description="Tournaments waiting on a payment. Confirm one and it goes live; reject it and the host can try again."
       />
 
       {query.isPending && <LoadingState label="Loading the queue" rows={3} />}
@@ -84,7 +84,7 @@ export function PublishRequestsPage() {
                 </div>
 
                 <p className={styles.requestAmount}>
-                  {formatLbp(request.amountLbp)}
+                  {formatUsd(request.amountCents)}
                   <span className={styles.requestTier}>{request.tier}</span>
                 </p>
 
@@ -155,7 +155,7 @@ function ResolveDialog({ resolving, onClose }) {
       description={
         resolving &&
         (confirming
-          ? `${resolving.request.tournamentTitle} goes live as soon as you confirm. ${formatLbp(resolving.request.amountLbp)} from ${resolving.request.host.name ?? 'the host'}.`
+          ? `${resolving.request.tournamentTitle} goes live as soon as you confirm. ${formatUsd(resolving.request.amountCents)} from ${resolving.request.host.name ?? 'the host'}.`
           : `${resolving.request.tournamentTitle} goes back to a draft. The host can send the payment again.`)
       }
       footer={
@@ -174,7 +174,7 @@ function ResolveDialog({ resolving, onClose }) {
       }
     >
       <Field
-        label={confirming ? 'Whish reference' : 'Reason'}
+        label={confirming ? 'payment reference' : 'Reason'}
         hint={
           confirming
             ? 'Optional. Whatever identifies the transfer, so this can be traced later.'
