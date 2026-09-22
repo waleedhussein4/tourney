@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { confirmMatch, reportMatch, tournamentKeys } from '/src/api/tournaments.js'
 import { useAuth } from '/src/features/auth/useAuth.js'
 import { Button, Card, Field, Input } from '/src/components/ui/index.js'
+import { formatMatchTime } from '/src/lib/format.js'
 import styles from './MatchActionsCard.module.css'
 
 /** The participant id (user id, or team id for a team tournament) the viewer competes under. */
@@ -52,14 +53,33 @@ export function MatchActionsCard({ tournament }) {
 function MatchAction({ tournament, match, myId, names }) {
   if (match.participants.includes(null)) return null
 
+  const scheduled = match.scheduledAt && (
+    <p className={styles.note}>Scheduled for {formatMatchTime(match.scheduledAt)}</p>
+  )
+
   if (match.state === 'reported') {
     if (match.reportedBy === myId) {
-      return <p className={styles.note}>Reported — waiting on your opponent to confirm.</p>
+      return (
+        <>
+          {scheduled}
+          <p className={styles.note}>Reported — waiting on your opponent to confirm.</p>
+        </>
+      )
     }
-    return <ConfirmForm tournament={tournament} match={match} names={names} />
+    return (
+      <>
+        {scheduled}
+        <ConfirmForm tournament={tournament} match={match} names={names} />
+      </>
+    )
   }
 
-  return <ReportForm tournament={tournament} match={match} names={names} />
+  return (
+    <>
+      {scheduled}
+      <ReportForm tournament={tournament} match={match} names={names} />
+    </>
+  )
 }
 
 function ReportForm({ tournament, match, names }) {

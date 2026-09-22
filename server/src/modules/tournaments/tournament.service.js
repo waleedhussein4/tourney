@@ -606,6 +606,39 @@ export async function updateMatches(tournamentId, hostId, matches) {
   return tournament
 }
 
+/**
+ * Sets when matches are played — one call for a single match or a whole round.
+ *
+ * A time must fall within the tournament's own `startDate`/`endDate` window.
+ * A time in the past is rejected only when the match had no `scheduledAt` yet;
+ * editing an already-scheduled match is allowed to move it into the past,
+ * since a host fixing a mistake after the fact is normal. Setting a time
+ * moves a `pending` match to `scheduled` but never overwrites the state of a
+ * match that has already been reported, disputed, or finalized.
+ */
+export async function scheduleMatches(tournamentId, hostId, matches) {
+  const tournament = await loadAsHost(tournamentId, hostId)
+  if (tournament.type !== 'brackets') throw ApiError.badRequest('This is not a bracket tournament')
+
+  for (const { id, scheduledAt } of matches) {
+    const match = tournament.matches.find((entry) => entry.id === id)
+    if (!match) throw ApiError.badRequest(`${id} is not a match in this tournament`)
+
+    if (scheduledAt < tournament.startDate || scheduledAt > tournament.endDate) {
+      throw ApiError.badRequest('The match time must fall within the tournament dates')
+    }
+    if (!match.scheduledAt && scheduledAt < new Date()) {
+      throw ApiError.badRequest('The match time cannot be in the past')
+    }
+
+    match.scheduledAt = scheduledAt
+    if (match.state === 'pending') match.state = 'scheduled'
+  }
+
+  await tournament.save()
+  return tournament
+}
+
 /** The participant id (a user id or a team id) `userId` competes under in `match`, or null. */
 function competitorIdFor(tournament, match, userId) {
   const id = String(userId)

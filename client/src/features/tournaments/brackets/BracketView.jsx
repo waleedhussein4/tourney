@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets'
 import { Badge, Modal } from '/src/components/ui/index.js'
+import { formatMatchTime } from '/src/lib/format.js'
 import { buildRounds, championOf } from './buildRounds.js'
 import styles from './BracketView.module.css'
 
@@ -56,6 +57,9 @@ export function BracketView({ tournament }) {
             </SeedTeam>
           ))}
         </div>
+        {seed.scheduledAt && (
+          <p className={styles.scheduledAt}>{formatMatchTime(seed.scheduledAt)}</p>
+        )}
       </SeedItem>
     </Seed>
   )

@@ -105,6 +105,13 @@ tournamentRouter.patch(
   controller.updateMatches
 )
 
+tournamentRouter.patch(
+  '/:tournamentId/matches/schedule',
+  requireAuth,
+  validate({ params: schemas.tournamentIdParams, body: schemas.scheduleMatchesSchema }),
+  controller.scheduleMatches
+)
+
 tournamentRouter.post(
   '/:tournamentId/matches/:matchId/report',
   requireAuth,

@@ -15,6 +15,14 @@ const DATE_TIME = new Intl.DateTimeFormat(undefined, {
   minute: '2-digit',
 })
 
+const MATCH_TIME = new Intl.DateTimeFormat(undefined, {
+  day: 'numeric',
+  month: 'short',
+  hour: 'numeric',
+  minute: '2-digit',
+  timeZoneName: 'short',
+})
+
 const USD = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
@@ -25,6 +33,34 @@ const USD = new Intl.NumberFormat('en-US', {
 export const formatDate = (value) => (value ? DATE.format(new Date(value)) : '')
 
 export const formatDateTime = (value) => (value ? DATE_TIME.format(new Date(value)) : '')
+
+/**
+ * A match's kickoff time in the viewer's own local timezone, with the zone
+ * named explicitly — e.g. "12 Oct, 8:00 PM GMT+9". `value` is a stored UTC
+ * Date/ISO string; `Intl` does the UTC-to-local conversion and supplies the
+ * zone name, so no timezone math happens by hand.
+ */
+export const formatMatchTime = (value) => (value ? MATCH_TIME.format(new Date(value)) : '')
+
+/**
+ * Converts a native `<input type="datetime-local">` value — timezone-naive,
+ * read as the viewer's local time — into a UTC ISO string to send to the
+ * server. `new Date('YYYY-MM-DDTHH:mm')` already parses that string as local
+ * time, so `toISOString()` is the UTC conversion.
+ */
+export const localInputToUtcIso = (value) => (value ? new Date(value).toISOString() : '')
+
+/**
+ * The reverse of `localInputToUtcIso`, for pre-filling a
+ * `datetime-local` input from a stored UTC value: "YYYY-MM-DDTHH:mm" in the
+ * viewer's local time.
+ */
+export function utcToLocalInput(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  const offsetMs = date.getTimezoneOffset() * 60 * 1000
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16)
+}
 
 /**
  * Real money, from cents: "$5", "$12.50".

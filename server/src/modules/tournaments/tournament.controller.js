@@ -123,6 +123,15 @@ export const updateMatches = asyncHandler(async (req, res) => {
   res.json({ tournament: await toManageView(tournament, req.userId) })
 })
 
+export const scheduleMatches = asyncHandler(async (req, res) => {
+  const tournament = await service.scheduleMatches(
+    req.params.tournamentId,
+    req.userId,
+    req.body.matches
+  )
+  res.json({ tournament: await toManageView(tournament, req.userId) })
+})
+
 export const reportMatch = asyncHandler(async (req, res) => {
   const tournament = await service.reportMatch(
     req.params.tournamentId,

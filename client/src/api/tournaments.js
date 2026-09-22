@@ -71,6 +71,14 @@ export const endTournament = (id) => post(`/api/tournaments/${id}/end`)
 /** `[{ id, winner }]` — the winner of each match, by match id; `winner: null` clears it. */
 export const saveMatches = (id, matches) => patch(`/api/tournaments/${id}/matches`, { matches })
 
+/**
+ * Sets when matches are played, by match id — one call for a single match or
+ * a whole round. `scheduledAt` values are UTC ISO strings.
+ * @param {{ id: string, scheduledAt: string }[]} matches
+ */
+export const scheduleMatches = (id, matches) =>
+  patch(`/api/tournaments/${id}/matches/schedule`, { matches })
+
 /** Score and elimination edits, by participant id. */
 export const saveParticipants = (id, participants) =>
   patch(`/api/tournaments/${id}/participants`, { participants })
