@@ -24,6 +24,17 @@ export const signupSchema = z.object({
   password,
 })
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().toLowerCase().email('Enter a valid email address'),
+})
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Reset token is required'),
+  // Reusing the signup rule: a reset password must meet the same bar a new
+  // one does.
+  password,
+})
+
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email('Enter a valid email address'),
   // Deliberately not the strong-password schema: an old account with a weak

@@ -1,8 +1,17 @@
+import crypto from 'node:crypto'
 import bcrypt from 'bcrypt'
 import User from '../../models/user.model.js'
 import { ApiError } from '../../utils/ApiError.js'
+import { sendMail } from '../../lib/mailer.js'
 
 const SALT_ROUNDS = 10
+const RESET_TOKEN_TTL_MS = 30 * 60 * 1000
+
+/** sha256 of the raw token — the same idea as a password hash, without the
+ * deliberate slowness bcrypt adds for a value that is already 32 random bytes. */
+function hashToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex')
+}
 
 /**
  * Creates an account.
@@ -41,6 +50,50 @@ export async function authenticateUser({ email, password }) {
   const matches = await bcrypt.compare(password, hash)
 
   if (!user || !matches) throw ApiError.unauthorized('Incorrect email or password')
+
+  return user
+}
+
+/**
+ * Starts a password reset, if the email belongs to an account.
+ *
+ * Always resolves the same way whether or not the account exists — a
+ * different response, or an error, would tell a caller which emails are
+ * registered.
+ */
+export async function requestPasswordReset({ email, resetUrlBase }) {
+  const user = await User.findOne({ email })
+  if (!user) return
+
+  const token = crypto.randomBytes(32).toString('hex')
+  user.resetPasswordToken = hashToken(token)
+  user.resetPasswordExpires = new Date(Date.now() + RESET_TOKEN_TTL_MS)
+  await user.save()
+
+  const resetUrl = `${resetUrlBase}/reset-password?token=${token}`
+  await sendMail({
+    to: user.email,
+    subject: 'Reset your Tourney password',
+    text: `Reset your password: ${resetUrl}\n\nThis link expires in 30 minutes. If you did not request this, ignore this email.`,
+  })
+}
+
+/**
+ * Completes a password reset: verifies the token, sets the new password, and
+ * invalidates the token so it cannot be replayed.
+ */
+export async function resetPassword({ token, password }) {
+  const user = await User.findOne({
+    resetPasswordToken: hashToken(token),
+    resetPasswordExpires: { $gt: new Date() },
+  }).select('+resetPasswordToken +resetPasswordExpires')
+
+  if (!user) throw ApiError.badRequest('That reset link is invalid or has expired')
+
+  user.password = await bcrypt.hash(password, SALT_ROUNDS)
+  user.resetPasswordToken = undefined
+  user.resetPasswordExpires = undefined
+  await user.save()
 
   return user
 }

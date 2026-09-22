@@ -117,6 +117,21 @@ function loadConfig() {
     problems.push('Card payments need PADDLE_PRICE_PLAN — the gateway price for the plan')
   }
 
+  // Password-reset email, via Resend. Unset in development, the mailer logs
+  // instead of sending — nothing to configure for local work. Unset in
+  // production would silently swallow every reset email, which is worse than
+  // failing loudly at boot, so it is required there.
+  const resend = {
+    apiKey: read('RESEND_API_KEY'),
+    mailFrom: read('MAIL_FROM'),
+  }
+  if (nodeEnv === 'production' && !resend.apiKey) {
+    problems.push('RESEND_API_KEY is required in production — password-reset emails need it')
+  }
+  if (nodeEnv === 'production' && !resend.mailFrom) {
+    problems.push('MAIL_FROM is required in production — the sender address for reset emails')
+  }
+
   if (problems.length > 0) {
     throw new Error(
       [
@@ -144,6 +159,9 @@ function loadConfig() {
     sentryDsn,
     // Optional: the bearer token the Cloudflare Cron Trigger presents to /api/cron/*.
     cronSecret,
+    // Password-reset email. `mailFrom` unset in development is fine — the
+    // mailer never reads it there, since it logs instead of calling Resend.
+    resend,
     // Card payments. `enabled` is what the rest of the code asks: unset
     // credentials mean the publish flow waits for a human instead.
     paddle: Object.freeze({ ...paddle, enabled: paddleGiven.length === paddleSet.length }),

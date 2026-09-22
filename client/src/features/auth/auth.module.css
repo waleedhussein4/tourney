@@ -61,6 +61,12 @@
   font-size: var(--text-sm);
 }
 
+.forgot {
+  align-self: flex-start;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
 .alt {
   margin-top: var(--space-5);
   padding-top: var(--space-4);
