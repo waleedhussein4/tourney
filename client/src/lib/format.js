@@ -32,11 +32,26 @@ export const formatDateTime = (value) => (value ? DATE_TIME.format(new Date(valu
  * Used for the one amount the site actually charges — the hosting
  * subscription. Everything else money-shaped (an entry fee, a prize) is a
  * plain dollar amount the host typed, and goes through `formatMoney` instead.
+ *
+ * Wrapped in bidi isolates (U+2068/U+2069) so the amount keeps its order and
+ * punctuation inside right-to-left text — the hosts page renders this in
+ * Arabic.
  */
 export function formatUsd(cents) {
   if (cents === 0) return 'Free'
   if (cents == null) return ''
-  return USD.format(cents / 100)
+  return `⁨${USD.format(cents / 100)}⁩`
+}
+
+/**
+ * Grouped western digits, isolated from the text around them: "150,000".
+ *
+ * U+2068 and U+2069 fence the number off from the bidirectional algorithm, so
+ * it keeps its comma and its order inside an Arabic sentence instead of being
+ * reordered around the surrounding right-to-left run.
+ */
+export function formatNumber(value) {
+  return `⁨${value.toLocaleString('en-US')}⁩`
 }
 
 /**
