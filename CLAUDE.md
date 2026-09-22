@@ -1,8 +1,10 @@
 # CLAUDE.md — working rules for this repository
 
 **Tourney** is a tournament hosting platform: players enter bracket or battle
-royale tournaments with entry fees escrowed in demo credits; hosting a live
-tournament beyond the first free one needs a $5/month subscription.
+royale tournaments and hosts run them. Entry fees and prizes are declared
+amounts settled directly between host and players; the site never moves money.
+Hosting a live tournament beyond the first free one needs a $5/month
+subscription.
 
 ## Commands
 
