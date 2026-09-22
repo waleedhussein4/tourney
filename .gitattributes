@@ -1,0 +1,13 @@
+# Normalise line endings so `npm run format:check` behaves the same on a
+# Windows checkout as it does in CI. Prettier defaults to `endOfLine: "lf"`,
+# and with git core.autocrlf=true every file in the tree fails the check
+# locally while passing on the Linux runner.
+* text=auto eol=lf
+
+# Binary assets must never be touched.
+*.png binary
+*.jpg binary
+*.gif binary
+*.webm binary
+*.woff binary
+*.woff2 binary
