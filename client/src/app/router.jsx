@@ -5,6 +5,8 @@ import { PageShell } from '/src/components/layout/PageShell.jsx'
 import { LoadingState } from '/src/components/ui/index.js'
 import { SignInPage } from '/src/features/auth/SignInPage.jsx'
 import { SignUpPage } from '/src/features/auth/SignUpPage.jsx'
+import { ForgotPasswordPage } from '/src/features/auth/ForgotPasswordPage.jsx'
+import { ResetPasswordPage } from '/src/features/auth/ResetPasswordPage.jsx'
 import { HomePage } from '/src/features/home/HomePage.jsx'
 import { BrowsePage } from '/src/features/tournaments/BrowsePage.jsx'
 import { TournamentPage } from '/src/features/tournaments/TournamentPage.jsx'
@@ -85,6 +87,8 @@ export function Router() {
         <Route element={<GuestRoute />}>
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
         </Route>
 
         {/* Signed in. */}

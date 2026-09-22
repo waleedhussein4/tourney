@@ -32,6 +32,12 @@ const userSchema = new Schema(
     // leak the hash by forgetting to project it away.
     password: { type: String, required: true, select: false },
 
+    // Set only while a password-reset link is outstanding; cleared the moment
+    // it is used or replaced. Hashed the same way a login password never is
+    // stored raw — a leaked database must not hand out working reset links.
+    resetPasswordToken: { type: String, select: false },
+    resetPasswordExpires: { type: Date, select: false },
+
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
 
     isHost: { type: Boolean, default: false },
