@@ -13,6 +13,7 @@ import { connectToDatabase } from './db/connect.js'
 import { ApiError } from './utils/ApiError.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
+import { requestId } from './middleware/requestId.js'
 import { healthRouter } from './modules/health/health.routes.js'
 import { authRouter } from './modules/auth/auth.routes.js'
 import { userRouter } from './modules/users/user.routes.js'
@@ -64,6 +65,7 @@ export function createApp() {
   app.disable('x-powered-by')
 
   app.use(helmet())
+  app.use(requestId)
 
   // CORS exists only for the case where the client is deployed to a different
   // origin than the API. The target setup has no such case — Vite proxies /api

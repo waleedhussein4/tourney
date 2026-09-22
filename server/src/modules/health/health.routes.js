@@ -2,6 +2,7 @@ import { Router } from 'express'
 import mongoose from 'mongoose'
 import { connectToDatabase } from '../../db/connect.js'
 import { asyncHandler } from '../../utils/asyncHandler.js'
+import config from '../../config/env.js'
 
 export const healthRouter = Router()
 
@@ -21,6 +22,13 @@ healthRouter.get(
     await connectToDatabase().catch(() => {})
 
     const state = DB_STATES[mongoose.connection.readyState] ?? 'unknown'
-    res.json({ status: state === 'connected' ? 'ok' : 'degraded', database: state })
+    res.json({
+      status: state === 'connected' ? 'ok' : 'degraded',
+      database: state,
+      // Booleans only: enough to see a misconfiguration without reading
+      // container logs, without exposing anything a secret would.
+      emailConfigured: config.resend.configured,
+      paymentsEnabled: config.paddle.enabled,
+    })
   })
 )
