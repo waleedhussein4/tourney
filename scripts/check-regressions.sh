@@ -117,6 +117,9 @@ gate "no Lebanese phone number committed"   bash -c '
     git grep --untracked -nE "(\+?961[ -]?[0-9]{2}[ -]?[0-9]{3}[ -]?[0-9]{3})|wa\.me/[0-9]"       -- . ":!scripts/check-regressions.sh"
   '
 
+gate "no AI attribution in history" \
+  bash -c 'count=$(git log --all --format=%B | grep -ciE "co-authored-by:.*(anthropic|claude|openai|copilot)|generated with|claude code|anthropic"); [ "$count" -eq 0 ] || echo "$count"'
+
 echo
 if [ $fail -eq 0 ]; then echo "all gates pass"; else echo "SOME GATES FAILED"; fi
 exit $fail
