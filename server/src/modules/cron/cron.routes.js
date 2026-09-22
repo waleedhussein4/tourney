@@ -22,7 +22,8 @@ export const cronRouter = Router()
  *   1. It refuses to run at all unless `CRON_SECRET` is set, so an
  *      unconfigured deployment cannot be talked into wiping itself.
  *   2. It requires that secret as a bearer token, compared in constant time.
- *      Vercel Cron sends exactly this header when the variable exists.
+ *      The Worker's `scheduled` handler sends exactly this header, built from
+ *      the same `CRON_SECRET` set as a Worker secret.
  *   3. It is rate limited, so the token cannot be probed for.
  */
 
@@ -76,7 +77,8 @@ const reseed = asyncHandler(async (req, res) => {
   res.json({ ok: true, cleared, seeded, durationMs: Date.now() - startedAt })
 })
 
-// Vercel Cron issues a GET, which is why an operation this destructive answers
-// one. POST is accepted too, for triggering a reseed by hand.
+// The Cloudflare Cron Trigger issues a GET, which is why an operation this
+// destructive answers one. POST is accepted too, for triggering a reseed by
+// hand.
 cronRouter.get('/reseed', cronLimiter, reseed)
 cronRouter.post('/reseed', cronLimiter, reseed)

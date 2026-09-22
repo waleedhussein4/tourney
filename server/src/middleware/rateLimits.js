@@ -37,9 +37,9 @@ export const checkoutLimiter = limiter({
 })
 
 /**
- * The scheduled reseed. One caller (Vercel Cron) hits it once a day, so a cap
- * this low costs nothing legitimate and takes brute-forcing the bearer token
- * off the table entirely.
+ * The scheduled reseed. One caller (the Cloudflare Cron Trigger) hits it once a
+ * day, so a cap this low costs nothing legitimate and takes brute-forcing the
+ * bearer token off the table entirely.
  */
 export const cronLimiter = limiter({
   windowMs: 60 * 60 * 1000,

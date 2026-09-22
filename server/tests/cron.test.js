@@ -66,7 +66,7 @@ describe('POST/GET /api/cron/reseed', () => {
     expect(await User.countDocuments()).toBe(before)
   })
 
-  it('rebuilds the demo data on GET, which is what Vercel Cron sends', async () => {
+  it('rebuilds the demo data on GET, which is what the Cron Trigger sends', async () => {
     await seedDemoData()
 
     // A real account. The reset is for the demo data; it must not touch this.

@@ -47,10 +47,11 @@ there. `npm run format` (prettier) is not in CI, but keep the diff clean.
   Small and coherent within a branch; the squash title is what lands on `main`. Do not include AI attribution lines (Co-Authored-By, Generated with, etc.).
 - **Pull request bodies:** What / Why / How, screenshots for anything visual,
   and the checklist. "Why" is the part reviewers actually need.
-- **`main` stays deployable after every merge.** It is connected to Vercel and
-  deploys production on merge, so a red `main` is a broken live site. If a
-  change would break the app halfway, make the PR bigger rather than splitting
-  it somewhere that does not work.
+- **`main` stays deployable after every merge.** Production is a Cloudflare
+  Worker and Container deployed with `wrangler deploy`, so a red `main` is a
+  broken live site the moment someone deploys it. If a change would break the
+  app halfway, make the PR bigger rather than splitting it somewhere that does
+  not work.
 
 ---
 

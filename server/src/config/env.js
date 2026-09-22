@@ -14,8 +14,8 @@ const nodeEnv = process.env.NODE_ENV || 'development'
 
 // dotenv never overwrites a variable that is already set, so the first file to
 // define a key wins. Loading the environment-specific file first preserves the
-// precedence the original project relied on, and real deployments (Vercel,
-// Atlas) simply have no dotenv files at all.
+// precedence the original project relied on, and real deployments (the
+// container, Atlas) simply have no dotenv files at all.
 dotenv.config({ path: path.join(serverRoot, `.env.${nodeEnv}`) })
 dotenv.config({ path: path.join(serverRoot, '.env') })
 
@@ -138,11 +138,11 @@ function loadConfig() {
     mongodbUri,
     jwtSecret,
     // Optional: unset means the client is served from the same origin as the
-    // API, which is the target setup (Vite proxy locally, one Vercel project in
-    // production) and needs no CORS at all.
+    // API, which is the target setup (Vite proxy locally, one Cloudflare Worker
+    // in production) and needs no CORS at all.
     clientUrl,
     sentryDsn,
-    // Optional: the bearer token Vercel Cron presents to /api/cron/*.
+    // Optional: the bearer token the Cloudflare Cron Trigger presents to /api/cron/*.
     cronSecret,
     // Card payments. `enabled` is what the rest of the code asks: unset
     // credentials mean the publish flow waits for a human instead.

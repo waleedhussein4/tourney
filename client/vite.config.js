@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 // The client always talks to a relative `/api` path. In development Vite proxies
 // that to the local API server; in production the client and API are same-origin
-// on Vercel. Result: no CORS anywhere.
+// on the same Cloudflare Worker. Result: no CORS anywhere.
 export default defineConfig({
   plugins: [react()],
   build: {

@@ -54,8 +54,11 @@ if (config.sentryDsn) {
 export function createApp() {
   const app = express()
 
-  // Behind Vercel's proxy, the client address is in `X-Forwarded-For`. Without
-  // this the rate limiters would see one address for the whole world.
+  // Behind Cloudflare's edge, the client address is in `X-Forwarded-For`.
+  // `worker/index.js` forwards the incoming Request to the container as-is —
+  // it does not rebuild headers — so the header the container sees still
+  // carries exactly the one hop Cloudflare's edge added. Without `trust
+  // proxy` set, the rate limiters would see one address for the whole world.
   app.set('trust proxy', 1)
   app.disable('x-powered-by')
 
@@ -63,8 +66,9 @@ export function createApp() {
 
   // CORS exists only for the case where the client is deployed to a different
   // origin than the API. The target setup has no such case — Vite proxies /api
-  // in development and Vercel serves both from one origin in production — so
-  // with CLIENT_URL unset no CORS middleware is registered at all.
+  // in development and the Cloudflare Worker serves both from one origin in
+  // production — so with CLIENT_URL unset no CORS middleware is registered at
+  // all.
   if (config.clientUrl) {
     app.use(cors({ origin: config.clientUrl, credentials: true }))
   }

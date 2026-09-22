@@ -1,11 +1,8 @@
 name: Deploy
 
 on:
-  # Push-to-main deploys are enabled by the Cloudflare migration, which is
-  # what adds wrangler.jsonc. Until then this workflow is dispatch-only, so
-  # merging it cannot trigger a deploy against a repo with no Worker config.
-  # push:
-  #   branches: [main]
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       ref:
