@@ -22,9 +22,7 @@ function ErrorFallback({ resetError }) {
       <div className={styles.page}>
         <p className={styles.code}>Error</p>
         <h1 className={styles.title}>Something went wrong</h1>
-        <p className={styles.body}>
-          The page hit an unexpected error. Reloading usually fixes it.
-        </p>
+        <p className={styles.body}>The page hit an unexpected error. Reloading usually fixes it.</p>
         <div className={styles.actions}>
           <Button variant="primary" onClick={resetError}>
             Reload

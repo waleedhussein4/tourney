@@ -32,10 +32,7 @@ describe('the free plan', () => {
 
     // Fill and finish the first — this is a battle royale, so scores are
     // enough to end it once the entrants are in.
-    await Tournament.updateOne(
-      { _id: first.id },
-      { $set: { hasStarted: true, hasEnded: true } }
-    )
+    await Tournament.updateOne({ _id: first.id }, { $set: { hasStarted: true, hasEnded: true } })
 
     await host.agent.post(`/api/tournaments/${second.id}/publish`).expect(200)
   })

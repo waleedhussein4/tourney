@@ -112,4 +112,3 @@ export function totalPrize(values) {
   if (values.type === 'brackets') return Number(values.prize) || 0
   return (values.prizes ?? []).reduce((sum, entry) => sum + (Number(entry.prize) || 0), 0)
 }
-

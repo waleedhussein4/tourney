@@ -22,8 +22,7 @@ export function PrivacyPage() {
         <h2>Cookies</h2>
         <p>
           One cookie: the session cookie that keeps you signed in. It is not used to track you
-          across other sites. We do not run analytics and we do not load any third-party
-          trackers.
+          across other sites. We do not run analytics and we do not load any third-party trackers.
         </p>
 
         <h2>Payment data</h2>
@@ -35,8 +34,8 @@ export function PrivacyPage() {
         <h2>Sharing</h2>
         <p>
           We do not sell your data or share it with advertisers. Tournament data you create —
-          brackets, standings, team rosters — is visible to other users of the site by design,
-          since that is what the service is for.
+          brackets, standings, team rosters — is visible to other users of the site by design, since
+          that is what the service is for.
         </p>
 
         <h2>Deleting your data</h2>

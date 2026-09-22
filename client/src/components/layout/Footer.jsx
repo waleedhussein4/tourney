@@ -22,7 +22,11 @@ export function Footer() {
             {link.label}
           </Link>
         ))}
-        <a href="https://github.com/waleedhussein4/tourney-rewrite" target="_blank" rel="noreferrer">
+        <a
+          href="https://github.com/waleedhussein4/tourney-rewrite"
+          target="_blank"
+          rel="noreferrer"
+        >
           GitHub
         </a>
       </nav>

@@ -4,7 +4,14 @@ import toast from 'react-hot-toast'
 import { billingKeys, getMyBilling, startCheckout } from '/src/api/billing.js'
 import { currentUserKey } from '/src/features/auth/queries.js'
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
-import { Badge, Button, Card, CardHeader, ErrorState, LoadingState } from '/src/components/ui/index.js'
+import {
+  Badge,
+  Button,
+  Card,
+  CardHeader,
+  ErrorState,
+  LoadingState,
+} from '/src/components/ui/index.js'
 import { formatDate, formatUsd } from '/src/lib/format.js'
 import { openCheckout } from '/src/lib/paddle.js'
 import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
@@ -145,7 +152,11 @@ export function BillingPage() {
         {!active && (
           <div className={styles.actions}>
             {gateway ? (
-              <Button variant="primary" onClick={() => subscribe.mutate()} loading={subscribe.isPending}>
+              <Button
+                variant="primary"
+                onClick={() => subscribe.mutate()}
+                loading={subscribe.isPending}
+              >
                 Subscribe — {formatUsd(plan.priceCents)}/{plan.interval}
               </Button>
             ) : (

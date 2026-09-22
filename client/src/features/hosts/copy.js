@@ -95,7 +95,8 @@ export const COPY = {
     ],
 
     closingTitle: 'Running something soon?',
-    closingBody: 'Start hosting free, or send us a message and we will set the first one up with you.',
+    closingBody:
+      'Start hosting free, or send us a message and we will set the first one up with you.',
     closingAction: "Start hosting — it's free",
     closingContact: 'Email us',
   },

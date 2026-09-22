@@ -158,7 +158,7 @@ function Pricing({ t, data, language }) {
           {t.pricingLine(
             formatNumber(data.freeLiveTournaments),
             formatUsd(data.plan.priceCents),
-            intervalName(language, data.plan.interval),
+            intervalName(language, data.plan.interval)
           )}
         </p>
       )}

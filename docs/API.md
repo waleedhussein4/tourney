@@ -270,7 +270,7 @@ Shared fields:
 | `category`             | a category slug                                                                                                      |
 | `accessibility`        | `open` \| `application required`                                                                                     |
 | `teamSize`             | integer 1–16; `1` is a solo tournament                                                                               |
-| `entryFee`             | a declared USD amount, ≥ 0 — settled between host and player, never charged by the app                              |
+| `entryFee`             | a declared USD amount, ≥ 0 — settled between host and player, never charged by the app                               |
 | `description`, `rules` | HTML, sanitised server-side. Limits are on the _visible_ text — 200 and 800 characters — not the markup              |
 | `contactInfo`          | `{ email?, phone?, socialMedia? { discord?, instagram?, twitter?, facebook? } }`, strict — unknown keys are an error |
 | `applicationForm`      | up to 10 question labels, at most 80 characters each; **required** when `accessibility` is `application required`    |
@@ -458,10 +458,10 @@ way in — so a code read off a screen works whatever case it is typed in.
 All require `role: "admin"`, which is set by the seed or by hand in the
 database — there is no endpoint that grants it.
 
-|                          |                                                                                |
-| ------------------------ | ------------------------------------------------------------------------------ |
-| `POST /api/admin/seed`   | Add whatever demo data is missing                                              |
-| `DELETE /api/admin/seed` | Clear demo data — all tournaments, teams, and non-admin accounts               |
+|                          |                                                                  |
+| ------------------------ | ---------------------------------------------------------------- |
+| `POST /api/admin/seed`   | Add whatever demo data is missing                                |
+| `DELETE /api/admin/seed` | Clear demo data — all tournaments, teams, and non-admin accounts |
 
 ---
 

@@ -35,7 +35,12 @@ export function PublishSection({ tournament }) {
           title="Published"
           subtitle="Anyone can find and join this tournament."
           actions={
-            <Button variant="ghost" size="sm" onClick={() => unpublish.mutate()} loading={unpublish.isPending}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => unpublish.mutate()}
+              loading={unpublish.isPending}
+            >
               Unpublish
             </Button>
           }
@@ -53,8 +58,7 @@ export function PublishSection({ tournament }) {
 
       {limitReached ? (
         <p className={styles.blockers}>
-          {publish.error.message}{' '}
-          <Link to="/billing">See billing</Link>
+          {publish.error.message} <Link to="/billing">See billing</Link>
         </p>
       ) : (
         <div className={styles.actions}>

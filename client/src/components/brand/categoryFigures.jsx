@@ -28,7 +28,15 @@ export const BattleRoyale = () => (
       [76, 92],
       [166, 40],
     ].map(([cx, cy]) => (
-      <circle key={`${cx}`} cx={cx} cy={cy} r="2.5" fill="currentColor" stroke="none" opacity="0.5" />
+      <circle
+        key={`${cx}`}
+        cx={cx}
+        cy={cy}
+        r="2.5"
+        fill="currentColor"
+        stroke="none"
+        opacity="0.5"
+      />
     ))}
   </g>
 )

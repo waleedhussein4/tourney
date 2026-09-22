@@ -254,7 +254,6 @@ describe('GET /api/users/me', () => {
     })
   })
 
-
   it('rejects a token signed for an account that no longer exists', async () => {
     const { agent, user } = await signUp('ada')
     await User.deleteOne({ _id: user.id })
@@ -313,7 +312,6 @@ describe('the endpoints the rewrite deleted', () => {
     const { agent } = await signUp('ada')
     await agent.get('/api/users/me/transactions').expect(404)
   })
-
 
   // Each of these was a way to obtain the old demo currency, or an identity check
   // that a 401 body could defeat. That currency no longer exists either.
