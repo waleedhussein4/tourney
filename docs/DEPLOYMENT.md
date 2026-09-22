@@ -224,17 +224,16 @@ confirm the subscription checkout flow works end to end.
 
 ---
 
-## Error tracking and uptime
+## Error tracking and health
 
 **Errors.** `@sentry/node` (server) and `@sentry/react` (client) stay
 inactive until `SENTRY_DSN` and `VITE_SENTRY_DSN` are set as above; no code
 change needed to enable them.
 
-**Uptime.** `GET /api/health` is public and returns `200` with
-`{"status":"ok","database":"connected"}` when the database is reachable. A
-free [uptimerobot.com](https://uptimerobot.com) HTTP(s) monitor against
-`https://tourneylb.com/api/health` every 5 minutes covers this, same as
-before — no code or config in this repository is involved.
+**Health.** `GET /api/health` is public and returns `200` with
+`{"status":"ok","database":"connected"}` when the database is reachable, and
+a non-`200` when it is not. It takes no arguments and touches no user data,
+so it is safe to poll from whatever external monitor you prefer.
 
 ---
 

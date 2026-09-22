@@ -51,6 +51,6 @@ lerna-debug.log*
 Thumbs.db
 desktop.ini
 
-# automated tooling local overrides
-.bot/settings.local.json
-bot.local.md
+# Local editor config
+.idea/
+.vscode/
