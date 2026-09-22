@@ -1,6 +1,6 @@
 // Starts one in-memory MongoDB replica set for the whole test run.
 //
-// A replica set, not a standalone `mongod`: every credit movement runs inside a
+// A replica set, not a standalone `mongod`: every multi-document write runs inside a
 // transaction, and a standalone server rejects those outright. Testing against a
 // replica set means the suite exercises the same code path production does
 // rather than a weakened version of it.

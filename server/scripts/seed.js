@@ -1,4 +1,4 @@
-// Seeds a database with demo accounts, teams, credit packages, and tournaments
+// Seeds a database with demo accounts, teams, subscription plans, and tournaments
 // in every state a visitor can land on.
 //
 //   npm run seed              # add whatever is missing
@@ -35,7 +35,7 @@ async function main() {
 
   console.log(
     `Seeded ${result.users} users, ${result.teams} teams, ` +
-      `${result.products} credit packages, ${result.tournaments} tournaments.`
+      `${result.products} subscription plans, ${result.tournaments} tournaments.`
   )
 
   console.log('\nSign in with:\n')

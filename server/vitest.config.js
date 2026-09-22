@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     // One in-memory MongoDB replica set is started for the whole run; each test
     // file then gets its own database inside it. A replica set rather than a
-    // standalone `mongod` because every credit movement in this app runs in a
+    // standalone `mongod` because multi-document writes in this app run in a
     // transaction, and a standalone server refuses those — the tests exercise
     // the same code path production does.
     globalSetup: ['./tests/setup/global-setup.js'],
