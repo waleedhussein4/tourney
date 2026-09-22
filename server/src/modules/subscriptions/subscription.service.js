@@ -99,11 +99,22 @@ export async function startCheckout(userId) {
  * what is already recorded is ignored rather than allowed to resurrect a
  * cancelled plan.
  */
-export async function applySubscription({ userId, subscriptionId, status, renewsAt, occurredAt }) {
+export async function applySubscription({
+  userId,
+  subscriptionId,
+  status,
+  renewsAt,
+  occurredAt,
+  eventId,
+}) {
   if (!userId) return { applied: false, reason: 'no user on the event' }
 
   const user = await User.findById(userId)
   if (!user) return { applied: false, reason: 'unknown user' }
+
+  if (eventId && eventId === user.hostingPlan?.lastEventId) {
+    return { applied: false, reason: 'already applied this event' }
+  }
 
   const seen = user.hostingPlan?.updatedAt
   if (seen && occurredAt && occurredAt < seen) {
@@ -116,6 +127,7 @@ export async function applySubscription({ userId, subscriptionId, status, renews
     provider: 'paddle',
     renewsAt: renewsAt ?? user.hostingPlan?.renewsAt,
     updatedAt: occurredAt ?? new Date(),
+    lastEventId: eventId ?? user.hostingPlan?.lastEventId,
   }
   await user.save()
 
