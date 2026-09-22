@@ -110,7 +110,7 @@
   --accent-glow: color-mix(in srgb, var(--violet-500) 22%, transparent);
   --accent-wash: color-mix(in srgb, var(--violet-500) 12%, transparent);
 
-  /* Status. Success doubles as the credits colour: money in this app is a win. */
+  /* Status. Success doubles as the money-positive colour: a declared win in this app. */
   --success: var(--green-400);
   --success-solid: var(--green-600);
   --danger: var(--red-400);
