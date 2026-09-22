@@ -4,6 +4,7 @@
 
 import User from '../../models/user.model.js'
 import Team from '../../models/team.model.js'
+import { attentionSummary } from './tournament.service.js'
 
 /**
  * Resolves every user id a tournament mentions to a username in one query.
@@ -181,6 +182,7 @@ export async function toManageView(tournament, viewerId) {
     })),
     acceptedUsers: tournament.acceptedUsers,
     acceptedTeams: tournament.acceptedTeams,
+    attention: attentionSummary(tournament),
   }
 }
 

@@ -77,7 +77,7 @@ export function DisputesSection({ tournament }) {
   if (disputed.length === 0) return null
 
   return (
-    <Card>
+    <Card id="disputes">
       <CardHeader
         title="Disputed matches"
         subtitle="The two competitors reported different results. Enter the final score to settle it."
