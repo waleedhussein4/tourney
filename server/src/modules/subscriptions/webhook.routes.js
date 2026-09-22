@@ -1,10 +1,9 @@
 import express, { Router } from 'express'
-import { PUBLISH_TIERS } from '../../config/publishing.js'
 import * as gateway from '../../payments/paddle.js'
-import * as service from './publishRequest.service.js'
+import * as service from './subscription.service.js'
 
 /**
- * The payment gateway telling us a host has paid.
+ * The payment gateway telling us a subscription changed.
  *
  * Mounted before the JSON body parser, because the signature is computed over
  * the bytes the gateway sent and a parsed-and-reserialised body is not those
@@ -28,32 +27,21 @@ webhookRouter.post(
       })
     } catch {
       // An unverifiable delivery is not from the gateway, or the secret is
-      // wrong. Either way retrying will not help, and nothing is logged that
-      // an attacker could use to tell the two apart.
+      // wrong. Either way a retry will not help, and nothing is reported that
+      // would let a caller tell those two apart.
       res.sendStatus(400)
       return
     }
 
-    if (!gateway.isPaymentSettled(event)) {
+    if (!gateway.isSubscriptionEvent(event)) {
       res.sendStatus(200)
       return
     }
 
-    const payment = gateway.paymentFrom(event)
-
-    // What the gateway charged has to match what the tier costs. The price
-    // object lives in the gateway's dashboard and the amount lives in this
-    // repository; this is the line where the two are held to each other, and it
-    // is why a mispriced product cannot quietly publish a tournament.
-    const expected = PUBLISH_TIERS.some((tier) => tier.amountCents === payment.totalCents)
-    if (!payment.tournamentId || !expected) {
-      res.sendStatus(200)
-      return
-    }
-
-    await service.markPaid(payment.tournamentId, {
-      provider: 'paddle',
-      providerRef: payment.providerRef,
+    const subscription = gateway.subscriptionFrom(event)
+    await service.applySubscription({
+      ...subscription,
+      occurredAt: event.occurredAt ? new Date(event.occurredAt) : new Date(),
     })
 
     res.sendStatus(200)

@@ -1,21 +1,11 @@
 import Tournament from '../../models/tournament.model.js'
-import PublishRequest from '../../models/publishRequest.model.js'
 import Team from '../../models/team.model.js'
 import User from '../../models/user.model.js'
 import { LIMITS, PAGE_SIZE } from '../../config/constants.js'
-import { UNPUBLISHED } from '../../config/publishing.js'
-import { withTransaction } from '../../db/withTransaction.js'
+import { UNPUBLISHED } from '../../config/publishStates.js'
+import { assertMayPublish } from '../subscriptions/subscription.service.js'
 import { ApiError } from '../../utils/ApiError.js'
 import { sanitizeRichText, toPlainText } from '../../utils/text.js'
-import {
-  creditBank,
-  creditUser,
-  debitBank,
-  debitUser,
-  depositIntoBank,
-  recordTransaction,
-} from './bank.service.js'
-import { payOutTournament } from './payout.service.js'
 
 // --- loading ----------------------------------------------------------------
 
@@ -188,6 +178,37 @@ export async function listMine(userId) {
   }).sort({ createdAt: -1 })
 }
 
+/**
+ * Puts a draft in front of people.
+ *
+ * The only thing standing between a host and a published tournament is how many
+ * they already have live — see `assertMayPublish`. There is no payment step
+ * here: the subscription is bought once, on the billing page, and this reads it.
+ */
+export async function publishTournament(tournamentId, hostId) {
+  const tournament = await loadAsHost(tournamentId, hostId)
+  if (tournament.isPublished) throw ApiError.conflict('This tournament is already published')
+
+  await assertMayPublish(hostId)
+
+  tournament.publishState = 'published'
+  await tournament.save()
+  return tournament
+}
+
+/** Takes a tournament back out of public view. Only before it starts. */
+export async function unpublishTournament(tournamentId, hostId) {
+  const tournament = await loadAsHost(tournamentId, hostId)
+  if (!tournament.isPublished) throw ApiError.conflict('This tournament is not published')
+  if (tournament.hasStarted) {
+    throw ApiError.badRequest('A tournament that has started cannot be hidden')
+  }
+
+  tournament.publishState = 'draft'
+  await tournament.save()
+  return tournament
+}
+
 // --- host edits -------------------------------------------------------------
 
 /** Applies a host's edits. Only fields the host may still change get through. */
@@ -228,69 +249,21 @@ export async function postUpdate(tournamentId, hostId, content) {
 }
 
 /**
- * Cancels a tournament and refunds every entry fee.
+ * Cancels a tournament.
  *
  * Only before it starts: once people are playing, the result is what the prizes
- * are for. Refunds and the host's own top-up all move inside one transaction, so
- * a cancelled tournament leaves the same total number of credits in the world as
- * it found.
+ * are for. Entry fees are between the host and their entrants and were never
+ * held here, so there is nothing to give back — whoever collected the money
+ * settles it the way they collected it.
  */
 export async function deleteTournament(tournamentId, hostId) {
-  return withTransaction(async (session) => {
-    const tournament = await loadAsHost(tournamentId, hostId, session)
-    if (tournament.hasStarted) {
-      throw ApiError.badRequest('A tournament that has started cannot be cancelled')
-    }
+  const tournament = await loadAsHost(tournamentId, hostId)
+  if (tournament.hasStarted) {
+    throw ApiError.badRequest('A tournament that has started cannot be cancelled')
+  }
 
-    const refunds = []
-    for (const participant of tournament.participants()) {
-      const payer = tournament.isTeamBased ? String(participant.paidBy) : String(participant.userId)
-      const amount = tournament.entryCost
-      if (amount <= 0) continue
-
-      await debitBank(tournament._id, amount, session)
-      await creditUser(payer, amount, session)
-      await recordTransaction(
-        {
-          userId: payer,
-          type: 'refund',
-          amount,
-          tournamentId: tournament._id,
-          description: `Refund for cancelled "${tournament.title}"`,
-        },
-        session
-      )
-      refunds.push({ userId: payer, amount })
-      tournament.bank -= amount
-    }
-
-    // Whatever is left is the host's own top-up coming back.
-    if (tournament.bank > 0) {
-      const remainder = tournament.bank
-      await debitBank(tournament._id, remainder, session)
-      await creditUser(tournament.host, remainder, session)
-      await recordTransaction(
-        {
-          userId: tournament.host,
-          type: 'refund',
-          amount: remainder,
-          tournamentId: tournament._id,
-          description: `Bank returned from cancelled "${tournament.title}"`,
-        },
-        session
-      )
-    }
-
-    // A cancelled tournament must not linger in the admin queue as a payment to chase.
-    await PublishRequest.updateMany(
-      { tournamentId: tournament._id, status: 'pending' },
-      { status: 'rejected', rejectedAt: new Date(), reason: 'Tournament cancelled by its host' },
-      { session }
-    )
-
-    await Tournament.deleteOne({ _id: tournament._id }, { session })
-    return { refunds }
-  })
+  await Tournament.deleteOne({ _id: tournament._id })
+  return { entrants: tournament.participantCount() }
 }
 
 // --- joining ----------------------------------------------------------------
@@ -325,44 +298,42 @@ function assertJoinable(tournament, userId) {
   }
 }
 
-/** Enters a solo tournament, paying the entry fee into the bank. */
+/**
+ * Enters a solo tournament.
+ *
+ * Takes no payment. The entry fee is what the host collects from the player
+ * themselves; the site records who is in.
+ */
 export async function joinSolo(tournamentId, userId) {
-  return withTransaction(async (session) => {
-    const tournament = await loadForEntry(tournamentId, userId, session)
-    if (tournament.isTeamBased) throw ApiError.badRequest('This tournament is played in teams')
+  const tournament = await loadForEntry(tournamentId, userId)
+  if (tournament.isTeamBased) throw ApiError.badRequest('This tournament is played in teams')
 
-    assertJoinable(tournament, userId)
+  assertJoinable(tournament, userId)
 
-    if (tournament.accessibility === 'application required') {
-      const accepted = tournament.acceptedUsers.some((id) => String(id) === String(userId))
-      if (!accepted) throw ApiError.forbidden('Your application has not been accepted yet')
-    }
+  if (tournament.accessibility === 'application required') {
+    const accepted = tournament.acceptedUsers.some((id) => String(id) === String(userId))
+    if (!accepted) throw ApiError.forbidden('Your application has not been accepted yet')
+  }
 
-    await collectEntryFee(tournament, userId, session)
+  tournament.enrolledUsers.push({ userId, score: 0, eliminated: false })
+  tournament.acceptedUsers = tournament.acceptedUsers.filter((id) => String(id) !== String(userId))
+  await tournament.save()
 
-    tournament.enrolledUsers.push({ userId, score: 0, eliminated: false })
-    tournament.acceptedUsers = tournament.acceptedUsers.filter(
-      (id) => String(id) !== String(userId)
-    )
-    await tournament.save({ session })
-
-    return tournament
-  })
+  return tournament
 }
 
 /**
  * Enters a team tournament.
  *
- * The leader pays `entryFee × teamSize` — the documented rule — and the whole
- * amount goes into the bank, so the prize the team can win is funded by what the
- * team put in.
+ * The leader enters on the team's behalf; whatever the host charges for a team
+ * is settled between them.
  */
 export async function joinTeam(tournamentId, userId, teamId) {
-  return withTransaction(async (session) => {
-    const tournament = await loadForEntry(tournamentId, userId, session)
+  {
+    const tournament = await loadForEntry(tournamentId, userId)
     if (!tournament.isTeamBased) throw ApiError.badRequest('This tournament is played solo')
 
-    const team = await Team.findById(teamId).session(session)
+    const team = await Team.findById(teamId)
     if (!team) throw ApiError.notFound('Team not found')
     if (!team.isLeader(userId)) throw ApiError.forbidden('Only the team leader can enter the team')
     if (team.members.length !== tournament.teamSize) {
@@ -386,8 +357,6 @@ export async function joinTeam(tournamentId, userId, teamId) {
       if (!accepted) throw ApiError.forbidden('Your application has not been accepted yet')
     }
 
-    await collectEntryFee(tournament, userId, session)
-
     tournament.enrolledTeams.push({
       teamId: String(team._id),
       teamName: team.name,
@@ -403,32 +372,10 @@ export async function joinTeam(tournamentId, userId, teamId) {
     tournament.acceptedTeams = tournament.acceptedTeams.filter(
       (id) => String(id) !== String(team._id)
     )
-    await tournament.save({ session })
+    await tournament.save()
 
     return tournament
-  })
-}
-
-/** Debits the payer and credits the bank, with a ledger entry, or does nothing if free. */
-async function collectEntryFee(tournament, payerId, session) {
-  const cost = tournament.entryCost
-  if (cost <= 0) return
-
-  await debitUser(payerId, cost, session)
-  await creditBank(tournament._id, cost, session)
-  await recordTransaction(
-    {
-      userId: payerId,
-      type: 'entry_fee',
-      amount: -cost,
-      tournamentId: tournament._id,
-      description: `Entry fee for "${tournament.title}"`,
-    },
-    session
-  )
-  // Keep the in-memory document in step with the update just applied, so the
-  // `save()` that follows does not write a stale bank back over it.
-  tournament.bank += cost
+  }
 }
 
 // --- applications -----------------------------------------------------------
@@ -530,19 +477,6 @@ export async function rejectApplication(tournamentId, hostId, applicationId) {
   return tournament
 }
 
-// --- bank -------------------------------------------------------------------
-
-/** A host top-up, capped at what the bank still needs. */
-export async function deposit(tournamentId, hostId, amount) {
-  return withTransaction(async (session) => {
-    const tournament = await loadAsHost(tournamentId, hostId, session)
-    if (tournament.hasEnded) throw ApiError.badRequest('This tournament has already ended')
-
-    const deposited = await depositIntoBank(tournament, hostId, amount, session)
-    return { deposited, bank: tournament.bank + deposited, required: tournament.totalPrize }
-  })
-}
-
 // --- lifecycle --------------------------------------------------------------
 
 /**
@@ -582,10 +516,9 @@ function drawBracket(tournament) {
 /**
  * Starts the tournament.
  *
- * The bank check is a numeric comparison against `totalPrize`, which is a number
- * for both formats. The original compared the bank to `earnings` directly — an
- * array of prize objects for battle royale — so the comparison stringified an
- * object and could never be true. A battle royale could not be started at all.
+ * Entries close and the draw is locked. What it takes is a full bracket, or two
+ * entrants for a battle royale — the prize is the host's promise to keep, not
+ * something this site can hold or verify.
  */
 export async function startTournament(tournamentId, hostId) {
   const tournament = await loadAsHost(tournamentId, hostId)
@@ -604,12 +537,6 @@ export async function startTournament(tournamentId, hostId) {
     }
   } else if (count < 2) {
     throw ApiError.badRequest('A tournament needs at least two participants')
-  }
-
-  if (tournament.bank < tournament.totalPrize) {
-    throw ApiError.badRequest(
-      `The bank holds ${tournament.bank} of the ${tournament.totalPrize} credits in prizes. Top it up first.`
-    )
   }
 
   // A bracket has to be drawn before it can be played. If the host never hit
@@ -687,22 +614,43 @@ export async function updateParticipants(tournamentId, hostId, updates) {
   return tournament
 }
 
-/** Ends the tournament and pays out, all inside one transaction. */
+/**
+ * Ends the tournament.
+ *
+ * Records that it is over and who won; paying the prize is the host's to do,
+ * with the people who were standing in front of them.
+ */
 export async function endTournament(tournamentId, hostId) {
-  return withTransaction(async (session) => {
-    const tournament = await loadAsHost(tournamentId, hostId, session)
-    if (!tournament.hasStarted) throw ApiError.badRequest('This tournament has not started')
-    if (tournament.hasEnded) throw ApiError.badRequest('This tournament has already ended')
+  const tournament = await loadAsHost(tournamentId, hostId)
+  if (!tournament.hasStarted) throw ApiError.badRequest('This tournament has not started')
+  if (tournament.hasEnded) throw ApiError.badRequest('This tournament has already ended')
 
-    if (tournament.type === 'brackets' && !tournament.matches[tournament.matches.length - 1]) {
-      throw ApiError.badRequest('Record the winner of the final before ending the tournament')
-    }
+  if (tournament.type === 'brackets' && !tournament.matches[tournament.matches.length - 1]) {
+    throw ApiError.badRequest('Record the winner of the final before ending the tournament')
+  }
 
-    const result = await payOutTournament(tournament, session)
+  tournament.hasEnded = true
+  await tournament.save()
 
-    tournament.hasEnded = true
-    await tournament.save({ session })
+  return { tournament, winners: winnersOf(tournament) }
+}
 
-    return { tournament, ...result }
-  })
+/**
+ * Who finished on top, for the host to pay and for the results screen.
+ *
+ * A bracket has one winner — the last match's. A battle royale is ranked by
+ * score, and only as deep as the prize table goes.
+ */
+function winnersOf(tournament) {
+  if (tournament.type === 'brackets') {
+    const champion = tournament.matches[tournament.matches.length - 1]
+    return champion ? [{ rank: 1, id: String(champion), prize: tournament.prize ?? 0 }] : []
+  }
+
+  const ranked = [...tournament.participants()].sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+  return (tournament.prizes ?? []).map((entry) => ({
+    rank: entry.rank,
+    id: ranked[entry.rank - 1] ? tournament.participantId(ranked[entry.rank - 1]) : null,
+    prize: entry.prize,
+  }))
 }

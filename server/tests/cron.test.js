@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { useDatabase } from './setup/database.js'
-import { createTeam, createTournament, creditsOf, guest, signUp } from './setup/api.js'
+import { createTeam, createTournament, guest, signUp } from './setup/api.js'
 import User from '../src/models/user.model.js'
 import Tournament from '../src/models/tournament.model.js'
-import Product from '../src/models/product.model.js'
 import Team from '../src/models/team.model.js'
-import Transaction from '../src/models/transaction.model.js'
 import { joinSolo } from '../src/modules/tournaments/tournament.service.js'
 import { assertCronAuthorised } from '../src/modules/cron/cron.routes.js'
 import { seedDemoData } from '../scripts/seed-data.js'
@@ -93,15 +91,14 @@ describe('POST/GET /api/cron/reseed', () => {
     expect(await Tournament.countDocuments()).toBe(response.body.seeded.tournaments)
   })
 
-  // The case that matters once hosts pay: a real host, their tournament, their
-  // team and their ledger all outlive the nightly reset, and the books balance.
-  it('leaves a real host, their tournament, team and ledger rows alone', async () => {
+  // A real host, their tournament and their team all outlive the nightly reset.
+  it('leaves a real host, their tournament and their team alone', async () => {
     await seedDemoData()
 
-    const host = await signUp('realhost', { credits: 400, isHost: true })
-    const player = await signUp('realplayer', { credits: 400 })
+    const host = await signUp('realhost', { isHost: true })
+    const player = await signUp('realplayer')
     const team = await createTeam(host.agent, [player.agent], 'Real Deal')
-    const tournament = await createTournament(host.agent, { title: 'Paid Cup' })
+    const tournament = await createTournament(host.agent, { title: 'Real Cup' })
     await player.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
 
     // The two worlds touching, in both directions: the real player is in a demo
@@ -110,11 +107,6 @@ describe('POST/GET /api/cron/reseed', () => {
     await player.agent.post(`/api/tournaments/${melee._id}/join/solo`).expect(200)
     const lena = await User.findOne({ username: 'lena' })
     await joinSolo(tournament.id, lena._id)
-
-    const realRows = () =>
-      Transaction.find({ userId: { $in: [host.user.id, player.user.id] } }).lean()
-    const rowsBefore = await realRows()
-    expect(rowsBefore.length).toBeGreaterThan(0)
 
     const reseed = () => guest().get('/api/cron/reseed').set('Authorization', AUTHORISED)
     await reseed().expect(200)
@@ -125,27 +117,10 @@ describe('POST/GET /api/cron/reseed', () => {
     expect((await Team.findById(team.id)).members).toHaveLength(2)
 
     const survivor = await Tournament.findById(tournament.id)
-    expect(survivor.bank).toBe(20)
     // The demo entrant is still a real document, so the bracket can be played out.
     for (const entry of survivor.enrolledUsers) {
       expect(await User.exists({ _id: entry.userId }), entry.userId).toBeTruthy()
     }
-
-    // Every row the real accounts had is still there, plus the refund for the
-    // demo tournament that was reset from under the player.
-    const rowsAfter = await realRows()
-    const ids = new Set(rowsAfter.map((row) => row._id))
-    for (const row of rowsBefore) expect(ids.has(row._id), row.description).toBe(true)
-    expect(rowsAfter.filter((row) => row.type === 'refund')).toHaveLength(1)
-
-    // Conservation, per real account: opening balance plus ledger equals wallet.
-    for (const account of [host, player]) {
-      const ledger = rowsAfter
-        .filter((row) => row.userId === account.user.id)
-        .reduce((sum, row) => sum + row.amount, 0)
-      expect(await creditsOf(account.user.id)).toBe(400 + ledger)
-    }
-    expect(await creditsOf(player.user.id)).toBe(390)
 
     // And the reseed is still idempotent with real data present.
     expect(await Tournament.countDocuments()).toBe(11)
@@ -178,7 +153,6 @@ describe('POST/GET /api/cron/reseed', () => {
     const snapshot = {
       users: await User.countDocuments(),
       tournaments: await Tournament.countDocuments(),
-      products: await Product.countDocuments(),
     }
 
     const second = await guest()
@@ -186,19 +160,13 @@ describe('POST/GET /api/cron/reseed', () => {
       .set('Authorization', AUTHORISED)
       .expect(200)
 
-    // The demo data is rebuilt from scratch every time...
     for (const key of ['users', 'teams', 'tournaments']) {
       expect(second.body.seeded[key], key).toBe(first.body.seeded[key])
     }
-    // ...but the credit packages are catalogue rows, not demo data: the reset
-    // leaves them alone, so the second run finds nothing to create.
-    expect(first.body.seeded.products).toBe(3)
-    expect(second.body.seeded.products).toBe(0)
 
     expect({
       users: await User.countDocuments(),
       tournaments: await Tournament.countDocuments(),
-      products: await Product.countDocuments(),
     }).toEqual(snapshot)
   })
 })
