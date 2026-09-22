@@ -24,11 +24,11 @@ export function guest() {
 /**
  * Signs a new account up and returns `{ agent, user }`.
  *
- * `credits` and `isHost` are applied straight to the document: how a user came
- * by their credits is the subject of other tests, not a precondition of this
- * one.
+ * `isHost`, `role` and `plan` are applied straight to the document: how an
+ * account came by them is the subject of other tests, not a precondition of
+ * every one. `plan: true` gives it an active subscription.
  */
-export async function signUp(name, { credits = 0, isHost = false, role } = {}) {
+export async function signUp(name, { isHost = false, role, plan = false } = {}) {
   const agent = client()
 
   await agent
@@ -36,8 +36,9 @@ export async function signUp(name, { credits = 0, isHost = false, role } = {}) {
     .send({ email: `${name}@example.com`, username: name, password: PASSWORD })
     .expect(201)
 
-  const update = { credits, isHost }
+  const update = { isHost }
   if (role) update.role = role
+  if (plan) update.hostingPlan = { status: 'active', provider: 'test', updatedAt: new Date() }
   await User.updateOne({ username: name }, { $set: update })
 
   const { body } = await agent.get('/api/users/me').expect(200)
@@ -78,9 +79,9 @@ export function tournamentPayload(overrides = {}) {
 /**
  * Creates a tournament as `host` and returns the public view of it.
  *
- * Published by default, applied straight to the document: how a tournament gets
- * published is the subject of `tournaments.publish`, not a precondition of every
- * other suite. Pass `{ published: false }` to get the draft the API really makes.
+ * Published by default, applied straight to the document: what it takes to
+ * publish is the subject of `subscriptions`, not a precondition of every other
+ * suite. Pass `{ published: false }` to get the draft the API really makes.
  */
 export async function createTournament(host, overrides = {}, { published = true } = {}) {
   const { body } = await host
@@ -94,24 +95,8 @@ export async function createTournament(host, overrides = {}, { published = true 
   return { ...body.tournament, publishState: 'published' }
 }
 
-/**
- * The total number of credits in existence: every user balance plus every
- * tournament bank.
- *
- * Credits only ever enter the system at the demo checkout and only ever leave it
- * when an account is deleted. Every other operation moves them, so this number
- * is the invariant the conservation tests assert on.
- */
-export async function totalCredits() {
-  const [users, banks] = await Promise.all([
-    User.aggregate([{ $group: { _id: null, total: { $sum: '$credits' } } }]),
-    Tournament.aggregate([{ $group: { _id: null, total: { $sum: '$bank' } } }]),
-  ])
-  return (users[0]?.total ?? 0) + (banks[0]?.total ?? 0)
-}
-
-/** A user's current balance, read straight from the database. */
-export async function creditsOf(userId) {
-  const user = await User.findById(userId).select('credits').lean()
-  return user?.credits ?? 0
+/** A user's plan status, read straight from the database. */
+export async function planOf(userId) {
+  const user = await User.findById(userId).select('hostingPlan').lean()
+  return user?.hostingPlan?.status ?? 'none'
 }

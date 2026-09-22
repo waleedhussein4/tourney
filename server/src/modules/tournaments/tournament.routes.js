@@ -64,10 +64,17 @@ tournamentRouter.post(
 )
 
 tournamentRouter.post(
-  '/:tournamentId/bank/deposit',
+  '/:tournamentId/publish',
   requireAuth,
-  validate({ params: schemas.tournamentIdParams, body: schemas.depositSchema }),
-  controller.deposit
+  validate({ params: schemas.tournamentIdParams }),
+  controller.publish
+)
+
+tournamentRouter.post(
+  '/:tournamentId/unpublish',
+  requireAuth,
+  validate({ params: schemas.tournamentIdParams }),
+  controller.unpublish
 )
 
 tournamentRouter.post(

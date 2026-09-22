@@ -41,8 +41,8 @@ export function HomePage() {
             Run the tournament. Or <em>win it.</em>
           </h1>
           <p className={styles.body}>
-            Solo or in teams, open to all or by application. Entry fees go into an escrow bank that
-            has to cover the prizes before anything starts.
+            Solo or in teams, open to all or by application. Set your own entry fees and prizes —
+            the site runs the brackets, you and your players settle the money.
           </p>
           <div className={styles.actions}>
             <ButtonLink variant="primary" to="/tournaments">

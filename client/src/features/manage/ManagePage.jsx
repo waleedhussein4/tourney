@@ -5,7 +5,6 @@ import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
 import { Badge, ErrorState, LoadingState } from '/src/components/ui/index.js'
 import { publishStatus, tournamentStatus } from '/src/lib/format.js'
 import { DetailsSection } from './sections/DetailsSection.jsx'
-import { BankSection } from './sections/BankSection.jsx'
 import { ApplicationsSection } from './sections/ApplicationsSection.jsx'
 import { ParticipantsSection } from './sections/ParticipantsSection.jsx'
 import { MatchesSection } from './sections/MatchesSection.jsx'
@@ -75,7 +74,6 @@ export function ManagePage() {
       <div className={styles.page}>
         <PublishSection tournament={tournament} />
         <LifecycleSection tournament={tournament} />
-        <BankSection tournament={tournament} />
         {tournament.accessibility === 'application required' && (
           <ApplicationsSection tournament={tournament} />
         )}

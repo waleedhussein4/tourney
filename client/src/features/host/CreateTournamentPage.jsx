@@ -7,15 +7,9 @@ import { createTournament, listCategories, tournamentKeys } from '/src/api/tourn
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
 import { Button, Card, Field, Input, Select, Textarea } from '/src/components/ui/index.js'
 import { RichTextField } from '/src/components/ui/RichTextField.jsx'
-import { formatCredits } from '/src/lib/format.js'
+import { formatMoney } from '/src/lib/format.js'
 import { richTextLimit } from '/src/lib/richText.js'
-import {
-  BRACKET_SIZES,
-  projectedIncome,
-  toCreatePayload,
-  totalPrize,
-  visibleSteps,
-} from './wizardSteps.js'
+import { BRACKET_SIZES, toCreatePayload, totalPrize, visibleSteps } from './wizardSteps.js'
 import styles from './CreateTournamentPage.module.css'
 
 /** Tomorrow, and the day after, as the datetime-local inputs want them. */
@@ -280,7 +274,7 @@ function StepFields({ step, form, categories, values }) {
         <Field
           label="Winner takes"
           required
-          hint="Paid from the prize bank when the tournament ends."
+          hint="What you tell entrants they'll win. Paid by you, off-platform."
           error={errors.prize?.message}
         >
           {(field) => (
@@ -360,8 +354,8 @@ function StepFields({ step, form, categories, values }) {
             required
             hint={
               values.teamSize > 1
-                ? `A team leader pays this for each of the ${values.teamSize} players.`
-                : 'Charged when someone joins. Set 0 to make it free.'
+                ? `What a team leader owes you for each of the ${values.teamSize} players, collected off-platform.`
+                : 'What entrants owe you, collected off-platform. Set 0 to make it free.'
             }
             error={errors.entryFee?.message}
           >
@@ -377,8 +371,6 @@ function StepFields({ step, form, categories, values }) {
               />
             )}
           </Field>
-
-          <BankForecast values={values} />
 
           <div className={styles.dates}>
             <Field label="Starts" required error={errors.startDate?.message}>
@@ -547,35 +539,6 @@ function ApplicationBuilder({ control, register, errors }) {
   )
 }
 
-/**
- * What the entry fees raise against what the prizes cost.
- *
- * The gap is exactly what the host has to deposit before the tournament can
- * start, so it is better learned here than at the start button.
- */
-function BankForecast({ values }) {
-  const prizes = totalPrize(values)
-  const income = projectedIncome(values)
-  const shortfall = Math.max(0, prizes - income)
-
-  return (
-    <div className={styles.forecast}>
-      <div>
-        <dt>Prize pool</dt>
-        <dd>{formatCredits(prizes)}</dd>
-      </div>
-      <div>
-        <dt>Entry fees, if it fills</dt>
-        <dd>{formatCredits(income)}</dd>
-      </div>
-      <div className={shortfall > 0 ? styles.forecastWarn : ''}>
-        <dt>You would top up</dt>
-        <dd>{formatCredits(shortfall)}</dd>
-      </div>
-    </div>
-  )
-}
-
 function Review({ values, categories }) {
   const category = (categories.data?.categories ?? []).find(
     (entry) => entry.slug === values.category
@@ -587,8 +550,8 @@ function Review({ values, categories }) {
     ['Category', category?.name ?? '—'],
     ['Team size', values.teamSize > 1 ? `Teams of ${values.teamSize}` : 'Solo'],
     ['Capacity', `${values.maxCapacity} ${values.teamSize > 1 ? 'teams' : 'players'}`],
-    ['Entry fee', formatCredits(Number(values.entryFee) || 0)],
-    ['Prize pool', formatCredits(totalPrize(values))],
+    ['Entry fee', formatMoney(Number(values.entryFee) || 0)],
+    ['Prize pool', formatMoney(totalPrize(values))],
     ['Entry', values.accessibility === 'open' ? 'Anyone can join' : 'By application'],
     ['Starts', values.startDate?.replace('T', ' ') ?? '—'],
     ['Ends', values.endDate?.replace('T', ' ') ?? '—'],

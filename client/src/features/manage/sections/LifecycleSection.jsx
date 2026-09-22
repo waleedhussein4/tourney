@@ -7,7 +7,6 @@ import {
   startTournament,
 } from '/src/api/tournaments.js'
 import { Button, Card, CardHeader, ConfirmDialog } from '/src/components/ui/index.js'
-import { formatCredits } from '/src/lib/format.js'
 import { useManageMutation } from '../useManageMutation.js'
 import styles from '../ManagePage.module.css'
 
@@ -23,7 +22,6 @@ export function LifecycleSection({ tournament }) {
   const [confirming, setConfirming] = useState(null)
 
   const entrants = tournament.participants.length
-  const bankShort = tournament.bankShortfall > 0
   const bracketUnfilled = tournament.type === 'brackets' && entrants < tournament.maxCapacity
   const tooFewEntrants = tournament.type !== 'brackets' && entrants < 2
   const finalUndecided =
@@ -39,7 +37,7 @@ export function LifecycleSection({ tournament }) {
   const end = useManageMutation({
     tournamentId: tournament.id,
     mutationFn: () => endTournament(tournament.id),
-    success: 'Tournament ended and prizes paid out',
+    success: 'Tournament ended and winners recorded',
     onDone: () => setConfirming(null),
   })
 
@@ -52,7 +50,7 @@ export function LifecycleSection({ tournament }) {
   const cancel = useManageMutation({
     tournamentId: tournament.id,
     mutationFn: () => cancelTournament(tournament.id),
-    success: 'Tournament cancelled and entry fees refunded',
+    success: 'Tournament cancelled',
     onDone: () => navigate('/tournaments'),
   })
 
@@ -60,7 +58,6 @@ export function LifecycleSection({ tournament }) {
 
   const blockers = [
     !published && 'it has not been published yet',
-    bankShort && `the bank is ${formatCredits(tournament.bankShortfall)} short of the prizes`,
     bracketUnfilled &&
       `${entrants} of ${tournament.maxCapacity} slots are filled — a bracket starts full`,
     tooFewEntrants && 'it needs at least two entrants',
@@ -69,10 +66,7 @@ export function LifecycleSection({ tournament }) {
   if (tournament.hasEnded) {
     return (
       <Card>
-        <CardHeader
-          title="Finished"
-          subtitle="Prizes have been paid out and the bank is empty. Nothing further to do."
-        />
+        <CardHeader title="Finished" subtitle="Winners have been recorded. Nothing further to do." />
       </Card>
     )
   }
@@ -83,7 +77,7 @@ export function LifecycleSection({ tournament }) {
         title={tournament.hasStarted ? 'Running' : 'Not started yet'}
         subtitle={
           tournament.hasStarted
-            ? 'Record the results, then end it to pay out the prizes.'
+            ? 'Record the results, then end it to lock in the winners.'
             : published
               ? 'Entrants can still join, and you can still edit the details.'
               : 'Nobody can find or join it until it is published. You can still edit everything.'
@@ -102,7 +96,7 @@ export function LifecycleSection({ tournament }) {
             disabled={finalUndecided}
             loading={end.isPending}
           >
-            End and pay out
+            End tournament
           </Button>
         ) : (
           <>
@@ -145,9 +139,9 @@ export function LifecycleSection({ tournament }) {
         onClose={() => setConfirming(null)}
         onConfirm={() => end.mutate()}
         loading={end.isPending}
-        title="End and pay out?"
-        description="Prizes are paid from the bank to the winners, and whatever is left comes to you. This cannot be undone."
-        confirmLabel="End and pay out"
+        title="End this tournament?"
+        description="The winners are recorded and the tournament is marked finished. This cannot be undone."
+        confirmLabel="End tournament"
       />
 
       <ConfirmDialog
@@ -157,7 +151,7 @@ export function LifecycleSection({ tournament }) {
         loading={cancel.isPending}
         destructive
         title="Cancel this tournament?"
-        description="Every entry fee is refunded and your own deposit comes back. The tournament is deleted."
+        description="The tournament is deleted. Any entry fees are between you and your players — settle those off-platform."
         confirmLabel="Cancel it"
         cancelLabel="Keep it"
       />

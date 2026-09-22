@@ -48,8 +48,8 @@ export const update = asyncHandler(async (req, res) => {
 })
 
 export const remove = asyncHandler(async (req, res) => {
-  const { refunds } = await service.deleteTournament(req.params.tournamentId, req.userId)
-  res.json({ deleted: true, refunds })
+  const { entrants } = await service.deleteTournament(req.params.tournamentId, req.userId)
+  res.json({ deleted: true, entrants })
 })
 
 export const postUpdate = asyncHandler(async (req, res) => {
@@ -92,12 +92,17 @@ export const rejectApplication = asyncHandler(async (req, res) => {
   res.json({ tournament: await toManageView(tournament, req.userId) })
 })
 
-// --- bank and lifecycle -----------------------------------------------------
-
-export const deposit = asyncHandler(async (req, res) => {
-  const result = await service.deposit(req.params.tournamentId, req.userId, req.body.amount)
-  res.json(result)
+export const publish = asyncHandler(async (req, res) => {
+  const tournament = await service.publishTournament(req.params.tournamentId, req.userId)
+  res.json({ tournament: await toManageView(tournament, req.userId) })
 })
+
+export const unpublish = asyncHandler(async (req, res) => {
+  const tournament = await service.unpublishTournament(req.params.tournamentId, req.userId)
+  res.json({ tournament: await toManageView(tournament, req.userId) })
+})
+
+// --- lifecycle --------------------------------------------------------------
 
 export const shuffle = asyncHandler(async (req, res) => {
   const tournament = await service.shuffleBrackets(req.params.tournamentId, req.userId)
@@ -128,9 +133,6 @@ export const updateParticipants = asyncHandler(async (req, res) => {
 })
 
 export const end = asyncHandler(async (req, res) => {
-  const { tournament, payouts, hostRemainder } = await service.endTournament(
-    req.params.tournamentId,
-    req.userId
-  )
-  res.json({ tournament: await toManageView(tournament, req.userId), payouts, hostRemainder })
+  const { tournament, winners } = await service.endTournament(req.params.tournamentId, req.userId)
+  res.json({ tournament: await toManageView(tournament, req.userId), winners })
 })
