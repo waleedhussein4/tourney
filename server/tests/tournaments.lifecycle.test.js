@@ -23,21 +23,34 @@ async function bracketOrder(id) {
 }
 
 /**
- * Records a bracket result that marches `winnerId` to the title.
- *
- * The draw is random, so the winner's first-round match is found rather than
- * assumed.
+ * Builds a full `{ id, winner }` result set that marches `championId` to the
+ * title, mirroring the same round-1-from-the-draw, later-rounds-from-the-
+ * previous-round's-winner propagation `updateMatches` does — so a match's
+ * winner is always one of its own two competitors, never an arbitrary id.
  */
-function matchesFor(order, slots, winnerId) {
-  const matches = new Array(slots - 1).fill(null)
-  let index = 0
-  for (let pair = 0; pair < order.length; pair += 2) {
-    const contenders = [order[pair], order[pair + 1]]
-    matches[index] = contenders.includes(winnerId) ? winnerId : order[pair]
-    index += 1
+function resultsFor(matches, order, championId) {
+  const participantsByKey = new Map()
+  for (const match of matches.filter((entry) => entry.round === 1)) {
+    participantsByKey.set(`1-${match.slot}`, [order[match.slot * 2], order[match.slot * 2 + 1]])
   }
-  for (; index < matches.length; index += 1) matches[index] = winnerId
-  return matches
+
+  const maxRound = Math.max(...matches.map((entry) => entry.round))
+  const results = []
+
+  for (const match of matches) {
+    const participants = participantsByKey.get(`${match.round}-${match.slot}`) ?? [null, null]
+    const winner = participants.includes(championId) ? championId : participants[0]
+    results.push({ id: match.id, winner })
+
+    if (match.round < maxRound) {
+      const nextKey = `${match.round + 1}-${Math.floor(match.slot / 2)}`
+      const next = participantsByKey.get(nextKey) ?? [null, null]
+      next[match.slot % 2] = winner
+      participantsByKey.set(nextKey, next)
+    }
+  }
+
+  return results
 }
 
 describe('a solo bracket, from creation to a crowned champion', () => {
@@ -47,7 +60,9 @@ describe('a solo bracket, from creation to a crowned champion', () => {
       maxCapacity: 4,
     })
 
-    expect(tournament.matches).toEqual([null, null, null])
+    expect(tournament.matches).toHaveLength(3)
+    expect(tournament.matches.map((match) => match.round)).toEqual([1, 1, 2])
+    expect(tournament.matches.every((match) => match.winner === null)).toBe(true)
 
     for (const name of ['mei', 'tomas', 'ada', 'kofi']) {
       await players[name].agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
@@ -59,10 +74,11 @@ describe('a solo bracket, from creation to a crowned champion', () => {
 
     const order = await bracketOrder(tournament.id)
     const champion = players.mei.user.id
+    const matches = (await Tournament.findById(tournament.id)).matches
 
     await host.agent
       .patch(`/api/tournaments/${tournament.id}/matches`)
-      .send({ matches: matchesFor(order, 4, champion) })
+      .send({ matches: resultsFor(matches, order, champion) })
       .expect(200)
 
     const ended = await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
@@ -96,9 +112,10 @@ describe('a team bracket', () => {
     await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(200)
 
     const order = await bracketOrder(tournament.id)
+    const matches = (await Tournament.findById(tournament.id)).matches
     await host.agent
       .patch(`/api/tournaments/${tournament.id}/matches`)
-      .send({ matches: matchesFor(order, 2, owls.id) })
+      .send({ matches: resultsFor(matches, order, owls.id) })
       .expect(200)
 
     const ended = await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)

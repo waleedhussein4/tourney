@@ -129,8 +129,8 @@ export const updateBodySchema = z.object({
 })
 
 export const matchesSchema = z.object({
-  /** One entry per match, `null` where the result is not in yet. */
-  matches: z.array(uuid.nullable()),
+  /** Winners to record, by match id. `winner: null` clears a recorded result. */
+  matches: z.array(z.object({ id: uuid, winner: uuid.nullable() })),
 })
 
 export const participantsSchema = z.object({

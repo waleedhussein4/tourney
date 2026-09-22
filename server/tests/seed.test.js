@@ -108,7 +108,7 @@ describe('what the seed creates', () => {
 
     for (const tournament of ended) {
       if (tournament.type === 'brackets') {
-        expect(tournament.matches[tournament.matches.length - 1]).not.toBeNull()
+        expect(tournament.matches[tournament.matches.length - 1].winner).not.toBeNull()
       } else {
         expect(tournament.participants().some((p) => p.score > 0)).toBe(true)
       }

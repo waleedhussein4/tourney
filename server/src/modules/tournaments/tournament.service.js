@@ -1,4 +1,4 @@
-import Tournament from '../../models/tournament.model.js'
+import Tournament, { buildBracketMatches } from '../../models/tournament.model.js'
 import Team from '../../models/team.model.js'
 import User from '../../models/user.model.js'
 import { LIMITS, PAGE_SIZE } from '../../config/constants.js'
@@ -77,8 +77,10 @@ export async function createTournament(hostId, input) {
     rules,
     contactInfo: input.contactInfo,
     applicationForm,
-    // A bracket has a fixed number of slots from the moment it exists.
-    matches: input.type === 'brackets' ? new Array(input.maxCapacity - 1).fill(null) : [],
+    // A bracket has a fixed number of match slots from the moment it exists.
+    // Participants are not known yet — the draw has not happened — so every
+    // match starts empty; `drawBracket` fills in round 1 once it has.
+    matches: input.type === 'brackets' ? buildBracketMatches(input.maxCapacity) : [],
   })
 }
 
@@ -496,6 +498,14 @@ function drawBracket(tournament) {
 
   tournament.bracketOrder = slots
   tournament.bracketsShuffled = true
+
+  // Round 1's matches now have real competitors — pair up consecutive
+  // bracket-order entries into each round-1 match's `participants`. Later
+  // rounds stay empty until the round that feeds them reports its winners.
+  for (const match of tournament.matches) {
+    if (match.round !== 1) continue
+    match.participants = [slots[match.slot * 2] ?? null, slots[match.slot * 2 + 1] ?? null]
+  }
 }
 
 /**
@@ -552,14 +562,33 @@ export async function updateMatches(tournamentId, hostId, matches) {
     )
   }
 
-  const enrolled = new Set(tournament.participantIds())
-  for (const winner of matches) {
-    if (winner !== null && !enrolled.has(String(winner))) {
-      throw ApiError.badRequest('Match winners must be competing in this tournament')
+  for (const { id, winner } of matches) {
+    const match = tournament.matches.find((entry) => entry.id === id)
+    if (!match) throw ApiError.badRequest(`${id} is not a match in this tournament`)
+
+    // The winner must be one of THAT match's own two competitors — stronger
+    // than just "competing somewhere in this tournament", and it is what
+    // actually stops the old bug (any site username accepted as any winner).
+    if (winner !== null && !match.participants.includes(String(winner))) {
+      throw ApiError.badRequest("A match winner must be one of that match's own competitors")
+    }
+
+    match.winner = winner
+    match.state = winner ? 'final' : 'pending'
+
+    // Propagate into the next round's match so the bracket shows who is
+    // actually playing, not just who won.
+    const next = tournament.matches.find(
+      (entry) => entry.round === match.round + 1 && entry.slot === Math.floor(match.slot / 2)
+    )
+    if (next) {
+      const position = match.slot % 2
+      const participants = [...next.participants]
+      participants[position] = winner
+      next.participants = participants
     }
   }
 
-  tournament.matches = matches
   await tournament.save()
   return tournament
 }
@@ -611,7 +640,8 @@ export async function endTournament(tournamentId, hostId) {
   if (!tournament.hasStarted) throw ApiError.badRequest('This tournament has not started')
   if (tournament.hasEnded) throw ApiError.badRequest('This tournament has already ended')
 
-  if (tournament.type === 'brackets' && !tournament.matches[tournament.matches.length - 1]) {
+  const final = tournament.matches[tournament.matches.length - 1]
+  if (tournament.type === 'brackets' && !final?.winner) {
     throw ApiError.badRequest('Record the winner of the final before ending the tournament')
   }
 
@@ -629,7 +659,7 @@ export async function endTournament(tournamentId, hostId) {
  */
 function winnersOf(tournament) {
   if (tournament.type === 'brackets') {
-    const champion = tournament.matches[tournament.matches.length - 1]
+    const champion = tournament.matches[tournament.matches.length - 1]?.winner
     return champion ? [{ rank: 1, id: String(champion) }] : []
   }
 

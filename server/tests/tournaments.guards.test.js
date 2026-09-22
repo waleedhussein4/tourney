@@ -36,6 +36,35 @@ async function liveTournament(overrides = {}) {
   return tournament
 }
 
+/**
+ * Plays out every round, always crowning each match's first competitor — one
+ * PATCH per round, since a later round only has real participants once the
+ * round before it has been recorded and propagated server-side.
+ */
+async function recordChampion(tournamentId, actor) {
+  let tournament
+  for (;;) {
+    tournament = await Tournament.findById(tournamentId)
+    const roundNumber = tournament.matches
+      .filter((match) => !match.winner)
+      .reduce((min, match) => Math.min(min, match.round), Infinity)
+    if (roundNumber === Infinity) break
+
+    const updates = tournament.matches.map((match) =>
+      match.round === roundNumber
+        ? { id: match.id, winner: match.participants[0] }
+        : { id: match.id, winner: match.winner ?? null }
+    )
+
+    await actor.agent
+      .patch(`/api/tournaments/${tournamentId}/matches`)
+      .send({ matches: updates })
+      .expect(200)
+  }
+  tournament = await Tournament.findById(tournamentId)
+  return tournament.matches[tournament.matches.length - 1].winner
+}
+
 // Each of these was reachable by anyone in the original: two of them needed no
 // authentication at all.
 describe('operations only the host may perform', () => {
@@ -45,7 +74,14 @@ describe('operations only the host may perform', () => {
     ['post an update', (id) => ['post', `/api/tournaments/${id}/updates`, { content: 'hello' }]],
     ['shuffle the bracket', (id) => ['post', `/api/tournaments/${id}/shuffle`, {}]],
     ['edit the tournament', (id) => ['patch', `/api/tournaments/${id}`, { title: 'Mine now' }]],
-    ['record match winners', (id) => ['patch', `/api/tournaments/${id}/matches`, { matches: [] }]],
+    [
+      'record match winners',
+      (id) => [
+        'patch',
+        `/api/tournaments/${id}/matches`,
+        { matches: [{ id: '2f1c8d5e-0000-4000-8000-000000000000', winner: null }] },
+      ],
+    ],
     [
       'edit participants',
       (id) => [
@@ -242,32 +278,40 @@ describe('starting', () => {
 })
 
 describe('recording results', () => {
-  it('refuses a winner who is not competing in this tournament', async () => {
+  it('refuses a winner who is not competing in this match', async () => {
     const tournament = await liveTournament()
     const outsider = await signUp('outsider')
 
-    const order = (await Tournament.findById(tournament.id)).bracketOrder.filter(Boolean)
+    const matches = (await Tournament.findById(tournament.id)).matches
+    const round1 = matches.filter((match) => match.round === 1)
     await host.agent
       .patch(`/api/tournaments/${tournament.id}/matches`)
-      .send({ matches: [outsider.user.id, order[0], order[0]] })
+      .send({
+        matches: matches.map((match) => ({
+          id: match.id,
+          winner: match.id === round1[0].id ? outsider.user.id : null,
+        })),
+      })
       .expect(400)
   })
 
   it('refuses a matches array of the wrong length', async () => {
     const tournament = await liveTournament()
+    const [first] = (await Tournament.findById(tournament.id)).matches
 
     await host.agent
       .patch(`/api/tournaments/${tournament.id}/matches`)
-      .send({ matches: [null] })
+      .send({ matches: [{ id: first.id, winner: null }] })
       .expect(400)
   })
 
   it('refuses match results before the tournament starts', async () => {
-    const tournament = await createTournament(host.agent)
+    const tournament = await createTournament(host.agent, { maxCapacity: 4 })
+    const matches = (await Tournament.findById(tournament.id)).matches
 
     await host.agent
       .patch(`/api/tournaments/${tournament.id}/matches`)
-      .send({ matches: [null, null, null] })
+      .send({ matches: matches.map((match) => ({ id: match.id, winner: null })) })
       .expect(400)
   })
 
@@ -297,12 +341,7 @@ describe('ending', () => {
 
   it('refuses a second end', async () => {
     const tournament = await liveTournament()
-
-    const order = (await Tournament.findById(tournament.id)).bracketOrder.filter(Boolean)
-    await host.agent
-      .patch(`/api/tournaments/${tournament.id}/matches`)
-      .send({ matches: [order[0], order[2], order[0]] })
-      .expect(200)
+    await recordChampion(tournament.id, host)
 
     await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
     await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(400)
