@@ -25,7 +25,9 @@
     "format:check": "prettier --check .",
     "test": "npm run test -w server",
     "check:regressions": "bash scripts/check-regressions.sh",
-    "seed": "npm run seed -w server"
+    "seed": "npm run seed -w server",
+    "backup": "npm run backup -w server",
+    "restore": "npm run restore -w server"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

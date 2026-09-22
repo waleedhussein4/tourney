@@ -334,6 +334,23 @@ already-public health endpoint from the outside.
 
 ---
 
+## Backup and restore
+
+Atlas M0 takes no automatic backups (see below), so a manual JSON dump is the
+fallback. Both commands run against whatever `DATABASE_URL`/`MONGODB_URI`
+points at — point it at production deliberately, not by accident.
+
+```bash
+npm run backup                         # dumps users, tournaments, teams to
+                                        # backups/<timestamp>/*.json, prints the folder
+npm run restore -- <backup-folder> --yes   # replaces those collections with the dump
+```
+
+`restore` refuses to run without `--yes`: it deletes every live document in
+the users, tournaments and teams collections before writing the backup back
+in. `backups/` is gitignored — a dump contains real user records, including
+password hashes, and must never be committed.
+
 ## Known limitations
 
 **Cold starts.** A Hobby function that has not been called recently takes about
