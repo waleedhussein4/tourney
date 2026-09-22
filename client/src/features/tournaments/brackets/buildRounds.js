@@ -9,7 +9,7 @@
  * Empty slots and undecided matches are `null` throughout and stay `null` here,
  * so a half-played bracket renders as "TBA" rather than crashing. The original
  * padded `enrolledUsers` with nulls in the database to represent empty slots,
- * which every count and payout downstream then had to filter back out.
+ * which every count downstream then had to filter back out.
  *
  * @param {object} tournament
  * @returns {{title: string, seeds: {id: number, teams: {id: string|null, name: string,

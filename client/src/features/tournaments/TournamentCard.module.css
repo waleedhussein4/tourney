@@ -99,5 +99,5 @@
 
 /* Prize money is the number a reader is looking for, so it is the one in colour. */
 .prize dd {
-  color: var(--credits);
+  color: var(--money);
 }

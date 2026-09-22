@@ -106,7 +106,7 @@
 }
 
 .factAccent dd {
-  color: var(--credits);
+  color: var(--money);
 }
 
 .columns {
@@ -160,7 +160,7 @@
   font-size: var(--text-3xl);
   font-weight: 700;
   letter-spacing: var(--tracking-tight);
-  color: var(--credits);
+  color: var(--money);
 }
 
 .prizeSingle span {
@@ -200,47 +200,6 @@
   font-stretch: var(--stretch-display);
   font-variant-numeric: tabular-nums;
   color: var(--text-strong);
-}
-
-/*
- * The escrow bank, as a meter. A tournament cannot start until this is full,
- * which is the single most important rule in the product — so it is drawn,
- * not just stated.
- */
-.bank {
-  margin-top: var(--space-5);
-}
-
-.bankLabel {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-}
-
-.bankLabel strong {
-  font-family: var(--font-display);
-  font-stretch: var(--stretch-display);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-strong);
-}
-
-.bankTrack {
-  height: 6px;
-  margin-top: var(--space-2);
-  background: var(--surface-sunken);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  overflow: hidden;
-}
-
-.bankFill {
-  height: 100%;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, var(--success-solid), var(--success));
-  transition: width var(--duration-slow) var(--ease-out);
 }
 
 .updates {

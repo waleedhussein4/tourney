@@ -96,7 +96,7 @@
 
 /* Money in is green, money out is quiet — the ledger reads at a glance. */
 .amountIn {
-  color: var(--credits);
+  color: var(--money);
 }
 
 .amountOut {
