@@ -171,6 +171,13 @@ export const reportMatchSchema = z.object({
 
 export const confirmMatchSchema = z.object({ agree: z.boolean() })
 
+/** The host's final call on a disputed match — same shape as reporting it. */
+export const resolveMatchSchema = z.object({
+  scores: z
+    .array(z.object({ participantId: uuid, score: z.coerce.number() }))
+    .length(2, 'Report a score for both competitors'),
+})
+
 export const trendingQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(24).optional().default(10),
 })

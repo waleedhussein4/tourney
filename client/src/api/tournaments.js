@@ -94,6 +94,13 @@ export const reportMatch = (id, matchId, body) =>
 export const confirmMatch = (id, matchId, agree) =>
   post(`/api/tournaments/${id}/matches/${matchId}/confirm`, { agree })
 
+/**
+ * The host's final call on a disputed match.
+ * @param {{ scores: { participantId: string, score: number }[] }} body
+ */
+export const resolveMatch = (id, matchId, body) =>
+  post(`/api/tournaments/${id}/matches/${matchId}/resolve`, body)
+
 // --- query keys ---------------------------------------------------------------
 
 /**
