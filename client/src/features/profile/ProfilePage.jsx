@@ -14,6 +14,7 @@ import {
   LoadingState,
 } from '/src/components/ui/index.js'
 import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
+import { NotificationPreferences } from './NotificationPreferences.jsx'
 import styles from './profile.module.css'
 
 export function ProfilePage() {
@@ -76,6 +77,8 @@ export function ProfilePage() {
           </div>
         )}
       </Card>
+
+      <NotificationPreferences />
     </PageShell>
   )
 }

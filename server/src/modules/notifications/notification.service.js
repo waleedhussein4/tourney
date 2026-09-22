@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import Notification from '../../models/notification.model.js'
 import Team from '../../models/team.model.js'
 import User from '../../models/user.model.js'
@@ -5,20 +6,93 @@ import Tournament from '../../models/tournament.model.js'
 import { UNPUBLISHED } from '../../config/publishStates.js'
 import { sendMail } from '../../lib/mailer.js'
 import { ApiError } from '../../utils/ApiError.js'
+import config from '../../config/env.js'
 
 const DEFAULT_PAGE_SIZE = 20
 
-// The subset that matters when the reader is not looking at the site. A
-// reminder they'll see the moment they open the app (a tournament they're
-// already watching starting soon) is deliberately left off — it would just be
-// noise on top of the in-app list.
-const EMAIL_TYPES = new Set([
-  'application_accepted',
-  'application_rejected',
-  'match_scheduled',
-  'match_starting_soon',
-  'result_disputed',
-])
+/** Every toggleable email category, and the notification `type`(s) that fall under it. */
+export const EMAIL_CATEGORIES = [
+  'matchScheduled',
+  'matchStartingSoon',
+  'resultDisputed',
+  'applicationDecided',
+]
+
+// The subset that matters when the reader is not looking at the site, mapped to
+// the preference category that gates it. A reminder they'll see the moment they
+// open the app (a tournament they're already watching starting soon) is
+// deliberately left off — it would just be noise on top of the in-app list.
+const TYPE_CATEGORY = {
+  match_scheduled: 'matchScheduled',
+  match_starting_soon: 'matchStartingSoon',
+  result_disputed: 'resultDisputed',
+  application_accepted: 'applicationDecided',
+  application_rejected: 'applicationDecided',
+}
+const EMAIL_TYPES = new Set(Object.keys(TYPE_CATEGORY))
+
+// --- unsubscribe tokens --------------------------------------------------------
+//
+// An HMAC of (userId, category) keyed on JWT_SECRET — the same secret that
+// signs auth tokens, not a new one, and nothing is stored per-email. Anyone
+// holding a valid link can turn that one category off for that one user; they
+// cannot forge a link for a category or user they weren't sent, and they
+// cannot turn anything back on with it.
+
+function signUnsubscribeToken(userId, category) {
+  return crypto.createHmac('sha256', config.jwtSecret).update(`${userId}:${category}`).digest('hex')
+}
+
+function verifyUnsubscribeToken(userId, category, token) {
+  const expected = Buffer.from(signUnsubscribeToken(userId, category))
+  const given = Buffer.from(String(token ?? ''))
+  return expected.length === given.length && crypto.timingSafeEqual(expected, given)
+}
+
+/** The one-click unsubscribe link for this user/category, appended to every category email. */
+function unsubscribeUrl(userId, category) {
+  const base = config.clientUrl || ''
+  const params = new URLSearchParams({
+    userId: String(userId),
+    category,
+    token: signUnsubscribeToken(userId, category),
+  })
+  return `${base}/unsubscribe?${params.toString()}`
+}
+
+/** Turns a category off for a user via a signed unsubscribe link. Never logged, never trusted unverified. */
+export async function unsubscribeByToken(userId, category, token) {
+  if (!EMAIL_CATEGORIES.includes(category) || !verifyUnsubscribeToken(userId, category, token)) {
+    throw ApiError.badRequest('That unsubscribe link is invalid', { code: 'UNSUBSCRIBE_INVALID' })
+  }
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { $set: { [`emailPreferences.${category}`]: false } },
+    { new: true }
+  ).select('emailPreferences')
+  if (!user) throw ApiError.notFound('User not found')
+  return user.emailPreferences
+}
+
+export async function getEmailPreferences(userId) {
+  const user = await User.findById(userId).select('emailPreferences').lean()
+  if (!user) throw ApiError.notFound('User not found')
+  return user.emailPreferences
+}
+
+export async function updateEmailPreferences(userId, updates) {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: Object.fromEntries(
+        Object.entries(updates).map(([key, value]) => [`emailPreferences.${key}`, value])
+      ),
+    },
+    { new: true }
+  ).select('emailPreferences')
+  if (!user) throw ApiError.notFound('User not found')
+  return user.emailPreferences
+}
 
 /**
  * Creates one notification, and emails it when the event is one of the ones
@@ -50,12 +124,15 @@ export async function notify({ userId, type, subjectId, title, body, tournamentI
 
   if (EMAIL_TYPES.has(type)) {
     try {
-      const recipient = await User.findById(userId).select('email').lean()
-      if (recipient) {
+      const category = TYPE_CATEGORY[type]
+      const recipient = await User.findById(userId).select('email emailPreferences').lean()
+      const enabled = recipient?.emailPreferences?.[category] ?? true
+      if (recipient && enabled) {
+        const text = `${body}\n\nTurn off these emails: ${unsubscribeUrl(userId, category)}`
         // `critical: false` means sendMail itself should swallow a failure
         // rather than reject — but this still can't trust an implementation
         // it doesn't own. Nothing here may propagate a rejection either way.
-        await sendMail({ to: recipient.email, subject: title, text: body, critical: false })
+        await sendMail({ to: recipient.email, subject: title, text, critical: false })
       }
     } catch (error) {
       // eslint-disable-next-line no-console -- the one place a notification failure surfaces.
