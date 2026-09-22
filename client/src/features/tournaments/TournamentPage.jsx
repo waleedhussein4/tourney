@@ -2,12 +2,7 @@ import { Suspense, lazy, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import {
-  getTournament,
-  reportTournament,
-  tournamentKeys,
-  withdraw,
-} from '/src/api/tournaments.js'
+import { getTournament, reportTournament, tournamentKeys, withdraw } from '/src/api/tournaments.js'
 import { reportUser } from '/src/api/users.js'
 import { useAuth } from '/src/features/auth/useAuth.js'
 import { PageShell } from '/src/components/layout/PageShell.jsx'
