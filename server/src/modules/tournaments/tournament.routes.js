@@ -105,6 +105,20 @@ tournamentRouter.patch(
   controller.updateMatches
 )
 
+tournamentRouter.post(
+  '/:tournamentId/matches/:matchId/report',
+  requireAuth,
+  validate({ params: schemas.matchParams, body: schemas.reportMatchSchema }),
+  controller.reportMatch
+)
+
+tournamentRouter.post(
+  '/:tournamentId/matches/:matchId/confirm',
+  requireAuth,
+  validate({ params: schemas.matchParams, body: schemas.confirmMatchSchema }),
+  controller.confirmMatch
+)
+
 tournamentRouter.patch(
   '/:tournamentId/participants',
   requireAuth,

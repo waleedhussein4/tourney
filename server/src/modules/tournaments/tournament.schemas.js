@@ -7,6 +7,8 @@ export const tournamentIdParams = z.object({ tournamentId: uuid })
 
 export const applicationParams = z.object({ tournamentId: uuid, applicationId: uuid })
 
+export const matchParams = z.object({ tournamentId: uuid, matchId: uuid })
+
 const contactInfoSchema = z
   .object({
     email: z.string().trim().email('Enter a valid contact email').or(z.literal('')).optional(),
@@ -153,6 +155,14 @@ export const participantsSchema = z.object({
     )
     .min(1, 'Nothing to update'),
 })
+
+export const reportMatchSchema = z.object({
+  scores: z
+    .array(z.object({ participantId: uuid, score: z.coerce.number() }))
+    .length(2, 'Report a score for both competitors'),
+})
+
+export const confirmMatchSchema = z.object({ agree: z.boolean() })
 
 export const trendingQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(24).optional().default(10),

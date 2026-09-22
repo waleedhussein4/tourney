@@ -123,6 +123,26 @@ export const updateMatches = asyncHandler(async (req, res) => {
   res.json({ tournament: await toManageView(tournament, req.userId) })
 })
 
+export const reportMatch = asyncHandler(async (req, res) => {
+  const tournament = await service.reportMatch(
+    req.params.tournamentId,
+    req.userId,
+    req.params.matchId,
+    req.body.scores
+  )
+  res.json({ tournament: await toPublicView(tournament, req.userId) })
+})
+
+export const confirmMatch = asyncHandler(async (req, res) => {
+  const tournament = await service.confirmMatch(
+    req.params.tournamentId,
+    req.userId,
+    req.params.matchId,
+    req.body.agree
+  )
+  res.json({ tournament: await toPublicView(tournament, req.userId) })
+})
+
 export const updateParticipants = asyncHandler(async (req, res) => {
   const tournament = await service.updateParticipants(
     req.params.tournamentId,
