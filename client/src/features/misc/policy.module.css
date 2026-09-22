@@ -1,0 +1,22 @@
+/* Shared prose styling for the Terms / Privacy / Refunds pages. */
+.prose {
+  max-width: 68ch;
+}
+
+.prose h2 {
+  margin-top: var(--space-7);
+  font-size: var(--text-xl);
+}
+
+.prose h2:first-child {
+  margin-top: 0;
+}
+
+.prose p {
+  margin-top: var(--space-3);
+  color: var(--text-muted);
+}
+
+.prose a {
+  color: var(--accent);
+}

@@ -17,6 +17,9 @@ import { ProfilePage } from '/src/features/profile/ProfilePage.jsx'
 import { AdminPage } from '/src/features/admin/AdminPage.jsx'
 import { HostsPage } from '/src/features/hosts/HostsPage.jsx'
 import { NotFoundPage } from '/src/features/misc/NotFoundPage.jsx'
+import { TermsPage } from '/src/features/misc/TermsPage.jsx'
+import { PrivacyPage } from '/src/features/misc/PrivacyPage.jsx'
+import { RefundsPage } from '/src/features/misc/RefundsPage.jsx'
 
 /**
  * The two host-only pages are split out of the main bundle.
@@ -70,6 +73,9 @@ export function Router() {
         <Route path="/tournament/:UUID" element={<TournamentPage />} />
         {/* Outside the app shell on purpose: it is a sales page, not a screen. */}
         <Route path="/hosts" element={<HostsPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/refunds" element={<RefundsPage />} />
 
         {/* Signed out only. */}
         <Route element={<GuestRoute />}>

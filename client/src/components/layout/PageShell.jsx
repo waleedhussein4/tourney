@@ -1,4 +1,5 @@
 import { Nav } from './Nav.jsx'
+import { Footer } from './Footer.jsx'
 import styles from './PageShell.module.css'
 
 /**
@@ -24,6 +25,7 @@ export function PageShell({ width = 'default', children }) {
       >
         {children}
       </main>
+      <Footer />
     </>
   )
 }

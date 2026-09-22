@@ -109,6 +109,10 @@ export function BillingPage() {
           </div>
         )}
       </Card>
+
+      <p className={styles.hint}>
+        Cancel any time. See the <a href="/refunds">refund policy</a> for details.
+      </p>
     </PageShell>
   )
 }
