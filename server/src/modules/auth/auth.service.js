@@ -2,7 +2,7 @@ import crypto from 'node:crypto'
 import bcrypt from 'bcrypt'
 import User from '../../models/user.model.js'
 import { ApiError } from '../../utils/ApiError.js'
-import { sendMail } from '../../lib/mailer.js'
+import { sendMail, mailCanSend } from '../../lib/mailer.js'
 
 const SALT_ROUNDS = 10
 const RESET_TOKEN_TTL_MS = 30 * 60 * 1000
@@ -62,6 +62,14 @@ export async function authenticateUser({ email, password }) {
  * registered.
  */
 export async function requestPasswordReset({ email, resetUrlBase }) {
+  // Checked before the lookup, so an unconfigured deployment answers the same
+  // way for every address and still cannot be used to probe for accounts.
+  if (!mailCanSend) {
+    throw new ApiError(503, 'Password reset is not configured on this deployment', {
+      code: 'MAIL_UNAVAILABLE',
+    })
+  }
+
   const user = await User.findOne({ email })
   if (!user) return
 

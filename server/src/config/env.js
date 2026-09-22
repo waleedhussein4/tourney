@@ -118,19 +118,20 @@ function loadConfig() {
   }
 
   // Password-reset email, via Resend. Unset in development, the mailer logs
-  // instead of sending — nothing to configure for local work. Unset in
-  // production would silently swallow every reset email, which is worse than
-  // failing loudly at boot, so it is required there.
+  // instead of sending — nothing to configure for local work.
+  //
+  // Unset in production is NOT a boot failure. Refusing to start would take
+  // the entire site down over one optional feature, which is a far worse
+  // outcome than that feature being unavailable: everybody loses tournaments
+  // and sign-in so that nobody loses a reset email. Instead the mailer reports
+  // itself unconfigured and `POST /api/auth/forgot-password` answers 503 with
+  // `MAIL_UNAVAILABLE`, so the failure is loud exactly where someone is
+  // standing in front of it, and silent everywhere it does not matter.
   const resend = {
     apiKey: read('RESEND_API_KEY'),
     mailFrom: read('MAIL_FROM'),
   }
-  if (nodeEnv === 'production' && !resend.apiKey) {
-    problems.push('RESEND_API_KEY is required in production — password-reset emails need it')
-  }
-  if (nodeEnv === 'production' && !resend.mailFrom) {
-    problems.push('MAIL_FROM is required in production — the sender address for reset emails')
-  }
+  const mailConfigured = Boolean(resend.apiKey && resend.mailFrom)
 
   if (problems.length > 0) {
     throw new Error(
@@ -161,7 +162,7 @@ function loadConfig() {
     cronSecret,
     // Password-reset email. `mailFrom` unset in development is fine — the
     // mailer never reads it there, since it logs instead of calling Resend.
-    resend,
+    resend: { ...resend, configured: mailConfigured },
     // Card payments. `enabled` is what the rest of the code asks: unset
     // credentials mean the publish flow waits for a human instead.
     paddle: Object.freeze({ ...paddle, enabled: paddleGiven.length === paddleSet.length }),
