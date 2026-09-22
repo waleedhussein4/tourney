@@ -1,5 +1,18 @@
 #!/bin/sh
-git log origin/main..HEAD --format=%B | grep -qiE 'co-authored-by:.*(anthropic|claude|openai|copilot)|generated with|claude code|anthropic' && {
-  echo "Rejected: attribution line in a commit." >&2
+# Same rule as commit-msg, applied to every commit being pushed, so a message
+# written with --no-verify still cannot reach the remote.
+ALLOWED='hamzahtmatar@gmail\.com|haythamduwaji@gmail\.com|137875421\+JadElMurr@users\.noreply\.github\.com|144370736\+Soumi-7@users\.noreply\.github\.com|62118101\+waleedhussein4@users\.noreply\.github\.com|walid\.a\.hussein@hotmail\.com|150618673\+jadzeid@users\.noreply\.github\.com|jadzeid004@gmail\.com'
+
+messages=$(git log origin/main..HEAD --format=%B)
+
+printf '%s\n' "$messages" | grep -qiE '^generated with' && {
+  echo "Rejected: a commit message contains a generated-by footer." >&2
   exit 1
-} || exit 0
+}
+
+printf '%s\n' "$messages" | grep -iE '^co-authored-by:' | grep -qivE "$ALLOWED" && {
+  echo "Rejected: a commit co-author is not a listed contributor." >&2
+  exit 1
+}
+
+exit 0
