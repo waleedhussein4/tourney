@@ -50,3 +50,7 @@ lerna-debug.log*
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Claude Code local overrides
+.claude/settings.local.json
+CLAUDE.local.md
