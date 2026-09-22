@@ -12,6 +12,7 @@ export const NOTIFICATION_TYPES = [
   'match_starting_soon',
   'result_confirmed',
   'result_disputed',
+  'result_resolved',
   'tournament_ended',
 ]
 

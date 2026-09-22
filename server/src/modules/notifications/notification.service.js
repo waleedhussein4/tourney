@@ -234,6 +234,19 @@ export async function notifyResultDisputed(tournament, match) {
   })
 }
 
+export async function notifyResultResolved(tournament, match) {
+  const recipients = match.participants
+    .filter(Boolean)
+    .flatMap((id) => participantUserIds(tournament, id))
+  await notifyAll(recipients, {
+    type: 'result_resolved',
+    subjectId: match._id,
+    title: 'Dispute resolved',
+    body: `The host resolved the disputed round ${match.round} match in "${tournament.title}".`,
+    tournamentId: tournament._id,
+  })
+}
+
 export async function notifyTournamentEnded(tournament) {
   await notifyAll(allParticipantUserIds(tournament), {
     type: 'tournament_ended',
