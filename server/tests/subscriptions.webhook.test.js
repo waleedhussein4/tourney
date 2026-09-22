@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useDatabase } from './setup/database.js'
 import { createTournament, guest, planOf, signUp } from './setup/api.js'
+import User from '../src/models/user.model.js'
 
 // The gateway is the only thing that knows Paddle, so a webhook test mocks it
 // rather than fabricating a signed payload — this is a test of
@@ -25,10 +26,11 @@ beforeEach(() => {
 })
 
 /** Queues up one delivery: the event `readEvent` returns, and what it decodes to. */
-function deliver({ event = {}, subscription, isSubscription = true } = {}) {
+function deliver({ event = {}, subscription, isSubscription = true, eventId = null } = {}) {
   gateway.readEvent.mockResolvedValueOnce(event)
   gateway.isSubscriptionEvent.mockReturnValueOnce(isSubscription)
   if (subscription) gateway.subscriptionFrom.mockReturnValueOnce(subscription)
+  if (isSubscription) gateway.eventIdOf.mockReturnValueOnce(eventId)
 }
 
 function post(body = { any: 'payload' }) {
@@ -116,6 +118,104 @@ describe('a duplicate delivery', () => {
 
     for (let i = 0; i < 2; i += 1) {
       deliver({
+        subscription: {
+          userId: host.user.id,
+          subscriptionId: 'sub_1',
+          status: 'active',
+          renewsAt: null,
+        },
+      })
+      await post().expect(200)
+    }
+
+    expect(await planOf(host.user.id)).toBe('active')
+  })
+
+  it('is ignored by event id even if it would otherwise change the status', async () => {
+    host = await signUp('hostie', { isHost: true })
+
+    deliver({
+      eventId: 'evt_1',
+      subscription: {
+        userId: host.user.id,
+        subscriptionId: 'sub_1',
+        status: 'active',
+        renewsAt: null,
+      },
+    })
+    await post().expect(200)
+    expect(await planOf(host.user.id)).toBe('active')
+
+    // Same event id redelivered, this time claiming canceled — it must not
+    // apply, because it is the same delivery the gateway already sent once.
+    deliver({
+      eventId: 'evt_1',
+      subscription: {
+        userId: host.user.id,
+        subscriptionId: 'sub_1',
+        status: 'canceled',
+        renewsAt: null,
+      },
+    })
+    await post().expect(200)
+
+    expect(await planOf(host.user.id)).toBe('active')
+  })
+
+  it('records the event id so a later replay can be recognized', async () => {
+    host = await signUp('hostie', { isHost: true })
+
+    deliver({
+      eventId: 'evt_9',
+      subscription: {
+        userId: host.user.id,
+        subscriptionId: 'sub_1',
+        status: 'active',
+        renewsAt: null,
+      },
+    })
+    await post().expect(200)
+
+    const user = await User.findById(host.user.id)
+    expect(user.hostingPlan.lastEventId).toBe('evt_9')
+  })
+
+  it('applies a new event id normally even right after another one', async () => {
+    host = await signUp('hostie', { isHost: true })
+
+    deliver({
+      eventId: 'evt_a',
+      subscription: {
+        userId: host.user.id,
+        subscriptionId: 'sub_1',
+        status: 'active',
+        renewsAt: null,
+      },
+    })
+    await post().expect(200)
+
+    deliver({
+      eventId: 'evt_b',
+      subscription: {
+        userId: host.user.id,
+        subscriptionId: 'sub_1',
+        status: 'canceled',
+        renewsAt: null,
+      },
+    })
+    await post().expect(200)
+
+    expect(await planOf(host.user.id)).toBe('canceled')
+  })
+
+  it('replays harmlessly and still lets a live tournament stay published', async () => {
+    host = await signUp('hostie', { isHost: true, plan: true })
+    const tournament = await createTournament(host.agent, {}, { published: false })
+    await host.agent.post(`/api/tournaments/${tournament.id}/publish`).expect(200)
+
+    for (let i = 0; i < 2; i += 1) {
+      deliver({
+        eventId: 'evt_replay',
         subscription: {
           userId: host.user.id,
           subscriptionId: 'sub_1',

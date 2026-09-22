@@ -52,6 +52,8 @@ const userSchema = new Schema(
       /** When the current paid period ends — what a cancelled plan runs until. */
       renewsAt: Date,
       updatedAt: Date,
+      /** The last webhook event id applied, so a redelivered event is a no-op. */
+      lastEventId: String,
     },
 
     /** Set by the seed script and nothing else. The demo reset deletes only these. */
