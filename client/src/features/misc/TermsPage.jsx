@@ -1,4 +1,5 @@
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
+import { ContactEmail } from './ContactEmail.jsx'
 import styles from './policy.module.css'
 
 export function TermsPage() {
@@ -24,15 +25,13 @@ export function TermsPage() {
         <h2>Accounts</h2>
         <p>
           You are responsible for what happens under your account. Keep your password to
-          yourself, and tell us at{' '}
-          <a href="mailto:contact@walenehq.com">contact@walenehq.com</a> if you think someone
-          else has access to it.
+          yourself, and tell us at <ContactEmail /> if you think someone else has access to it.
         </p>
 
         <h2>Hosting subscription</h2>
         <p>
-          Hosting more than the free plan&rsquo;s live tournaments requires a $5/month subscription,
-          billed by Paddle as merchant of record. See the{' '}
+          Hosting more than the free plan&rsquo;s live tournaments requires a $5/month
+          subscription, billed by Paddle as merchant of record. See the{' '}
           <a href="/refunds">refunds page</a> for cancellation and refund terms.
         </p>
 
@@ -44,7 +43,7 @@ export function TermsPage() {
 
         <h2>Contact</h2>
         <p>
-          Questions about these terms: <a href="mailto:contact@walenehq.com">contact@walenehq.com</a>.
+          Questions about these terms: <ContactEmail />.
         </p>
       </div>
     </PageShell>

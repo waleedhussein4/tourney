@@ -1,4 +1,5 @@
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
+import { ContactEmail } from './ContactEmail.jsx'
 import styles from './policy.module.css'
 
 export function PrivacyPage() {
@@ -9,7 +10,7 @@ export function PrivacyPage() {
         <h2>Who runs this</h2>
         <p>
           Tourney (tourneylb.com) is operated by Walene HQ. Questions about your data:{' '}
-          <a href="mailto:contact@walenehq.com">contact@walenehq.com</a>.
+          <ContactEmail />.
         </p>
 
         <h2>What we store</h2>
@@ -40,8 +41,7 @@ export function PrivacyPage() {
 
         <h2>Deleting your data</h2>
         <p>
-          Email <a href="mailto:contact@walenehq.com">contact@walenehq.com</a> to have your
-          account and its data removed.
+          Email <ContactEmail /> to have your account and its data removed.
         </p>
       </div>
     </PageShell>

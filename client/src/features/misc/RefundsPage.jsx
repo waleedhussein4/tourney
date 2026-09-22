@@ -1,4 +1,5 @@
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
+import { ContactEmail } from './ContactEmail.jsx'
 import styles from './policy.module.css'
 
 export function RefundsPage() {
@@ -16,8 +17,7 @@ export function RefundsPage() {
 
         <h2>Refund window</h2>
         <p>
-          If you are charged and want a refund, email{' '}
-          <a href="mailto:contact@walenehq.com">contact@walenehq.com</a> within 14 days of the
+          If you are charged and want a refund, email <ContactEmail /> within 14 days of the
           charge and we will refund it.
         </p>
 
