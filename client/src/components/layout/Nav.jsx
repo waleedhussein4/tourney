@@ -3,6 +3,7 @@ import toast from 'react-hot-toast'
 import { useAuth } from '/src/features/auth/useAuth.js'
 import { Logo } from '/src/components/brand/index.js'
 import { Button } from '/src/components/ui/index.js'
+import { NotificationBell } from '/src/features/notifications/NotificationBell.jsx'
 import styles from './Nav.module.css'
 
 const LINKS = [
@@ -62,6 +63,7 @@ export function Nav() {
               <NavLink to="/profile" className={styles.link}>
                 {user.username}
               </NavLink>
+              <NotificationBell />
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 Sign out
               </Button>
