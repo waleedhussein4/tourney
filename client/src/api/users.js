@@ -11,3 +11,6 @@ export const getDashboard = (options) => get('/api/users/me/dashboard', options)
 
 /** Flags a user for the admin queue. */
 export const reportUser = (userId, reason) => post(`/api/users/${userId}/report`, { reason })
+
+/** What needs the signed-in host across every tournament they run. */
+export const getHostDashboard = (options) => get('/api/users/me/host-dashboard', options)

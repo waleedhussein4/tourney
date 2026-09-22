@@ -87,7 +87,7 @@ export function MatchesSection({ tournament }) {
 
   if (!tournament.hasStarted) {
     return (
-      <Card>
+      <Card id="matches">
         <CardHeader title="Results" />
         <EmptyState
           title="The bracket is not running yet"
@@ -105,7 +105,7 @@ export function MatchesSection({ tournament }) {
     setDraft((current) => ({ ...current, [matchId]: participantId }))
 
   return (
-    <Card>
+    <Card id="matches">
       <CardHeader
         title="Results"
         subtitle="Pick the winner of each match, and set when each one is played. Times are shown in your own timezone."

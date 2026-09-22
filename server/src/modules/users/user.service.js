@@ -2,6 +2,7 @@ import User from '../../models/user.model.js'
 import Team from '../../models/team.model.js'
 import Tournament from '../../models/tournament.model.js'
 import { ApiError } from '../../utils/ApiError.js'
+import { attentionSummary } from '../tournaments/tournament.service.js'
 
 // An account with an unverified email may browse and join tournaments freely —
 // there is nothing an unproven address puts at risk there. It may not become a
@@ -180,4 +181,29 @@ export async function getDashboard(userId) {
   }
 
   return { nextMatch, awaitingConfirmation, applications }
+}
+
+/**
+ * Across every tournament this user hosts: what needs them right now, so a
+ * host with several tournaments running can see at a glance which one is
+ * stalled.
+ *
+ * One query, matched on `host` (indexed) and projected down to just the
+ * arrays `attentionSummary` reads — never the whole collection, and never a
+ * tournament this user does not host. A non-host, or a host of nothing, gets
+ * an empty list rather than a special case.
+ */
+export async function getHostDashboard(userId) {
+  const tournaments = await Tournament.find({ host: userId })
+    .select('title hasStarted hasEnded applications matches')
+    .sort({ createdAt: -1 })
+    .lean()
+
+  return tournaments.map((tournament) => ({
+    tournamentId: tournament._id,
+    tournamentTitle: tournament.title,
+    hasStarted: tournament.hasStarted,
+    hasEnded: tournament.hasEnded,
+    ...attentionSummary(tournament),
+  }))
 }
