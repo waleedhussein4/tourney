@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tourney",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // The Express API, unchanged, running in the Dockerfile at the repo root.
+  // Bound to a Durable Object so Cloudflare can address one container
+  // instance per class, per Containers' current design.
+  "containers": [
+    {
+      "class_name": "TourneyContainer",
+      "image": "./Dockerfile",
+      "max_instances": 1,
+      "instance_type": "basic"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "TOURNEY_CONTAINER", "class_name": "TourneyContainer" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["TourneyContainer"] }],
+
+  // The built SPA. /api/* runs the Worker (and therefore the container)
+  // first; everything else falls back to the static file, then index.html.
+  "assets": {
+    "directory": "./client/dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+    "not_found_handling": "single-page-application"
+  },
+
+  // Replaces the Vercel cron that hit /api/cron/reseed at 04:00 UTC daily.
+  // Container stdout/stderr and Worker logs. Without this a crash inside the
+  // container is invisible — the only signal is a generic "container is not
+  // running" at the edge.
+  "observability": { "enabled": true },
+
+  "triggers": {
+    "crons": ["0 4 * * *"]
+  }
+}

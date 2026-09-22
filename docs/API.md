@@ -473,9 +473,9 @@ or its tournament is no longer `pending_payment`. Unknown body keys are a `400`.
 
 ### `POST /api/cron/reseed`
 
-Wipes and rebuilds the demo dataset. Scheduled daily at 04:00 UTC by Vercel
-Cron, which is why an operation this destructive answers a `GET` — that is the
-only method Vercel Cron issues.
+Wipes and rebuilds the demo dataset. Scheduled daily at 04:00 UTC by a
+Cloudflare Cron Trigger, which is why an operation this destructive answers a
+`GET` — `POST` is accepted too, for triggering one by hand.
 
 Requires `Authorization: Bearer $CRON_SECRET`, compared in constant time.
 

@@ -27,10 +27,15 @@
     "check:regressions": "bash scripts/check-regressions.sh",
     "seed": "npm run seed -w server",
     "backup": "npm run backup -w server",
-    "restore": "npm run restore -w server"
+    "restore": "npm run restore -w server",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@cloudflare/containers": "^0.3.7"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
-    "prettier": "^3.4.2"
+    "prettier": "^3.4.2",
+    "wrangler": "^4.28.1"
   }
 }
