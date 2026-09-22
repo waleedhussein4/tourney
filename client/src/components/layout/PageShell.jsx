@@ -1,5 +1,6 @@
 import { Nav } from './Nav.jsx'
 import { Footer } from './Footer.jsx'
+import { DemoBanner } from './DemoBanner.jsx'
 import styles from './PageShell.module.css'
 
 /**
@@ -17,6 +18,7 @@ export function PageShell({ width = 'default', children }) {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
+      <DemoBanner />
       <Nav />
       <main
         id="main"
