@@ -38,6 +38,15 @@ const userSchema = new Schema(
     resetPasswordToken: { type: String, select: false },
     resetPasswordExpires: { type: Date, select: false },
 
+    // True once the address behind this account has been proven reachable.
+    // Seeded and demo accounts are created pre-verified — see seed-data.js.
+    emailVerified: { type: Boolean, default: false },
+    // Hashed the same way the reset token is. Left in place (not cleared) once
+    // verification succeeds, so a replayed link can be told apart from a
+    // tampered one — `emailVerified` is what actually gates re-use.
+    verifyEmailToken: { type: String, select: false },
+    verifyEmailExpires: { type: Date, select: false },
+
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
 
     isHost: { type: Boolean, default: false },
@@ -79,6 +88,7 @@ userSchema.methods.toPublicJSON = function toPublicJSON() {
     id: this._id,
     username: this.username,
     email: this.email,
+    emailVerified: this.emailVerified,
     isHost: this.isHost,
     isAdmin: this.role === 'admin',
     plan: {

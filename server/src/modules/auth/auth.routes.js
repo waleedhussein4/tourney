@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { requireAuth } from '../../middleware/auth.js'
 import { validate } from '../../middleware/validate.js'
 import { authLimiter } from '../../middleware/rateLimits.js'
 import {
@@ -6,8 +7,17 @@ import {
   loginSchema,
   resetPasswordSchema,
   signupSchema,
+  verifyEmailSchema,
 } from './auth.schemas.js'
-import { forgotPassword, login, logout, resetPasswordHandler, signup } from './auth.controller.js'
+import {
+  forgotPassword,
+  login,
+  logout,
+  resendVerificationHandler,
+  resetPasswordHandler,
+  signup,
+  verifyEmailHandler,
+} from './auth.controller.js'
 
 export const authRouter = Router()
 
@@ -26,3 +36,10 @@ authRouter.post(
   validate({ body: resetPasswordSchema }),
   resetPasswordHandler
 )
+authRouter.post(
+  '/verify-email',
+  authLimiter,
+  validate({ body: verifyEmailSchema }),
+  verifyEmailHandler
+)
+authRouter.post('/resend-verification', authLimiter, requireAuth, resendVerificationHandler)

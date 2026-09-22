@@ -28,6 +28,10 @@ export const forgotPasswordSchema = z.object({
   email: z.string().trim().toLowerCase().email('Enter a valid email address'),
 })
 
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1, 'Verification token is required'),
+})
+
 export const resetPasswordSchema = z.object({
   token: z.string().min(1, 'Reset token is required'),
   // Reusing the signup rule: a reset password must meet the same bar a new
