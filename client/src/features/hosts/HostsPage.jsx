@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { billingKeys, getPlan } from '/src/api/billing.js'
 import { BracketTree } from '/src/components/brand/index.js'
 import { formatNumber, formatUsd } from '/src/lib/format.js'
-import { COPY, LANGUAGES, directionOf } from './copy.js'
+import { COPY, LANGUAGES, directionOf, intervalName } from './copy.js'
 import styles from './HostsPage.module.css'
 
 const STORED_LANGUAGE = 'tourney.hosts.language'
@@ -27,7 +27,7 @@ export function HostsPage() {
     queryKey: billingKeys.plan,
     queryFn: getPlan,
   })
-  const mailto = pricing.data?.contactEmail ? `mailto:${pricing.data.contactEmail}` : null
+  const contactHref = pricing.data?.contactEmail ? `mailto:${pricing.data.contactEmail}` : null
   const direction = directionOf(language)
   const t = COPY[language]
 
@@ -77,11 +77,9 @@ export function HostsPage() {
           <h1 className={styles.heroTitle}>{t.heroTitle}</h1>
           <p className={styles.heroLead}>{t.heroBody}</p>
           <div className={styles.heroActions}>
-            {mailto && (
-              <a className={styles.primary} href={mailto}>
-                {t.heroAction}
-              </a>
-            )}
+            <Link className={styles.primary} to="/signup">
+              {t.heroAction}
+            </Link>
             <Link className={styles.secondary} to="/tournaments">
               {t.heroSecondary}
             </Link>
@@ -113,7 +111,7 @@ export function HostsPage() {
         </div>
       </section>
 
-      <Pricing t={t} data={pricing.data} />
+      <Pricing t={t} data={pricing.data} language={language} />
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>{t.faqTitle}</h2>
@@ -130,9 +128,12 @@ export function HostsPage() {
       <section className={styles.closing}>
         <h2 className={styles.closingTitle}>{t.closingTitle}</h2>
         <p className={styles.closingBody}>{t.closingBody}</p>
-        {mailto && (
-          <a className={styles.primary} href={mailto}>
-            {t.closingAction}
+        <Link className={styles.primary} to="/signup">
+          {t.closingAction}
+        </Link>
+        {contactHref && (
+          <a className={styles.contactLink} href={contactHref}>
+            {t.closingContact}
           </a>
         )}
       </section>
@@ -146,7 +147,7 @@ export function HostsPage() {
  * The price lives in one config file — quoting it here from a hard-coded copy
  * is exactly how this page and the billing screen would come to disagree.
  */
-function Pricing({ t, data }) {
+function Pricing({ t, data, language }) {
   return (
     <section className={styles.section}>
       <h2 className={styles.sectionTitle}>{t.pricingTitle}</h2>
@@ -154,8 +155,11 @@ function Pricing({ t, data }) {
 
       {data && (
         <p className={styles.sectionLead}>
-          {t.upTo(formatNumber(data.freeLiveTournaments))} {t.free.toLowerCase()} —{' '}
-          {t.price(formatUsd(data.plan.priceCents))} {data.plan.interval} for as many as you like.
+          {t.pricingLine(
+            formatNumber(data.freeLiveTournaments),
+            formatUsd(data.plan.priceCents),
+            intervalName(language, data.plan.interval),
+          )}
         </p>
       )}
     </section>
