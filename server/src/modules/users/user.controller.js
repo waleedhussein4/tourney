@@ -15,3 +15,10 @@ export const becomeHost = asyncHandler(async (req, res) => {
   const user = await userService.becomeHost(req.userId)
   res.json({ user: user.toPublicJSON() })
 })
+
+/** What's next for this player: their next match, results awaiting their
+ * confirmation, and tournaments they've applied to. */
+export const getDashboard = asyncHandler(async (req, res) => {
+  const dashboard = await userService.getDashboard(req.userId)
+  res.json(dashboard)
+})

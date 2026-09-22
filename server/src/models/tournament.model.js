@@ -207,6 +207,9 @@ tournamentSchema.index({ title: 'text', description: 'text' })
 tournamentSchema.index({ category: 1, type: 1, accessibility: 1 })
 tournamentSchema.index({ 'enrolledUsers.userId': 1 })
 tournamentSchema.index({ 'enrolledTeams.members.userId': 1 })
+tournamentSchema.index({ 'applications.applicantId': 1 })
+tournamentSchema.index({ acceptedUsers: 1 })
+tournamentSchema.index({ acceptedTeams: 1 })
 
 /** True for a tournament played by teams rather than individuals. */
 tournamentSchema.virtual('isTeamBased').get(function isTeamBased() {

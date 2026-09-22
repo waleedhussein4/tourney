@@ -58,6 +58,57 @@
   font-size: var(--text-sm);
 }
 
+.dashboardSections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.dashboardHeading {
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: var(--space-2);
+}
+
+.dashboardRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-strong);
+  text-decoration: none;
+}
+
+.dashboardRow:not(:last-child) {
+  margin-bottom: var(--space-2);
+}
+
+.dashboardRow:hover,
+.dashboardRow:focus-visible {
+  border-color: var(--border-strong, var(--border));
+}
+
+.dashboardMeta {
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.dashboardEmpty {
+  margin-top: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
 .tournaments {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
