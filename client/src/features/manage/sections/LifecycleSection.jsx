@@ -66,7 +66,10 @@ export function LifecycleSection({ tournament }) {
   if (tournament.hasEnded) {
     return (
       <Card>
-        <CardHeader title="Finished" subtitle="Winners have been recorded. Nothing further to do." />
+        <CardHeader
+          title="Finished"
+          subtitle="Winners have been recorded. Nothing further to do."
+        />
       </Card>
     )
   }

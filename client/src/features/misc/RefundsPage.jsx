@@ -11,14 +11,14 @@ export function RefundsPage() {
         <p>
           The hosting subscription is $5/month, charged by Paddle, who acts as merchant of record
           for the transaction. You can cancel at any time from the{' '}
-          <a href="/billing">billing page</a> — cancelling stops future charges but does not
-          refund the current period automatically.
+          <a href="/billing">billing page</a> — cancelling stops future charges but does not refund
+          the current period automatically.
         </p>
 
         <h2>Refund window</h2>
         <p>
-          If you are charged and want a refund, email <ContactEmail /> within 14 days of the
-          charge and we will refund it.
+          If you are charged and want a refund, email <ContactEmail /> within 14 days of the charge
+          and we will refund it.
         </p>
 
         <h2>Entry fees</h2>
