@@ -75,6 +75,10 @@ function loadConfig() {
 
   const clientUrl = read('CLIENT_URL')
 
+  // Optional: Sentry error tracking. Unset means Sentry.init is never called —
+  // no network calls, no side effects.
+  const sentryDsn = read('SENTRY_DSN')
+
   // Optional. Unset means the scheduled reseed endpoint refuses to run at all,
   // which is the safe default: that route can empty the production database.
   const cronSecret = read('CRON_SECRET')
@@ -137,6 +141,7 @@ function loadConfig() {
     // API, which is the target setup (Vite proxy locally, one Vercel project in
     // production) and needs no CORS at all.
     clientUrl,
+    sentryDsn,
     // Optional: the bearer token Vercel Cron presents to /api/cron/*.
     cronSecret,
     // Card payments. `enabled` is what the rest of the code asks: unset
