@@ -71,21 +71,28 @@ mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/tourney?retryWrites=true&w=major
 
 ### 2. Cloudflare — owner task
 
-This step needs a Cloudflare account and Docker running locally; it is not
-something a repository change can do.
+Create an API token (Edit Cloudflare Workers, including Workers Containers
+Write) and note the account ID, then store both as **GitHub Actions repository
+secrets**:
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+These are what `.github/workflows/deploy.yml` passes to `wrangler deploy` —
+the deploy itself needs no local Cloudflare login. Containers requires the
+Workers **Paid** plan; confirm the account is on it before the first deploy.
+
+Set every runtime secret the Worker and container need with `wrangler secret
+put` (each prompts for the value, so none of them land in shell history or in
+GitHub) — this can be run from any machine with `wrangler login`, it is a
+one-time step against the Cloudflare account and is unrelated to how deploys
+happen afterward. `JWT_SECRET` in particular **must be at least 32
+characters** with `NODE_ENV=production` (`server/src/config/env.js` refuses to
+boot otherwise), so check the value before pasting it in if it was copied from
+a local `.env` that predates that requirement:
 
 ```bash
-npm install -g wrangler   # or use the root devDependency via npx wrangler
-wrangler login
-```
-
-Set every secret the Worker and container need — each prompts for the value,
-so none of them land in shell history. `JWT_SECRET` in particular **must be at
-least 32 characters** with `NODE_ENV=production` (`server/src/config/env.js`
-refuses to boot otherwise), so check the value before pasting it in if it was
-copied from a local `.env` that predates that requirement:
-
-```bash
+npx wrangler login   # one-time, from any machine — not needed for CI deploys after this
 wrangler secret put MONGODB_URI
 wrangler secret put JWT_SECRET   # 32+ characters in production
 wrangler secret put CRON_SECRET
@@ -98,17 +105,29 @@ wrangler secret put SEED_ADMIN_PASSWORD
 wrangler secret put SEED_PASSWORD
 ```
 
-`PADDLE_ENV`, `SENTRY_DSN`, and `VITE_SENTRY_DSN` are optional; set them the
-same way if used.
+`PADDLE_ENV` and `SENTRY_DSN` are optional; set them the same way if used.
 
-### 3. Deploy — owner task
+`VITE_SENTRY_DSN` is different: it is a **build-time** value baked into the
+client bundle by Vite, not something the running Worker reads, so it cannot be
+a `wrangler secret`. Set it instead as a GitHub Actions repository secret
+named `VITE_SENTRY_DSN` — the deploy workflow's build step passes it through
+as an environment variable. Left unset, the build still succeeds and client
+Sentry init stays a no-op, by design.
+
+### 3. Deploy
+
+Deploys run in GitHub Actions (`.github/workflows/deploy.yml`), not on any
+local machine — the workflow builds the container image and runs
+`wrangler deploy` on `ubuntu-latest`, which has Docker available. It triggers
+automatically on every push to `main`, and can be run by hand from a branch:
 
 ```bash
-npm run deploy   # wrangler deploy — needs Docker running locally to build the image
+gh workflow run deploy.yml --ref <branch-or-sha>
 ```
 
-Or wire it into CI once the account is connected; this repository does not do
-that on its own, since deploy credentials live outside the repo.
+Local Docker is **optional** — only needed if someone wants to build the
+container image by hand (`docker build .`) or run `npm run deploy` from their
+own machine. Neither is the normal path.
 
 ### 4. DNS — owner task
 
@@ -143,7 +162,8 @@ codebase's control.
 | `SEED_DEMO_EMAIL`, `SEED_ADMIN_EMAIL`  | Worker secret, local | no  | Default to `demo@tourney.app` and `admin@tourney.app`.                                                          |
 | `VITE_API_URL`                         | client build     | no       | **Leave empty.** An empty value makes the client call a relative `/api`.                                        |
 | `VITE_FRONTEND_URL`                    | client build     | no       | Only used to build team invite links.                                                                           |
-| `SENTRY_DSN` / `VITE_SENTRY_DSN`       | Worker secret / client build | no | Optional error tracking; unset, `Sentry.init` never runs.                                            |
+| `SENTRY_DSN`                           | Worker secret     | no       | Optional server error tracking; unset, `Sentry.init` never runs.                                                |
+| `VITE_SENTRY_DSN`                      | GitHub Actions secret | no   | Optional client error tracking. Build-time only — baked into the bundle by the deploy workflow, not a Worker secret. |
 
 Set names only, never values, in this file or any committed file — every
 secret above goes in as `wrangler secret put <NAME>`, which prompts
