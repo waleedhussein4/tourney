@@ -45,6 +45,19 @@
   margin-top: var(--space-4);
 }
 
+.preferences {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.preferencesError {
+  margin-top: var(--space-3);
+  color: var(--danger);
+  font-size: var(--text-sm);
+}
+
 .tournaments {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));

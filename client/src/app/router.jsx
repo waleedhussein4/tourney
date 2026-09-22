@@ -17,6 +17,7 @@ import { TeamPage } from '/src/features/teams/TeamPage.jsx'
 import { JoinTeamPage } from '/src/features/teams/JoinTeamPage.jsx'
 import { BillingPage } from '/src/features/billing/BillingPage.jsx'
 import { ProfilePage } from '/src/features/profile/ProfilePage.jsx'
+import { UnsubscribePage } from '/src/features/profile/UnsubscribePage.jsx'
 import { HostsPage } from '/src/features/hosts/HostsPage.jsx'
 import { NotFoundPage } from '/src/features/misc/NotFoundPage.jsx'
 import { TermsPage } from '/src/features/misc/TermsPage.jsx'
@@ -84,6 +85,7 @@ export function Router() {
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/refunds" element={<RefundsPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/unsubscribe" element={<UnsubscribePage />} />
 
         {/* Signed out only. */}
         <Route element={<GuestRoute />}>
