@@ -1,0 +1,5 @@
+#!/bin/sh
+git log origin/main..HEAD --format=%B | grep -qiE 'co-authored-by:.*(anthropic|claude|openai|copilot)|generated with|claude code|anthropic' && {
+  echo "Rejected: attribution line in a commit." >&2
+  exit 1
+} || exit 0
