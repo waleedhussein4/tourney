@@ -80,11 +80,14 @@ wrangler login
 ```
 
 Set every secret the Worker and container need — each prompts for the value,
-so none of them land in shell history:
+so none of them land in shell history. `JWT_SECRET` in particular **must be at
+least 32 characters** with `NODE_ENV=production` (`server/src/config/env.js`
+refuses to boot otherwise), so check the value before pasting it in if it was
+copied from a local `.env` that predates that requirement:
 
 ```bash
 wrangler secret put MONGODB_URI
-wrangler secret put JWT_SECRET
+wrangler secret put JWT_SECRET   # 32+ characters in production
 wrangler secret put CRON_SECRET
 wrangler secret put PADDLE_API_KEY
 wrangler secret put PADDLE_WEBHOOK_SECRET
