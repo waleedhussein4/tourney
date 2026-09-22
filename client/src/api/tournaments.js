@@ -47,6 +47,9 @@ export const joinSolo = (id) => post(`/api/tournaments/${id}/join/solo`)
 
 export const joinAsTeam = (id, teamId) => post(`/api/tournaments/${id}/join/team`, { teamId })
 
+/** Leaves a tournament the caller is in. Before the start, frees the slot; after, forfeits. */
+export const withdraw = (id) => post(`/api/tournaments/${id}/withdraw`)
+
 /**
  * @param {string} id
  * @param {{teamId?: string, fields: {label: string, input: string}[]}} application

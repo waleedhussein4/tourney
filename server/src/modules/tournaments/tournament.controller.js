@@ -69,6 +69,11 @@ export const joinAsTeam = asyncHandler(async (req, res) => {
   res.json({ tournament: await toPublicView(tournament, req.userId) })
 })
 
+export const withdraw = asyncHandler(async (req, res) => {
+  const tournament = await service.withdraw(req.params.tournamentId, req.userId)
+  res.json({ tournament: await toPublicView(tournament, req.userId) })
+})
+
 export const apply = asyncHandler(async (req, res) => {
   const tournament = await service.apply(req.params.tournamentId, req.userId, req.body)
   res.status(201).json({ tournament: await toPublicView(tournament, req.userId) })

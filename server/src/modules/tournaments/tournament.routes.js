@@ -171,6 +171,13 @@ tournamentRouter.post(
 )
 
 tournamentRouter.post(
+  '/:tournamentId/withdraw',
+  requireAuth,
+  validate({ params: schemas.tournamentIdParams }),
+  controller.withdraw
+)
+
+tournamentRouter.post(
   '/:tournamentId/applications',
   requireAuth,
   validate({ params: schemas.tournamentIdParams, body: schemas.applySchema }),

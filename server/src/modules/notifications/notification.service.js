@@ -247,6 +247,20 @@ export async function notifyResultResolved(tournament, match) {
   })
 }
 
+/** A waitlist entry was promoted into an open slot after someone withdrew. */
+export async function notifyWaitlistPromoted(tournament, entry) {
+  const recipients = entry.isTeam
+    ? entry.members.map((member) => String(member.userId))
+    : [String(entry.userId)]
+  await notifyAll(recipients, {
+    type: 'waitlist_promoted',
+    subjectId: entry._id,
+    title: "You're in!",
+    body: `A slot opened up in "${tournament.title}" and you were next on the waitlist.`,
+    tournamentId: tournament._id,
+  })
+}
+
 export async function notifyTournamentEnded(tournament) {
   await notifyAll(allParticipantUserIds(tournament), {
     type: 'tournament_ended',
