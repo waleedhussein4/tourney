@@ -127,7 +127,7 @@ export function TeamPage() {
                         setPending({
                           title: `Make ${member.username} the leader?`,
                           description:
-                            'They take over paying entry fees and managing the roster. You stay on the team.',
+                            'They take over entering tournaments and managing the roster. You stay on the team.',
                           confirmLabel: 'Transfer leadership',
                           success: 'Leadership transferred',
                           run: () => transferLeadership(team.id, member.username),

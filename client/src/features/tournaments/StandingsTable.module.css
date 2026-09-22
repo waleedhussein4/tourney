@@ -63,10 +63,6 @@
   color: var(--text-strong);
 }
 
-.prize {
-  color: var(--money);
-}
-
 .name {
   display: block;
   color: var(--text-strong);
@@ -78,11 +74,6 @@
   margin-top: var(--space-1);
   color: var(--text-muted);
   font-size: var(--text-xs);
-}
-
-.muted {
-  color: var(--text-faint);
-  font-weight: 400;
 }
 
 .out .name {

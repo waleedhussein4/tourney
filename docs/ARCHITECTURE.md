@@ -41,9 +41,9 @@ Every server module is the same four files, so a request's path through the
 code is the same every time. A reader who has followed one endpoint can follow
 any of them.
 
-The site itself never moves money — entry fees and prizes are USD amounts the
-host and players settle directly. The only payment path in the app is its own
-subscription, through Paddle. See [DECISIONS.md](DECISIONS.md) for why.
+The site itself never moves money between hosts and players — it only tracks
+tournaments, entrants, and standings. The only payment path in the app is its
+own subscription, through Paddle. See [DECISIONS.md](DECISIONS.md) for why.
 
 ---
 
@@ -115,23 +115,21 @@ anything is written.
 are larger, and inserts are not naturally ordered by time. At this scale neither
 matters; at a much larger one, UUIDv7 would be the answer.
 
-### Why the app never holds entry fees or prizes
+### Why tournaments have no entry fee or prize fields
 
-Entry fees and prizes are declared USD amounts on the tournament; the host
-collects and pays them directly with players, outside the app. The app only
-records who is in and who won.
+A tournament only records who is in and who won — no entry fee, no prize, no
+prize table.
 
-**Why.** Holding other people's money in transit is money transmission, and a
-paid bracket with a payout the site controls reads as a wagering contract in
-most places — both are licensed activities this project cannot obtain. Not
-touching the money at all sidesteps both, and it means cancelling a tournament
-needs no refund logic: nothing here ever held it. See
+**Why.** Even a declared, off-platform entry fee and prize pool reads as a
+wagering contract to a payment processor's review, which is what got this
+product's Paddle application rejected. Removing the fields entirely — not just
+declining to hold the money — is what got it approved. See
 [DECISIONS.md](DECISIONS.md) for the fuller reasoning.
 
-**What it cost.** The site cannot enforce that a host actually pays out, or
-that a player actually pays their entry fee — it is a bulletin board for the
-event, not a guarantor of it. That is the tradeoff for not being a regulated
-money service.
+**What it cost.** The site cannot describe what a tournament is worth to
+enter or to win — it is a bulletin board and a scoreboard for the event, not a
+stakes tracker. That is the tradeoff for staying approved by the payment
+processor.
 
 ### Why the subscription is the only payment the app takes
 

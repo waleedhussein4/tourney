@@ -1,7 +1,25 @@
 # Decisions
 
 History, not a spec — see [ARCHITECTURE.md](ARCHITECTURE.md) for what exists
-today. The one file allowed to mention the old credits model.
+today. The one file allowed to mention the old credits model, and entry fees
+and prizes.
+
+## 2026-09-22 — Why entry fees and prizes were removed from tournaments
+
+Paddle reviewed the site and rejected it, classifying it as "Gambling,
+betting, wagering." The previous fix (below) had already stopped the app from
+holding or moving that money, but every tournament still _advertised_ an
+entry fee players paid in and a prize pool a winner took out — declared, not
+collected, but still the shape of a wager from the outside. Paddle's review
+looks at what the product describes, not just what it processes.
+
+The fix: `entryFee`, `prize`, and `prizes` are gone — from the tournament
+model, the API, and every screen. A tournament now only tracks who is
+competing, brackets, and standings. The only paid product left is the
+$5/month hosting subscription in `server/src/config/plans.js`, which Paddle
+approved once the wagering shape was gone. A migration
+(`server/scripts/drop-money-fields.js`) clears the stray fields off documents
+written before this change.
 
 ## Why the credits economy was replaced by a subscription
 
