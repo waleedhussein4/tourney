@@ -1,75 +1,59 @@
 # Deployment
 
-Tourney runs as **one Vercel project**: the built React client is served as
-static files, and the Express API is a single serverless function mounted at
-`/api`. The database is a MongoDB Atlas **M0** cluster.
+Tourney runs as **one Cloudflare Worker**: Workers Static Assets serves the
+built React client, and a Cloudflare **Container** runs the Express API,
+unchanged, in Docker. The database is a MongoDB Atlas **M0** cluster.
 
-Total cost: **$0**. Vercel Hobby and Atlas M0 are both permanently free, and
-neither sleeps nor expires — the deployment stays up without a card on file.
+This replaced Vercel because the app now takes real $5/month subscription
+payments — commercial use Vercel's Hobby tier forbids — and the owner already
+pays for Cloudflare.
 
 ---
 
-## Why one project and not two
+## Why a container, and not Workers directly
 
-Two projects (client on one domain, API on another) would mean cross-origin
-requests, which costs three things:
+Rewriting the API onto the Workers runtime was considered and rejected:
 
-1. **CORS.** Every route would need an allowlist and a preflight round trip.
-2. **The auth cookie.** It would become third-party. Safari's tracking
-   prevention and Chrome's third-party cookie restrictions both block those, so
-   sign-in would silently stop working for a share of visitors.
-3. **A second origin.** The browser would resolve, connect, and negotiate TLS
-   twice instead of once.
+1. **Mongoose 8 doesn't run on Workers.** Mongoose's TCP sockets need Node's
+   `net` module in a form the Workers runtime doesn't provide;
+   [mongoose#14613](https://github.com/Automattic/mongoose/issues/14613) is
+   open, and MongoDB's own guidance calls the workarounds exactly that.
+2. **The Paddle webhook needs the raw request body** for signature
+   verification, mounted ahead of `express.json` in `server/src/app.js`. That
+   ordering, and Express's body handling generally, is easiest to keep by not
+   changing the runtime at all.
 
-Same-origin removes all three. `CLIENT_URL` is therefore left **unset** in
-production, which is what makes `server/src/app.js` skip registering `cors()`
-at all, and the auth cookie is first-party with `HttpOnly; SameSite=Lax; Secure`.
+Cloudflare Containers runs the existing Express app in Docker with no source
+changes. Workers Static Assets serves `client/dist` from the same Worker, so
+the app stays same-origin — which is what keeps the `httpOnly`,
+`SameSite=Lax` auth cookie working without CORS.
 
-## Region
+## Same-origin, still
 
-The function is pinned to **`fra1` (Frankfurt)** in `vercel.json`, so that it
-sits in the same region as the Atlas cluster (AWS `eu-central-1`). A single
-request makes several database round trips; with the function and the database
-on different continents each one costs roughly 100 ms, and the page waits for
-all of them. Same-region makes them sub-millisecond.
-
-If the Atlas cluster moves, change `regions` in `vercel.json` to match.
+`CLIENT_URL` stays **unset** in production, exactly as it was on Vercel: no
+`cors()` allowlist, one origin, the auth cookie is first-party.
 
 ---
 
 ## What is deployed
 
 ```
-vercel.json     build command, output directory, region, rewrites
-api/index.js    exports the Express app; Vercel runs it per request
-client/dist/    the static build, served straight from the CDN
+Dockerfile        builds and runs the Express API in a container
+.dockerignore      keeps node_modules, .git, client/dist, and .env out of the image
+wrangler.jsonc     the Worker: container binding, static assets, cron trigger
+worker/index.js    routes /api/* to the container; the scheduled reseed
+client/dist/       the static build, served by Workers Static Assets
 ```
 
-`api/index.js` is one import and one export. An Express app _is_ a
-`(req, res)` handler, which is exactly what a Vercel Node function is, so there
-is no adapter and no second copy of the routing table.
+`wrangler.jsonc` routes `/api/*` to the Worker first (`run_worker_first`),
+which forwards it to the container; every other path is handled by asset
+routing, falling back to `index.html` for the SPA
+(`not_found_handling: "single-page-application"`).
 
-Two rewrites do all the routing:
-
-```json
-{ "source": "/api/(.*)", "destination": "/api" }
-{ "source": "/(.*)", "destination": "/index.html" }
-```
-
-Vercel checks the filesystem _before_ applying a rewrite, so real files
-(`/assets/*`, `/favicon.svg`) are served directly and never reach the SPA
-fallback. The function still receives the original path, so Express matches
-`/api/auth/login` with its routers unchanged.
-
-**Nothing connects to the database on import.** A serverless invocation has no
-startup phase, so `app.js` connects lazily in an `ensureDatabase` middleware and
-`db/connect.js` caches the connection promise on `globalThis`, which survives a
-container thaw. Without that cache every invocation would open a new connection
-and exhaust M0's connection limit within minutes.
-
-`/api/health` is mounted _ahead_ of that middleware and connects best-effort, so
-it can report `{"status":"degraded"}` when the database is unreachable rather
-than failing along with it.
+`server/src/app.js` and everything under `server/src/` is unchanged —
+`ensureDatabase`, the cached `globalThis` connection, and every route still
+work exactly as they did on Vercel, because the container runs the same
+`node server/src/index.js` a local `npm start` would.
 
 ---
 
@@ -77,83 +61,121 @@ than failing along with it.
 
 ### 1. MongoDB Atlas
 
-1. Create a free account and an **M0** cluster, in the region you intend to pin
-   the function to. This deployment uses AWS `eu-central-1` (Frankfurt).
-2. **Database Access** — add a user with _Read and write to any database_.
-   Prefer a generated password with no characters that need URL-escaping.
-3. **Network Access** — add `0.0.0.0/0`. Serverless functions have no stable
-   outbound IP, so an IP allowlist cannot work; access is controlled by the
-   database credentials instead.
-4. Copy the connection string and append the database name:
+Unchanged from before: an M0 cluster, a database user, `0.0.0.0/0` network
+access (the container has no stable outbound IP either), and a connection
+string:
 
-   ```
-   mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/tourney?retryWrites=true&w=majority
-   ```
-
-The connection string is a secret. It belongs in `vercel env` and in your own
-untracked `server/.env` — never in a committed file.
-
-### 2. Vercel
-
-```bash
-npm i -g vercel
-vercel login
-vercel link           # creates or links the project, at the repository root
+```
+mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/tourney?retryWrites=true&w=majority
 ```
 
-Then the environment. Each value is piped in on stdin, so none of them land in
-shell history:
+### 2. Cloudflare — owner task
+
+This step needs a Cloudflare account and Docker running locally; it is not
+something a repository change can do.
 
 ```bash
-printf '%s' 'mongodb+srv://...'          | vercel env add MONGODB_URI production
-printf '%s' "$(openssl rand -hex 32)"    | vercel env add JWT_SECRET production
-printf '%s' 'DemoPlayer2026'             | vercel env add SEED_DEMO_PASSWORD production
-printf '%s' '...'                        | vercel env add SEED_ADMIN_PASSWORD production
-printf '%s' 'Player2026Demo'             | vercel env add SEED_PASSWORD production
+npm install -g wrangler   # or use the root devDependency via npx wrangler
+wrangler login
 ```
 
-Repeat with `preview` in place of `production` if preview deployments should
-work too.
-
-### 3. Deploy
+Set every secret the Worker and container need — each prompts for the value,
+so none of them land in shell history:
 
 ```bash
-vercel deploy --prod
+wrangler secret put MONGODB_URI
+wrangler secret put JWT_SECRET
+wrangler secret put CRON_SECRET
+wrangler secret put PADDLE_API_KEY
+wrangler secret put PADDLE_WEBHOOK_SECRET
+wrangler secret put PADDLE_CLIENT_TOKEN
+wrangler secret put PADDLE_PRICE_PLAN
+wrangler secret put SEED_DEMO_PASSWORD
+wrangler secret put SEED_ADMIN_PASSWORD
+wrangler secret put SEED_PASSWORD
 ```
 
-Or merge to `main`: the project is connected to the GitHub repository and
-deploys production on every push to it.
+`PADDLE_ENV`, `SENTRY_DSN`, and `VITE_SENTRY_DSN` are optional; set them the
+same way if used.
+
+### 3. Deploy — owner task
+
+```bash
+npm run deploy   # wrangler deploy — needs Docker running locally to build the image
+```
+
+Or wire it into CI once the account is connected; this repository does not do
+that on its own, since deploy credentials live outside the repo.
+
+### 4. DNS — owner task
+
+The domain (`tourneylb.com`, currently on Porkbun) must move to Cloudflare
+nameservers (full setup, not just a CNAME):
+
+1. Add the site to the Cloudflare dashboard and note the two nameservers it
+   assigns.
+2. Update the nameservers at Porkbun to those two.
+3. Wait for Cloudflare to report the zone active.
+4. Route both the apex `tourneylb.com` and `www` to the Worker (a Worker
+   Route or a Custom Domain in the dashboard, once the zone is active).
+
+None of this is a repository change, and DNS propagation is outside this
+codebase's control.
 
 ---
 
-## Environment variables
+## Environment variables / Worker secrets
 
-| Name                                  | Where                | Required | Notes                                                                                                                          |
-| ------------------------------------- | -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `MONGODB_URI`                         | Vercel, local server | **yes**  | Atlas connection string, including the `/tourney` database name. Alias: `DATABASE_URL`.                                        |
-| `JWT_SECRET`                          | Vercel, local server | **yes**  | Signs the auth cookie. At least 32 characters in production — the app refuses to boot otherwise. Alias: `SECRET`.              |
-| `NODE_ENV`                            | set by Vercel        | —        | `production` on Vercel. Controls the cookie's `Secure` flag and request logging.                                               |
-| `CLIENT_URL`                          | —                    | no       | **Leave unset.** Setting it registers a `cors()` allowlist that a same-origin deployment does not need. Alias: `FRONTEND_URL`. |
-| `PORT`                                | local only           | no       | Defaults to `2000`. Meaningless on Vercel, which never calls `listen()`.                                                       |
-| `SEED_DEMO_PASSWORD`                  | Vercel, local        | no       | Password for `demo@tourney.app`. Publishable: it is the account visitors are invited to use.                                   |
-| `SEED_ADMIN_PASSWORD`                 | Vercel, local        | no       | Password for `admin@tourney.app`. **Not** publishable — that account can wipe and reseed the live demo data.                   |
-| `SEED_PASSWORD`                       | Vercel, local        | no       | Shared by the seeded player accounts.                                                                                          |
-| `SEED_DEMO_EMAIL`, `SEED_ADMIN_EMAIL` | Vercel, local        | no       | Default to `demo@tourney.app` and `admin@tourney.app`.                                                                         |
-| `VITE_API_URL`                        | client build         | no       | **Leave empty.** An empty value makes the client call a relative `/api`, which is the point of the single-project setup.       |
-| `VITE_FRONTEND_URL`                   | client build         | no       | Only used to build team invite links.                                                                                          |
-| `CRON_SECRET`                         | Vercel               | no       | Bearer token for the scheduled reseed. Unset means the route refuses to run at all. At least 16 characters.                    |
+| Name                                  | Where           | Required | Notes                                                                                                          |
+| -------------------------------------- | --------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `MONGODB_URI`                          | Worker secret, local server | **yes** | Atlas connection string, including the `/tourney` database name. Alias: `DATABASE_URL`.               |
+| `JWT_SECRET`                           | Worker secret, local server | **yes** | Signs the auth cookie. At least 32 characters in production. Alias: `SECRET`.                          |
+| `NODE_ENV`                             | set in the container | —   | `production` in the deployed image. Controls the cookie's `Secure` flag and request logging.                    |
+| `CLIENT_URL`                           | —                | no       | **Leave unset.** Setting it registers a `cors()` allowlist a same-origin deployment doesn't need. Alias: `FRONTEND_URL`. |
+| `PORT`                                 | local only       | no       | Defaults to `2000`, which is also what the container's `EXPOSE`/`defaultPort` use.                              |
+| `CRON_SECRET`                          | Worker secret    | no       | Bearer token the Cron Trigger presents to `/api/cron/reseed`. Unset means the route refuses to run at all. At least 16 characters. |
+| `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_CLIENT_TOKEN`, `PADDLE_PRICE_PLAN` | Worker secret | no | Card payments for the publishing fee. Unset, the app takes no cards. |
+| `PADDLE_ENV`                           | Worker secret    | no       | `sandbox` (default) or `production`.                                                                            |
+| `SEED_DEMO_PASSWORD`, `SEED_ADMIN_PASSWORD`, `SEED_PASSWORD` | Worker secret, local | no | Demo account passwords. `SEED_ADMIN_PASSWORD` is not publishable.                                     |
+| `SEED_DEMO_EMAIL`, `SEED_ADMIN_EMAIL`  | Worker secret, local | no  | Default to `demo@tourney.app` and `admin@tourney.app`.                                                          |
+| `VITE_API_URL`                         | client build     | no       | **Leave empty.** An empty value makes the client call a relative `/api`.                                        |
+| `VITE_FRONTEND_URL`                    | client build     | no       | Only used to build team invite links.                                                                           |
+| `SENTRY_DSN` / `VITE_SENTRY_DSN`       | Worker secret / client build | no | Optional error tracking; unset, `Sentry.init` never runs.                                            |
 
-The `SEED_*` passwords matter in production because the admin page can reseed
-the live database. Left unset, the seeder generates a password per run and
-prints it to a log nobody is reading — so the reseeded accounts would be
-unreachable.
+Set names only, never values, in this file or any committed file — every
+secret above goes in as `wrangler secret put <NAME>`, which prompts
+interactively.
+
+---
+
+## The scheduled reseed
+
+Unchanged in behaviour: `GET /api/cron/reseed` clears and rebuilds the demo
+dataset, guarded by `CRON_SECRET` exactly as documented in
+`server/src/modules/cron/cron.routes.js`. What changed is the trigger:
+
+```jsonc
+// wrangler.jsonc
+"triggers": { "crons": ["0 4 * * *"] }
+```
+
+The Worker's `scheduled` handler (`worker/index.js`) fires at 04:00 UTC,
+calls the container directly at `/api/cron/reseed` with
+`Authorization: Bearer $CRON_SECRET`, and the route runs exactly the
+clear-then-seed it always has.
+
+### Triggering one by hand
+
+```bash
+curl -s https://tourneylb.com/api/cron/reseed -H "Authorization: Bearer $CRON_SECRET"
+```
 
 ---
 
 ## Seeding the production database
 
-The seed script talks to Atlas directly. It is not part of a deployment and
-does not run on Vercel.
+Unchanged — the seed script talks to Atlas directly and is not part of a
+deployment:
 
 ```bash
 cd server
@@ -162,175 +184,34 @@ SEED_DEMO_PASSWORD='...' SEED_ADMIN_PASSWORD='...' SEED_PASSWORD='...' \
 node scripts/seed.js -- --reset
 ```
 
-`--reset` clears the demo data first. Without it the script adds only what is
-missing, and is safe to run twice.
-
-The seeder goes through the same services the API does, so a seeded tournament
-that says it has started really did pass the bank check, and a seeded payout
-really did move credits and write ledger rows. That means it needs transactions
-— which is why the test suite runs a replica set locally, and why Atlas (always
-a replica set) works unchanged.
-
 An admin can also reseed from the live site, at `/admin`.
-
----
-
-## The scheduled reseed
-
-The demo credentials are published in the README, so the demo account gets
-spent down and the tournaments fill with strangers' test entries. The site
-repairs itself once a day.
-
-`GET /api/cron/reseed` runs the same clear-then-seed the CLI does, and
-`vercel.json` schedules it:
-
-```json
-"crons": [{ "path": "/api/cron/reseed", "schedule": "0 4 * * *" }]
-```
-
-04:00 UTC, because Hobby cron granularity is one run per day and that is a
-quiet hour. It is a `GET` because that is the only method Vercel Cron issues;
-`POST` is accepted too, for triggering one by hand.
-
-### What it deletes — demo data only
-
-The reset and the admin page's "clear" touch **only demo data**; a real host's
-account, tournaments, teams and ledger rows are never in scope. Demo data is:
-
-- users, teams and tournaments flagged `isDemo: true` — a field only the seed
-  script sets (no API schema accepts it);
-- anything made _with_ a demo account (a tournament it hosts, a team it leads),
-  because the demo login is public and those are visitors' leftovers.
-
-Where the two worlds touch: a real player enrolled in a demo tournament is
-refunded their entry fee, with a `refund` ledger row, before it is removed; a
-demo user or team that a real tournament refers to is kept and reset in place,
-so a real bracket never points at a deleted account. The seeded `admin` is never
-deleted.
-
-#### Migrating a database seeded before `isDemo`
-
-No script to run. Documents seeded before the flag existed carry no `isDemo`, so
-the first reseed after deploying clears nothing (`cleared` is all zeros) and the
-seed half then flags the existing demo documents — users by the seed's emails,
-teams and tournaments by name/title **and** a seeded owner. From the second run
-on it is a normal rebuild. It is idempotent; to do both steps at once, trigger
-the reseed by hand twice (below).
-
-Accounts visitors signed up before the migration are now indistinguishable from
-real users and are left alone. Delete them by hand in Atlas before launch if
-wanted.
-
-### Guarding it
-
-This route empties the production database. It is the most dangerous endpoint
-in the application and it is not protected by obscurity:
-
-1. **Unset `CRON_SECRET` means it does not run.** Not "runs unauthenticated" —
-   `503 CRON_NOT_CONFIGURED`, before touching anything. A development machine or
-   a preview deployment that never configured the variable cannot be talked into
-   wiping a database.
-2. **The secret is required as a bearer token**, compared in constant time after
-   hashing both sides so neither the value nor its length leaks through timing.
-   Vercel Cron sends `Authorization: Bearer $CRON_SECRET` automatically once the
-   variable exists on the project.
-3. **It is rate limited** to ten requests an hour, so the token cannot be probed
-   for.
-
-`server/tests/cron.test.js` covers every one of those branches, including that a
-request without the token changes nothing.
-
-Set the secret like the others:
-
-```bash
-printf '%s' "$(openssl rand -hex 32)" | vercel env add CRON_SECRET production
-```
-
-### Triggering one by hand
-
-```bash
-curl -s https://<domain>/api/cron/reseed -H "Authorization: Bearer $CRON_SECRET"
-```
-
-```json
-{
-  "ok": true,
-  "cleared": { "tournaments": 10, "teams": 4, "users": 13, "transactions": 35 },
-  "seeded": { "users": 14, "teams": 4, "products": 0, "tournaments": 10 },
-  "durationMs": 4008
-}
-```
-
-`products` is `0` on a rebuild because the credit packages are catalogue rows
-rather than demo data: the reset leaves them in place.
-
-### The timeout, measured
-
-A reseed creates fourteen accounts — each one a bcrypt hash at cost 10 — and
-then drives ten tournaments through the real services, several of them inside
-transactions. That is enough work to be worth measuring against the function's
-deadline rather than assuming.
-
-Measured on the deployed function, in `fra1`, against the Atlas cluster:
-
-|                                |           |
-| ------------------------------ | --------- |
-| Reseed work, cold invocation   | **4.0 s** |
-| Reseed work, warm invocation   | **4.0 s** |
-| `maxDuration` in `vercel.json` | **60 s**  |
-
-A fifteen-fold margin, so nothing here needs weakening — in particular the
-seeded accounts are hashed at the same cost 10 as a real signup. The `fra1`
-pinning is doing most of the work: the same script from a laptop outside the
-region takes noticeably longer, because it pays the round trip on every one of
-those writes.
-
-`maxDuration` was raised from 15 s to 60 s (the Hobby ceiling) anyway, so that
-the margin is the deadline's and not a guess. If the demo dataset ever grows
-enough to threaten it, the fix in order of preference is: batch the account
-creation, then lower the bcrypt cost **for seeded demo accounts only** — never
-for `registerUser`'s real path.
-
-If a run were ever cut off between the clear and the seed, the database would be
-left empty rather than corrupt, and the next daily run rebuilds it — `seedDemoData`
-is additive and idempotent. An admin can also reseed immediately from `/admin`.
 
 ---
 
 ## Verifying a deployment
 
 ```bash
-curl https://<domain>/api/health        # {"status":"ok","database":"connected"}
-curl https://<domain>/api/tournaments   # the catalogue
-curl -I https://<domain>/assets/<file>  # a real file, not the SPA fallback
+curl https://tourneylb.com/api/health        # {"status":"ok","database":"connected"}
+curl https://tourneylb.com/api/tournaments   # the catalogue
+curl -I https://tourneylb.com/assets/<file>  # a real file, not the SPA fallback
 ```
 
-Then in a browser: sign in as the demo account, open a tournament, run the demo
-checkout, and confirm the credit balance in the nav changes without a reload.
+Then in a browser: sign in as the demo account, open a tournament, and
+confirm the subscription checkout flow works end to end.
 
 ---
 
 ## Error tracking and uptime
 
-**Errors.** `@sentry/node` (server) and `@sentry/react` (client) are wired in
-but stay fully inactive — no `Sentry.init` call, no network traffic — until
-`SENTRY_DSN` (server) and `VITE_SENTRY_DSN` (client) are set. Both are free
-Sentry project DSNs, `tracesSampleRate: 0` (errors only, no performance
-tracing, staying on the free tier). Set them in the Vercel project's
-environment variables and redeploy; there is no code change to make.
+**Errors.** `@sentry/node` (server) and `@sentry/react` (client) stay
+inactive until `SENTRY_DSN` and `VITE_SENTRY_DSN` are set as above; no code
+change needed to enable them.
 
-**Uptime.** `GET /api/health` is already public and returns `200` with
-`{"status":"ok","database":"connected"}` when the database is reachable. To get
-free uptime alerts:
-
-1. Create a free account at [uptimerobot.com](https://uptimerobot.com).
-2. Add a new monitor: type **HTTP(s)**, URL `https://tourneylb.com/api/health`,
-   monitoring interval **5 minutes**.
-3. Add the owner's email as an alert contact so a monitor going down sends a
-   notification.
-
-No code or config in this repository is involved — UptimeRobot polls the
-already-public health endpoint from the outside.
+**Uptime.** `GET /api/health` is public and returns `200` with
+`{"status":"ok","database":"connected"}` when the database is reachable. A
+free [uptimerobot.com](https://uptimerobot.com) HTTP(s) monitor against
+`https://tourneylb.com/api/health` every 5 minutes covers this, same as
+before — no code or config in this repository is involved.
 
 ---
 
@@ -353,28 +234,22 @@ password hashes, and must never be committed.
 
 ## Known limitations
 
-**Cold starts.** A Hobby function that has not been called recently takes about
-a second to answer its first request; everything after that is warm. That is
-the honest cost of a free, permanently available deployment, and it is
-preferred here to a host that sleeps the whole application after fifteen
-minutes — or deletes the database after a trial.
+**Container cold starts.** A container that has scaled to zero takes longer
+to answer its first request than a warm Worker invocation would. `sleepAfter`
+in `worker/index.js` controls how long an idle container stays warm.
 
 **Atlas M0.** 512 MB of storage, shared CPU, and a cap on concurrent
-connections. The cached `globalThis` connection is what keeps a serverless
-deployment inside that cap. M0 has no backups either; the data here is demo
-data and is reproducible with `npm run seed`.
+connections. The cached `globalThis` connection in `server/src/db/connect.js`
+is what keeps the deployment inside that cap.
 
 **`sanitize-html` is pinned to `>=2.13.0 <2.17.6`.** From 2.17.6 it depends on
-an ESM-only `htmlparser2` which its own CommonJS entry point then `require()`s.
-Node 22+ tolerates that locally, Vercel's module loader does not, and the
-function crashes on every invocation with `ERR_REQUIRE_ESM`. The pin holds it at
-the last release whose parser still ships a CommonJS build. Worth revisiting
-once the packaging is fixed upstream.
+an ESM-only `htmlparser2` which its own CommonJS entry point then `require()`s,
+which crashes under Node's CommonJS loader. The pin holds it at the last
+release whose parser still ships a CommonJS build. Worth revisiting once the
+packaging is fixed upstream.
 
 **SRV lookups can fail on a workstation.** `mongodb+srv://` needs a DNS SRV
 query, and some local resolvers — VPN clients especially — refuse them
-(`querySrv ECONNREFUSED`). That is a machine problem, not an application one,
-and it is why this codebase does **not** carry the `dns.setServers` call the
-original had: a web server should not be overriding its host's DNS. Point the
-resolver at a public one, or seed using the non-SRV `mongodb://` form of the
-connection string, which Atlas also provides.
+(`querySrv ECONNREFUSED`). That is a machine problem, not an application one.
+Point the resolver at a public one, or seed using the non-SRV `mongodb://`
+form of the connection string, which Atlas also provides.
