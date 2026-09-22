@@ -310,6 +310,30 @@ checkout, and confirm the credit balance in the nav changes without a reload.
 
 ---
 
+## Error tracking and uptime
+
+**Errors.** `@sentry/node` (server) and `@sentry/react` (client) are wired in
+but stay fully inactive — no `Sentry.init` call, no network traffic — until
+`SENTRY_DSN` (server) and `VITE_SENTRY_DSN` (client) are set. Both are free
+Sentry project DSNs, `tracesSampleRate: 0` (errors only, no performance
+tracing, staying on the free tier). Set them in the Vercel project's
+environment variables and redeploy; there is no code change to make.
+
+**Uptime.** `GET /api/health` is already public and returns `200` with
+`{"status":"ok","database":"connected"}` when the database is reachable. To get
+free uptime alerts:
+
+1. Create a free account at [uptimerobot.com](https://uptimerobot.com).
+2. Add a new monitor: type **HTTP(s)**, URL `https://tourneylb.com/api/health`,
+   monitoring interval **5 minutes**.
+3. Add the owner's email as an alert contact so a monitor going down sends a
+   notification.
+
+No code or config in this repository is involved — UptimeRobot polls the
+already-public health endpoint from the outside.
+
+---
+
 ## Known limitations
 
 **Cold starts.** A Hobby function that has not been called recently takes about
