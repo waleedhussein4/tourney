@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 import { ZodError } from 'zod'
 import config from '../config/env.js'
 import { ApiError } from '../utils/ApiError.js'
+import { logger } from '../lib/logger.js'
 
 /**
  * The single place an error becomes a response. Every failure leaves the API in
@@ -14,9 +15,13 @@ export function errorHandler(error, req, res, next) {
   const normalised = normalise(error)
 
   if (normalised.status >= 500 && !config.isTest) {
-    // The only logging in the server: an unexpected failure, with its stack.
-    // eslint-disable-next-line no-console
-    console.error(`${req.method} ${req.originalUrl} →`, error)
+    logger.error('unhandled error', {
+      requestId: req.id,
+      method: req.method,
+      path: req.originalUrl,
+      message: error?.message,
+      stack: error?.stack,
+    })
   }
 
   const body = { message: normalised.message }
