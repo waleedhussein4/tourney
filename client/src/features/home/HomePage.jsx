@@ -19,9 +19,11 @@ import {
 } from '/src/components/ui/index.js'
 import { TournamentCard } from '/src/features/tournaments/TournamentCard.jsx'
 import { categoryName } from '/src/components/brand/categories.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import styles from './HomePage.module.css'
 
 export function HomePage() {
+  useDocumentTitle()
   const { isAuthenticated, isHost } = useAuth()
 
   const trending = useQuery({ queryKey: tournamentKeys.trending, queryFn: () => listTrending(10) })

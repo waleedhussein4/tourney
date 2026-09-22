@@ -6,6 +6,7 @@ import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
 import { Badge, Button, Card, CardHeader, ErrorState, LoadingState } from '/src/components/ui/index.js'
 import { formatDate, formatUsd } from '/src/lib/format.js'
 import { openCheckout } from '/src/lib/paddle.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import styles from './billing.module.css'
 
 /**
@@ -16,6 +17,7 @@ import styles from './billing.module.css'
  * that limit — so the two can never disagree about what this account may do.
  */
 export function BillingPage() {
+  useDocumentTitle('Billing')
   const queryClient = useQueryClient()
 
   const billing = useQuery({
