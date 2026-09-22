@@ -16,7 +16,7 @@ import './styles/globals.css'
  * page's visual language (same module, different copy) rather than inventing
  * a second "something broke" look.
  */
-function ErrorFallback() {
+function ErrorFallback({ resetError }) {
   return (
     <PageShell width="narrow">
       <div className={styles.page}>
@@ -26,7 +26,7 @@ function ErrorFallback() {
           The page hit an unexpected error. Reloading usually fixes it.
         </p>
         <div className={styles.actions}>
-          <Button variant="primary" onClick={() => window.location.reload()}>
+          <Button variant="primary" onClick={resetError}>
             Reload
           </Button>
         </div>
@@ -37,7 +37,7 @@ function ErrorFallback() {
 
 export default function App() {
   return (
-    <Sentry.ErrorBoundary fallback={<ErrorFallback />}>
+    <Sentry.ErrorBoundary fallback={ErrorFallback}>
       <Router />
     </Sentry.ErrorBoundary>
   )
