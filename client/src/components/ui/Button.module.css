@@ -85,6 +85,16 @@
   background: var(--danger-solid-hover);
 }
 
+/* Below 640px every button is a touch target: 40px tall, 14px floor text. */
+@media (max-width: 640px) {
+  .btn {
+    min-height: 40px;
+  }
+  .sm {
+    font-size: var(--text-sm);
+  }
+}
+
 .spinner {
   width: 0.85em;
   height: 0.85em;

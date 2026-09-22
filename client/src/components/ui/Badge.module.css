@@ -43,3 +43,9 @@
   border-color: color-mix(in srgb, var(--danger) 45%, transparent);
   color: var(--danger);
 }
+
+@media (max-width: 640px) {
+  .badge {
+    font-size: var(--text-sm);
+  }
+}

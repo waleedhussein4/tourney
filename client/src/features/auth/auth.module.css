@@ -10,6 +10,10 @@
   align-items: center;
   gap: var(--space-5);
   padding: var(--space-6) 0;
+  /* The bracket tree behind the card is decorative and wider than the
+     column; clip it here so it never pushes the page wider than the
+     viewport. */
+  overflow: hidden;
 }
 
 .tree {
@@ -63,4 +67,12 @@
   border-top: 1px solid var(--border);
   color: var(--text-muted);
   font-size: var(--text-sm);
+}
+
+/* Widen the inline link's hit area to a full 40px without disturbing the
+   surrounding text's line height. */
+.alt a {
+  display: inline-block;
+  padding: 0.6875rem 0;
+  margin: -0.6875rem 0;
 }

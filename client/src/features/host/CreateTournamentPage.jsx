@@ -111,7 +111,7 @@ export function CreateTournamentPage() {
             aria-current={index === stepIndex ? 'step' : undefined}
           >
             <span className={styles.stepNumber}>{index + 1}</span>
-            <span>{candidate.title}</span>
+            <span className={styles.stepTitle}>{candidate.title}</span>
           </li>
         ))}
       </ol>
