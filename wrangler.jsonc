@@ -31,6 +31,11 @@
   },
 
   // Replaces the Vercel cron that hit /api/cron/reseed at 04:00 UTC daily.
+  // Container stdout/stderr and Worker logs. Without this a crash inside the
+  // container is invisible — the only signal is a generic "container is not
+  // running" at the edge.
+  "observability": { "enabled": true },
+
   "triggers": {
     "crons": ["0 4 * * *"]
   }
