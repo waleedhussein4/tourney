@@ -2,8 +2,6 @@ import { describe, expect, it } from 'vitest'
 import { useDatabase } from './setup/database.js'
 import { client, guest, PASSWORD, signUp } from './setup/api.js'
 import User from '../src/models/user.model.js'
-import Transaction from '../src/models/transaction.model.js'
-import { HOST_UPGRADE_COST } from '../src/config/constants.js'
 
 useDatabase()
 
@@ -28,9 +26,9 @@ describe('POST /api/auth/signup', () => {
     expect(response.body.user).toMatchObject({
       username: 'ada',
       email: 'ada@example.com',
-      credits: 0,
       isHost: false,
       isAdmin: false,
+      plan: { status: 'none', active: false },
     })
 
     await agent.get('/api/users/me').expect(200)
@@ -244,17 +242,18 @@ describe('GET /api/users/me', () => {
   })
 
   it('returns the whole identity in one call', async () => {
-    const { agent } = await signUp('ada', { credits: 42, isHost: true, role: 'admin' })
+    const { agent } = await signUp('ada', { isHost: true, role: 'admin', plan: true })
 
     const { body } = await agent.get('/api/users/me').expect(200)
 
     expect(body.user).toMatchObject({
       username: 'ada',
-      credits: 42,
       isHost: true,
       isAdmin: true,
+      plan: { status: 'active', active: true },
     })
   })
+
 
   it('rejects a token signed for an account that no longer exists', async () => {
     const { agent, user } = await signUp('ada')
@@ -269,49 +268,32 @@ describe('GET /api/users/me', () => {
 })
 
 describe('POST /api/users/me/become-host', () => {
-  it('charges the fixed price, flips isHost, and writes a ledger row', async () => {
-    const { agent, user } = await signUp('ada', { credits: 25 })
+  it('flips isHost, and costs nothing', async () => {
+    const { agent } = await signUp('ada')
 
     const { body } = await agent.post('/api/users/me/become-host').expect(200)
 
     expect(body.user.isHost).toBe(true)
-    expect(body.user.credits).toBe(25 - HOST_UPGRADE_COST)
-
-    const ledger = await Transaction.find({ userId: user.id }).lean()
-    expect(ledger).toHaveLength(1)
-    expect(ledger[0]).toMatchObject({ type: 'host_upgrade', amount: -HOST_UPGRADE_COST })
+    // Hosting is free. What is paid for is running more than one tournament at
+    // a time, and that is the plan — which a new account does not have.
+    expect(body.user.plan).toMatchObject({ status: 'none', active: false })
   })
 
-  it('refuses when the balance is short, and charges nothing', async () => {
-    const { agent, user } = await signUp('ada', { credits: HOST_UPGRADE_COST - 1 })
-
-    await agent.post('/api/users/me/become-host').expect(400)
-
-    const account = await User.findById(user.id)
-    expect(account.credits).toBe(HOST_UPGRADE_COST - 1)
-    expect(account.isHost).toBe(false)
-    expect(await Transaction.countDocuments()).toBe(0)
-  })
-
-  it('refuses a second upgrade and does not charge again', async () => {
-    const { agent, user } = await signUp('ada', { credits: 100 })
+  it('refuses a second upgrade', async () => {
+    const { agent } = await signUp('ada')
 
     await agent.post('/api/users/me/become-host').expect(200)
     await agent.post('/api/users/me/become-host').expect(400)
-
-    expect(await User.findById(user.id).then((account) => account.credits)).toBe(
-      100 - HOST_UPGRADE_COST
-    )
   })
 
   it('requires a signed-in caller', async () => {
     await guest().post('/api/users/me/become-host').expect(401)
   })
 
-  // Two simultaneous requests both pass a read-then-write balance check; only
-  // the conditional update stops the account going negative.
-  it('cannot be raced into a negative balance', async () => {
-    const { agent, user } = await signUp('ada', { credits: HOST_UPGRADE_COST })
+  // Two simultaneous requests both pass a read-then-write check; only the
+  // conditional update stops the second one succeeding as well.
+  it('cannot be raced into two upgrades', async () => {
+    const { agent, user } = await signUp('ada')
 
     const results = await Promise.allSettled([
       agent.post('/api/users/me/become-host'),
@@ -322,44 +304,19 @@ describe('POST /api/users/me/become-host', () => {
       (result) => result.status === 'fulfilled' && result.value.status === 200
     )
     expect(succeeded).toHaveLength(1)
-
-    const account = await User.findById(user.id)
-    expect(account.credits).toBe(0)
-    expect(await Transaction.countDocuments()).toBe(1)
-  })
-})
-
-describe('GET /api/users/me/transactions', () => {
-  it('lists the caller ledger, newest first', async () => {
-    const { agent } = await signUp('ada', { credits: 100 })
-    await agent.post('/api/users/me/become-host').expect(200)
-
-    const { body } = await agent.get('/api/users/me/transactions').expect(200)
-
-    expect(body.transactions).toHaveLength(1)
-    expect(body.transactions[0].type).toBe('host_upgrade')
-  })
-
-  it('shows a user only their own rows', async () => {
-    const ada = await signUp('ada', { credits: 100 })
-    await signUp('bob', { credits: 100 })
-    await ada.agent.post('/api/users/me/become-host').expect(200)
-
-    const bob = client()
-    await bob.post('/api/auth/login').send({ email: 'bob@example.com', password: PASSWORD })
-
-    const { body } = await bob.get('/api/users/me/transactions').expect(200)
-    expect(body.transactions).toHaveLength(0)
-  })
-
-  it('requires a signed-in caller', async () => {
-    await guest().get('/api/users/me/transactions').expect(401)
+    expect(await User.findById(user.id).then((account) => account.isHost)).toBe(true)
   })
 })
 
 describe('the endpoints the rewrite deleted', () => {
+  it('the credit ledger is gone for a signed-in caller too', async () => {
+    const { agent } = await signUp('ada')
+    await agent.get('/api/users/me/transactions').expect(404)
+  })
+
+
   // Each of these was a way to obtain credits, or an identity check that a 401
-  // body could defeat. They must stay gone.
+  // body could defeat. The credits they granted no longer exist either.
   it.each([
     ['POST', '/api/user/removeEarn'],
     ['POST', '/api/user/payment'],
@@ -367,6 +324,9 @@ describe('the endpoints the rewrite deleted', () => {
     ['GET', '/api/user/isHost'],
     ['GET', '/api/user/isAdmin'],
     ['GET', '/api/user/profile'],
+    // Gone with the demo economy: there is no wallet to top up.
+    ['GET', '/api/products'],
+    ['POST', '/api/credits/checkout/credits-100'],
   ])('%s %s is gone', async (method, path) => {
     const response = await guest()[method.toLowerCase()](path).send({})
     expect(response.status).toBe(404)

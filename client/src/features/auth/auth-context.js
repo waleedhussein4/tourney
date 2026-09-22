@@ -2,8 +2,9 @@ import { createContext } from 'react'
 
 /**
  * @typedef {object} AuthValue
- * @property {{id: string, username: string, email: string, credits: number,
- *            isHost: boolean, isAdmin: boolean} | null} user
+ * @property {{id: string, username: string, email: string, isHost: boolean,
+ *            isAdmin: boolean, plan: {status: string, active: boolean,
+ *            renewsAt: string|null}} | null} user
  *   The signed-in user, or `null` when signed out. Never `undefined` once
  *   `isLoading` is false.
  * @property {boolean} isLoading True until the first identity check resolves.

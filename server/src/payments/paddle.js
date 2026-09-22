@@ -1,8 +1,8 @@
-// The card gateway.
+// The payment gateway.
 //
 // Everything that knows Paddle exists lives here. The rest of the app asks for
-// a checkout and is told a payment happened; swapping provider means writing
-// another file with these three functions, not touching the publish rules.
+// a checkout and is told a subscription changed; swapping provider means another
+// file with these functions, not a change to who may publish.
 
 import { Paddle, Environment, EventName } from '@paddle/paddle-node-sdk'
 import config from '../config/env.js'
@@ -28,21 +28,19 @@ function paddle() {
 export const canTakeCards = () => config.paddle.enabled
 
 /**
- * Opens a transaction for one publishing fee.
+ * Opens a transaction for one subscription.
  *
- * The transaction is created here rather than in the browser on purpose. Paddle
- * will happily open a checkout from a price id alone, but then the amount and
- * the tournament it belongs to are both chosen by the page — and a host who
- * edits them pays for the tier they picked, not the tier they are buying. Made
- * server-side, both are ours.
+ * Created server-side rather than from a price id in the browser: that way the
+ * plan being bought and the account it belongs to are ours, not the page's.
  *
- * @param {{priceId: string, tournamentId: string, publishRequestId: string}} order
+ * @param {{userId: string, email: string}} buyer
  * @returns {Promise<{transactionId: string}>}
  */
-export async function createCheckout({ priceId, tournamentId, publishRequestId }) {
+export async function createSubscriptionCheckout({ userId, email }) {
   const transaction = await paddle().transactions.create({
-    items: [{ priceId, quantity: 1 }],
-    customData: { tournamentId, publishRequestId },
+    items: [{ priceId: config.paddle.planPriceId, quantity: 1 }],
+    customData: { userId },
+    ...(email ? { customer: { email } } : {}),
   })
   return { transactionId: transaction.id }
 }
@@ -60,25 +58,44 @@ export async function readEvent({ rawBody, signature }) {
   return paddle().webhooks.unmarshal(rawBody, config.paddle.webhookSecret, signature)
 }
 
-/**
- * The one event that means money has settled.
- *
- * `transaction.paid` fires when the card is captured and `transaction.completed`
- * when Paddle has finished with it. Both mean paid; the later one is the one
- * with the fees worked out, and publishing a tournament a few seconds later
- * costs nothing.
- */
-export const isPaymentSettled = (event) => event?.eventType === EventName.TransactionCompleted
+/** The events that change whether an account may publish. */
+const SUBSCRIPTION_EVENTS = new Set([
+  EventName.SubscriptionCreated,
+  EventName.SubscriptionActivated,
+  EventName.SubscriptionUpdated,
+  EventName.SubscriptionCanceled,
+  EventName.SubscriptionPastDue,
+  EventName.SubscriptionPaused,
+  EventName.SubscriptionResumed,
+])
 
-/** What the event says was bought, in our terms. */
-export function paymentFrom(event) {
+export const isSubscriptionEvent = (event) => SUBSCRIPTION_EVENTS.has(event?.eventType)
+
+/**
+ * What a subscription event says, in this app's terms.
+ *
+ * Paddle's statuses are richer than the question being asked here, which is
+ * only ever "may this account publish?". `trialing` is treated as active
+ * because a trial is a working subscription; everything unrecognised falls to
+ * `canceled`, so an unknown state fails closed rather than granting access.
+ */
+export function subscriptionFrom(event) {
   const data = event.data ?? {}
+  const statuses = {
+    active: 'active',
+    trialing: 'active',
+    past_due: 'past_due',
+    paused: 'canceled',
+    canceled: 'canceled',
+  }
   return {
-    providerRef: data.id,
-    tournamentId: data.customData?.tournamentId ?? null,
-    publishRequestId: data.customData?.publishRequestId ?? null,
-    // Minor units, as a string, exactly as every Paddle amount arrives.
-    totalCents: Number(data.details?.totals?.total ?? NaN),
-    currency: data.currencyCode ?? null,
+    subscriptionId: data.id ?? null,
+    userId: data.customData?.userId ?? null,
+    status: statuses[data.status] ?? 'canceled',
+    renewsAt: data.currentBillingPeriod?.endsAt ? new Date(data.currentBillingPeriod.endsAt) : null,
+    priceIds: (data.items ?? []).map((item) => item?.price?.id).filter(Boolean),
   }
 }
+
+/** The event id, for refusing a delivery we have already acted on. */
+export const eventIdOf = (event) => event?.eventId ?? null

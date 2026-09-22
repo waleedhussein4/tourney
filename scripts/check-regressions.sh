@@ -104,8 +104,8 @@ gate "no secret ever entered git history" \
 # Where the money goes lives in one file. A copy pasted into a component or a
 # doc is how the page and the checkout come to disagree, so the gate reads the
 # contact out of the config and looks for it everywhere else.
-gate "no payment contact outside config/publishing.js"   bash -c '
-    config=server/src/config/publishing.js
+gate "no payment contact outside config/plans.js"   bash -c '
+    config=server/src/config/plans.js
     contact=$(grep "CONTACT_EMAIL" $config | cut -d"'"'"'" -f2)
     [ -n "$contact" ] || { echo "could not read CONTACT_EMAIL from $config"; exit; }
     git grep --untracked -I -nF "$contact" -- . ":!$config"

@@ -112,17 +112,11 @@ export async function toPublicView(tournament, viewerId) {
     prize: tournament.prize,
     prizes: tournament.prizes,
     totalPrize: tournament.totalPrize,
-    bank: tournament.bank,
     startDate: tournament.startDate,
     endDate: tournament.endDate,
     hasStarted: tournament.hasStarted,
     hasEnded: tournament.hasEnded,
     publishState: tournament.publishState,
-    // What this host was asked to pay. Set on paid tiers only, shown to the host only.
-    publishRequest:
-      id && tournament.isHostedBy(id) && tournament.publishRequest?.tier
-        ? tournament.publishRequest
-        : undefined,
     bracketsShuffled: tournament.bracketsShuffled,
     bracketOrder: tournament.bracketOrder,
     matches: tournament.matches,
@@ -161,8 +155,6 @@ export async function toManageView(tournament, viewerId) {
     })),
     acceptedUsers: tournament.acceptedUsers,
     acceptedTeams: tournament.acceptedTeams,
-    bankRequired: tournament.totalPrize,
-    bankShortfall: Math.max(0, tournament.totalPrize - tournament.bank),
   }
 }
 

@@ -74,38 +74,6 @@
   gap: var(--space-2);
 }
 
-/* Credits are money, and money is a win: the success hue, in tabular figures. */
-.credits {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.35em;
-  padding: 0.3rem var(--space-3);
-  background: color-mix(in srgb, var(--credits) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--credits) 32%, transparent);
-  border-radius: var(--radius-pill);
-  font-size: var(--text-2xs);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--credits);
-  transition: border-color var(--duration-fast) var(--ease-out);
-}
-
-.credits:hover {
-  text-decoration: none;
-  border-color: var(--credits);
-  color: var(--credits);
-}
-
-.creditsValue {
-  font-family: var(--font-display);
-  font-stretch: var(--stretch-display);
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  font-size: var(--text-base);
-  letter-spacing: var(--tracking-tight);
-  color: var(--text-strong);
-}
-
 /*
  * Below 720px the bar becomes two rows rather than one crowded one: identity
  * and account on top, navigation underneath. Everything stays reachable — at
@@ -139,8 +107,5 @@
   .link:global(.active)::after {
     left: var(--space-2);
     right: var(--space-2);
-  }
-  .creditsLabel {
-    display: none;
   }
 }

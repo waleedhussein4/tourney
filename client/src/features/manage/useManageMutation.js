@@ -6,11 +6,11 @@ import { currentUserKey } from '/src/features/auth/queries.js'
 /**
  * A host action against one tournament.
  *
- * Every one of them changes something on this page, and several move credits, so
- * they all invalidate the same two queries: the tournament and the signed-in
- * user. That is what replaces the `navigate(0)` full-page reload the original
- * fired after each action — the data that changed is refetched, the scroll
- * position and any open dialog are not thrown away.
+ * Every one of them changes something on this page, so they all invalidate the
+ * same two queries: the tournament and the signed-in user. That is what
+ * replaces the `navigate(0)` full-page reload the original fired after each
+ * action — the data that changed is refetched, the scroll position and any
+ * open dialog are not thrown away.
  *
  * @param {object} options
  * @param {string} options.tournamentId
@@ -30,8 +30,6 @@ export function useManageMutation({ tournamentId, mutationFn, success, onDone })
       if (success) toast.success(success)
       onDone?.()
     },
-    // The API's message says what went wrong in the host's terms — "the bank
-    // holds 40 of the 60 credits in prizes" — so it is shown as-is.
     onError: (error) => toast.error(error.message),
   })
 }

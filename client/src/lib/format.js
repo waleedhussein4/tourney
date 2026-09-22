@@ -29,9 +29,9 @@ export const formatDateTime = (value) => (value ? DATE_TIME.format(new Date(valu
 /**
  * Real money, from cents: "$5", "$12.50".
  *
- * Publishing fees are the one amount in the app that is not credits, so the
- * dollar sign is always shown — a bare number next to a credit balance is how
- * the two get read as the same thing.
+ * Used for the one amount the site actually charges — the hosting
+ * subscription. Everything else money-shaped (an entry fee, a prize) is a
+ * plain dollar amount the host typed, and goes through `formatMoney` instead.
  */
 export function formatUsd(cents) {
   if (cents === 0) return 'Free'
@@ -39,10 +39,15 @@ export function formatUsd(cents) {
   return USD.format(cents / 100)
 }
 
-/** "12 credits", "1 credit", "Free". */
-export function formatCredits(amount) {
+/**
+ * What a host says an entry fee or a prize is worth: "$5", "$12.50", "Free".
+ *
+ * This money never touches the site — it changes hands between the host and
+ * their players — so this is a label, not a balance.
+ */
+export function formatMoney(amount) {
   if (!amount) return 'Free'
-  return `${amount} ${amount === 1 ? 'credit' : 'credits'}`
+  return USD.format(amount)
 }
 
 /**
@@ -78,7 +83,6 @@ export function tournamentStatus(tournament) {
  */
 export function publishStatus(publishState) {
   if (publishState === 'draft') return { label: 'Draft', tone: 'neutral' }
-  if (publishState === 'pending_payment') return { label: 'Awaiting payment', tone: 'warning' }
   return null
 }
 

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
 import { ACCESSIBILITY, CATEGORY_SLUGS, LIMITS, TOURNAMENT_TYPES } from '../config/constants.js'
-import { PUBLISH_STATES, UNPUBLISHED } from '../config/publishing.js'
+import { PUBLISH_STATES, UNPUBLISHED } from '../config/publishStates.js'
 
 const { Schema } = mongoose
 
@@ -67,18 +67,24 @@ const tournamentSchema = new Schema(
      */
     maxCapacity: { type: Number, required: true, min: 2 },
 
+    /**
+     * What an entrant pays the host, in dollars.
+     *
+     * Declared, not collected: the money changes hands between the host and
+     * their players, in cash or by transfer, exactly as it did before this site
+     * existed. Nothing here ever holds it. That is deliberate — holding other
+     * people's money is a licensed activity, and running the brackets is the
+     * part organisers actually want help with.
+     */
     entryFee: { type: Number, required: true, min: 0 },
 
-    /** Brackets: the single prize the winner takes. */
+    /** Brackets: what the winner is promised, in dollars. Paid by the host. */
     prize: { type: Number, min: 0 },
-    /** Battle royale: what each finishing rank pays. */
+    /** Battle royale: what each finishing rank is promised. */
     prizes: {
       type: [{ _id: false, rank: { type: Number, min: 1 }, prize: { type: Number, min: 0 } }],
       default: undefined,
     },
-
-    /** Escrow. Entry fees flow in; payouts flow out; the remainder goes to the host. */
-    bank: { type: Number, default: 0, min: 0 },
 
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
@@ -90,8 +96,8 @@ const tournamentSchema = new Schema(
 
     /**
      * Whether anyone but the host can see this. A tournament is born a `draft`;
-     * only `published` ones are listed, joinable, or startable. The rules live in
-     * the publishRequests module — see docs/MONETISATION.md.
+     * only a published one is listed, joinable, or startable. What it takes to
+     * publish is in the subscriptions module — see docs/MONETISATION.md.
      */
     /**
      * No schema default on purpose. Mongoose applies a default when it hydrates
@@ -101,13 +107,6 @@ const tournamentSchema = new Schema(
      * tournaments are given the state explicitly when they are created.
      */
     publishState: { type: String, enum: PUBLISH_STATES, index: true },
-    /** What the host was asked to pay, recorded when a paid tier asks to publish. */
-    publishRequest: {
-      _id: false,
-      tier: String,
-      amountCents: Number,
-      requestedAt: Date,
-    },
 
     description: { type: String, default: '' },
     rules: { type: String, default: '' },
@@ -171,13 +170,13 @@ tournamentSchema.virtual('isTeamBased').get(function isTeamBased() {
   return this.teamSize > 1
 })
 
-/** What the bank must hold before the tournament can start. */
+/** Everything promised across the prize table, for display. */
 tournamentSchema.virtual('totalPrize').get(function totalPrize() {
   if (this.type === 'brackets') return this.prize ?? 0
   return (this.prizes ?? []).reduce((sum, entry) => sum + entry.prize, 0)
 })
 
-/** What one participant pays to enter: the fee per player, times the roster. */
+/** What one entry costs the payer: the fee per player, times the roster. */
 tournamentSchema.virtual('entryCost').get(function entryCost() {
   return this.entryFee * this.teamSize
 })

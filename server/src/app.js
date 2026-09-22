@@ -18,14 +18,9 @@ import { userRouter } from './modules/users/user.routes.js'
 import { teamRouter } from './modules/teams/team.routes.js'
 import { tournamentRouter } from './modules/tournaments/tournament.routes.js'
 import { adminRouter } from './modules/admin/admin.routes.js'
-import {
-  publishRequestAdminRouter,
-  publishRouter,
-  publishingRouter,
-} from './modules/publishRequests/publishRequest.routes.js'
-import { webhookRouter } from './modules/publishRequests/webhook.routes.js'
+import { billingRouter } from './modules/subscriptions/subscription.routes.js'
+import { webhookRouter } from './modules/subscriptions/webhook.routes.js'
 import { cronRouter } from './modules/cron/cron.routes.js'
-import { creditsRouter, productRouter } from './modules/credits/credits.routes.js'
 
 /**
  * Opens the database connection on the first request that needs one.
@@ -89,11 +84,7 @@ export function createApp() {
   app.use('/api/users', userRouter)
   app.use('/api/teams', teamRouter)
   app.use('/api/tournaments', tournamentRouter)
-  app.use('/api/tournaments', publishRouter)
-  app.use('/api/publishing', publishingRouter)
-  app.use('/api/products', productRouter)
-  app.use('/api/credits', creditsRouter)
-  app.use('/api/admin/publish-requests', publishRequestAdminRouter)
+  app.use('/api/billing', billingRouter)
   app.use('/api/admin', adminRouter)
   app.use('/api/cron', cronRouter)
 

@@ -1,31 +1,20 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useDatabase } from './setup/database.js'
-import {
-  createTeam,
-  createTournament,
-  creditsOf,
-  signUp,
-  tournamentPayload,
-  totalCredits,
-} from './setup/api.js'
+import { createTeam, createTournament, signUp, tournamentPayload } from './setup/api.js'
 import Tournament from '../src/models/tournament.model.js'
 
 useDatabase()
-
-const START = 1000
 
 let host
 let players
 
 beforeEach(async () => {
-  host = await signUp('hostie', { credits: START, isHost: true })
+  host = await signUp('hostie', { isHost: true, plan: true })
   players = {}
   for (const name of ['mei', 'tomas', 'ada', 'kofi', 'lena', 'oscar']) {
-    players[name] = await signUp(name, { credits: START })
+    players[name] = await signUp(name)
   }
 })
-
-const bankOf = async (id) => (await Tournament.findById(id)).bank
 
 /** Everyone who competed, in the order the bracket drew them. */
 async function bracketOrder(id) {
@@ -51,11 +40,8 @@ function matchesFor(order, slots, winnerId) {
   return matches
 }
 
-describe('a solo bracket, from creation to payout', () => {
-  it('moves every credit through the bank and back out again', async () => {
-    const worldBefore = await totalCredits()
-
-    // --- the host advertises a 60-credit prize on a 40-credit fee income ----
+describe('a solo bracket, from creation to a crowned champion', () => {
+  it('carries a tournament from empty slots to a recorded winner', async () => {
     const tournament = await createTournament(host.agent, {
       title: 'Solo Ladder Open',
       maxCapacity: 4,
@@ -63,40 +49,17 @@ describe('a solo bracket, from creation to payout', () => {
       prize: 60,
     })
 
-    expect(tournament.bank).toBe(0)
     expect(tournament.totalPrize).toBe(60)
     expect(tournament.matches).toEqual([null, null, null])
 
-    // --- four players enter, each paying the fee into the bank -------------
     for (const name of ['mei', 'tomas', 'ada', 'kofi']) {
       await players[name].agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
-      expect(await creditsOf(players[name].user.id)).toBe(START - 10)
     }
 
-    expect(await bankOf(tournament.id)).toBe(40)
-    expect(await totalCredits()).toBe(worldBefore)
-
-    // --- the bank is short, so it cannot start yet -------------------------
-    const tooSoon = await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(400)
-    expect(tooSoon.body.error.message).toMatch(/40 of the 60/)
-
-    // --- the host tops up the difference out of their own credits ----------
-    const deposit = await host.agent
-      .post(`/api/tournaments/${tournament.id}/bank/deposit`)
-      .send({ amount: 20 })
-      .expect(200)
-
-    expect(deposit.body.deposited).toBe(20)
-    expect(await bankOf(tournament.id)).toBe(60)
-    expect(await creditsOf(host.user.id)).toBe(START - 20)
-    expect(await totalCredits()).toBe(worldBefore)
-
-    // --- start -------------------------------------------------------------
     const started = await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(200)
     expect(started.body.tournament.hasStarted).toBe(true)
     expect(started.body.tournament.bracketOrder.filter(Boolean)).toHaveLength(4)
 
-    // --- play it out -------------------------------------------------------
     const order = await bracketOrder(tournament.id)
     const champion = players.mei.user.id
 
@@ -105,54 +68,15 @@ describe('a solo bracket, from creation to payout', () => {
       .send({ matches: matchesFor(order, 4, champion) })
       .expect(200)
 
-    // --- end and pay out ---------------------------------------------------
     const ended = await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
 
     expect(ended.body.tournament.hasEnded).toBe(true)
-    expect(await creditsOf(champion)).toBe(START - 10 + 60)
-    expect(await bankOf(tournament.id)).toBe(0)
-
-    // Nothing was created or destroyed anywhere along the way.
-    expect(await totalCredits()).toBe(worldBefore)
-  })
-
-  it('hands the host whatever the prizes did not claim', async () => {
-    const worldBefore = await totalCredits()
-
-    // Four 20-credit fees fund an 80-credit bank against a 50-credit prize.
-    const tournament = await createTournament(host.agent, {
-      maxCapacity: 4,
-      entryFee: 20,
-      prize: 50,
-    })
-
-    for (const name of ['mei', 'tomas', 'ada', 'kofi']) {
-      await players[name].agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
-    }
-    expect(await bankOf(tournament.id)).toBe(80)
-
-    await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(200)
-
-    const order = await bracketOrder(tournament.id)
-    await host.agent
-      .patch(`/api/tournaments/${tournament.id}/matches`)
-      .send({ matches: matchesFor(order, 4, players.mei.user.id) })
-      .expect(200)
-
-    const ended = await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
-
-    expect(ended.body.hostRemainder).toBe(30)
-    expect(await creditsOf(host.user.id)).toBe(START + 30)
-    expect(await creditsOf(players.mei.user.id)).toBe(START - 20 + 50)
-    expect(await bankOf(tournament.id)).toBe(0)
-    expect(await totalCredits()).toBe(worldBefore)
+    expect(ended.body.winners).toEqual([{ rank: 1, id: champion, prize: 60 }])
   })
 })
 
 describe('a team bracket', () => {
-  it('splits the prize evenly between the members, to the credit', async () => {
-    const worldBefore = await totalCredits()
-
+  it('takes two teams through to a finished bracket', async () => {
     const owls = await createTeam(players.mei.agent, [players.tomas.agent], 'Night Owls')
     const larks = await createTeam(players.ada.agent, [players.kofi.agent], 'Day Larks')
 
@@ -161,30 +85,19 @@ describe('a team bracket', () => {
       teamSize: 2,
       maxCapacity: 2,
       entryFee: 10,
-      // An odd number, so an even split is impossible and the remainder has to
-      // go somewhere deliberate rather than being rounded away.
       prize: 41,
     })
 
-    // The documented rule: the leader pays the fee for every seat.
+    // The documented rule: the leader enters on the team's behalf.
     await players.mei.agent
       .post(`/api/tournaments/${tournament.id}/join/team`)
       .send({ teamId: owls.id })
       .expect(200)
-    expect(await creditsOf(players.mei.user.id)).toBe(START - 20)
-    expect(await creditsOf(players.tomas.user.id)).toBe(START)
-
     await players.ada.agent
       .post(`/api/tournaments/${tournament.id}/join/team`)
       .send({ teamId: larks.id })
       .expect(200)
 
-    expect(await bankOf(tournament.id)).toBe(40)
-
-    await host.agent
-      .post(`/api/tournaments/${tournament.id}/bank/deposit`)
-      .send({ amount: 1 })
-      .expect(200)
     await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(200)
 
     const order = await bracketOrder(tournament.id)
@@ -193,24 +106,13 @@ describe('a team bracket', () => {
       .send({ matches: matchesFor(order, 2, owls.id) })
       .expect(200)
 
-    await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
-
-    // 41 between two members is 21 and 20 — not 20.5 each, and not all 41 to
-    // the leader, which is what the original did.
-    const mei = (await creditsOf(players.mei.user.id)) - (START - 20)
-    const tomas = (await creditsOf(players.tomas.user.id)) - START
-
-    expect(mei + tomas).toBe(41)
-    expect(Math.abs(mei - tomas)).toBe(1)
-    expect(await bankOf(tournament.id)).toBe(0)
-    expect(await totalCredits()).toBe(worldBefore)
+    const ended = await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
+    expect(ended.body.winners).toEqual([{ rank: 1, id: owls.id, prize: 41 }])
   })
 })
 
 describe('a battle royale', () => {
-  it('pays the rank table down the leaderboard', async () => {
-    const worldBefore = await totalCredits()
-
+  it('ranks entrants by score and ends with the leaderboard order', async () => {
     const tournament = await createTournament(host.agent, {
       title: 'Score Attack',
       type: 'battle royale',
@@ -230,9 +132,6 @@ describe('a battle royale', () => {
       await players[name].agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
     }
 
-    // Exactly the prize pool, which is the case the original could never
-    // satisfy: it compared the bank to the array of prize objects.
-    expect(await bankOf(tournament.id)).toBe(40)
     await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(200)
 
     await host.agent
@@ -247,20 +146,16 @@ describe('a battle royale', () => {
       })
       .expect(200)
 
-    await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
+    const ended = await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
 
-    expect(await creditsOf(players.kofi.user.id)).toBe(START - 10 + 25)
-    expect(await creditsOf(players.ada.user.id)).toBe(START - 10 + 10)
-    expect(await creditsOf(players.tomas.user.id)).toBe(START - 10 + 5)
-    expect(await creditsOf(players.mei.user.id)).toBe(START - 10)
-
-    expect(await bankOf(tournament.id)).toBe(0)
-    expect(await totalCredits()).toBe(worldBefore)
+    expect(ended.body.winners).toEqual([
+      { rank: 1, id: players.kofi.user.id, prize: 25 },
+      { rank: 2, id: players.ada.user.id, prize: 10 },
+      { rank: 3, id: players.tomas.user.id, prize: 5 },
+    ])
   })
 
-  it('splits each rank prize across the winning team', async () => {
-    const worldBefore = await totalCredits()
-
+  it('ranks winning teams by their combined score', async () => {
     const owls = await createTeam(
       players.mei.agent,
       [players.tomas.agent, players.ada.agent],
@@ -294,7 +189,6 @@ describe('a battle royale', () => {
       .send({ teamId: larks.id })
       .expect(200)
 
-    expect(await bankOf(tournament.id)).toBe(30)
     await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(200)
 
     await host.agent
@@ -307,32 +201,16 @@ describe('a battle royale', () => {
       })
       .expect(200)
 
-    await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
-
-    // First place: 20 across three members. Second: 10 across three.
-    const larksTotal =
-      (await creditsOf(players.kofi.user.id)) -
-      (START - 15) +
-      ((await creditsOf(players.lena.user.id)) - START) +
-      ((await creditsOf(players.oscar.user.id)) - START)
-
-    const owlsTotal =
-      (await creditsOf(players.mei.user.id)) -
-      (START - 15) +
-      ((await creditsOf(players.tomas.user.id)) - START) +
-      ((await creditsOf(players.ada.user.id)) - START)
-
-    expect(larksTotal).toBe(20)
-    expect(owlsTotal).toBe(10)
-    expect(await bankOf(tournament.id)).toBe(0)
-    expect(await totalCredits()).toBe(worldBefore)
+    const ended = await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
+    expect(ended.body.winners).toEqual([
+      { rank: 1, id: larks.id, prize: 20 },
+      { rank: 2, id: owls.id, prize: 10 },
+    ])
   })
 })
 
 describe('an application-gated tournament', () => {
   it('takes an applicant from applying, through acceptance, to competing', async () => {
-    const worldBefore = await totalCredits()
-
     const tournament = await createTournament(host.agent, {
       title: 'By Invitation',
       type: 'battle royale',
@@ -358,8 +236,6 @@ describe('an application-gated tournament', () => {
       .expect(201)
 
     expect(applied.body.tournament.viewer.hasApplied).toBe(true)
-    // Nothing has been charged yet — applying is not entering.
-    expect(await creditsOf(players.mei.user.id)).toBe(START)
 
     const queue = await host.agent.get(`/api/tournaments/${tournament.id}/manage`).expect(200)
     expect(queue.body.tournament.applications).toHaveLength(1)
@@ -381,11 +257,9 @@ describe('an application-gated tournament', () => {
       .expect(200)
 
     expect(joined.body.tournament.viewer.isJoined).toBe(true)
-    expect(await creditsOf(players.mei.user.id)).toBe(START - 10)
-    expect(await totalCredits()).toBe(worldBefore)
   })
 
-  it('lets the host reject an application, which charges nobody', async () => {
+  it('lets the host reject an application, which lets nobody in', async () => {
     const tournament = await createTournament(host.agent, {
       type: 'battle royale',
       accessibility: 'application required',
@@ -412,14 +286,11 @@ describe('an application-gated tournament', () => {
 
     // Rejected, so still shut out.
     await players.mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(403)
-    expect(await creditsOf(players.mei.user.id)).toBe(START)
   })
 })
 
 describe('cancelling before the start', () => {
-  it('refunds every entry fee and the host top-up', async () => {
-    const worldBefore = await totalCredits()
-
+  it('removes the tournament entirely', async () => {
     const tournament = await createTournament(host.agent, {
       type: 'battle royale',
       maxCapacity: 4,
@@ -430,19 +301,10 @@ describe('cancelling before the start', () => {
 
     await players.mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
     await players.tomas.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
-    await host.agent
-      .post(`/api/tournaments/${tournament.id}/bank/deposit`)
-      .send({ amount: 30 })
-      .expect(200)
 
-    const cancelled = await host.agent.delete(`/api/tournaments/${tournament.id}`).expect(200)
+    await host.agent.delete(`/api/tournaments/${tournament.id}`).expect(200)
 
-    expect(cancelled.body.refunds).toHaveLength(2)
-    expect(await creditsOf(players.mei.user.id)).toBe(START)
-    expect(await creditsOf(players.tomas.user.id)).toBe(START)
-    expect(await creditsOf(host.user.id)).toBe(START)
     expect(await Tournament.findById(tournament.id)).toBeNull()
-    expect(await totalCredits()).toBe(worldBefore)
   })
 
   it('refuses once the tournament has started', async () => {

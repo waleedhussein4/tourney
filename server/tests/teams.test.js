@@ -225,7 +225,7 @@ describe('roster changes while the team is entered but the tournament has not st
   let tournament
 
   beforeEach(async () => {
-    host = await signUp('hostie', { credits: 1000, isHost: true })
+    host = await signUp('hostie', { isHost: true })
     team = await createTeam(ada.agent, [bob.agent], 'Night Owls')
 
     tournament = await createTournament(host.agent, {
@@ -274,7 +274,7 @@ describe('roster changes while the team is competing', () => {
   let host
 
   beforeEach(async () => {
-    host = await signUp('hostie', { credits: 1000, isHost: true })
+    host = await signUp('hostie', { isHost: true })
     team = await createTeam(ada.agent, [bob.agent], 'Night Owls')
 
     const tournament = await createTournament(host.agent, {

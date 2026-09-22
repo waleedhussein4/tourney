@@ -1,24 +1,11 @@
 // Domain constants. Anything that would otherwise be a magic number or a string
 // literal repeated across modules lives here.
 
-/** Credits charged once to upgrade an account to a tournament host. */
-export const HOST_UPGRADE_COST = 20
-
 /** Tournament formats. */
 export const TOURNAMENT_TYPES = ['brackets', 'battle royale']
 
 /** How participants get in. */
 export const ACCESSIBILITY = ['open', 'application required']
-
-/** Ledger entry kinds written for every credit movement. */
-export const TRANSACTION_TYPES = [
-  'purchase',
-  'entry_fee',
-  'bank_deposit',
-  'payout',
-  'host_upgrade',
-  'refund',
-]
 
 /**
  * Tournament categories. Fixed list rather than free text so filtering, seeding,

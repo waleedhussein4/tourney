@@ -3,8 +3,8 @@ import { CategoryArt } from '/src/components/brand/index.js'
 import { Badge } from '/src/components/ui/index.js'
 import {
   formatCapacity,
-  formatCredits,
   formatDate,
+  formatMoney,
   formatType,
   publishStatus,
   tournamentStatus,
@@ -46,11 +46,11 @@ export function TournamentCard({ tournament }) {
         <dl className={styles.facts}>
           <div className={styles.prize}>
             <dt>Prize pool</dt>
-            <dd>{formatCredits(tournament.totalPrize)}</dd>
+            <dd>{formatMoney(tournament.totalPrize)}</dd>
           </div>
           <div>
             <dt>Entry</dt>
-            <dd>{formatCredits(tournament.entryFee)}</dd>
+            <dd>{formatMoney(tournament.entryFee)}</dd>
           </div>
           <div>
             <dt>Entrants</dt>
