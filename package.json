@@ -23,7 +23,7 @@
     "lint:fix": "npm run lint:fix -w server && npm run lint:fix -w client",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "npm run test -w server",
+    "test": "npm run test -w server && npm run test -w client",
     "check:regressions": "bash scripts/check-regressions.sh",
     "seed": "npm run seed -w server",
     "backup": "npm run backup -w server",
