@@ -87,3 +87,9 @@
   height: 1rem;
   accent-color: var(--violet-500);
 }
+
+@media (max-width: 640px) {
+  .label {
+    font-size: var(--text-sm);
+  }
+}

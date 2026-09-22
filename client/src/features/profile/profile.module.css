@@ -34,7 +34,9 @@
 }
 
 .link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
   margin-top: var(--space-3);
   font-size: var(--text-sm);
 }
@@ -101,4 +103,12 @@
 
 .amountOut {
   color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .statLabel,
+  .ledger thead th,
+  .ledgerDetail {
+    font-size: var(--text-sm);
+  }
 }
