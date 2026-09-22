@@ -2,7 +2,8 @@ import { Suspense, lazy, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { getTournament, tournamentKeys, withdraw } from '/src/api/tournaments.js'
+import { getTournament, reportTournament, tournamentKeys, withdraw } from '/src/api/tournaments.js'
+import { reportUser } from '/src/api/users.js'
 import { useAuth } from '/src/features/auth/useAuth.js'
 import { PageShell } from '/src/components/layout/PageShell.jsx'
 import { CategoryArt } from '/src/components/brand/index.js'
@@ -25,6 +26,7 @@ import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import { StandingsTable } from './StandingsTable.jsx'
 import { EnterDialog } from './EnterDialog.jsx'
 import { MatchActionsCard } from './MatchActionsCard.jsx'
+import { ReasonDialog } from './ReasonDialog.jsx'
 import styles from './TournamentPage.module.css'
 
 /*
@@ -62,6 +64,8 @@ export function TournamentPage() {
   const { UUID: id } = useParams()
   const [entering, setEntering] = useState(null)
   const queryClient = useQueryClient()
+  const [reporting, setReporting] = useState(false)
+  const [reportingUser, setReportingUser] = useState(null)
 
   const query = useQuery({
     queryKey: tournamentKeys.detail(id),
@@ -75,6 +79,16 @@ export function TournamentPage() {
       queryClient.invalidateQueries({ queryKey: tournamentKeys.detail(id) })
       toast.success('You have withdrawn')
     },
+    onError: (error) => toast.error(error.message),
+  })
+
+  const report = useMutation({
+    mutationFn: (reason) => reportTournament(id, reason),
+    onError: (error) => toast.error(error.message),
+  })
+
+  const reportParticipant = useMutation({
+    mutationFn: (reason) => reportUser(reportingUser.id, reason),
     onError: (error) => toast.error(error.message),
   })
 
@@ -143,6 +157,7 @@ export function TournamentPage() {
       </div>
 
       <HostNotice tournament={tournament} />
+      <ReportLink tournament={tournament} onReport={() => setReporting(true)} />
 
       <dl className={styles.facts}>
         <Fact
@@ -170,7 +185,10 @@ export function TournamentPage() {
                 <BracketView tournament={tournament} />
               </Suspense>
             ) : (
-              <StandingsTable tournament={tournament} />
+              <StandingsTable
+                tournament={tournament}
+                onReportParticipant={!isTeamBased ? setReportingUser : undefined}
+              />
             )}
           </Card>
 
@@ -196,6 +214,45 @@ export function TournamentPage() {
           onClose={() => setEntering(null)}
         />
       )}
+
+      <ReasonDialog
+        open={reporting}
+        onClose={() => setReporting(false)}
+        title={`Report "${tournament.title}"`}
+        description="Tell the admins what's wrong. They'll review it from the moderation queue."
+        label="Reason"
+        confirmLabel="Send report"
+        destructive
+        submitting={report.isPending}
+        onSubmit={(reason, { close }) =>
+          report.mutate(reason, {
+            onSuccess: () => {
+              toast.success('Report sent to the admins')
+              close()
+            },
+          })
+        }
+      />
+
+      <ReasonDialog
+        open={Boolean(reportingUser)}
+        onClose={() => setReportingUser(null)}
+        title={reportingUser ? `Report ${reportingUser.name}` : 'Report player'}
+        description="Tell the admins what's wrong. They'll review it from the moderation queue."
+        label="Reason"
+        confirmLabel="Send report"
+        destructive
+        submitting={reportParticipant.isPending}
+        onSubmit={(reason, { close }) =>
+          reportParticipant.mutate(reason, {
+            onSuccess: () => {
+              toast.success('Report sent to the admins')
+              close()
+              setReportingUser(null)
+            },
+          })
+        }
+      />
     </PageShell>
   )
 }
@@ -240,6 +297,18 @@ function HostNotice({ tournament }) {
  * inferring it: `isHost`, `isJoined`, `hasApplied` and `isAccepted` all arrive
  * on the payload.
  */
+/** A quiet way to flag this tournament for the admins — not for the host, who has better tools. */
+function ReportLink({ tournament, onReport }) {
+  const { isAuthenticated } = useAuth()
+  if (!isAuthenticated || tournament.viewer.isHost) return null
+
+  return (
+    <button type="button" className={styles.reportLink} onClick={onReport}>
+      Report this tournament
+    </button>
+  )
+}
+
 function EntryActions({ tournament, onJoin, onApply, onWithdraw, withdrawing }) {
   const { isAuthenticated } = useAuth()
   const { viewer } = tournament

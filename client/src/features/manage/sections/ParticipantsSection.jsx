@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { saveParticipants } from '/src/api/tournaments.js'
+import { removeParticipant, saveParticipants } from '/src/api/tournaments.js'
 import { Button, Card, CardHeader, EmptyState, Input } from '/src/components/ui/index.js'
+import { ReasonDialog } from '/src/features/tournaments/ReasonDialog.jsx'
 import { useManageMutation } from '../useManageMutation.js'
 import styles from '../ManagePage.module.css'
 
@@ -25,6 +26,7 @@ function toDraft(participants) {
  */
 export function ParticipantsSection({ tournament }) {
   const [draft, setDraft] = useState(() => toDraft(tournament.participants))
+  const [removing, setRemoving] = useState(null)
 
   // The server is the source of truth. When another action refetches the
   // tournament, the table follows rather than holding a stale local copy.
@@ -44,6 +46,13 @@ export function ParticipantsSection({ tournament }) {
         }))
       ),
     success: 'Scores saved',
+  })
+
+  const remove = useManageMutation({
+    tournamentId: tournament.id,
+    mutationFn: (reason) => removeParticipant(tournament.id, removing.id, reason),
+    success: tournament.hasStarted ? 'Removed — their remaining matches were forfeited' : 'Removed',
+    onDone: () => setRemoving(null),
   })
 
   if (tournament.participants.length === 0) {
@@ -95,6 +104,9 @@ export function ParticipantsSection({ tournament }) {
             <th scope="col">{isTeamBased ? 'Team' : 'Player'}</th>
             <th scope="col">Score</th>
             <th scope="col">Eliminated</th>
+            <th scope="col" className="visually-hidden">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -133,10 +145,36 @@ export function ParticipantsSection({ tournament }) {
                   onChange={(event) => update(participant.id, { eliminated: event.target.checked })}
                 />
               </td>
+              <td>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={tournament.hasEnded}
+                  onClick={() => setRemoving({ id: participant.id, name: participant.name })}
+                >
+                  Remove
+                </Button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <ReasonDialog
+        open={Boolean(removing)}
+        onClose={() => setRemoving(null)}
+        title={removing ? `Remove ${removing.name}?` : 'Remove participant'}
+        description={
+          tournament.hasStarted
+            ? 'Their remaining matches will be forfeited to their opponent — the history stays, they just no longer advance.'
+            : 'This frees their slot. Tell them why, so it is on the record.'
+        }
+        label="Reason"
+        confirmLabel="Remove"
+        destructive
+        submitting={remove.isPending}
+        onSubmit={(reason) => remove.mutate(reason)}
+      />
     </Card>
   )
 }

@@ -52,6 +52,14 @@ const userSchema = new Schema(
     isHost: { type: Boolean, default: false },
 
     /**
+     * Set by an admin. A suspended account cannot sign in, host, or join — see
+     * `requireAuth` and `authenticateUser`, the two places that turn this into
+     * a rejection instead of silently letting the account act.
+     */
+    suspended: { type: Boolean, default: false },
+    suspendedReason: { type: String, default: null },
+
+    /**
      * The subscription that lets this account publish without limit.
      *
      * Embedded rather than a collection of its own: an account has exactly one,

@@ -1,5 +1,6 @@
 import { asyncHandler } from '../../utils/asyncHandler.js'
 import * as userService from './user.service.js'
+import { createReport } from '../admin/report.service.js'
 
 /**
  * The one endpoint the client needs to know who it is talking to. It replaces
@@ -21,4 +22,14 @@ export const becomeHost = asyncHandler(async (req, res) => {
 export const getDashboard = asyncHandler(async (req, res) => {
   const dashboard = await userService.getDashboard(req.userId)
   res.json(dashboard)
+})
+
+export const reportUser = asyncHandler(async (req, res) => {
+  await createReport({
+    reporterId: req.userId,
+    targetType: 'user',
+    targetId: req.params.userId,
+    reason: req.body.reason,
+  })
+  res.status(201).json({ reported: true })
 })

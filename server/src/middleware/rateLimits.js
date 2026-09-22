@@ -37,6 +37,17 @@ export const checkoutLimiter = limiter({
 })
 
 /**
+ * Filing a report. Capped per account so the admin queue cannot be flooded by
+ * one caller repeating the same complaint.
+ */
+export const reportLimiter = limiter({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  keyGenerator: (req) => req.userId ?? req.ip,
+  message: 'Too many reports in the last hour.',
+})
+
+/**
  * The scheduled reseed. One caller (the Cloudflare Cron Trigger) hits it once a
  * day, so a cap this low costs nothing legitimate and takes brute-forcing the
  * bearer token off the table entirely.

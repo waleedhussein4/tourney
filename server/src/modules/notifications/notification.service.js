@@ -261,6 +261,17 @@ export async function notifyWaitlistPromoted(tournament, entry) {
   })
 }
 
+/** Tells whoever was removed by the host why, and from what. */
+export async function notifyParticipantRemoved(tournament, userIds, reason) {
+  await notifyAll(userIds, {
+    type: 'participant_removed',
+    subjectId: tournament._id,
+    title: 'Removed from a tournament',
+    body: `You were removed from "${tournament.title}" by the host: ${reason}`,
+    tournamentId: tournament._id,
+  })
+}
+
 export async function notifyTournamentEnded(tournament) {
   await notifyAll(allParticipantUserIds(tournament), {
     type: 'tournament_ended',

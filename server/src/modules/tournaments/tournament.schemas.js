@@ -9,6 +9,16 @@ export const applicationParams = z.object({ tournamentId: uuid, applicationId: u
 
 export const matchParams = z.object({ tournamentId: uuid, matchId: uuid })
 
+export const participantParams = z.object({ tournamentId: uuid, participantId: uuid })
+
+export const removeParticipantSchema = z.object({
+  reason: z.string().trim().min(1, 'A reason is required').max(500),
+})
+
+export const reportTournamentSchema = z.object({
+  reason: z.string().trim().min(1, 'A reason is required').max(2000),
+})
+
 const contactInfoSchema = z
   .object({
     email: z.string().trim().email('Enter a valid contact email').or(z.literal('')).optional(),
