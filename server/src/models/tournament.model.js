@@ -139,7 +139,7 @@ const tournamentSchema = new Schema(
      * Kept separate from the enrolment arrays so shuffling never has to write a
      * placeholder into them — the original code pushed `null` members into
      * `enrolledUsers` to pad the bracket, which then had to be filtered out of
-     * every count, payout, and standings query downstream.
+     * every count and standings query downstream.
      */
     bracketOrder: { type: [String], default: [] },
     bracketsShuffled: { type: Boolean, default: false },
