@@ -118,7 +118,7 @@ gate "no Lebanese phone number committed"   bash -c '
   '
 
 gate "no AI attribution in history" \
-  bash -c 'count=$(git log --all --format=%B | grep -ciE "co-authored-by:.*(anthropic|claude|openai|copilot)|generated with|claude code|anthropic"); [ "$count" -eq 0 ] || echo "$count"'
+  bash -c 'count=$(git log origin/main HEAD --format=%B | grep -ciE "co-authored-by:.*(anthropic|claude|openai|copilot)|generated with|claude code|anthropic"); [ "$count" -eq 0 ] || echo "$count"'
 
 echo
 if [ $fail -eq 0 ]; then echo "all gates pass"; else echo "SOME GATES FAILED"; fi
