@@ -16,6 +16,9 @@ build/
 .vercel/
 .turbo/
 
+# Database backups (backup.js / restore.js)
+backups/
+
 # Test & coverage
 coverage/
 *.lcov

@@ -11,6 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "seed": "node scripts/seed.js",
+    "backup": "node scripts/backup.js",
+    "restore": "node scripts/restore.js",
     "migrate:publish-state": "node scripts/migrate-publish-state.js",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --fix --report-unused-disable-directives"
