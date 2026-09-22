@@ -258,52 +258,6 @@
 
 /* --- pricing -------------------------------------------------------------- */
 
-.prices {
-  width: 100%;
-  max-width: 34rem;
-  border-collapse: collapse;
-  text-align: start;
-}
-
-.prices th,
-.prices td {
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border);
-  text-align: start;
-}
-
-.prices thead th {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-}
-
-.prices tbody th {
-  font-weight: 400;
-  color: var(--text);
-}
-
-.prices tbody td {
-  font-family: var(--font-display);
-  font-stretch: 112%;
-  font-variant-numeric: tabular-nums;
-  font-size: var(--text-lg);
-  color: var(--text-strong);
-  white-space: nowrap;
-}
-
-.bigger {
-  margin-top: var(--space-5);
-  color: var(--text-muted);
-  font-size: var(--text-sm);
-}
-
-.bigger strong {
-  color: var(--text-strong);
-}
-
 /* --- faq ------------------------------------------------------------------ */
 
 .faq {
