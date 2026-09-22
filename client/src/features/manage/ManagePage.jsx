@@ -5,6 +5,7 @@ import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
 import { Badge, ErrorState, LoadingState } from '/src/components/ui/index.js'
 import { publishStatus, tournamentStatus } from '/src/lib/format.js'
 import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
+import { AttentionSummary } from './AttentionSummary.jsx'
 import { DetailsSection } from './sections/DetailsSection.jsx'
 import { ApplicationsSection } from './sections/ApplicationsSection.jsx'
 import { ParticipantsSection } from './sections/ParticipantsSection.jsx'
@@ -76,6 +77,7 @@ export function ManagePage() {
       />
 
       <div className={styles.page}>
+        <AttentionSummary tournament={tournament} />
         <PublishSection tournament={tournament} />
         <LifecycleSection tournament={tournament} />
         {tournament.accessibility === 'application required' && (

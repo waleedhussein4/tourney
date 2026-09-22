@@ -14,6 +14,7 @@ import {
   LoadingState,
 } from '/src/components/ui/index.js'
 import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
+import { HostDashboard } from './HostDashboard.jsx'
 import { NotificationPreferences } from './NotificationPreferences.jsx'
 import { PlayerDashboard } from './PlayerDashboard.jsx'
 import styles from './profile.module.css'
@@ -55,6 +56,7 @@ export function ProfilePage() {
       </div>
 
       <PlayerDashboard />
+      {user.isHost && <HostDashboard />}
 
       <Card className={styles.section}>
         <CardHeader title="Your tournaments" subtitle="Everything you host or compete in." />

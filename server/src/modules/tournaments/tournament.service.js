@@ -1124,3 +1124,61 @@ function winnersOf(tournament) {
     .slice(0, RESULTS_DEPTH)
     .map((participant, index) => ({ rank: index + 1, id: tournament.participantId(participant) }))
 }
+
+// --- host attention ----------------------------------------------------------
+
+/**
+ * Everything about this tournament that needs the host to look at it: pending
+ * applications, disputed matches, matches with both competitors set but no
+ * time booked, results reported but not yet confirmed, and rounds that just
+ * finished so the next one can be scheduled.
+ *
+ * Pure and synchronous — it walks the arrays already on a loaded tournament
+ * (or a `.lean()` plain object shaped the same way), rather than issuing a
+ * query per category. Works for both a single manage-page load and the
+ * profile-wide summary, which fetches many tournaments with one indexed query
+ * and calls this once per document.
+ */
+export function attentionSummary(tournament) {
+  const disputedMatches = []
+  const unscheduledMatches = []
+  const awaitingConfirmation = []
+  const matchesByRound = new Map()
+
+  for (const match of tournament.matches) {
+    if (!matchesByRound.has(match.round)) matchesByRound.set(match.round, [])
+    matchesByRound.get(match.round).push(match)
+
+    if (match.state === 'disputed') disputedMatches.push(String(match._id))
+    if (match.state === 'reported') awaitingConfirmation.push(String(match._id))
+    if (
+      match.state === 'pending' &&
+      !match.scheduledAt &&
+      match.participants.filter(Boolean).length === 2
+    ) {
+      unscheduledMatches.push(String(match._id))
+    }
+  }
+
+  const maxRound = matchesByRound.size ? Math.max(...matchesByRound.keys()) : 0
+  const roundsReady = [...matchesByRound.entries()]
+    .filter(([round, matches]) => round < maxRound && matches.every((m) => m.state === 'final'))
+    .map(([round]) => round)
+    .sort((a, b) => a - b)
+
+  const pendingApplications = tournament.applications.length
+
+  return {
+    pendingApplications,
+    disputedMatches,
+    unscheduledMatches,
+    awaitingConfirmation,
+    roundsReady,
+    total:
+      pendingApplications +
+      disputedMatches.length +
+      unscheduledMatches.length +
+      awaitingConfirmation.length +
+      roundsReady.length,
+  }
+}

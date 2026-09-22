@@ -22,7 +22,7 @@ export function ApplicationsSection({ tournament }) {
   const slotsLeft = tournament.maxCapacity - tournament.participants.length - reserved
 
   return (
-    <Card>
+    <Card id="applications">
       <CardHeader
         title="Applications"
         subtitle={

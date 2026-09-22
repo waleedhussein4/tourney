@@ -33,3 +33,10 @@ export const reportUser = asyncHandler(async (req, res) => {
   })
   res.status(201).json({ reported: true })
 })
+
+/** What needs this host across every tournament they run. Empty for a
+ * non-host, or a host who currently runs nothing. */
+export const getHostDashboard = asyncHandler(async (req, res) => {
+  const tournaments = await userService.getHostDashboard(req.userId)
+  res.json({ tournaments })
+})
