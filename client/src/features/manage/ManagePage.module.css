@@ -141,7 +141,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-
 .matches {
   display: flex;
   gap: var(--space-5);

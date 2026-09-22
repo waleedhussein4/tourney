@@ -330,16 +330,16 @@ shared replica set, so files run in parallel without interfering.
 
 The suites are split by what they defend:
 
-|                            |                                                                         |
-| -------------------------- | ----------------------------------------------------------------------- |
-| `auth`, `teams`             | the everyday paths, and their failure modes                             |
-| `tournaments.guards`       | who is allowed to do what, and what the state forbids                   |
-| `tournaments.lifecycle`    | create → join → publish → start → results                               |
-| `subscriptions`            | the free-tier limit, checkout, and `PLAN_LIMIT_REACHED`                 |
-| `subscriptions.webhook`    | a gateway event updates the plan once, and only if it isn't stale       |
-| `seed`                     | the demo data is buildable, idempotent, and commits no passwords        |
-| `cron`                     | the reseed's lock, including that a rejected request changes nothing    |
-| `backup`                   | the backup/restore scripts round-trip the collections they touch        |
+|                         |                                                                      |
+| ----------------------- | -------------------------------------------------------------------- |
+| `auth`, `teams`         | the everyday paths, and their failure modes                          |
+| `tournaments.guards`    | who is allowed to do what, and what the state forbids                |
+| `tournaments.lifecycle` | create → join → publish → start → results                            |
+| `subscriptions`         | the free-tier limit, checkout, and `PLAN_LIMIT_REACHED`              |
+| `subscriptions.webhook` | a gateway event updates the plan once, and only if it isn't stale    |
+| `seed`                  | the demo data is buildable, idempotent, and commits no passwords     |
+| `cron`                  | the reseed's lock, including that a rejected request changes nothing |
+| `backup`                | the backup/restore scripts round-trip the collections they touch     |
 
 Alongside them, `scripts/check-regressions.sh` is a set of grep gates in CI —
 one per bug the rewrite fixed. No `navigate(0)`, no `console.log`, no

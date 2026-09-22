@@ -33,7 +33,9 @@ export function AdminPage() {
     mutationFn: clearDemoData,
     onSuccess: (data) => {
       queryClient.invalidateQueries()
-      setResult(`Cleared ${data.tournaments} tournaments, ${data.teams} teams, ${data.users} users.`)
+      setResult(
+        `Cleared ${data.tournaments} tournaments, ${data.teams} teams, ${data.users} users.`
+      )
       toast.success('Demo data cleared')
       setConfirming(false)
     },
