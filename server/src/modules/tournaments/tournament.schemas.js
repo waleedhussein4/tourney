@@ -154,8 +154,6 @@ export const updateBodySchema = z.object({
   content: z.string().trim().min(1, 'An update needs some text').max(LIMITS.update),
 })
 
-export const depositSchema = z.object({ amount: credits.refine((v) => v > 0, 'Deposit something') })
-
 export const matchesSchema = z.object({
   /** One entry per match, `null` where the result is not in yet. */
   matches: z.array(uuid.nullable()),

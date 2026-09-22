@@ -6,22 +6,21 @@ import { Link } from 'react-router-dom'
 import { applyToTournament, joinAsTeam, joinSolo, tournamentKeys } from '/src/api/tournaments.js'
 import { listMyTeams } from '/src/api/teams.js'
 import { currentUserKey } from '/src/features/auth/queries.js'
-import { useAuth } from '/src/features/auth/useAuth.js'
 import { Button, Field, Input, Modal, Spinner } from '/src/components/ui/index.js'
-import { formatCredits } from '/src/lib/format.js'
+import { formatMoney } from '/src/lib/format.js'
 import styles from './EnterDialog.module.css'
 
 /**
  * Entering a tournament: joining directly, or applying to be let in.
  *
- * One dialog for both because the decisions are the same — solo or with a team,
- * and can you afford it — and only the final request differs.
+ * One dialog for both because the decisions are the same — solo or with a
+ * team — and only the final request differs. Joining never charges anything
+ * here; the entry fee, if any, is settled between the entrant and the host.
  */
 export function EnterDialog({ tournament, mode, open, onClose }) {
   const isApplication = mode === 'apply'
   const isTeamBased = tournament.teamSize > 1
 
-  const { user } = useAuth()
   const queryClient = useQueryClient()
   const [teamId, setTeamId] = useState('')
 
@@ -47,8 +46,6 @@ export function EnterDialog({ tournament, mode, open, onClose }) {
       return isTeamBased ? joinAsTeam(tournament.id, teamId) : joinSolo(tournament.id)
     },
     onSuccess: () => {
-      // The tournament gained an entrant and the wallet lost the fee; both are on
-      // screen, so both are refreshed rather than left stale until a reload.
       queryClient.invalidateQueries({ queryKey: tournamentKeys.detail(tournament.id) })
       queryClient.invalidateQueries({ queryKey: currentUserKey })
       toast.success(isApplication ? 'Application sent' : 'You are in')
@@ -58,7 +55,6 @@ export function EnterDialog({ tournament, mode, open, onClose }) {
   })
 
   const cost = tournament.entryCost ?? tournament.entryFee
-  const canAfford = isApplication || (user?.credits ?? 0) >= cost
   const eligibleTeams = (teams.data?.teams ?? []).filter(
     (team) => team.isLeader && team.members.length === tournament.teamSize
   )
@@ -71,7 +67,7 @@ export function EnterDialog({ tournament, mode, open, onClose }) {
       title={isApplication ? `Apply to ${tournament.title}` : `Join ${tournament.title}`}
       description={
         isApplication
-          ? 'The host reviews applications and decides who gets a slot. Nothing is charged until you are accepted and join.'
+          ? 'The host reviews applications and decides who gets a slot.'
           : undefined
       }
       footer={
@@ -84,9 +80,9 @@ export function EnterDialog({ tournament, mode, open, onClose }) {
             form="enter-form"
             type="submit"
             loading={enter.isPending}
-            disabled={!canAfford || chosenTeamMissing}
+            disabled={chosenTeamMissing}
           >
-            {isApplication ? 'Send application' : `Join for ${formatCredits(cost)}`}
+            {isApplication ? 'Send application' : 'Join'}
           </Button>
         </>
       }
@@ -96,19 +92,12 @@ export function EnterDialog({ tournament, mode, open, onClose }) {
         className={styles.enter}
         onSubmit={handleSubmit((values) => enter.mutate(values))}
       >
-        {!isApplication && (
+        {!isApplication && cost > 0 && (
           <p className={styles.cost}>
-            Entry costs <strong>{formatCredits(cost)}</strong>
+            Entry costs <strong>{formatMoney(cost)}</strong>
             {isTeamBased &&
-              ` — ${formatCredits(tournament.entryFee)} for each of the ${tournament.teamSize} players, paid by you as leader`}
-            . You have {formatCredits(user?.credits ?? 0)}.
-          </p>
-        )}
-
-        {!canAfford && (
-          <p className={styles.warning} role="alert">
-            You need {formatCredits(cost - (user?.credits ?? 0))} more.{' '}
-            <Link to="/credits">Buy credits</Link>
+              ` — ${formatMoney(tournament.entryFee)} for each of the ${tournament.teamSize} players, owed by you as leader`}
+            . Settle this with the host directly.
           </p>
         )}
 

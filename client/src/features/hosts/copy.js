@@ -33,8 +33,8 @@ export const COPY = {
         body: 'Brackets or points, solo or teams, open to all or by application. Six steps, about five minutes.',
       },
       {
-        title: 'Pay the fee',
-        body: 'Email us and we send you a payment link. We put the tournament live the same day, usually within the hour.',
+        title: 'Publish it',
+        body: 'Your first tournament goes live for free. Running more than one at a time is a monthly subscription.',
       },
       {
         title: 'Share the link',
@@ -61,24 +61,24 @@ export const COPY = {
 
     pricingTitle: 'What it costs',
     pricingBody:
-      'One fee per tournament, paid once, when you publish it. No cut of the entry fees and no monthly charge.',
+      'Hosting is free. Running more than one tournament live at the same time needs a subscription — no cut of your entry fees, ever.',
     tierHeading: 'Tournament size',
     priceHeading: 'Fee',
-    upTo: (players) => `Up to ${players} players`,
+    upTo: (count) => `${count} tournament live at a time is`,
     free: 'Free',
-    price: (amount) => amount,
-    biggerTitle: 'Bigger than 64 players?',
-    biggerBody: 'Email us and we will price it.',
+    price: (amount) => `then ${amount} a`,
+    biggerTitle: 'Running several at once?',
+    biggerBody: 'Subscribe from your billing page — no email needed.',
 
     faqTitle: 'The questions we get',
     faq: [
       {
         q: 'Do you take a cut of the entry fees?',
-        a: 'No. The fee to publish is the only thing we charge. Entry fees are held for the tournament and paid out to the winners.',
+        a: 'No. Entry fees and prizes are between you and your players — the site never holds or moves that money.',
       },
       {
-        q: 'What if nobody signs up?',
-        a: 'Message us and we will refund the fee. It has not happened yet, but that is the answer.',
+        q: 'What if I only run one tournament?',
+        a: 'Then hosting costs nothing. The subscription only matters once you want a second tournament live at the same time.',
       },
       {
         q: 'Can players pay their entry fee in cash?',
@@ -113,8 +113,8 @@ export const COPY = {
         body: 'جدول إقصائي أو نقاط، فردي أو فرق، مفتوحة للجميع أو بطلب انضمام. ست خطوات، خمس دقائق تقريباً.',
       },
       {
-        title: 'ادفع الرسوم',
-        body: 'راسلنا ونرسل لك رابط الدفع. ننشر البطولة في اليوم نفسه، غالباً خلال ساعة.',
+        title: 'انشرها',
+        body: 'بطولتك الأولى مجانية. تشغيل أكثر من بطولة في الوقت نفسه يحتاج اشتراكاً شهرياً.',
       },
       {
         title: 'شارك الرابط',
@@ -135,24 +135,24 @@ export const COPY = {
 
     pricingTitle: 'الكلفة',
     pricingBody:
-      'رسم واحد لكل بطولة، يُدفع مرة واحدة عند نشرها. لا نأخذ نسبة من رسوم الاشتراك ولا اشتراك شهري.',
+      'التنظيم مجاني. تشغيل أكثر من بطولة واحدة في الوقت نفسه يحتاج اشتراكاً — بلا أي نسبة من رسوم اشتراك لاعبيك.',
     tierHeading: 'حجم البطولة',
     priceHeading: 'الرسوم',
-    upTo: (players) => `حتى ${players} لاعباً`,
-    free: 'مجاناً',
-    price: (amount) => amount,
-    biggerTitle: 'أكبر من ٦٤ لاعباً؟',
-    biggerBody: 'راسلنا وسنحدّد لك السعر.',
+    upTo: (count) => `بطولة واحدة (${count}) في الوقت نفسه`,
+    free: 'مجانية',
+    price: (amount) => `ثم ${amount} في`,
+    biggerTitle: 'تدير أكثر من بطولة في آن واحد؟',
+    biggerBody: 'اشترك من صفحة الفوترة — بلا حاجة لمراسلتنا.',
 
     faqTitle: 'أسئلة تصلنا',
     faq: [
       {
         q: 'هل تأخذون نسبة من رسوم الاشتراك؟',
-        a: 'لا. رسم النشر هو كل ما نتقاضاه. رسوم الاشتراك تُحفظ للبطولة وتُدفع للفائزين.',
+        a: 'لا. رسوم الاشتراك والجوائز أمر بينك وبين لاعبيك — الموقع لا يحفظ هذه الأموال ولا يحرّكها.',
       },
       {
-        q: 'ماذا لو لم يسجّل أحد؟',
-        a: 'راسلنا ونعيد لك الرسوم. لم يحصل هذا بعد، لكن هذا هو الجواب.',
+        q: 'ماذا لو أدرت بطولة واحدة فقط؟',
+        a: 'عندها التنظيم مجاني بالكامل. الاشتراك يهم فقط عندما تريد بطولة ثانية في الوقت نفسه.',
       },
       {
         q: 'هل يمكن للّاعبين دفع الاشتراك نقداً؟',

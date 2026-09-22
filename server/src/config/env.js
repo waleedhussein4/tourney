@@ -91,14 +91,11 @@ function loadConfig() {
     webhookSecret: read('PADDLE_WEBHOOK_SECRET'),
     clientToken: read('PADDLE_CLIENT_TOKEN'),
     environment: read('PADDLE_ENV') ?? 'sandbox',
-    // The gateway's id for each paid tier's price, created in its dashboard.
-    prices: Object.freeze({
-      small: read('PADDLE_PRICE_SMALL'),
-      large: read('PADDLE_PRICE_LARGE'),
-    }),
+    // The gateway's id for the subscription price, created in its dashboard.
+    planPriceId: read('PADDLE_PRICE_PLAN'),
   }
   const paddleSet = Object.entries(paddle).filter(
-    ([name]) => !['environment', 'prices'].includes(name)
+    ([name]) => !['environment', 'planPriceId'].includes(name)
   )
   const paddleGiven = paddleSet.filter(([, value]) => value)
   if (paddleGiven.length > 0 && paddleGiven.length < paddleSet.length) {
@@ -110,17 +107,10 @@ function loadConfig() {
   if (!['sandbox', 'production'].includes(paddle.environment)) {
     problems.push(`PADDLE_ENV must be sandbox or production, got "${paddle.environment}"`)
   }
-  // A configured gateway with no price for a paid tier would take the host to a
-  // checkout that cannot charge anything.
-  if (paddleGiven.length === paddleSet.length) {
-    const missingPrices = Object.entries(paddle.prices)
-      .filter(([, value]) => !value)
-      .map(([tier]) => `PADDLE_PRICE_${tier.toUpperCase()}`)
-    if (missingPrices.length > 0) {
-      problems.push(
-        `Card payments need a price for every paid tier — missing ${missingPrices.join(', ')}`
-      )
-    }
+  // A configured gateway with no price would send a host to a checkout that
+  // cannot charge anything.
+  if (paddleGiven.length === paddleSet.length && !paddle.planPriceId) {
+    problems.push('Card payments need PADDLE_PRICE_PLAN — the gateway price for the plan')
   }
 
   if (problems.length > 0) {

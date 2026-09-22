@@ -1,9 +1,9 @@
 // The demo dataset, shared by `npm run seed` and the admin page.
 //
 // Everything is built through the same services the API uses, so a seeded
-// tournament that says it has started really did go through the bank check, and
-// a seeded payout really did move credits and write ledger rows. A fixture that
-// wrote documents directly would drift from the rules the app enforces.
+// tournament that says it has started really did pass the rules for starting
+// one. A fixture that wrote documents directly would drift from what the app
+// enforces.
 //
 // No password is committed. Each is taken from the environment if set, and
 // otherwise generated per run and printed once — so a deployment cannot end up
@@ -13,13 +13,7 @@ import crypto from 'node:crypto'
 import User from '../src/models/user.model.js'
 import Team from '../src/models/team.model.js'
 import Tournament from '../src/models/tournament.model.js'
-import { migratePublishState } from './migrate-publish-state.js'
-import Transaction from '../src/models/transaction.model.js'
-import Product from '../src/models/product.model.js'
-import { DEFAULT_PRODUCTS } from '../src/config/products.js'
 import { registerUser } from '../src/modules/auth/auth.service.js'
-import { withTransaction } from '../src/db/withTransaction.js'
-import { creditUser, recordTransaction } from '../src/modules/tournaments/bank.service.js'
 import * as tournaments from '../src/modules/tournaments/tournament.service.js'
 
 const DAY = 24 * 60 * 60 * 1000
@@ -72,18 +66,18 @@ export function seedCredentials() {
 
 /** The twelve players. Two of them host, so there is more than one host's view. */
 const PLAYERS = [
-  { username: 'sana', isHost: true, credits: 2000 },
-  { username: 'idris', isHost: true, credits: 2000 },
-  { username: 'mei', credits: 400 },
-  { username: 'tomas', credits: 400 },
-  { username: 'ada', credits: 400 },
-  { username: 'kofi', credits: 400 },
-  { username: 'lena', credits: 400 },
-  { username: 'oscar', credits: 400 },
-  { username: 'priya', credits: 400 },
-  { username: 'diego', credits: 400 },
-  { username: 'yuki', credits: 400 },
-  { username: 'noor', credits: 400 },
+  { username: 'sana', isHost: true, plan: true },
+  { username: 'idris', isHost: true, plan: true },
+  { username: 'mei' },
+  { username: 'tomas' },
+  { username: 'ada' },
+  { username: 'kofi' },
+  { username: 'lena' },
+  { username: 'oscar' },
+  { username: 'priya' },
+  { username: 'diego' },
+  { username: 'yuki' },
+  { username: 'noor' },
 ]
 
 /** Four teams, sized for the team tournaments below. */
@@ -96,23 +90,20 @@ const TEAMS = [
 
 // --- helpers -----------------------------------------------------------------
 
-async function findOrCreateUser({ username, email, password, credits = 0, isHost = false, role }) {
+async function findOrCreateUser({ username, email, password, isHost = false, role, plan }) {
   let user = await User.findOne({ email })
   if (!user) user = await registerUser({ email, username, password })
 
   // Matching by the seed's own email is also what flags accounts seeded before
   // `isDemo` existed. The admin is seeded but is not demo data: it is never cleared.
-  const update = { credits, isHost, isDemo: !role }
+  const update = { isHost, isDemo: !role }
   if (role) update.role = role
+  // Seeded hosts carry a plan, or the demo would be ten tournaments nobody can
+  // see: publishing more than one needs a subscription.
+  if (plan) update.hostingPlan = { status: 'active', provider: 'seed', updatedAt: new Date() }
   await User.updateOne({ _id: user._id }, { $set: update })
 
   return User.findById(user._id)
-}
-
-/** Tops the bank up to the full prize pool out of the host's own credits. */
-async function fillBank(tournament, hostId) {
-  const shortfall = tournament.totalPrize - tournament.bank
-  if (shortfall > 0) await tournaments.deposit(tournament._id, hostId, shortfall)
 }
 
 // --- the tournaments ---------------------------------------------------------
@@ -353,15 +344,14 @@ export async function seedDemoData() {
     username: 'demo',
     email: credentials.demo.email,
     password: credentials.demo.password,
-    credits: 500,
     isHost: true,
+    plan: true,
   })
 
   const admin = await findOrCreateUser({
     username: 'admin',
     email: credentials.admin.email,
     password: credentials.admin.password,
-    credits: 0,
     role: 'admin',
   })
 
@@ -380,16 +370,6 @@ export async function seedDemoData() {
     )
   }
 
-  let products = 0
-  for (const product of DEFAULT_PRODUCTS) {
-    const result = await Product.updateOne(
-      { _id: product._id },
-      { $setOnInsert: product },
-      { upsert: true }
-    )
-    if (result.upsertedCount) products += 1
-  }
-
   const teams = new Map()
   for (const blueprint of TEAMS) {
     let team = await Team.findOne({ name: blueprint.name })
@@ -406,11 +386,6 @@ export async function seedDemoData() {
     }
     teams.set(blueprint.name, team)
   }
-
-  // Tournaments that predate `publishState` were, by definition, already public.
-  // Running it here as well as in the migration script means a deployment whose
-  // database was never migrated heals itself at the next reseed, with no shell.
-  await migratePublishState()
 
   // Documents seeded before `isDemo` existed carry no flag. They are recognised
   // by the seed's natural key *and* a seeded owner, so a real host's tournament
@@ -436,7 +411,6 @@ export async function seedDemoData() {
   return {
     users: people.size,
     teams: teams.size,
-    products,
     tournaments: created,
     demoEmail: credentials.demo.email,
     adminEmail: credentials.admin.email,
@@ -484,8 +458,6 @@ async function buildTournament(blueprint, people, teams) {
 
   if (blueprint.state !== 'started' && blueprint.state !== 'ended') return tournament
 
-  const funded = await tournaments.loadTournament(id)
-  await fillBank(funded, host._id)
   await tournaments.startTournament(id, host._id)
 
   await recordResults(id, host._id, blueprint, people, teams)
@@ -558,15 +530,12 @@ function idsReferencedBy(tournament) {
  * demo account — the demo login is public, so a tournament it hosts or a team it
  * leads is a visitor's leftovers. Real accounts, and everything they own, stay.
  *
- * The two worlds can touch, and both directions are handled:
- *   - a real player in a demo tournament gets their entry fee back, with a ledger
- *     row, before the tournament and its bank disappear;
- *   - a demo user or team that a real tournament refers to is kept (the seed
- *     resets it in place), so a paying host's bracket never points at nobody.
+ * The two worlds can touch, and the direction that matters is handled: a demo
+ * user or team that a real tournament refers to is kept — the seed resets it in
+ * place — so a paying host's bracket never points at nobody.
  */
 export async function clearDemoData() {
   const demoUserIds = (await User.find({ isDemo: true }).select('_id').lean()).map((u) => u._id)
-  const isDemoUser = new Set(demoUserIds)
 
   const demoTournaments = await Tournament.find({
     $or: [{ isDemo: true }, { host: { $in: demoUserIds } }],
@@ -574,46 +543,17 @@ export async function clearDemoData() {
   const demoTournamentIds = demoTournaments.map((tournament) => tournament._id)
 
   const realTournaments = await Tournament.find({ _id: { $nin: demoTournamentIds } })
-  const realTournamentIds = realTournaments.map((tournament) => tournament._id)
   const keep = [...new Set(realTournaments.flatMap(idsReferencedBy))]
 
-  for (const tournament of demoTournaments) {
-    await withTransaction(async (session) => {
-      // An ended tournament has already paid its bank out; there is no fee left to return.
-      for (const participant of tournament.hasEnded ? [] : tournament.participants()) {
-        const payer = String(tournament.isTeamBased ? participant.paidBy : participant.userId)
-        if (isDemoUser.has(payer) || tournament.entryCost <= 0) continue
-
-        await creditUser(payer, tournament.entryCost, session)
-        await recordTransaction(
-          {
-            userId: payer,
-            type: 'refund',
-            amount: tournament.entryCost,
-            tournamentId: tournament._id,
-            description: `Refund for "${tournament.title}", removed by the demo reset`,
-          },
-          session
-        )
-      }
-      await Tournament.deleteOne({ _id: tournament._id }, { session })
-    })
-  }
+  await Tournament.deleteMany({ _id: { $in: demoTournamentIds } })
 
   const doomedUsers = { isDemo: true, role: { $ne: 'admin' }, _id: { $nin: keep } }
   const doomedUserIds = (await User.find(doomedUsers).select('_id').lean()).map((u) => u._id)
 
-  const [teamResult, transactionResult] = await Promise.all([
-    Team.deleteMany({
-      $or: [{ isDemo: true }, { leader: { $in: demoUserIds } }],
-      _id: { $nin: keep },
-    }),
-    // A demo user's rows go, except those a real tournament's bank is built from.
-    Transaction.deleteMany({
-      userId: { $in: demoUserIds },
-      tournamentId: { $nin: realTournamentIds },
-    }),
-  ])
+  const teamResult = await Team.deleteMany({
+    $or: [{ isDemo: true }, { leader: { $in: demoUserIds } }],
+    _id: { $nin: keep },
+  })
   await Team.updateMany({}, { $pull: { members: { $in: doomedUserIds } } })
   const userResult = await User.deleteMany({ _id: { $in: doomedUserIds } })
 
@@ -621,6 +561,5 @@ export async function clearDemoData() {
     tournaments: demoTournaments.length,
     teams: teamResult.deletedCount,
     users: userResult.deletedCount,
-    transactions: transactionResult.deletedCount,
   }
 }

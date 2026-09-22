@@ -4,7 +4,7 @@ import '@fontsource-variable/noto-sans-arabic'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { getPublishingPricing, publishingKeys } from '/src/api/publishing.js'
+import { billingKeys, getPlan } from '/src/api/billing.js'
 import { BracketTree } from '/src/components/brand/index.js'
 import { COPY, LANGUAGES, directionOf } from './copy.js'
 import styles from './HostsPage.module.css'
@@ -23,8 +23,8 @@ const STORED_LANGUAGE = 'tourney.hosts.language'
 export function HostsPage() {
   const [language, setLanguage] = useState(initialLanguage)
   const pricing = useQuery({
-    queryKey: publishingKeys.pricing,
-    queryFn: getPublishingPricing,
+    queryKey: billingKeys.plan,
+    queryFn: getPlan,
   })
   const mailto = pricing.data?.contactEmail ? `mailto:${pricing.data.contactEmail}` : null
   const direction = directionOf(language)
@@ -112,7 +112,7 @@ export function HostsPage() {
         </div>
       </section>
 
-      <Pricing t={t} tiers={pricing.data?.tiers} />
+      <Pricing t={t} data={pricing.data} />
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>{t.faqTitle}</h2>
@@ -140,39 +140,23 @@ export function HostsPage() {
 }
 
 /**
- * The price list, read from the server.
+ * What hosting costs, read from the server.
  *
- * The prices live in one config file — quoting them here from a hard-coded copy
- * is exactly how the page and the checkout would come to disagree.
+ * The price lives in one config file — quoting it here from a hard-coded copy
+ * is exactly how this page and the billing screen would come to disagree.
  */
-function Pricing({ t, tiers }) {
+function Pricing({ t, data }) {
   return (
     <section className={styles.section}>
       <h2 className={styles.sectionTitle}>{t.pricingTitle}</h2>
       <p className={styles.sectionLead}>{t.pricingBody}</p>
 
-      {tiers && (
-        <table className={styles.prices}>
-          <thead>
-            <tr>
-              <th scope="col">{t.tierHeading}</th>
-              <th scope="col">{t.priceHeading}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tiers.map((tier) => (
-              <tr key={tier.tier}>
-                <th scope="row">{t.upTo(formatNumber(tier.maxCapacity))}</th>
-                <td>{tier.amountCents === 0 ? t.free : t.price(formatMoney(tier.amountCents))}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {data && (
+        <p className={styles.sectionLead}>
+          {t.upTo(formatNumber(data.freeLiveTournaments))} {t.free.toLowerCase()} —{' '}
+          {t.price(formatMoney(data.plan.priceCents))} {data.plan.interval} for as many as you like.
+        </p>
       )}
-
-      <p className={styles.bigger}>
-        <strong>{t.biggerTitle}</strong> {t.biggerBody}
-      </p>
     </section>
   )
 }
