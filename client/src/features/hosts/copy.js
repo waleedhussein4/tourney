@@ -14,6 +14,11 @@ export const LANGUAGES = [
 
 export const directionOf = (code) => (code === 'ar' ? 'rtl' : 'ltr')
 
+// The billing API returns the interval as a plain English word ('month') —
+// there is only ever the one value, so a lookup beats a translation library.
+const INTERVAL_NAMES = { en: { month: 'month' }, ar: { month: 'شهر' } }
+export const intervalName = (code, interval) => INTERVAL_NAMES[code]?.[interval] ?? interval
+
 export const COPY = {
   en: {
     documentTitle: 'Run your tournament on Tourney',
@@ -23,7 +28,7 @@ export const COPY = {
     heroTitle: 'Run your tournament. We handle the rest.',
     heroBody:
       'Sign-ups, brackets, teams and standings. You run the competition; the site keeps track of it.',
-    heroAction: 'Email us',
+    heroAction: "Start hosting — it's free",
     heroSecondary: 'See a live tournament',
 
     stepsTitle: 'How it works',
@@ -64,9 +69,8 @@ export const COPY = {
       'Hosting is free. Running more than one tournament live at the same time needs a subscription — no cut of your entry fees, ever.',
     tierHeading: 'Tournament size',
     priceHeading: 'Fee',
-    upTo: (count) => `${count} tournament live at a time is`,
-    free: 'Free',
-    price: (amount) => `then ${amount} a`,
+    pricingLine: (count, amount, interval) =>
+      `${count} tournament live at a time is free — then ${amount} a ${interval} for as many as you like.`,
     biggerTitle: 'Running several at once?',
     biggerBody: 'Subscribe from your billing page — no email needed.',
 
@@ -91,8 +95,9 @@ export const COPY = {
     ],
 
     closingTitle: 'Running something soon?',
-    closingBody: 'Send us a message. We will set the first one up with you.',
-    closingAction: 'Email us',
+    closingBody: 'Start hosting free, or send us a message and we will set the first one up with you.',
+    closingAction: "Start hosting — it's free",
+    closingContact: 'Email us',
   },
 
   ar: {
@@ -103,7 +108,7 @@ export const COPY = {
     heroTitle: 'نظّم بطولتك ونحن نتكفّل بالباقي.',
     heroBody:
       'التسجيل، جداول المباريات، الفرق والترتيب. أنت تدير المنافسة، والموقع يتابع كل التفاصيل.',
-    heroAction: 'راسلنا بالبريد',
+    heroAction: 'ابدأ التنظيم — مجاناً',
     heroSecondary: 'شاهد بطولة جارية',
 
     stepsTitle: 'كيف تعمل',
@@ -138,9 +143,8 @@ export const COPY = {
       'التنظيم مجاني. تشغيل أكثر من بطولة واحدة في الوقت نفسه يحتاج اشتراكاً — بلا أي نسبة من رسوم اشتراك لاعبيك.',
     tierHeading: 'حجم البطولة',
     priceHeading: 'الرسوم',
-    upTo: (count) => `بطولة واحدة (${count}) في الوقت نفسه`,
-    free: 'مجانية',
-    price: (amount) => `ثم ${amount} في`,
+    pricingLine: (count, amount, interval) =>
+      `تشغيل ${count} بطولة واحدة في الوقت نفسه مجاني — وبعدها ${amount} ${interval} لعدد غير محدود من البطولات.`,
     biggerTitle: 'تدير أكثر من بطولة في آن واحد؟',
     biggerBody: 'اشترك من صفحة الفوترة — بلا حاجة لمراسلتنا.',
 
@@ -165,7 +169,8 @@ export const COPY = {
     ],
 
     closingTitle: 'عندك بطولة قريباً؟',
-    closingBody: 'راسلنا وسنجهّز الأولى معك.',
-    closingAction: 'راسلنا بالبريد',
+    closingBody: 'ابدأ التنظيم مجاناً، أو راسلنا وسنجهّز الأولى معك.',
+    closingAction: 'ابدأ التنظيم — مجاناً',
+    closingContact: 'راسلنا بالبريد',
   },
 }
