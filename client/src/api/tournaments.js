@@ -75,6 +75,17 @@ export const saveMatches = (id, matches) => patch(`/api/tournaments/${id}/matche
 export const saveParticipants = (id, participants) =>
   patch(`/api/tournaments/${id}/participants`, { participants })
 
+/**
+ * A competitor (or the host, standing in) reports a match's result.
+ * @param {{ scores: { participantId: string, score: number }[] }} body
+ */
+export const reportMatch = (id, matchId, body) =>
+  post(`/api/tournaments/${id}/matches/${matchId}/report`, body)
+
+/** The other competitor confirms (`agree: true`) or disputes (`agree: false`) a reported result. */
+export const confirmMatch = (id, matchId, agree) =>
+  post(`/api/tournaments/${id}/matches/${matchId}/confirm`, { agree })
+
 // --- query keys ---------------------------------------------------------------
 
 /**
