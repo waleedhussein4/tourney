@@ -9,6 +9,7 @@ import { DetailsSection } from './sections/DetailsSection.jsx'
 import { ApplicationsSection } from './sections/ApplicationsSection.jsx'
 import { ParticipantsSection } from './sections/ParticipantsSection.jsx'
 import { MatchesSection } from './sections/MatchesSection.jsx'
+import { DisputesSection } from './sections/DisputesSection.jsx'
 import { UpdatesSection } from './sections/UpdatesSection.jsx'
 import { LifecycleSection } from './sections/LifecycleSection.jsx'
 import { PublishSection } from './sections/PublishSection.jsx'
@@ -81,6 +82,7 @@ export function ManagePage() {
           <ApplicationsSection tournament={tournament} />
         )}
         <ParticipantsSection tournament={tournament} />
+        {tournament.type === 'brackets' && <DisputesSection tournament={tournament} />}
         {tournament.type === 'brackets' && <MatchesSection tournament={tournament} />}
         <UpdatesSection tournament={tournament} />
         <DetailsSection tournament={tournament} />

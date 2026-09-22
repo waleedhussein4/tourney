@@ -126,6 +126,13 @@ tournamentRouter.post(
   controller.confirmMatch
 )
 
+tournamentRouter.post(
+  '/:tournamentId/matches/:matchId/resolve',
+  requireAuth,
+  validate({ params: schemas.matchParams, body: schemas.resolveMatchSchema }),
+  controller.resolveMatch
+)
+
 tournamentRouter.patch(
   '/:tournamentId/participants',
   requireAuth,

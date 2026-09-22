@@ -152,6 +152,16 @@ export const confirmMatch = asyncHandler(async (req, res) => {
   res.json({ tournament: await toPublicView(tournament, req.userId) })
 })
 
+export const resolveMatch = asyncHandler(async (req, res) => {
+  const tournament = await service.resolveMatch(
+    req.params.tournamentId,
+    req.userId,
+    req.params.matchId,
+    req.body.scores
+  )
+  res.json({ tournament: await toManageView(tournament, req.userId) })
+})
+
 export const updateParticipants = asyncHandler(async (req, res) => {
   const tournament = await service.updateParticipants(
     req.params.tournamentId,

@@ -11,6 +11,7 @@ import {
   notifyMatchScheduled,
   notifyResultConfirmed,
   notifyResultDisputed,
+  notifyResultResolved,
   notifyTournamentEnded,
   notifyTournamentPublished,
 } from '../notifications/notification.service.js'
@@ -670,6 +671,20 @@ function competitorIdFor(tournament, match, userId) {
   )
 }
 
+/** Scores in participant order, and the winner they imply. Ties are rejected. */
+function deriveResult(match, scores) {
+  const ordered = match.participants.map((participantId) => {
+    const entry = scores.find((score) => String(score.participantId) === String(participantId))
+    if (!entry) throw ApiError.badRequest('Report a score for every competitor in this match')
+    return entry.score
+  })
+  if (ordered[0] === ordered[1]) {
+    throw ApiError.badRequest('Scores cannot be tied — there must be a winner')
+  }
+  const winner = ordered[0] > ordered[1] ? match.participants[0] : match.participants[1]
+  return { ordered, winner }
+}
+
 /** The checks shared by reporting and confirming a match result. */
 function loadReportableMatch(tournament, matchId) {
   if (tournament.type !== 'brackets') throw ApiError.badRequest('This is not a bracket tournament')
@@ -711,17 +726,10 @@ export async function reportMatch(tournamentId, userId, matchId, scores) {
     throw ApiError.forbidden('You are not a competitor in this match')
   }
 
-  const ordered = match.participants.map((participantId) => {
-    const entry = scores.find((score) => String(score.participantId) === String(participantId))
-    if (!entry) throw ApiError.badRequest('Report a score for every competitor in this match')
-    return entry.score
-  })
-  if (ordered[0] === ordered[1]) {
-    throw ApiError.badRequest('Scores cannot be tied — there must be a winner')
-  }
+  const { ordered, winner } = deriveResult(match, scores)
 
   match.scores = ordered
-  match.winner = ordered[0] > ordered[1] ? match.participants[0] : match.participants[1]
+  match.winner = winner
   match.state = 'reported'
   match.reportedBy = String(userId)
   match.confirmedBy = null
@@ -762,6 +770,36 @@ export async function confirmMatch(tournamentId, userId, matchId, agree) {
   await tournament.save()
   if (agree) await notifyResultConfirmed(tournament, match)
   else await notifyResultDisputed(tournament, match)
+  return tournament
+}
+
+/**
+ * The host's final call on a disputed match, once the two sides can't agree.
+ *
+ * Only a `disputed` match can be resolved this way. `confirmedBy` is set to
+ * the host's id — the same "host imposed this" marker `updateMatches` uses —
+ * so a resolved dispute stays visibly distinct from a result the competitors
+ * actually agreed on, while `reportedBy` keeps whichever competitor filed the
+ * original report.
+ */
+export async function resolveMatch(tournamentId, hostId, matchId, scores) {
+  const tournament = await loadAsHost(tournamentId, hostId)
+  const match = loadReportableMatch(tournament, matchId)
+
+  if (match.state !== 'disputed') {
+    throw ApiError.badRequest('This match is not disputed')
+  }
+
+  const { ordered, winner } = deriveResult(match, scores)
+
+  match.scores = ordered
+  match.winner = winner
+  match.state = 'final'
+  match.confirmedBy = String(hostId)
+  advanceWinner(tournament, match, winner)
+
+  await tournament.save()
+  await notifyResultResolved(tournament, match)
   return tournament
 }
 
