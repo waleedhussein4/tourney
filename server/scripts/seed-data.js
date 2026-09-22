@@ -115,7 +115,7 @@ const now = () => Date.now()
  *
  * `state` drives how far each one is taken: an upcoming tournament is only
  * created, a filling one has some entrants, a started one is full and under way,
- * and an ended one has been played out and paid out.
+ * and an ended one has been played through to a winner.
  */
 function blueprints() {
   const base = now()
@@ -131,7 +131,7 @@ function blueprints() {
         accessibility: 'open',
         teamSize: 1,
         maxCapacity: 8,
-        description: 'Eight players, single elimination, one winner takes the pot.',
+        description: 'Eight players, single elimination, one winner.',
         rules: '<p>Best of three. Report your result within ten minutes of the match.</p>',
         startDate: new Date(base + 5 * DAY),
         endDate: new Date(base + 6 * DAY),
@@ -183,7 +183,7 @@ function blueprints() {
         accessibility: 'open',
         teamSize: 1,
         maxCapacity: 4,
-        description: 'Last season’s bracket, played out and paid out.',
+        description: 'Last season’s bracket, played out in full.',
         rules: '<p>Classical time control.</p>',
         startDate: new Date(base - 10 * DAY),
         endDate: new Date(base - 9 * DAY),
@@ -291,7 +291,7 @@ function blueprints() {
         accessibility: 'open',
         teamSize: 1,
         maxCapacity: 20,
-        description: 'Open to everyone, no entry cost.',
+        description: 'Open to everyone, no application needed.',
         rules: '<p>Open to everyone. One entry per person.</p>',
         startDate: new Date(base + 9 * DAY),
         endDate: new Date(base + 10 * DAY),
