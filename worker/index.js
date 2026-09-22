@@ -32,6 +32,8 @@ const FORWARDED = [
   'PADDLE_PRICE_PLAN',
   'PADDLE_ENV',
   'SENTRY_DSN',
+  'RESEND_API_KEY',
+  'MAIL_FROM',
 ]
 
 export class TourneyContainer extends Container {
