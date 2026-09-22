@@ -42,6 +42,7 @@ webhookRouter.post(
     await service.applySubscription({
       ...subscription,
       occurredAt: event.occurredAt ? new Date(event.occurredAt) : new Date(),
+      eventId: gateway.eventIdOf(event),
     })
 
     res.sendStatus(200)
