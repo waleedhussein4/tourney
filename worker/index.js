@@ -36,6 +36,9 @@ const FORWARDED = [
   'MAIL_FROM',
 ]
 
+/** Must match the reseed entry in `wrangler.jsonc`'s `triggers.crons`. */
+const DAILY_RESEED = '0 4 * * *'
+
 export class TourneyContainer extends Container {
   defaultPort = 2000
   sleepAfter = '10m'
@@ -62,9 +65,20 @@ export default {
     return env.ASSETS.fetch(request)
   },
 
-  async scheduled(_event, env) {
+  // Two triggers, told apart by cron expression. `event.cron` is the literal
+  // string from wrangler.jsonc, so this stays correct if the schedules move.
+  //
+  // The hourly sweep exists because the daily one cannot do its job: a match
+  // reminder promising "starting within the hour" is meaningless if the only
+  // chance to send it comes once a day at 04:00. The sweep is idempotent — the
+  // notification table has a unique index on (user, type, subject) — so
+  // running it every hour re-sends nothing, it only catches what has newly
+  // come due.
+  async scheduled(event, env) {
     const container = getContainer(env.TOURNEY_CONTAINER)
-    await container.fetch('https://container/api/cron/reseed', {
+    const path = event.cron === DAILY_RESEED ? '/api/cron/reseed' : '/api/cron/notify-sweep'
+
+    await container.fetch(`https://container${path}`, {
       headers: { authorization: `Bearer ${env.CRON_SECRET}` },
     })
   },

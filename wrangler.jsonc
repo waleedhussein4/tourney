@@ -47,6 +47,10 @@
   "observability": { "enabled": true },
 
   "triggers": {
-    "crons": ["0 4 * * *"],
+    // Daily at 04:00 UTC rebuilds the demo data. Hourly drives the
+    // notification sweep — a "your match starts within the hour" reminder
+    // cannot be delivered by a job that runs once a day. `worker/index.js`
+    // tells them apart by the cron string.
+    "crons": ["0 4 * * *", "0 * * * *"],
   },
 }
