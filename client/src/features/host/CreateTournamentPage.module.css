@@ -176,40 +176,6 @@
   flex: 1;
 }
 
-/* What the host would have to top up, before they reach the start button. */
-.forecast {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-3);
-  padding: var(--space-4);
-  background: var(--surface-sunken);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.forecast dt {
-  font-family: var(--font-display);
-  font-stretch: var(--stretch-display);
-  font-size: var(--text-2xs);
-  font-weight: 650;
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--text-faint);
-}
-
-.forecast dd {
-  margin: var(--space-1) 0 0;
-  font-family: var(--font-display);
-  font-stretch: var(--stretch-display);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--text-lg);
-  font-weight: 700;
-  color: var(--text-strong);
-}
-
-.forecastWarn dd {
-  color: var(--warning);
-}
 
 .review {
   display: flex;
@@ -244,8 +210,7 @@
 }
 
 @media (max-width: 560px) {
-  .dates,
-  .forecast {
+  .dates {
     grid-template-columns: 1fr;
   }
 }
