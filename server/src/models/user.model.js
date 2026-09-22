@@ -73,6 +73,22 @@ const userSchema = new Schema(
 
     /** Set by the seed script and nothing else. The demo reset deletes only these. */
     isDemo: { type: Boolean, default: false, index: true },
+
+    /**
+     * Per-category opt-outs for notification email. The in-app notification is
+     * always created regardless of these — they only gate the email leg. Every
+     * category defaults to on; a category not in this set (e.g. tournament
+     * published) is in-app only and has no toggle at all. Security mail
+     * (password reset, email verification) is not a notification and never
+     * reads this.
+     */
+    emailPreferences: {
+      _id: false,
+      matchScheduled: { type: Boolean, default: true },
+      matchStartingSoon: { type: Boolean, default: true },
+      resultDisputed: { type: Boolean, default: true },
+      applicationDecided: { type: Boolean, default: true },
+    },
   },
   { timestamps: true }
 )
