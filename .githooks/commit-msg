@@ -1,5 +1,18 @@
 #!/bin/sh
-if grep -qiE 'co-authored-by:.*(anthropic|claude|openai|copilot)|generated with|claude code|anthropic' "$1"; then
-  echo "Rejected: commit message contains an AI attribution line." >&2
+# Commit messages are written by the person making the commit. Reject any
+# provenance footer, and any co-author that is not a human on this project.
+#
+# The allowlist is emails, not names, because a name is trivially spoofed and
+# an email is what GitHub actually attributes a commit to.
+ALLOWED='hamzahtmatar@gmail\.com|haythamduwaji@gmail\.com|137875421\+JadElMurr@users\.noreply\.github\.com|144370736\+Soumi-7@users\.noreply\.github\.com|62118101\+waleedhussein4@users\.noreply\.github\.com|walid\.a\.hussein@hotmail\.com|150618673\+jadzeid@users\.noreply\.github\.com|jadzeid004@gmail\.com'
+
+if grep -qiE '^generated with' "$1"; then
+  echo "Rejected: commit message contains a generated-by footer." >&2
+  exit 1
+fi
+
+if grep -iE '^co-authored-by:' "$1" | grep -qivE "$ALLOWED"; then
+  echo "Rejected: co-author is not a listed contributor on this project." >&2
+  echo "If someone genuinely joined, add their email to .githooks/commit-msg." >&2
   exit 1
 fi

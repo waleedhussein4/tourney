@@ -35,9 +35,8 @@ CI also runs `npm run check:regressions` (grep tripwires for old bugs) and
 - **Commits:** [Conventional Commits](https://www.conventionalcommits.org).
   Small and coherent within a branch; the squash title is what lands on
   `main`.
-- **No AI attribution trailers** (`Co-Authored-By: Claude`, "Generated with…",
-  etc.) in commits or PRs — a commit-msg hook and a CI gate both reject them,
-  whatever tool you used to help write the change.
+- **No machine-generated trailers** in commits or PRs — a commit-msg hook and
+  a CI gate both reject them. Write the message yourself.
 - **Pull requests** use [the template](.github/PULL_REQUEST_TEMPLATE.md):
   What / Why / How, screenshots for anything visual, and the checklist.
 - **`main` stays deployable after every merge.** It is live at
@@ -47,9 +46,9 @@ CI also runs `npm run check:regressions` (grep tripwires for old bugs) and
 
 ## Code conventions
 
-The full list is in [CLAUDE.md](CLAUDE.md) — zod at the edge, one error
-shape, React Query with zero `navigate(0)`, CSS Modules on `tokens.css`, no
-`console.log`, no dead code left commented out. Read it before your first PR.
+Zod at the edge, one error shape, React Query with zero `navigate(0)`, CSS
+Modules on `tokens.css`, no `console.log`, no dead code left commented out.
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) has the reasoning behind each.
 
 ## Out of scope
 
