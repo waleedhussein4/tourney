@@ -70,6 +70,7 @@ export function buildRounds(tournament, winnerOverrides = {}) {
 
       return {
         id: match.id,
+        scheduledAt: match.scheduledAt ?? null,
         teams: [
           describe(participants[0] ?? null, winnerId),
           describe(participants[1] ?? null, winnerId),
