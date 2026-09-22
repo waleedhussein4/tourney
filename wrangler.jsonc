@@ -12,7 +12,17 @@
     {
       "class_name": "TourneyContainer",
       "image": "./Dockerfile",
-      "max_instances": 1,
+      // A ceiling, not a reservation. Containers bill per running second, so
+      // raising this costs nothing on its own — instances only start when
+      // there is traffic to justify them, and stop again when there is not.
+      //
+      // It was 1, which meant every request in the world queued behind a
+      // single process. Measured against production before this change:
+      // 50 concurrent requests to /api/tournaments all returned 200, but p50
+      // was 4.4s and p95 6.5s, against 463ms for the same request on its own.
+      // Fifty people opening the browse page as a tournament starts is a
+      // normal evening for this product, not a stress test.
+      "max_instances": 5,
       "instance_type": "basic",
     },
   ],
