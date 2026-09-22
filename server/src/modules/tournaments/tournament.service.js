@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import Tournament, { buildBracketMatches } from '../../models/tournament.model.js'
 import Team from '../../models/team.model.js'
 import User from '../../models/user.model.js'
@@ -14,7 +15,33 @@ import {
   notifyResultResolved,
   notifyTournamentEnded,
   notifyTournamentPublished,
+  notifyWaitlistPromoted,
 } from '../notifications/notification.service.js'
+
+/**
+ * Runs `work` against a freshly-loaded tournament inside a transaction, then
+ * saves it.
+ *
+ * Every join/withdraw touches `maxCapacity` bookkeeping, so two people racing
+ * for the same last slot must not both get it. `session.withTransaction`
+ * re-runs `work` from a fresh read on a write conflict — a real one, from the
+ * replica set, not a comment promising it is safe — so the loser of the race
+ * always sees the post-winner state before it decides what to do.
+ */
+async function withCapacityLock(tournamentId, work) {
+  const session = await mongoose.startSession()
+  try {
+    let result
+    await session.withTransaction(async () => {
+      const tournament = await loadTournament(tournamentId, session)
+      result = await work(tournament, session)
+      await tournament.save({ session })
+    })
+    return result
+  } finally {
+    await session.endSession()
+  }
+}
 
 // --- loading ----------------------------------------------------------------
 
@@ -278,62 +305,92 @@ export async function deleteTournament(tournamentId, hostId) {
  */
 async function loadForEntry(tournamentId, userId, session) {
   const tournament = await loadTournament(tournamentId, session)
-  if (tournament.isPublished) return tournament
+  assertVisibleForEntry(tournament, userId)
+  return tournament
+}
+
+/** An unpublished tournament does not exist to anyone but its host. */
+function assertVisibleForEntry(tournament, userId) {
+  if (tournament.isPublished) return
   if (tournament.isHostedBy(userId)) {
     throw ApiError.badRequest('This tournament has not been published yet')
   }
   throw ApiError.notFound('Tournament not found')
 }
 
-/** The checks that apply however a participant gets in. */
+/** Whether every slot — enrolled, not waitlisted — is taken. */
+function isFull(tournament) {
+  return tournament.participantCount() >= tournament.maxCapacity
+}
+
+/** The checks that apply however a participant gets in, full or not. */
 function assertJoinable(tournament, userId) {
+  assertVisibleForEntry(tournament, userId)
   if (tournament.hasStarted) throw ApiError.badRequest('This tournament has already started')
   if (tournament.isHostedBy(userId)) {
     throw ApiError.badRequest('A host cannot compete in their own tournament')
   }
-  if (tournament.participantCount() >= tournament.maxCapacity) {
-    throw ApiError.conflict('This tournament is full')
-  }
   if (tournament.hasParticipant(userId)) {
     throw ApiError.conflict('You are already in this tournament')
   }
+  if (isWaitlisted(tournament, userId)) {
+    throw ApiError.conflict('You are already on the waitlist')
+  }
+}
+
+/** True when this user — directly, or through a team — has a waitlist entry. */
+function isWaitlisted(tournament, userId) {
+  const id = String(userId)
+  return tournament.waitlist.some((entry) =>
+    entry.isTeam
+      ? entry.members.some((member) => String(member.userId) === id)
+      : entry.userId === id
+  )
 }
 
 /**
- * Enters a solo tournament.
+ * Enters a solo tournament — or, once it is full, joins the waitlist for one.
+ *
+ * Wrapped in a transaction: two people racing for the last slot must not both
+ * get it. Whichever request's write loses the race re-reads inside its retry
+ * and finds the tournament full, so it waitlists instead of erroring.
  */
 export async function joinSolo(tournamentId, userId) {
-  const tournament = await loadForEntry(tournamentId, userId)
-  if (tournament.isTeamBased) throw ApiError.badRequest('This tournament is played in teams')
+  return withCapacityLock(tournamentId, async (tournament) => {
+    if (tournament.isTeamBased) throw ApiError.badRequest('This tournament is played in teams')
+    assertJoinable(tournament, userId)
 
-  assertJoinable(tournament, userId)
+    if (tournament.accessibility === 'application required') {
+      const accepted = tournament.acceptedUsers.some((id) => String(id) === String(userId))
+      if (!accepted) throw ApiError.forbidden('Your application has not been accepted yet')
+    }
 
-  if (tournament.accessibility === 'application required') {
-    const accepted = tournament.acceptedUsers.some((id) => String(id) === String(userId))
-    if (!accepted) throw ApiError.forbidden('Your application has not been accepted yet')
-  }
+    if (isFull(tournament)) {
+      tournament.waitlist.push({ isTeam: false, userId: String(userId) })
+    } else {
+      tournament.enrolledUsers.push({ userId, score: 0, eliminated: false })
+      tournament.acceptedUsers = tournament.acceptedUsers.filter(
+        (id) => String(id) !== String(userId)
+      )
+    }
 
-  tournament.enrolledUsers.push({ userId, score: 0, eliminated: false })
-  tournament.acceptedUsers = tournament.acceptedUsers.filter((id) => String(id) !== String(userId))
-  await tournament.save()
-
-  return tournament
+    return tournament
+  })
 }
 
 /**
- * Enters a team tournament.
+ * Enters a team tournament — or waitlists the team once it is full.
  *
  * The leader enters on the team's behalf; whatever the host charges for a team
  * is settled between them.
  */
 export async function joinTeam(tournamentId, userId, teamId) {
-  {
-    const tournament = await loadForEntry(tournamentId, userId)
-    if (!tournament.isTeamBased) throw ApiError.badRequest('This tournament is played solo')
+  const team = await Team.findById(teamId)
+  if (!team) throw ApiError.notFound('Team not found')
+  if (!team.isLeader(userId)) throw ApiError.forbidden('Only the team leader can enter the team')
 
-    const team = await Team.findById(teamId)
-    if (!team) throw ApiError.notFound('Team not found')
-    if (!team.isLeader(userId)) throw ApiError.forbidden('Only the team leader can enter the team')
+  return withCapacityLock(tournamentId, async (tournament) => {
+    if (!tournament.isTeamBased) throw ApiError.badRequest('This tournament is played solo')
     if (team.members.length !== tournament.teamSize) {
       throw ApiError.badRequest(
         `This tournament needs teams of exactly ${tournament.teamSize} — yours has ${team.members.length}`
@@ -355,24 +412,126 @@ export async function joinTeam(tournamentId, userId, teamId) {
       if (!accepted) throw ApiError.forbidden('Your application has not been accepted yet')
     }
 
-    tournament.enrolledTeams.push({
-      teamId: String(team._id),
-      teamName: team.name,
+    const members = team.members.map((member) => ({
+      userId: String(member),
       score: 0,
       eliminated: false,
-      members: team.members.map((member) => ({
-        userId: String(member),
-        score: 0,
-        eliminated: false,
-      })),
-    })
-    tournament.acceptedTeams = tournament.acceptedTeams.filter(
-      (id) => String(id) !== String(team._id)
-    )
-    await tournament.save()
+    }))
+
+    if (isFull(tournament)) {
+      tournament.waitlist.push({
+        isTeam: true,
+        teamId: String(team._id),
+        teamName: team.name,
+        members,
+      })
+    } else {
+      tournament.enrolledTeams.push({ teamId: String(team._id), teamName: team.name, members })
+      tournament.acceptedTeams = tournament.acceptedTeams.filter(
+        (id) => String(id) !== String(team._id)
+      )
+    }
 
     return tournament
+  })
+}
+
+// --- withdrawing --------------------------------------------------------------
+
+/** This user's own enrolment — directly, or through their team — or null. */
+function findMyEntry(tournament, userId) {
+  const id = String(userId)
+  const userEntry = tournament.enrolledUsers.find((entry) => String(entry.userId) === id)
+  if (userEntry) return { isTeam: false, entry: userEntry }
+
+  const teamEntry = tournament.enrolledTeams.find((team) =>
+    team.members.some((member) => String(member.userId) === id)
+  )
+  if (teamEntry) return { isTeam: true, entry: teamEntry }
+
+  return null
+}
+
+/** Promotes the longest-waiting waitlist entry into the slot a withdrawal just opened. */
+function promoteFromWaitlist(tournament) {
+  const promoted = tournament.waitlist.shift()
+  if (!promoted) return null
+
+  if (promoted.isTeam) {
+    tournament.enrolledTeams.push({
+      teamId: promoted.teamId,
+      teamName: promoted.teamName,
+      members: promoted.members.map((member) => ({ userId: member.userId, score: 0 })),
+    })
+  } else {
+    tournament.enrolledUsers.push({ userId: promoted.userId, score: 0, eliminated: false })
   }
+
+  return promoted
+}
+
+/**
+ * Forfeits every one of this entrant's matches that has not already been
+ * finalized — their opponent advances instead. A `final` match is left
+ * exactly as played: the record of what happened stays intact.
+ */
+function forfeitMatches(tournament, participantId) {
+  const id = String(participantId)
+  for (const match of tournament.matches) {
+    if (match.state === 'final') continue
+    if (!match.participants.some((entry) => String(entry) === id)) continue
+
+    const opponent = match.participants.find((entry) => entry && String(entry) !== id) ?? null
+    if (!opponent) continue
+
+    match.winner = opponent
+    match.state = 'final'
+    match.reportedBy = null
+    match.confirmedBy = null
+    advanceWinner(tournament, match, opponent)
+  }
+}
+
+/**
+ * Withdraws the caller from a tournament they are in.
+ *
+ * Before the tournament starts, the slot reopens outright and the
+ * longest-waiting waitlist entry is promoted into it. After it starts, the
+ * bracket tree is already fixed — instead of tearing a hole in it, the
+ * entrant is marked withdrawn and forfeits whatever matches have not already
+ * been finalized, so their opponent advances.
+ */
+export async function withdraw(tournamentId, userId) {
+  const { tournament, promoted } = await withCapacityLock(tournamentId, async (tournament) => {
+    if (tournament.hasEnded) throw ApiError.badRequest('This tournament has already ended')
+
+    const found = findMyEntry(tournament, userId)
+    if (!found) throw ApiError.badRequest('You are not in this tournament')
+    const { isTeam, entry } = found
+
+    if (!tournament.hasStarted) {
+      if (isTeam) {
+        tournament.enrolledTeams = tournament.enrolledTeams.filter(
+          (team) => String(team.teamId) !== String(entry.teamId)
+        )
+      } else {
+        tournament.enrolledUsers = tournament.enrolledUsers.filter(
+          (user) => String(user.userId) !== String(entry.userId)
+        )
+      }
+      return { tournament, promoted: promoteFromWaitlist(tournament) }
+    }
+
+    const participantId = isTeam ? String(entry.teamId) : String(entry.userId)
+    entry.withdrawn = true
+    entry.eliminated = true
+    if (tournament.type === 'brackets') forfeitMatches(tournament, participantId)
+
+    return { tournament, promoted: null }
+  })
+
+  if (promoted) await notifyWaitlistPromoted(tournament, promoted)
+  return tournament
 }
 
 // --- applications -----------------------------------------------------------
@@ -385,6 +544,7 @@ export async function apply(tournamentId, userId, { teamId, fields }) {
     throw ApiError.badRequest('This tournament is open — join it directly')
   }
   assertJoinable(tournament, userId)
+  if (isFull(tournament)) throw ApiError.conflict('This tournament is full')
 
   let applicantId = String(userId)
   let displayName = null
