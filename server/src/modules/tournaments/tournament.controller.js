@@ -176,6 +176,21 @@ export const updateParticipants = asyncHandler(async (req, res) => {
   res.json({ tournament: await toManageView(tournament, req.userId) })
 })
 
+export const removeParticipant = asyncHandler(async (req, res) => {
+  const tournament = await service.removeParticipant(
+    req.params.tournamentId,
+    req.userId,
+    req.params.participantId,
+    req.body.reason
+  )
+  res.json({ tournament: await toManageView(tournament, req.userId) })
+})
+
+export const reportTournament = asyncHandler(async (req, res) => {
+  await service.reportTournament(req.params.tournamentId, req.userId, req.body.reason)
+  res.status(201).json({ reported: true })
+})
+
 export const end = asyncHandler(async (req, res) => {
   const { tournament, winners } = await service.endTournament(req.params.tournamentId, req.userId)
   res.json({ tournament: await toManageView(tournament, req.userId), winners })

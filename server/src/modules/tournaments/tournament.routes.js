@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { optionalAuth, requireAuth } from '../../middleware/auth.js'
 import { validate } from '../../middleware/validate.js'
+import { reportLimiter } from '../../middleware/rateLimits.js'
 import * as schemas from './tournament.schemas.js'
 import * as controller from './tournament.controller.js'
 
@@ -138,6 +139,21 @@ tournamentRouter.patch(
   requireAuth,
   validate({ params: schemas.tournamentIdParams, body: schemas.participantsSchema }),
   controller.updateParticipants
+)
+
+tournamentRouter.delete(
+  '/:tournamentId/participants/:participantId',
+  requireAuth,
+  validate({ params: schemas.participantParams, body: schemas.removeParticipantSchema }),
+  controller.removeParticipant
+)
+
+tournamentRouter.post(
+  '/:tournamentId/report',
+  requireAuth,
+  reportLimiter,
+  validate({ params: schemas.tournamentIdParams, body: schemas.reportTournamentSchema }),
+  controller.reportTournament
 )
 
 tournamentRouter.post(
