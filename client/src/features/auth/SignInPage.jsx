@@ -89,6 +89,10 @@ export function SignInPage() {
               could prefill the field. */}
             <Checkbox label="Keep me signed in for 30 days" {...register('rememberMe')} />
 
+            <Link to="/forgot-password" className={styles.forgot}>
+              Forgot your password?
+            </Link>
+
             {errors.root && (
               <p className={styles.error} role="alert">
                 {errors.root.message}
