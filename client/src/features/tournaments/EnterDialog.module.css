@@ -14,7 +14,7 @@
   font-stretch: var(--stretch-display);
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  color: var(--credits);
+  color: var(--money);
 }
 
 .warning {
