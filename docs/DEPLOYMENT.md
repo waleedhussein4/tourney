@@ -259,6 +259,38 @@ so it is safe to poll from whatever external monitor you prefer.
 
 ---
 
+## Capacity and what it costs
+
+The API runs in a Cloudflare Container. Two settings decide how it behaves
+under load, and both cost money only while a container is actually running —
+Cloudflare bills per running second, not per configured instance.
+
+**`max_instances` in `wrangler.jsonc` (currently 5).** A ceiling, not a
+reservation. At 1, every request in the world queued behind one process.
+Measured against production before raising it:
+
+|     | one request at a time | 50 concurrent |
+| --- | --------------------- | ------------- |
+| p50 | 463 ms                | 4,457 ms      |
+| p95 | —                     | 6,542 ms      |
+
+Nothing failed; it queued. Fifty people opening the browse page as a
+tournament starts is a normal evening, so this was worth fixing.
+
+**`sleepAfter` in `worker/index.js` (currently `10m`).** After ten idle
+minutes the container stops, and the next visitor pays a cold start — measured
+at **11.5 seconds**. Raising it trades running-hours for a faster first
+request. It is deliberately left alone: the crowd problem was free to fix, this
+one is not, and a quiet site paying to stay awake is the wrong default.
+
+**Cost.** The `basic` instance (1 GiB memory, ¼ vCPU, 4 GB disk) costs roughly
+**$0.028 per running hour**, and the Workers Paid plan includes about **25
+running-hours a month**. A quiet month is very likely $0. Heavy use — awake
+eight hours every day — lands near $5/month on top of the $5 plan. Watch it in
+the Cloudflare dashboard under the container's Metrics tab before assuming.
+
+---
+
 ## Backup and restore
 
 Atlas M0 takes no automatic backups (see below), so a manual JSON dump is the
