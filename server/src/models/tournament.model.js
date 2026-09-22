@@ -10,6 +10,10 @@ const standingFields = {
   _id: false,
   score: { type: Number, default: 0 },
   eliminated: { type: Boolean, default: false },
+  // Set only after the tournament has started — a pre-start withdrawal removes
+  // the entry outright instead, since there is no played history to keep. Left
+  // `false` for a team's individual members; a team withdraws as one entrant.
+  withdrawn: { type: Boolean, default: false },
 }
 
 const memberSchema = new Schema({ ...standingFields, userId: { type: String, ref: 'User' } })
@@ -85,6 +89,23 @@ export function buildBracketMatches(maxCapacity) {
   }
   return matches
 }
+
+/**
+ * One entry waiting for a slot once `maxCapacity` was full at join time.
+ * Shaped like an enrolment so promoting one is a straight push, not a rebuild —
+ * `teamName`/`members` are only ever set for a team entry.
+ */
+const waitlistEntrySchema = new Schema(
+  {
+    _id: { type: String, default: uuidv4 },
+    isTeam: { type: Boolean, default: false },
+    userId: { type: String, default: null },
+    teamId: { type: String, default: null },
+    teamName: { type: String, default: null },
+    members: { type: [memberSchema], default: [] },
+  },
+  { timestamps: { createdAt: true, updatedAt: false } }
+)
 
 const applicationSchema = new Schema(
   {
@@ -168,6 +189,10 @@ const tournamentSchema = new Schema(
 
     enrolledUsers: { type: [enrolledUserSchema], default: [] },
     enrolledTeams: { type: [enrolledTeamSchema], default: [] },
+
+    // FIFO — array order is join order, so the front of the array is always
+    // the longest-waiting entry a withdrawal promotes.
+    waitlist: { type: [waitlistEntrySchema], default: [] },
 
     /**
      * Participant ids in bracket-slot order, `null` for an empty slot.

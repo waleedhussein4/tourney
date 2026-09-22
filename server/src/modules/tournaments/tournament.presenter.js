@@ -51,7 +51,11 @@ function matchesOf(tournament) {
 }
 
 function standing(entry) {
-  return { score: entry.score ?? 0, eliminated: Boolean(entry.eliminated) }
+  return {
+    score: entry.score ?? 0,
+    eliminated: Boolean(entry.eliminated),
+    withdrawn: Boolean(entry.withdrawn),
+  }
 }
 
 /**
@@ -138,13 +142,22 @@ export async function toPublicView(tournament, viewerId) {
     applicationForm: tournament.applicationForm,
     host: { id: String(tournament.host), name: names.get(String(tournament.host)) ?? null },
     participants: participantsOf(tournament, names),
+    waitlistCount: tournament.waitlist.length,
     viewer: {
       isHost: id ? tournament.isHostedBy(id) : false,
       isJoined: id ? tournament.hasParticipant(id) : false,
       hasApplied: id ? hasApplied(tournament, id, viewerTeamIds) : false,
       isAccepted: id ? isAccepted(tournament, id, viewerTeamIds) : false,
+      isWaitlisted: id ? isWaitlisted(tournament, id, viewerTeamIds) : false,
     },
   }
+}
+
+/** True when the viewer — or their team — is waiting for a slot to open up. */
+function isWaitlisted(tournament, userId, teamIds) {
+  return tournament.waitlist.some((entry) =>
+    entry.isTeam ? teamIds.has(String(entry.teamId)) : String(entry.userId) === userId
+  )
 }
 
 /** The host's view: the public view plus the applications queue. */

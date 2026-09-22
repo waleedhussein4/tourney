@@ -1,7 +1,8 @@
 import { Suspense, lazy, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { getTournament, tournamentKeys } from '/src/api/tournaments.js'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
+import { getTournament, tournamentKeys, withdraw } from '/src/api/tournaments.js'
 import { useAuth } from '/src/features/auth/useAuth.js'
 import { PageShell } from '/src/components/layout/PageShell.jsx'
 import { CategoryArt } from '/src/components/brand/index.js'
@@ -60,11 +61,21 @@ loadBracketView()
 export function TournamentPage() {
   const { UUID: id } = useParams()
   const [entering, setEntering] = useState(null)
+  const queryClient = useQueryClient()
 
   const query = useQuery({
     queryKey: tournamentKeys.detail(id),
     queryFn: () => getTournament(id),
     enabled: Boolean(id),
+  })
+
+  const leave = useMutation({
+    mutationFn: () => withdraw(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: tournamentKeys.detail(id) })
+      toast.success('You have withdrawn')
+    },
+    onError: (error) => toast.error(error.message),
   })
 
   useDocumentTitle(query.data?.tournament ? query.data.tournament.name : 'Tournament')
@@ -125,6 +136,8 @@ export function TournamentPage() {
             tournament={tournament}
             onJoin={() => setEntering('join')}
             onApply={() => setEntering('apply')}
+            onWithdraw={() => leave.mutate()}
+            withdrawing={leave.isPending}
           />
         </header>
       </div>
@@ -227,7 +240,7 @@ function HostNotice({ tournament }) {
  * inferring it: `isHost`, `isJoined`, `hasApplied` and `isAccepted` all arrive
  * on the payload.
  */
-function EntryActions({ tournament, onJoin, onApply }) {
+function EntryActions({ tournament, onJoin, onApply, onWithdraw, withdrawing }) {
   const { isAuthenticated } = useAuth()
   const { viewer } = tournament
 
@@ -245,6 +258,22 @@ function EntryActions({ tournament, onJoin, onApply }) {
     return (
       <div className={styles.actions}>
         <Badge tone="success">You are in this tournament</Badge>
+        {!tournament.hasStarted && (
+          <Button variant="ghost" onClick={onWithdraw} loading={withdrawing}>
+            Withdraw
+          </Button>
+        )}
+      </div>
+    )
+  }
+
+  if (viewer.isWaitlisted) {
+    return (
+      <div className={styles.actions}>
+        <Badge tone="accent">You are on the waitlist</Badge>
+        <Button variant="ghost" onClick={onWithdraw} loading={withdrawing}>
+          Leave the waitlist
+        </Button>
       </div>
     )
   }
@@ -301,8 +330,8 @@ function EntryActions({ tournament, onJoin, onApply }) {
 
   return (
     <div className={styles.actions}>
-      <Button variant="primary" onClick={onJoin} disabled={isFull}>
-        {isFull ? 'Full' : 'Join'}
+      <Button variant="primary" onClick={onJoin}>
+        {isFull ? 'Join the waitlist' : 'Join'}
       </Button>
     </div>
   )

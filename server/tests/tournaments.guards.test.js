@@ -168,11 +168,17 @@ describe('joining', () => {
     expect((await Tournament.findById(tournament.id)).enrolledUsers).toHaveLength(1)
   })
 
-  it('refuses once every slot is taken', async () => {
+  it('waitlists once every slot is taken, instead of refusing', async () => {
     const tournament = await createTournament(host.agent, { maxCapacity: 2 })
 
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
     await tomas.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
+
+    const response = await ada.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
+
+    expect(response.body.tournament.viewer.isJoined).toBe(false)
+    expect(response.body.tournament.viewer.isWaitlisted).toBe(true)
+    expect(response.body.tournament.waitlistCount).toBe(1)
 
     await ada.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(409)
   })
@@ -442,6 +448,7 @@ describe('what a guest can see', () => {
       isJoined: false,
       hasApplied: false,
       isAccepted: false,
+      isWaitlisted: false,
     })
   })
 
