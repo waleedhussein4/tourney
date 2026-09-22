@@ -5,8 +5,9 @@ decision has a downside, it is written down — a document that only lists
 advantages is a sales page, not an architecture note.
 
 Companion documents: [API.md](API.md) for the endpoint surface,
-[DESIGN.md](DESIGN.md) for the visual system, [DEPLOYMENT.md](DEPLOYMENT.md) for
-how it runs in production.
+[DESIGN.md](DESIGN.md) for the visual system, [DEPLOYMENT.md](DEPLOYMENT.md)
+for how it runs in production, [DECISIONS.md](DECISIONS.md) for why the
+business model is what it is today.
 
 ---
 
@@ -14,28 +15,35 @@ how it runs in production.
 
 ```mermaid
 flowchart TB
-    subgraph client["client/ — React 18 + Vite"]
-        pages["features/*<br/>page components"]
-        rq["React Query<br/>cache + invalidation"]
-        api["api/*.js<br/>the only place fetch is called"]
-        pages --> rq --> api
+    visitor(("visitor")) --> worker
+
+    subgraph cf["Cloudflare"]
+        worker["Worker<br/>Static Assets + /api/* router<br/>+ Cron Trigger (daily reseed)"]
+        container["Container<br/>node server/src/index.js"]
+        worker -- "/api/*" --> container
+        worker -- "everything else" --> assets["client/dist<br/>(the SPA)"]
     end
 
-    subgraph server["server/ — Express 4, ESM"]
+    subgraph server["server/ — Express 4, ESM, inside the container"]
         routes["*.routes.js<br/>zod validates params, query, body"]
         controllers["*.controller.js<br/>shapes the response"]
-        services["*.service.js<br/>the rules, and the transaction"]
+        services["*.service.js<br/>the rules"]
         models["models/*<br/>mongoose schemas"]
         routes --> controllers --> services --> models
     end
 
-    api -- "same-origin /api/*" --> routes
-    models --> db[("MongoDB")]
+    container --> routes
+    models --> db[("MongoDB Atlas")]
+    container -- "webhook" --> paddle["Paddle<br/>subscription payments"]
 ```
 
 Every server module is the same four files, so a request's path through the
 code is the same every time. A reader who has followed one endpoint can follow
 any of them.
+
+The site itself never moves money — entry fees and prizes are USD amounts the
+host and players settle directly. The only payment path in the app is its own
+subscription, through Paddle. See [DECISIONS.md](DECISIONS.md) for why.
 
 ---
 
@@ -47,9 +55,9 @@ any of them.
 running the unmodified Express app in Docker (`Dockerfile`); `server/src/index.js`
 still `listen()`s inside it exactly as it does locally.
 
-**Why.** Two things ruled out running the API as Workers code directly: Mongoose
-8's TCP sockets need Node's `net` module in a form the Workers runtime doesn't
-provide (the underlying gap is tracked upstream, e.g.
+**Why.** Two things ruled out running the API as Workers code directly:
+Mongoose 8's TCP sockets need Node's `net` module in a form the Workers
+runtime doesn't provide (the underlying gap is tracked upstream, e.g.
 [mongoose#14613](https://github.com/Automattic/mongoose/issues/14613)), and the
 Paddle webhook needs the raw request body ahead of `express.json`, which is
 easiest to keep by not changing the runtime at all. A container preserves both
@@ -107,45 +115,36 @@ anything is written.
 are larger, and inserts are not naturally ordered by time. At this scale neither
 matters; at a much larger one, UUIDv7 would be the answer.
 
-### Why every credit movement is a transaction
+### Why the app never holds entry fees or prizes
 
-Every operation that moves credits touches at least two documents — a wallet and
-a bank, or two wallets — and writes a `Transaction` row describing the change.
-All of it runs inside one mongoose transaction, through a `withTransaction`
-helper.
+Entry fees and prizes are declared USD amounts on the tournament; the host
+collects and pays them directly with players, outside the app. The app only
+records who is in and who won.
 
-**Why.** Without it, "the entry fee left your wallet but never reached the bank"
-is a state the database can be left in, and there is no way to detect it after
-the fact. With it, that state cannot exist.
+**Why.** Holding other people's money in transit is money transmission, and a
+paid bracket with a payout the site controls reads as a wagering contract in
+most places — both are licensed activities this project cannot obtain. Not
+touching the money at all sidesteps both, and it means cancelling a tournament
+needs no refund logic: nothing here ever held it. See
+[DECISIONS.md](DECISIONS.md) for the fuller reasoning.
 
-The invariant is that credits are **conserved**: exactly one source (the demo
-checkout) and one sink (the host upgrade fee). Everything else only moves
-credits, so the total across every wallet and every bank is unchanged by it.
-`server/tests/conservation.test.js` checks this two independent ways — summing
-the documents, and summing the ledger rows — and requires them to agree, so a
-balance write that commits without its ledger row fails the suite.
+**What it cost.** The site cannot enforce that a host actually pays out, or
+that a player actually pays their entry fee — it is a bulletin board for the
+event, not a guarantor of it. That is the tradeoff for not being a regulated
+money service.
 
-**What it cost.** Transactions need a replica set. A standalone `mongod` rejects
-them outright, which is why the test suite starts an in-memory _replica set_
-rather than a plain server, and why local setup asks for Atlas or a single-node
-replica set. Testing against the same machinery production uses is worth the
-setup friction; the alternative is a suite that passes against a weaker database
-than the one that ships.
+### Why the subscription is the only payment the app takes
 
-### Why the demo checkout is a demo
+Hosting more than one live tournament at a time costs $5/month, taken by
+Paddle as merchant of record. One call — `GET /api/billing/me` — answers both
+the billing screen and whether `POST /api/tournaments/:id/publish` will
+succeed, so the two can never disagree. `assertMayPublish` in
+`subscriptions/subscription.service.js` is the single place that decides it.
 
-Real payments would mean a payment processor, a merchant account, a webhook
-endpoint, refund handling, and a legal surface — for a portfolio project that
-nobody should be spending money on.
-
-So the checkout grants credits and says so, everywhere: a notice on the
-catalogue and the checkout page, a `demo: true` in the response, and the card
-fields are a mock-up that never leaves the browser. There is a gate in
-`npm run check:regressions` that fails the build if a card field is ever sent to
-the server, so that stays true as the code changes.
-
-**What it cost.** The economy has no withdrawal path, which is listed in the
-README's roadmap as a gap rather than glossed over.
+**What it cost.** A second module (`subscriptions/`) and a webhook the rest of
+the app doesn't otherwise need. Worth it for keeping "can this host publish?"
+answerable in one place rather than scattered across the tournament and user
+modules.
 
 ### Why React Query rather than `useEffect` + `useState`
 
@@ -290,12 +289,24 @@ modules/<resource>/
   <resource>.routes.js      paths, auth middleware, zod validation
   <resource>.controller.js  request in, response out; no rules
   <resource>.schemas.js     the zod shapes
-  <resource>.service.js     the rules, and the transaction boundary
+  <resource>.service.js     the rules
+
+modules/
+  auth/           signup, login, logout
+  users/          me, become host
+  teams/          create, join by code, roster changes
+  tournaments/    create, browse, join, apply, lifecycle, results
+  subscriptions/  the hosting plan, Paddle checkout, the webhook
+  admin/          seed and clear demo data
+  cron/           the daily reseed, bearer-token gated
+  health/         GET /api/health
 ```
 
-A rule lives in exactly one place: the service. Controllers do not decide who is
-allowed to do what, and routes do not reach into the database. That is what
-makes "where is the entry-fee logic?" answerable without searching.
+A rule lives in exactly one place: the service. Controllers do not decide who
+is allowed to do what, and routes do not reach into the database. That is what
+makes "where is the publish limit enforced?" answerable without searching —
+it's `subscriptions/subscription.service.js`, called once, from
+`tournaments/tournament.service.js`.
 
 ### Client feature anatomy
 
@@ -313,26 +324,26 @@ error shape unwrapped in one place.
 
 ## Testing
 
-273 tests, run against an **in-memory MongoDB replica set** — the real database
-engine, not a mock and not a standalone that would reject the transactions the
-app depends on. Each test file gets its own database inside the shared replica
-set, so files run in parallel without interfering.
+208 tests, run against an **in-memory MongoDB replica set** — the real
+database engine, not a mock. Each test file gets its own database inside the
+shared replica set, so files run in parallel without interfering.
 
 The suites are split by what they defend:
 
 |                            |                                                                         |
 | -------------------------- | ----------------------------------------------------------------------- |
-| `auth`, `teams`, `credits` | the everyday paths, and their failure modes                             |
+| `auth`, `teams`             | the everyday paths, and their failure modes                             |
 | `tournaments.guards`       | who is allowed to do what, and what the state forbids                   |
-| `tournaments.lifecycle`    | create → join → bank → start → results → payout                         |
-| `tournaments.publish`      | draft → pending payment → published; who can see and confirm what       |
-| `publish.webhook`          | a gateway's payment publishes once, for the right amount, or not at all |
-| `conservation`             | credits are conserved; the ledger reconstructs every balance            |
+| `tournaments.lifecycle`    | create → join → publish → start → results                               |
+| `subscriptions`            | the free-tier limit, checkout, and `PLAN_LIMIT_REACHED`                 |
+| `subscriptions.webhook`    | a gateway event updates the plan once, and only if it isn't stale       |
 | `seed`                     | the demo data is buildable, idempotent, and commits no passwords        |
 | `cron`                     | the reseed's lock, including that a rejected request changes nothing    |
+| `backup`                   | the backup/restore scripts round-trip the collections they touch        |
 
 Alongside them, `scripts/check-regressions.sh` is a set of grep gates in CI —
 one per bug the rewrite fixed. No `navigate(0)`, no `console.log`, no
-`prompt`/`confirm`/`alert`, no password in `localStorage`, no card field sent to
-the server, no secret in git history. They are crude on purpose: a grep cannot
-be argued with, and it fails the build the moment a fixed bug comes back.
+`prompt`/`confirm`/`alert`, no password in `localStorage`, no payment contact
+address outside `server/src/config/plans.js`, no secret in git history. They
+are crude on purpose: a grep cannot be argued with, and it fails the build the
+moment a fixed bug comes back.
