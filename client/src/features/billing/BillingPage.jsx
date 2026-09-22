@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { billingKeys, getMyBilling, startCheckout } from '/src/api/billing.js'
@@ -9,6 +10,42 @@ import { openCheckout } from '/src/lib/paddle.js'
 import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import styles from './billing.module.css'
 
+/** How long to keep polling `billing/me` after the gateway reports success. */
+const POLL_DURATION_MS = 2 * 60 * 1000
+const POLL_INTERVAL_MS = 5000
+
+/** Status-specific copy for the plan card. Colour alone never carries the meaning. */
+const STATUS_COPY = {
+  none: {
+    badge: 'Free',
+    tone: 'neutral',
+    title: 'Free plan',
+    subtitle: (data) =>
+      `${data.freeLiveTournaments} free live tournament at a time. Subscribe to run as many as you like.`,
+  },
+  active: {
+    badge: 'Active',
+    tone: 'success',
+    title: (data) => `${data.plan.name} plan`,
+    subtitle: (data) =>
+      data.renewsAt ? `Renews ${formatDate(data.renewsAt)}.` : 'Active — no live-tournament limit.',
+  },
+  past_due: {
+    badge: 'Payment issue',
+    tone: 'warning',
+    title: (data) => `${data.plan.name} plan`,
+    subtitle: () =>
+      'Your last payment failed. Your tournaments stay live while the gateway retries the charge — update your card with the payment provider to avoid interruption.',
+  },
+  canceled: {
+    badge: 'Canceled',
+    tone: 'neutral',
+    title: 'Plan canceled',
+    subtitle: (data) =>
+      `Your subscription has ended. ${data.freeLiveTournaments} free live tournament at a time, or subscribe again for unlimited.`,
+  },
+}
+
 /**
  * The hosting subscription.
  *
@@ -19,11 +56,20 @@ import styles from './billing.module.css'
 export function BillingPage() {
   useDocumentTitle('Billing')
   const queryClient = useQueryClient()
+  const pollDeadline = useRef(null)
 
   const billing = useQuery({
     queryKey: billingKeys.me,
     queryFn: getMyBilling,
     select: (data) => data.billing,
+    refetchInterval: (query) => {
+      if (!pollDeadline.current) return false
+      if (query.state.data?.billing?.status === 'active' || Date.now() > pollDeadline.current) {
+        pollDeadline.current = null
+        return false
+      }
+      return POLL_INTERVAL_MS
+    },
   })
 
   const subscribe = useMutation({
@@ -36,15 +82,20 @@ export function BillingPage() {
         clientToken: gateway.clientToken,
         environment: gateway.environment,
         onPaid: () => {
-          toast.success('Payment received — your plan updates itself shortly')
-          setTimeout(() => {
-            queryClient.invalidateQueries({ queryKey: billingKeys.me })
-            queryClient.invalidateQueries({ queryKey: currentUserKey })
-          }, 2500)
+          toast.success('Payment received — your plan activates within a minute')
+          pollDeadline.current = Date.now() + POLL_DURATION_MS
+          queryClient.invalidateQueries({ queryKey: billingKeys.me })
+          queryClient.invalidateQueries({ queryKey: currentUserKey })
         },
       })
     },
-    onError: (error) => toast.error(error.message),
+    onError: (error) => {
+      if (error.code === 'PAYMENTS_UNAVAILABLE') {
+        toast.error('Card payments are not available on this deployment right now.')
+      } else {
+        toast.error(error.message)
+      }
+    },
   })
 
   if (billing.isPending) {
@@ -68,7 +119,8 @@ export function BillingPage() {
   }
 
   const data = billing.data
-  const { active, plan, liveTournaments, freeLiveTournaments, gateway, contactEmail } = data
+  const { active, status, plan, liveTournaments, freeLiveTournaments, gateway, contactEmail } = data
+  const copy = STATUS_COPY[status] ?? STATUS_COPY.none
 
   return (
     <PageShell width="narrow">
@@ -80,18 +132,12 @@ export function BillingPage() {
 
       <Card>
         <CardHeader
-          title={active ? `${plan.name} plan` : 'Free plan'}
-          subtitle={
-            active
-              ? data.renewsAt
-                ? `Renews ${formatDate(data.renewsAt)}.`
-                : 'Active — no live-tournament limit.'
-              : `${freeLiveTournaments} free live tournament at a time. Subscribe to run as many as you like.`
-          }
-          actions={<Badge tone={active ? 'success' : 'neutral'}>{active ? 'Active' : 'Free'}</Badge>}
+          title={typeof copy.title === 'function' ? copy.title(data) : copy.title}
+          subtitle={copy.subtitle(data)}
+          actions={<Badge tone={copy.tone}>{copy.badge}</Badge>}
         />
 
-        <p className={styles.usage}>
+        <p className={styles.usage} aria-live="polite">
           <strong>{liveTournaments}</strong> of{' '}
           <strong>{active ? 'unlimited' : freeLiveTournaments}</strong> live tournaments in use
         </p>
@@ -104,7 +150,7 @@ export function BillingPage() {
               </Button>
             ) : (
               <p className={styles.hint}>
-                Card payments are not available right now. Email{' '}
+                Card payments are not available on this deployment. Email{' '}
                 <a href={`mailto:${contactEmail}`}>{contactEmail}</a> to subscribe.
               </p>
             )}
