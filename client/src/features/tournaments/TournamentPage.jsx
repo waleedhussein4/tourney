@@ -21,6 +21,7 @@ import {
   formatType,
   tournamentStatus,
 } from '/src/lib/format.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import { StandingsTable } from './StandingsTable.jsx'
 import { EnterDialog } from './EnterDialog.jsx'
 import styles from './TournamentPage.module.css'
@@ -65,6 +66,8 @@ export function TournamentPage() {
     queryFn: () => getTournament(id),
     enabled: Boolean(id),
   })
+
+  useDocumentTitle(query.data?.tournament ? query.data.tournament.name : 'Tournament')
 
   if (query.isPending) {
     return (

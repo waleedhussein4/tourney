@@ -14,7 +14,6 @@ import { TeamPage } from '/src/features/teams/TeamPage.jsx'
 import { JoinTeamPage } from '/src/features/teams/JoinTeamPage.jsx'
 import { BillingPage } from '/src/features/billing/BillingPage.jsx'
 import { ProfilePage } from '/src/features/profile/ProfilePage.jsx'
-import { AdminPage } from '/src/features/admin/AdminPage.jsx'
 import { HostsPage } from '/src/features/hosts/HostsPage.jsx'
 import { NotFoundPage } from '/src/features/misc/NotFoundPage.jsx'
 import { TermsPage } from '/src/features/misc/TermsPage.jsx'
@@ -41,6 +40,11 @@ const CreateTournamentPage = lazy(() =>
 )
 const ManagePage = lazy(() =>
   import('/src/features/manage/ManagePage.jsx').then((module) => ({ default: module.ManagePage }))
+)
+
+// Unlisted, admin-only, and rarely opened — no reason to ship it to every visitor.
+const AdminPage = lazy(() =>
+  import('/src/features/admin/AdminPage.jsx').then((module) => ({ default: module.AdminPage }))
 )
 
 /**

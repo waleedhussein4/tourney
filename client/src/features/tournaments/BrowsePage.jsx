@@ -13,6 +13,7 @@ import {
   Select,
 } from '/src/components/ui/index.js'
 import { useDebounced } from '/src/lib/useDebounced.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import { TournamentCard } from './TournamentCard.jsx'
 import styles from './BrowsePage.module.css'
 
@@ -35,6 +36,7 @@ function readFilters(searchParams) {
 }
 
 export function BrowsePage() {
+  useDocumentTitle('Tournaments')
   const [searchParams, setSearchParams] = useSearchParams()
   const filters = readFilters(searchParams)
 
