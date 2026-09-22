@@ -543,11 +543,32 @@ export async function startTournament(tournamentId, hostId) {
 }
 
 /**
+ * Writes a winner into the next round's match, in this match's slot position —
+ * the tree-walk both the host override and a confirmed report rely on.
+ */
+function advanceWinner(tournament, match, winner) {
+  const next = tournament.matches.find(
+    (entry) => entry.round === match.round + 1 && entry.slot === Math.floor(match.slot / 2)
+  )
+  if (!next) return
+  const position = match.slot % 2
+  const participants = [...next.participants]
+  participants[position] = winner
+  next.participants = participants
+}
+
+/**
  * Records match winners.
  *
  * Every winner must be a participant in *this* tournament — the original looked
  * the name up in the users or teams collection globally, so any username on the
  * site was accepted as the winner of any match.
+ *
+ * This is the host's direct override, distinct from the two-sided report/confirm
+ * flow below. It is recorded as one: `reportedBy` and `confirmedBy` are both set
+ * to the host's id. A host can never be a competitor in their own tournament
+ * (`assertJoinable` forbids it), so `confirmedBy === tournament.host` is an
+ * unambiguous "the host imposed this" marker — no extra schema field needed.
  */
 export async function updateMatches(tournamentId, hostId, matches) {
   const tournament = await loadAsHost(tournamentId, hostId)
@@ -575,18 +596,118 @@ export async function updateMatches(tournamentId, hostId, matches) {
 
     match.winner = winner
     match.state = winner ? 'final' : 'pending'
+    match.reportedBy = winner ? String(hostId) : null
+    match.confirmedBy = winner ? String(hostId) : null
 
-    // Propagate into the next round's match so the bracket shows who is
-    // actually playing, not just who won.
-    const next = tournament.matches.find(
-      (entry) => entry.round === match.round + 1 && entry.slot === Math.floor(match.slot / 2)
+    if (winner) advanceWinner(tournament, match, winner)
+  }
+
+  await tournament.save()
+  return tournament
+}
+
+/** The participant id (a user id or a team id) `userId` competes under in `match`, or null. */
+function competitorIdFor(tournament, match, userId) {
+  const id = String(userId)
+  return (
+    match.participants.find((participantId) => {
+      if (!participantId) return false
+      if (!tournament.isTeamBased) return String(participantId) === id
+      const team = tournament.enrolledTeams.find(
+        (entry) => String(entry.teamId) === String(participantId)
+      )
+      return Boolean(team?.members.some((member) => String(member.userId) === id))
+    }) ?? null
+  )
+}
+
+/** The checks shared by reporting and confirming a match result. */
+function loadReportableMatch(tournament, matchId) {
+  if (tournament.type !== 'brackets') throw ApiError.badRequest('This is not a bracket tournament')
+  if (!tournament.hasStarted) throw ApiError.badRequest('This tournament has not started')
+  if (tournament.hasEnded) throw ApiError.badRequest('This tournament has already ended')
+
+  const match = tournament.matches.find((entry) => entry.id === matchId)
+  if (!match) throw ApiError.notFound('Match not found')
+  return match
+}
+
+/**
+ * A competitor — or the host, standing in for one — reports a match's scores.
+ *
+ * The winner is derived from the scores, not taken on trust: whichever
+ * competitor's score is higher wins. The match becomes `reported`, not
+ * `final` — it still needs the other side to confirm before its winner is
+ * allowed to advance (`advanceWinner` is not called here).
+ *
+ * A team competes as one entrant, so any of its members may file the report on
+ * the team's behalf — checked via `enrolledTeams[].members`, the same roster
+ * `hasParticipant` and `competitorIdFor` read from.
+ */
+export async function reportMatch(tournamentId, userId, matchId, scores) {
+  const tournament = await loadTournament(tournamentId)
+  const match = loadReportableMatch(tournament, matchId)
+
+  if (match.state === 'final') {
+    throw ApiError.badRequest('This match has already been finalized')
+  }
+  if (match.participants.includes(null)) {
+    throw ApiError.badRequest(
+      'This match is not ready to report yet — the previous round has not finished'
     )
-    if (next) {
-      const position = match.slot % 2
-      const participants = [...next.participants]
-      participants[position] = winner
-      next.participants = participants
-    }
+  }
+
+  const isHost = tournament.isHostedBy(userId)
+  if (!isHost && !competitorIdFor(tournament, match, userId)) {
+    throw ApiError.forbidden('You are not a competitor in this match')
+  }
+
+  const ordered = match.participants.map((participantId) => {
+    const entry = scores.find((score) => String(score.participantId) === String(participantId))
+    if (!entry) throw ApiError.badRequest('Report a score for every competitor in this match')
+    return entry.score
+  })
+  if (ordered[0] === ordered[1]) {
+    throw ApiError.badRequest('Scores cannot be tied — there must be a winner')
+  }
+
+  match.scores = ordered
+  match.winner = ordered[0] > ordered[1] ? match.participants[0] : match.participants[1]
+  match.state = 'reported'
+  match.reportedBy = String(userId)
+  match.confirmedBy = null
+
+  await tournament.save()
+  return tournament
+}
+
+/**
+ * The other competitor confirms — or disputes — a reported result.
+ *
+ * Confirming finalizes the match and lets its winner advance. Disputing
+ * records the disagreement but leaves the winner in place without advancing
+ * it — only a `final` match ever feeds the next round.
+ */
+export async function confirmMatch(tournamentId, userId, matchId, agree) {
+  const tournament = await loadTournament(tournamentId)
+  const match = loadReportableMatch(tournament, matchId)
+
+  if (match.state !== 'reported') {
+    throw ApiError.badRequest('This match is not awaiting confirmation')
+  }
+  if (!competitorIdFor(tournament, match, userId)) {
+    throw ApiError.forbidden('You are not a competitor in this match')
+  }
+  if (String(match.reportedBy) === String(userId)) {
+    throw ApiError.badRequest('You reported this result — the other competitor must confirm it')
+  }
+
+  match.confirmedBy = String(userId)
+  if (agree) {
+    match.state = 'final'
+    advanceWinner(tournament, match, match.winner)
+  } else {
+    match.state = 'disputed'
   }
 
   await tournament.save()

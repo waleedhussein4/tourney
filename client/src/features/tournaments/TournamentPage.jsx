@@ -23,6 +23,7 @@ import {
 import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import { StandingsTable } from './StandingsTable.jsx'
 import { EnterDialog } from './EnterDialog.jsx'
+import { MatchActionsCard } from './MatchActionsCard.jsx'
 import styles from './TournamentPage.module.css'
 
 /*
@@ -145,6 +146,8 @@ export function TournamentPage() {
 
       <div className={styles.columns}>
         <div className={styles.main}>
+          <MatchActionsCard tournament={tournament} />
+
           <Card>
             <h2 className={styles.sectionTitle}>
               {tournament.type === 'brackets' ? 'Bracket' : 'Standings'}
