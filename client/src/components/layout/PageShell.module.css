@@ -58,4 +58,7 @@
   .page {
     padding-top: var(--space-5);
   }
+  .eyebrow {
+    font-size: var(--text-sm);
+  }
 }

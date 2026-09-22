@@ -9,6 +9,9 @@
   align-items: center;
   text-align: center;
   padding: var(--space-8) 0;
+  /* The bracket tree behind the copy is decorative and wider than the
+     column; clip it so it never pushes the page wider than the viewport. */
+  overflow: hidden;
 }
 
 .tree {

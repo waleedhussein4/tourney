@@ -101,3 +101,9 @@
 .prize dd {
   color: var(--money);
 }
+
+@media (max-width: 640px) {
+  .facts dt {
+    font-size: var(--text-sm);
+  }
+}

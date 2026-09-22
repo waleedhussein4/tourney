@@ -159,3 +159,24 @@
     display: none;
   }
 }
+
+/*
+ * The rail scrolls sideways on wide screens, but the page itself must never
+ * grow wider than the viewport, so below 640px it stacks into a single
+ * column instead.
+ */
+@media (max-width: 640px) {
+  .eyebrow {
+    font-size: var(--text-sm);
+  }
+  .railTrack {
+    display: flex;
+    flex-direction: column;
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+  .railItem {
+    flex-basis: auto;
+    width: 100%;
+  }
+}

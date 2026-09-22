@@ -214,3 +214,13 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 640px) {
+  .step,
+  .stepTitle,
+  .stepNumber,
+  .position,
+  .choices legend {
+    font-size: var(--text-sm);
+  }
+}

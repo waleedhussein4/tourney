@@ -309,3 +309,11 @@
   font-size: var(--text-sm);
   color: var(--text-strong);
 }
+
+@media (max-width: 640px) {
+  .fact dt,
+  .contact dt,
+  .sectionTitle {
+    font-size: var(--text-sm);
+  }
+}
