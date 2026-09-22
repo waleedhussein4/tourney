@@ -117,6 +117,17 @@ gate "no Lebanese phone number committed"   bash -c '
     git grep --untracked -nE "(\+?961[ -]?[0-9]{2}[ -]?[0-9]{3}[ -]?[0-9]{3})|wa\.me/[0-9]"       -- . ":!scripts/check-regressions.sh"
   '
 
+# Paddle rejected this site TWICE as "gambling, betting, wagering", because an
+# entry fee plus a prize is the shape of a wager to a compliance reviewer no
+# matter who holds the money. The fields are gone; this gate stops the LANGUAGE
+# coming back. It deliberately searches every file type — the second rejection
+# was caused by the homepage meta description in index.html, which an earlier
+# sweep missed by filtering to *.js, *.jsx and *.css.
+gate "no wagering language anywhere"   bash -c '
+    git grep --untracked -niE "\b(entry fee|entry fees|entryFee|prize|prizes|wager|betting|gambling|winnings|takes the pot)\b" \
+      -- . ":!scripts/check-regressions.sh" ":!docs/DECISIONS.md" ":!docs/ARCHITECTURE.md" ":!server/scripts/drop-money-fields.js"
+  '
+
 gate "no unlisted co-authors in new commits" \
   bash -c 'msgs=$(git log origin/main..HEAD --format=%B); printf "%s\n" "$msgs" | grep -icE "^generated with" | grep -v "^0$"; printf "%s\n" "$msgs" | grep -iE "^co-authored-by:" | grep -ivE "$(sed -n "s/^ALLOWED=.\(.*\).$/\1/p" .githooks/commit-msg)"'
 
