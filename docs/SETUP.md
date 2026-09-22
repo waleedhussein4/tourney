@@ -4,18 +4,15 @@
 
 - **Node.js 20 or newer** (`node --version`) — the repo uses npm workspaces and
   `node --watch`.
-- **MongoDB, as a replica set.** Every credit movement runs inside a MongoDB
-  transaction, and transactions require a replica set. Two options:
+- **MongoDB.** Two options:
   - A free [MongoDB Atlas M0](https://www.mongodb.com/cloud/atlas/register)
-    cluster — already a replica set, nothing to configure. Recommended.
-  - A local `mongod` started as a single-node replica set:
+    cluster — nothing to configure. Recommended, and what production runs on.
+  - A local `mongod`, started as a single-node replica set so it matches what
+    the test suite and Atlas both run:
     ```bash
     mongod --replSet rs0 --dbpath /your/data/path
     mongosh --eval "rs.initiate()"     # once, the first time
     ```
-    A plain `mongod` will serve every read and every non-financial write, but
-    joining a tournament, buying credits, and paying out will fail with a clear
-    "database does not support transactions" error.
 
 ## Five commands
 
@@ -54,21 +51,21 @@ it will not start half-configured.
 npm run seed
 ```
 
-Creates fourteen accounts, four teams, the credit packages, and ten
-tournaments — every format, and every state a visitor can land on: upcoming,
-part-filled, under way, and finished with the prizes paid out.
+Creates fourteen accounts, four teams, and ten tournaments — every format,
+and every state a visitor can land on: upcoming, part-filled, under way, and
+finished.
 
 Each tournament is built through the same services the API uses, so a seeded
-tournament that says it has started really did pass the bank check, and a seeded
-payout really did move credits and write its ledger rows.
+tournament that says it has started really did pass the same checks a real
+host's would.
 
 The script prints the three sign-ins when it finishes:
 
-| Account                                      | Set with                                   |
-| -------------------------------------------- | ------------------------------------------ |
-| `demo@tourney.app` — a host with credits     | `SEED_DEMO_EMAIL` / `SEED_DEMO_PASSWORD`   |
-| `admin@tourney.app` — reaches the admin page | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` |
-| The twelve demo players                      | `SEED_PASSWORD`                            |
+| Account                                       | Set with                                   |
+| ---------------------------------------------- | ------------------------------------------- |
+| `demo@tourney.app` — a host, on the free plan  | `SEED_DEMO_EMAIL` / `SEED_DEMO_PASSWORD`   |
+| `admin@tourney.app` — reaches the admin page   | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` |
+| The twelve demo players                        | `SEED_PASSWORD`                            |
 
 **No password is committed.** Anything left unset is generated for that run and
 printed once — so read the output, or set the variables in `server/.env` and
@@ -76,8 +73,10 @@ choose your own.
 
 `npm run seed -- --reset` clears the demo data first.
 
-> The credits checkout is a **demo**. Card fields are visual only and are never
-> sent to the server. No real payment is ever processed.
+> The app never takes a real card outside its own $5/month hosting
+> subscription, and that only runs against Paddle's sandbox unless
+> `PADDLE_ENV=production` is set. Entry fees and prizes are numbers hosts and
+> players agree between themselves — the app never charges or holds them.
 
 ## Everyday commands
 
@@ -102,9 +101,7 @@ npm test
 
 The suite runs against a real MongoDB: `mongodb-memory-server` starts an
 in-memory **replica set** once per run, and each test file gets its own database
-inside it. A replica set rather than a standalone `mongod`, because every credit
-movement runs inside a transaction and a standalone server rejects those — so
-the tests exercise the same code path production does.
+inside it — the same replica-set topology Atlas and local setup both use.
 
 Nothing needs to be installed or running first. The mongod binary is downloaded
 and cached on first use.
