@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 import morgan from 'morgan'
 import cors from 'cors'
+import * as Sentry from '@sentry/node'
 import config from './config/env.js'
 import { connectToDatabase } from './db/connect.js'
 import { ApiError } from './utils/ApiError.js'
@@ -42,6 +43,12 @@ function ensureDatabase(_req, _res, next) {
         })
       )
   )
+}
+
+// Free tier: errors only, no performance tracing. A no-op when SENTRY_DSN is
+// unset — no network calls, no side effects.
+if (config.sentryDsn) {
+  Sentry.init({ dsn: config.sentryDsn, environment: config.nodeEnv, tracesSampleRate: 0 })
 }
 
 export function createApp() {
@@ -89,6 +96,11 @@ export function createApp() {
   app.use('/api/cron', cronRouter)
 
   app.use(notFound)
+
+  if (config.sentryDsn) {
+    Sentry.setupExpressErrorHandler(app)
+  }
+
   app.use(errorHandler)
 
   return app
