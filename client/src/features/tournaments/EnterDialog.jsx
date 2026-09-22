@@ -7,15 +7,13 @@ import { applyToTournament, joinAsTeam, joinSolo, tournamentKeys } from '/src/ap
 import { listMyTeams } from '/src/api/teams.js'
 import { currentUserKey } from '/src/features/auth/queries.js'
 import { Button, Field, Input, Modal, Spinner } from '/src/components/ui/index.js'
-import { formatMoney } from '/src/lib/format.js'
 import styles from './EnterDialog.module.css'
 
 /**
  * Entering a tournament: joining directly, or applying to be let in.
  *
  * One dialog for both because the decisions are the same — solo or with a
- * team — and only the final request differs. Joining never charges anything
- * here; the entry fee, if any, is settled between the entrant and the host.
+ * team — and only the final request differs.
  */
 export function EnterDialog({ tournament, mode, open, onClose }) {
   const isApplication = mode === 'apply'
@@ -54,7 +52,6 @@ export function EnterDialog({ tournament, mode, open, onClose }) {
     onError: (error) => toast.error(error.message),
   })
 
-  const cost = tournament.entryCost ?? tournament.entryFee
   const eligibleTeams = (teams.data?.teams ?? []).filter(
     (team) => team.isLeader && team.members.length === tournament.teamSize
   )
@@ -90,15 +87,6 @@ export function EnterDialog({ tournament, mode, open, onClose }) {
         className={styles.enter}
         onSubmit={handleSubmit((values) => enter.mutate(values))}
       >
-        {!isApplication && cost > 0 && (
-          <p className={styles.cost}>
-            Entry costs <strong>{formatMoney(cost)}</strong>
-            {isTeamBased &&
-              ` — ${formatMoney(tournament.entryFee)} for each of the ${tournament.teamSize} players, owed by you as leader`}
-            . Settle this with the host directly.
-          </p>
-        )}
-
         {isTeamBased && (
           <TeamPicker
             teams={teams}

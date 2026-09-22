@@ -30,7 +30,7 @@ export function TeamsPage() {
     <PageShell>
       <PageHeader
         title="Teams"
-        description="Team tournaments are entered by a team, and the leader pays the entry fee."
+        description="Team tournaments are entered by a team, on the leader's behalf."
         actions={
           <>
             <Button onClick={() => setDialog('join')}>Join with a code</Button>

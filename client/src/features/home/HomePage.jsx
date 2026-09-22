@@ -43,8 +43,8 @@ export function HomePage() {
             Run the tournament. Or <em>win it.</em>
           </h1>
           <p className={styles.body}>
-            Solo or in teams, open to all or by application. Set your own entry fees and prizes —
-            the site runs the brackets, you and your players settle the money.
+            Solo or in teams, open to all or by application — the site runs the brackets and the
+            standings for you.
           </p>
           <div className={styles.actions}>
             <ButtonLink variant="primary" to="/tournaments">
