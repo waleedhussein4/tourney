@@ -24,11 +24,16 @@ export function guest() {
 /**
  * Signs a new account up and returns `{ agent, user }`.
  *
- * `isHost`, `role` and `plan` are applied straight to the document: how an
- * account came by them is the subject of other tests, not a precondition of
- * every one. `plan: true` gives it an active subscription.
+ * `isHost`, `role`, `plan` and `emailVerified` are applied straight to the
+ * document: how an account came by them is the subject of other tests, not a
+ * precondition of every one. `plan: true` gives it an active subscription.
+ * `emailVerified` defaults to `true` so existing suites don't need to know
+ * about verification unless they are the ones testing it.
  */
-export async function signUp(name, { isHost = false, role, plan = false } = {}) {
+export async function signUp(
+  name,
+  { isHost = false, role, plan = false, emailVerified = true } = {}
+) {
   const agent = client()
 
   await agent
@@ -36,7 +41,7 @@ export async function signUp(name, { isHost = false, role, plan = false } = {}) 
     .send({ email: `${name}@example.com`, username: name, password: PASSWORD })
     .expect(201)
 
-  const update = { isHost }
+  const update = { isHost, emailVerified }
   if (role) update.role = role
   if (plan) update.hostingPlan = { status: 'active', provider: 'test', updatedAt: new Date() }
   await User.updateOne({ username: name }, { $set: update })

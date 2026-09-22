@@ -34,6 +34,7 @@ describe('POST /api/auth/forgot-password', () => {
 
   it('emails a reset link for a known account', async () => {
     await signUp('ada')
+    sendMail.mockClear()
 
     const response = await guest()
       .post('/api/auth/forgot-password')
@@ -62,6 +63,7 @@ describe('POST /api/auth/forgot-password', () => {
 describe('POST /api/auth/reset-password', () => {
   it('resets the password and the new one logs in', async () => {
     await signUp('ada')
+    sendMail.mockClear()
     await guest().post('/api/auth/forgot-password').send({ email: 'ada@example.com' }).expect(200)
     const token = tokenFromLastEmail()
 
@@ -83,6 +85,7 @@ describe('POST /api/auth/reset-password', () => {
 
   it('cannot be used twice', async () => {
     await signUp('ada')
+    sendMail.mockClear()
     await guest().post('/api/auth/forgot-password').send({ email: 'ada@example.com' }).expect(200)
     const token = tokenFromLastEmail()
 
@@ -99,6 +102,7 @@ describe('POST /api/auth/reset-password', () => {
 
   it('rejects an expired token', async () => {
     await signUp('ada')
+    sendMail.mockClear()
     await guest().post('/api/auth/forgot-password').send({ email: 'ada@example.com' }).expect(200)
     const token = tokenFromLastEmail()
 
@@ -115,6 +119,7 @@ describe('POST /api/auth/reset-password', () => {
 
   it('rejects a tampered or made-up token', async () => {
     await signUp('ada')
+    sendMail.mockClear()
     await guest().post('/api/auth/forgot-password').send({ email: 'ada@example.com' }).expect(200)
 
     await guest()
@@ -125,6 +130,7 @@ describe('POST /api/auth/reset-password', () => {
 
   it('rejects a weak new password, leaving the old one working', async () => {
     await signUp('ada')
+    sendMail.mockClear()
     await guest().post('/api/auth/forgot-password').send({ email: 'ada@example.com' }).expect(200)
     const token = tokenFromLastEmail()
 

@@ -54,6 +54,7 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(user),
       isHost: Boolean(user?.isHost),
       isAdmin: Boolean(user?.isAdmin),
+      isEmailVerified: Boolean(user?.emailVerified),
       refresh,
       logout,
     }),

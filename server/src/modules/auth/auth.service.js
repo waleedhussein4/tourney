@@ -6,6 +6,7 @@ import { sendMail, mailCanSend } from '../../lib/mailer.js'
 
 const SALT_ROUNDS = 10
 const RESET_TOKEN_TTL_MS = 30 * 60 * 1000
+const VERIFY_TOKEN_TTL_MS = 24 * 60 * 60 * 1000
 
 /** sha256 of the raw token — the same idea as a password hash, without the
  * deliberate slowness bcrypt adds for a value that is already 32 random bytes. */
@@ -51,6 +52,68 @@ export async function authenticateUser({ email, password }) {
 
   if (!user || !matches) throw ApiError.unauthorized('Incorrect email or password')
 
+  return user
+}
+
+/**
+ * Sends (or resends) a verification link for an account that has not proven
+ * its email yet.
+ *
+ * Best-effort: unlike a password reset, an unsent verification email must
+ * never fail the request that triggered it — signing up still creates the
+ * account, and a resend still answers success, even when mail is unconfigured
+ * or Resend is briefly down. `critical: false` is what buys that.
+ */
+export async function sendVerificationEmail(user, verifyUrlBase) {
+  const token = crypto.randomBytes(32).toString('hex')
+  user.verifyEmailToken = hashToken(token)
+  user.verifyEmailExpires = new Date(Date.now() + VERIFY_TOKEN_TTL_MS)
+  await user.save()
+
+  const verifyUrl = `${verifyUrlBase}/verify-email?token=${token}`
+  await sendMail({
+    to: user.email,
+    subject: 'Verify your Tourney email',
+    text: `Verify your email: ${verifyUrl}\n\nThis link expires in 24 hours. If you did not create this account, ignore this email.`,
+    critical: false,
+  })
+}
+
+/**
+ * Resends a verification link to the signed-in caller.
+ */
+export async function resendVerification(userId, verifyUrlBase) {
+  const user = await User.findById(userId)
+  if (!user) throw ApiError.notFound('User not found')
+  if (user.emailVerified) {
+    throw new ApiError(409, 'This email is already verified', { code: 'VERIFY_ALREADY_DONE' })
+  }
+  await sendVerificationEmail(user, verifyUrlBase)
+}
+
+/**
+ * Completes email verification.
+ *
+ * The token hash is left in place once used — see the model — so a second
+ * request with the same link is told apart from one that is merely made up:
+ * `emailVerified` already being true is what actually blocks the replay.
+ */
+export async function verifyEmail(token) {
+  const user = await User.findOne({ verifyEmailToken: hashToken(token) }).select(
+    '+verifyEmailToken +verifyEmailExpires'
+  )
+  if (!user) {
+    throw new ApiError(400, 'That verification link is invalid', { code: 'VERIFY_INVALID' })
+  }
+  if (user.emailVerified) {
+    throw new ApiError(409, 'This email is already verified', { code: 'VERIFY_ALREADY_DONE' })
+  }
+  if (user.verifyEmailExpires < new Date()) {
+    throw new ApiError(400, 'That verification link has expired', { code: 'VERIFY_EXPIRED' })
+  }
+
+  user.emailVerified = true
+  await user.save()
   return user
 }
 

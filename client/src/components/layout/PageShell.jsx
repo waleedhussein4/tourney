@@ -1,6 +1,7 @@
 import { Nav } from './Nav.jsx'
 import { Footer } from './Footer.jsx'
 import { DemoBanner } from './DemoBanner.jsx'
+import { VerifyEmailBanner } from './VerifyEmailBanner.jsx'
 import styles from './PageShell.module.css'
 
 /**
@@ -19,6 +20,7 @@ export function PageShell({ width = 'default', children }) {
         Skip to content
       </a>
       <DemoBanner />
+      <VerifyEmailBanner />
       <Nav />
       <main
         id="main"
