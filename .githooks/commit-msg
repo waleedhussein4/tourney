@@ -1,0 +1,5 @@
+#!/bin/sh
+if grep -qiE 'co-authored-by:.*(vendor|bot|openai|copilot)|generated with|automated tooling|vendor' "$1"; then
+  echo "Rejected: commit message contains an AI attribution line." >&2
+  exit 1
+fi

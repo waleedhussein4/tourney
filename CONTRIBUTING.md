@@ -44,7 +44,7 @@ there. `npm run format` (prettier) is not in CI, but keep the diff clean.
 - **Branch names:** `feat/`, `fix/`, `chore/`, `docs/`, `test/`, `ci/`,
   `refactor/` + a slug.
 - **Commits:** [Conventional Commits](https://www.conventionalcommits.org).
-  Small and coherent within a branch; the squash title is what lands on `main`.
+  Small and coherent within a branch; the squash title is what lands on `main`. Do not include AI attribution lines (Co-Authored-By, Generated with, etc.).
 - **Pull request bodies:** What / Why / How, screenshots for anything visual,
   and the checklist. "Why" is the part reviewers actually need.
 - **`main` stays deployable after every merge.** It is connected to Vercel and
