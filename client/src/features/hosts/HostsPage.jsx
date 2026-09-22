@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { billingKeys, getPlan } from '/src/api/billing.js'
 import { BracketTree } from '/src/components/brand/index.js'
+import { formatNumber, formatUsd } from '/src/lib/format.js'
 import { COPY, LANGUAGES, directionOf } from './copy.js'
 import styles from './HostsPage.module.css'
 
@@ -154,27 +155,11 @@ function Pricing({ t, data }) {
       {data && (
         <p className={styles.sectionLead}>
           {t.upTo(formatNumber(data.freeLiveTournaments))} {t.free.toLowerCase()} —{' '}
-          {t.price(formatMoney(data.plan.priceCents))} {data.plan.interval} for as many as you like.
+          {t.price(formatUsd(data.plan.priceCents))} {data.plan.interval} for as many as you like.
         </p>
       )}
     </section>
   )
-}
-
-/** Dollars from cents, isolated so Arabic does not reorder the amount. */
-function formatMoney(cents) {
-  return `⁨$${(cents / 100).toLocaleString('en-US')}⁩`
-}
-
-/**
- * Grouped western digits, isolated from the text around them.
- *
- * U+2068 and U+2069 fence the number off from the bidirectional algorithm, so
- * "150,000 ل.ل." keeps its comma and its order inside an Arabic sentence
- * instead of being reordered around the surrounding right-to-left run.
- */
-function formatNumber(value) {
-  return `⁨${value.toLocaleString('en-US')}⁩`
 }
 
 function initialLanguage() {
