@@ -15,6 +15,7 @@ import {
 } from '/src/components/ui/index.js'
 import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import { NotificationPreferences } from './NotificationPreferences.jsx'
+import { PlayerDashboard } from './PlayerDashboard.jsx'
 import styles from './profile.module.css'
 
 export function ProfilePage() {
@@ -52,6 +53,8 @@ export function ProfilePage() {
           )}
         </Card>
       </div>
+
+      <PlayerDashboard />
 
       <Card className={styles.section}>
         <CardHeader title="Your tournaments" subtitle="Everything you host or compete in." />
