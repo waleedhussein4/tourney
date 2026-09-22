@@ -3,11 +3,11 @@ import { ACCESSIBILITY, CATEGORY_SLUGS, LIMITS, PAGE_SIZE } from '../../config/c
 
 const uuid = z.string().uuid('Not a valid id')
 
-const credits = z.coerce
+const usdAmount = z.coerce
   .number({ invalid_type_error: 'Must be a number' })
-  .int('Credits are whole numbers')
+  .int('Must be a whole number of US dollars')
   .min(0, 'Cannot be negative')
-  .max(1_000_000, 'That is more credits than this app deals in')
+  .max(1_000_000, 'That is more than this app deals in')
 
 export const tournamentIdParams = z.object({ tournamentId: uuid })
 
@@ -37,7 +37,7 @@ const commonCreateFields = {
   category: z.enum(CATEGORY_SLUGS, { errorMap: () => ({ message: 'Unknown category' }) }),
   accessibility: z.enum(ACCESSIBILITY),
   teamSize: z.coerce.number().int().min(1, 'Team size must be at least 1').max(16),
-  entryFee: credits,
+  entryFee: usdAmount,
   description: z.string().max(20_000).optional().default(''),
   rules: z.string().max(40_000).optional().default(''),
   contactInfo: contactInfoSchema.optional(),
@@ -65,14 +65,14 @@ export const createTournamentSchema = z
         .min(2)
         .max(256)
         .refine(isPowerOfTwo, 'A bracket needs a power-of-two number of slots (2, 4, 8, 16, …)'),
-      prize: credits,
+      prize: usdAmount,
     }),
     z.object({
       ...commonCreateFields,
       type: z.literal('battle royale'),
       maxCapacity: z.coerce.number().int().min(2).max(1000),
       prizes: z
-        .array(z.object({ rank: z.coerce.number().int().min(1), prize: credits }))
+        .array(z.object({ rank: z.coerce.number().int().min(1), prize: usdAmount }))
         .min(1, 'A battle royale needs at least one prize'),
     }),
   ])
@@ -127,8 +127,8 @@ export const listQuerySchema = z.object({
   category: z.enum(CATEGORY_SLUGS).optional(),
   type: z.enum(['brackets', 'battle royale']).optional(),
   accessibility: z.enum(ACCESSIBILITY).optional(),
-  minEntryFee: credits.optional(),
-  maxEntryFee: credits.optional(),
+  minEntryFee: usdAmount.optional(),
+  maxEntryFee: usdAmount.optional(),
   status: z.enum(['upcoming', 'live', 'ended']).optional(),
 })
 

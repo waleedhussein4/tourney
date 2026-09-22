@@ -14,7 +14,7 @@ export const cronRouter = Router()
  * This is the most dangerous route in the application: it empties every
  * tournament, team, transaction, and non-admin account, then rebuilds the demo
  * dataset. It exists because the demo credentials are published in the README —
- * within a day the demo account is out of credits and the tournaments are full
+ * within a day the demo account's subscription is a mess and the tournaments are full
  * of strangers' test entries.
  *
  * Three things guard it, and none of them is obscurity:

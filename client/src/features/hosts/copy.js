@@ -22,7 +22,7 @@ export const COPY = {
 
     heroTitle: 'Run your tournament. We handle the rest.',
     heroBody:
-      'Sign-ups, brackets, teams, prize money held until the results are in. You run the competition; the site keeps track of it.',
+      'Sign-ups, brackets, teams and standings. You run the competition; the site keeps track of it.',
     heroAction: 'Email us',
     heroSecondary: 'See a live tournament',
 
@@ -38,11 +38,11 @@ export const COPY = {
       },
       {
         title: 'Share the link',
-        body: 'Players sign up themselves. You see who is in, who has paid, and who is still missing.',
+        body: 'Players sign up themselves. You see who is in, and who is still missing.',
       },
       {
         title: 'Play it out',
-        body: 'Record results round by round. The bracket advances on its own and the prizes pay out at the end.',
+        body: 'Record results round by round. The bracket advances on its own.',
       },
     ],
 
@@ -55,7 +55,7 @@ export const COPY = {
       { src: '/media/browse.png', caption: 'Your tournament listed alongside the rest' },
       {
         src: '/media/manage.png',
-        caption: 'Your console — entries, bank, results, all in one screen',
+        caption: 'Your console — entries, results, all in one screen',
       },
     ],
 
@@ -102,7 +102,7 @@ export const COPY = {
 
     heroTitle: 'نظّم بطولتك ونحن نتكفّل بالباقي.',
     heroBody:
-      'التسجيل، جداول المباريات، الفرق، وأموال الجوائز محفوظة حتى تظهر النتائج. أنت تدير المنافسة، والموقع يتابع كل التفاصيل.',
+      'التسجيل، جداول المباريات، الفرق والترتيب. أنت تدير المنافسة، والموقع يتابع كل التفاصيل.',
     heroAction: 'راسلنا بالبريد',
     heroSecondary: 'شاهد بطولة جارية',
 
@@ -118,11 +118,11 @@ export const COPY = {
       },
       {
         title: 'شارك الرابط',
-        body: 'اللاعبون يسجّلون بأنفسهم. ترى من انضم، ومن دفع، ومن لم يسجّل بعد.',
+        body: 'اللاعبون يسجّلون بأنفسهم. ترى من انضم، ومن لم يسجّل بعد.',
       },
       {
         title: 'أدِر المباريات',
-        body: 'سجّل النتائج جولة بجولة. الجدول يتقدّم وحده، والجوائز تُدفع في النهاية.',
+        body: 'سجّل النتائج جولة بجولة. الجدول يتقدّم وحده.',
       },
     ],
 
@@ -130,7 +130,7 @@ export const COPY = {
     shots: [
       { src: '/media/tournament.png', caption: 'صفحة البطولة، مع الجدول ومجموع الجوائز' },
       { src: '/media/browse.png', caption: 'بطولتك معروضة إلى جانب البطولات الأخرى' },
-      { src: '/media/manage.png', caption: 'لوحتك — المشتركون والخزنة والنتائج في شاشة واحدة' },
+      { src: '/media/manage.png', caption: 'لوحتك — المشتركون والنتائج في شاشة واحدة' },
     ],
 
     pricingTitle: 'الكلفة',

@@ -176,8 +176,8 @@ export async function deleteTeam(teamId, userId) {
  * finished.
  *
  * The window that matters opens when the team *enters*, not when the tournament
- * starts: the entry fee is in the bank from that moment, and the tournament has
- * snapshotted the roster it will pay out to. A leader who could dissolve the
+ * starts: the entry is recorded from that moment, and the tournament has
+ * snapshotted the roster it will place in the standings. A leader who could dissolve the
  * team in between would leave the tournament holding a phantom entrant, and a
  * member who could leave would still collect a share of the prize.
  *

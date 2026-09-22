@@ -215,7 +215,7 @@ describe('leader-only operations', () => {
   })
 })
 
-// A tournament funds its bank and snapshots its roster the moment a team enters
+// A tournament records the entry and snapshots its roster the moment a team enters
 // — before it starts. Letting the leader empty that roster in between would
 // leave prizes owed to people who are no longer on the team, and the tournament
 // holding an entrant that no longer exists.
