@@ -10,3 +10,7 @@ export const forgotPassword = ({ email }) => post('/api/auth/forgot-password', {
 
 export const resetPassword = ({ token, password }) =>
   post('/api/auth/reset-password', { token, password })
+
+export const verifyEmail = ({ token }) => post('/api/auth/verify-email', { token })
+
+export const resendVerification = () => post('/api/auth/resend-verification')

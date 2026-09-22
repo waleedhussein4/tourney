@@ -96,7 +96,7 @@ async function findOrCreateUser({ username, email, password, isHost = false, rol
 
   // Matching by the seed's own email is also what flags accounts seeded before
   // `isDemo` existed. The admin is seeded but is not demo data: it is never cleared.
-  const update = { isHost, isDemo: !role }
+  const update = { isHost, isDemo: !role, emailVerified: true }
   if (role) update.role = role
   // Seeded hosts carry a plan, or the demo would be ten tournaments nobody can
   // see: publishing more than one needs a subscription.

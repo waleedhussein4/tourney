@@ -7,6 +7,7 @@ import { SignInPage } from '/src/features/auth/SignInPage.jsx'
 import { SignUpPage } from '/src/features/auth/SignUpPage.jsx'
 import { ForgotPasswordPage } from '/src/features/auth/ForgotPasswordPage.jsx'
 import { ResetPasswordPage } from '/src/features/auth/ResetPasswordPage.jsx'
+import { VerifyEmailPage } from '/src/features/auth/VerifyEmailPage.jsx'
 import { HomePage } from '/src/features/home/HomePage.jsx'
 import { BrowsePage } from '/src/features/tournaments/BrowsePage.jsx'
 import { TournamentPage } from '/src/features/tournaments/TournamentPage.jsx'
@@ -82,6 +83,7 @@ export function Router() {
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/refunds" element={<RefundsPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         {/* Signed out only. */}
         <Route element={<GuestRoute />}>
