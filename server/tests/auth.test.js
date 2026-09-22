@@ -309,14 +309,14 @@ describe('POST /api/users/me/become-host', () => {
 })
 
 describe('the endpoints the rewrite deleted', () => {
-  it('the credit ledger is gone for a signed-in caller too', async () => {
+  it('the transaction ledger is gone for a signed-in caller too', async () => {
     const { agent } = await signUp('ada')
     await agent.get('/api/users/me/transactions').expect(404)
   })
 
 
-  // Each of these was a way to obtain credits, or an identity check that a 401
-  // body could defeat. The credits they granted no longer exist either.
+  // Each of these was a way to obtain the old demo currency, or an identity check
+  // that a 401 body could defeat. That currency no longer exists either.
   it.each([
     ['POST', '/api/user/removeEarn'],
     ['POST', '/api/user/payment'],
@@ -326,7 +326,7 @@ describe('the endpoints the rewrite deleted', () => {
     ['GET', '/api/user/profile'],
     // Gone with the demo economy: there is no wallet to top up.
     ['GET', '/api/products'],
-    ['POST', '/api/credits/checkout/credits-100'],
+    ['POST', '/api/billing/checkout/legacy-100'],
   ])('%s %s is gone', async (method, path) => {
     const response = await guest()[method.toLowerCase()](path).send({})
     expect(response.status).toBe(404)

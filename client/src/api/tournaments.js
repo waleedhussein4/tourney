@@ -14,7 +14,7 @@ export const listTournaments = (params, options) =>
 
 export const getTournament = (id, options) => get(`/api/tournaments/${id}`, options)
 
-/** The host's view: everything public, plus the applications queue and the bank. */
+/** The host's view: everything public, plus the applications queue and standings. */
 export const getManageView = (id) => get(`/api/tournaments/${id}/manage`)
 
 export const listTrending = (limit = 8) => get('/api/tournaments/trending', { query: { limit } })
