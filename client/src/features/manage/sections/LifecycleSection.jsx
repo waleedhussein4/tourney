@@ -25,7 +25,7 @@ export function LifecycleSection({ tournament }) {
   const bracketUnfilled = tournament.type === 'brackets' && entrants < tournament.maxCapacity
   const tooFewEntrants = tournament.type !== 'brackets' && entrants < 2
   const finalUndecided =
-    tournament.type === 'brackets' && !tournament.matches[tournament.matches.length - 1]
+    tournament.type === 'brackets' && !tournament.matches[tournament.matches.length - 1]?.winner
 
   const start = useManageMutation({
     tournamentId: tournament.id,

@@ -28,6 +28,64 @@ const enrolledTeamSchema = new Schema({
   members: { type: [memberSchema], default: [] },
 })
 
+/**
+ * One bracket match: a slot in a single round, the (up to two) participants
+ * competing in it, and the result.
+ *
+ * `round`/`slot` place it in the tree the same way the old flat array did —
+ * round 1 first, then each subsequent round, halving each time — so existing
+ * bracket-walking logic keeps working. `participants` holds the competitor
+ * ids — user ids in a solo tournament, team ids in a team one — and starts
+ * empty for every round after the first; it fills in as earlier rounds
+ * report a winner, or from `bracketOrder` for round 1 once the draw happens.
+ * Stored rather than derived, because a team can be renamed or deleted and
+ * the bracket still has to show who actually played.
+ *
+ * `scores` is parallel to `participants` by index, so a score always belongs
+ * to a named competitor rather than to "the left side". Scheduling/reporting/
+ * dispute fields are unused for now — no code sets them yet — but are here so
+ * a later phase does not need another migration.
+ */
+const matchSchema = new Schema(
+  {
+    _id: { type: String, default: uuidv4 },
+    round: { type: Number, required: true, min: 1 },
+    slot: { type: Number, required: true, min: 0 },
+    participants: { type: [String], default: [] },
+    scores: { type: [Number], default: [] },
+    winner: { type: String, default: null },
+    state: {
+      type: String,
+      enum: ['pending', 'scheduled', 'reported', 'disputed', 'final'],
+      default: 'pending',
+    },
+    scheduledAt: { type: Date, default: null },
+    /** Who last submitted a score, so a self-confirmed result is visible as one. */
+    reportedBy: { type: String, default: null },
+    confirmedBy: { type: String, default: null },
+  },
+  { _id: true }
+)
+
+/**
+ * The empty match tree for a `maxCapacity`-slot bracket: round 1 has
+ * `maxCapacity / 2` matches, each later round halves, same order the old flat
+ * winner array used (round 1 first, last entry the final). `participants` is
+ * seeded later — round 1 from `bracketOrder` once the draw happens, later
+ * rounds as earlier matches report a winner.
+ */
+export function buildBracketMatches(maxCapacity) {
+  const matches = []
+  let round = 1
+  for (let matchesInRound = maxCapacity / 2; matchesInRound >= 1; matchesInRound /= 2) {
+    for (let slot = 0; slot < matchesInRound; slot++) {
+      matches.push({ round, slot, participants: [], scores: [], winner: null })
+    }
+    round++
+  }
+  return matches
+}
+
 const applicationSchema = new Schema(
   {
     _id: { type: String, default: uuidv4 },
@@ -123,11 +181,18 @@ const tournamentSchema = new Schema(
     bracketsShuffled: { type: Boolean, default: false },
 
     /**
-     * Winners by match index, `null` where undecided. Round 1 occupies the first
-     * `maxCapacity / 2` entries, then each subsequent round halves, so the array
-     * is always `maxCapacity - 1` long and the last entry is the champion.
+     * One subdocument per bracket match, in the same order the old positional
+     * winner array used: round 1 occupies the first `maxCapacity / 2` entries,
+     * each later round halves, so there are always `maxCapacity - 1` of them
+     * and the last is the final.
+     *
+     * This replaced a bare `[String]` of winner ids. That shape could say who
+     * won a slot and nothing else — not who was playing, not when, not whether
+     * anyone disagreed — which made scheduling and participant-reported scores
+     * impossible to build. `winner` still carries what the old array carried,
+     * so the bracket keeps rendering from the same fact.
      */
-    matches: { type: [String], default: [] },
+    matches: { type: [matchSchema], default: [] },
 
     updates: {
       type: [{ _id: false, date: { type: Date, default: Date.now }, content: String }],

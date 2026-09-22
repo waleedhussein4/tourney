@@ -472,22 +472,32 @@ async function recordResults(id, hostId, blueprint, people, teams) {
         : live.participantIds()[0]
 
     const order = live.bracketOrder.filter(Boolean)
-    const matches = new Array(live.maxCapacity - 1).fill(null)
 
-    // Round one: the seeded winner takes their match, the other pairs go to
-    // whoever is listed first.
-    let slot = 0
-    for (let pair = 0; pair < order.length; pair += 2) {
-      matches[slot] =
-        order.includes(winnerId) && [order[pair], order[pair + 1]].includes(winnerId)
-          ? winnerId
-          : order[pair]
-      slot += 1
+    // Walk the match tree in the same round-1-from-the-draw,
+    // later-rounds-from-the-previous-round's-winner order `updateMatches`
+    // does, so every winner is one of that match's own two competitors.
+    const participantsByKey = new Map()
+    for (const match of live.matches.filter((entry) => entry.round === 1)) {
+      participantsByKey.set(`1-${match.slot}`, [order[match.slot * 2], order[match.slot * 2 + 1]])
     }
-    // Everything after round one is the seeded winner marching to the final.
-    for (; slot < matches.length; slot += 1) matches[slot] = winnerId
 
-    await tournaments.updateMatches(id, hostId, matches)
+    const maxRound = Math.max(...live.matches.map((entry) => entry.round))
+    const results = []
+
+    for (const match of live.matches) {
+      const participants = participantsByKey.get(`${match.round}-${match.slot}`) ?? [null, null]
+      const winner = participants.includes(winnerId) ? winnerId : participants[0]
+      results.push({ id: match.id, winner })
+
+      if (match.round < maxRound) {
+        const nextKey = `${match.round + 1}-${Math.floor(match.slot / 2)}`
+        const next = participantsByKey.get(nextKey) ?? [null, null]
+        next[match.slot % 2] = winner
+        participantsByKey.set(nextKey, next)
+      }
+    }
+
+    await tournaments.updateMatches(id, hostId, results)
     return
   }
 

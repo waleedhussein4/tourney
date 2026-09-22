@@ -5,6 +5,11 @@ import { buildRounds } from '/src/features/tournaments/brackets/buildRounds.js'
 import { useManageMutation } from '../useManageMutation.js'
 import styles from '../ManagePage.module.css'
 
+/** The current winner draft, by match id. */
+function draftFrom(tournament) {
+  return Object.fromEntries((tournament.matches ?? []).map((match) => [match.id, match.winner]))
+}
+
 /**
  * Recording who won each match.
  *
@@ -14,15 +19,26 @@ import styles from '../ManagePage.module.css'
  * rejects that too, but the host should never have been able to type it.
  */
 export function MatchesSection({ tournament }) {
-  const [draft, setDraft] = useState(() => [...tournament.matches])
+  const [draft, setDraft] = useState(() => draftFrom(tournament))
 
   useEffect(() => {
-    setDraft([...tournament.matches])
+    setDraft(draftFrom(tournament))
+    // Only the matches themselves should reset the draft — not every prop
+    // change on `tournament` (score edits elsewhere on the page, etc).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tournament.matches])
+
+  const dirty = Object.entries(draft).some(
+    ([id, winner]) => winner !== (tournament.matches ?? []).find((match) => match.id === id)?.winner
+  )
 
   const save = useManageMutation({
     tournamentId: tournament.id,
-    mutationFn: () => saveMatches(tournament.id, draft),
+    mutationFn: () =>
+      saveMatches(
+        tournament.id,
+        Object.entries(draft).map(([id, winner]) => ({ id, winner }))
+      ),
     success: 'Results saved',
   })
 
@@ -38,15 +54,12 @@ export function MatchesSection({ tournament }) {
     )
   }
 
-  // Rounds are rebuilt from the draft, so choosing a winner immediately shows
-  // them in the next round rather than after a save.
-  const rounds = buildRounds({ ...tournament, matches: draft })
-  const dirty = draft.some((value, index) => value !== tournament.matches[index])
+  // Rounds are rebuilt with the draft overlaid, so choosing a winner immediately
+  // shows them in the next round rather than after a save.
+  const rounds = buildRounds(tournament, draft)
 
-  const setWinner = (matchIndex, participantId) =>
-    setDraft((current) =>
-      current.map((value, index) => (index === matchIndex ? participantId : value))
-    )
+  const setWinner = (matchId, participantId) =>
+    setDraft((current) => ({ ...current, [matchId]: participantId }))
 
   return (
     <Card>
