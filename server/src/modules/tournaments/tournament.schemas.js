@@ -135,6 +135,13 @@ export const matchesSchema = z.object({
   matches: z.array(z.object({ id: uuid, winner: uuid.nullable() })),
 })
 
+export const scheduleMatchesSchema = z.object({
+  /** Kickoff times to set, by match id — one call handles a single match or a whole round. */
+  matches: z
+    .array(z.object({ id: uuid, scheduledAt: z.coerce.date() }))
+    .min(1, 'Nothing to schedule'),
+})
+
 export const participantsSchema = z.object({
   participants: z
     .array(
