@@ -6,9 +6,11 @@ import { PageShell } from '/src/components/layout/PageShell.jsx'
 import { BracketTree, Logo } from '/src/components/brand/index.js'
 import { Button, Card, Checkbox, Field, Input } from '/src/components/ui/index.js'
 import { useAuth } from './useAuth.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import styles from './auth.module.css'
 
 export function SignInPage() {
+  useDocumentTitle('Sign in')
   const navigate = useNavigate()
   const location = useLocation()
   const { refresh } = useAuth()

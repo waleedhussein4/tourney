@@ -6,6 +6,7 @@ import { PageShell } from '/src/components/layout/PageShell.jsx'
 import { BracketTree, Logo } from '/src/components/brand/index.js'
 import { Button, Card, Field, Input } from '/src/components/ui/index.js'
 import { useAuth } from './useAuth.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import styles from './auth.module.css'
 
 /** Mirrors the server's password policy, so the rule is stated before it is broken. */
@@ -20,6 +21,7 @@ const PASSWORD_RULES = {
 }
 
 export function SignUpPage() {
+  useDocumentTitle('Sign up')
   const navigate = useNavigate()
   const location = useLocation()
   const { refresh } = useAuth()

@@ -13,11 +13,13 @@ import {
   ErrorState,
   LoadingState,
 } from '/src/components/ui/index.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import styles from './profile.module.css'
 
 export function ProfilePage() {
   // The route guard has already established there is a user here.
   const { user } = useAuth()
+  useDocumentTitle(user.username)
 
   const tournaments = useQuery({
     queryKey: tournamentKeys.mine,

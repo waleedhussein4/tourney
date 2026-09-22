@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { clearDemoData, seedDemoData } from '/src/api/admin.js'
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
 import { Button, Card, CardHeader, ConfirmDialog } from '/src/components/ui/index.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import styles from './admin.module.css'
 
 /**
@@ -13,6 +14,7 @@ import styles from './admin.module.css'
  * gated by the subscription, which the payment gateway settles on its own.
  */
 export function AdminPage() {
+  useDocumentTitle('Admin')
   const queryClient = useQueryClient()
   const [confirming, setConfirming] = useState(false)
   const [result, setResult] = useState(null)

@@ -4,6 +4,7 @@ import { getManageView, tournamentKeys } from '/src/api/tournaments.js'
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
 import { Badge, ErrorState, LoadingState } from '/src/components/ui/index.js'
 import { publishStatus, tournamentStatus } from '/src/lib/format.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import { DetailsSection } from './sections/DetailsSection.jsx'
 import { ApplicationsSection } from './sections/ApplicationsSection.jsx'
 import { ParticipantsSection } from './sections/ParticipantsSection.jsx'
@@ -29,6 +30,8 @@ export function ManagePage() {
     queryFn: () => getManageView(id),
     enabled: Boolean(id),
   })
+
+  useDocumentTitle(query.data ? `Manage ${query.data.tournament.name}` : 'Manage tournament')
 
   if (query.isPending) {
     return (

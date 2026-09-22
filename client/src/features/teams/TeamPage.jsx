@@ -13,6 +13,7 @@ import {
   ErrorState,
   LoadingState,
 } from '/src/components/ui/index.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import { teamKeys } from './queries.js'
 import styles from './teams.module.css'
 
@@ -39,6 +40,8 @@ export function TeamPage() {
     queryFn: () => getTeam(teamId),
     enabled: Boolean(teamId),
   })
+
+  useDocumentTitle(query.data?.team ? query.data.team.name : 'Team')
 
   const act = useMutation({
     mutationFn: ({ run }) => run(),

@@ -15,11 +15,13 @@ import {
   LoadingState,
   Modal,
 } from '/src/components/ui/index.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import { teamKeys } from './queries.js'
 import styles from './teams.module.css'
 
 /** The teams you are on, and the two ways to get onto another. */
 export function TeamsPage() {
+  useDocumentTitle('Teams')
   const [dialog, setDialog] = useState(null)
 
   const teams = useQuery({ queryKey: teamKeys.mine, queryFn: listMyTeams })

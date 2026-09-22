@@ -6,9 +6,11 @@ import { currentUserKey } from '/src/features/auth/queries.js'
 import { useAuth } from '/src/features/auth/useAuth.js'
 import { PageShell } from '/src/components/layout/PageShell.jsx'
 import { Button, Card } from '/src/components/ui/index.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import styles from './become-host.module.css'
 
 export function BecomeHostPage() {
+  useDocumentTitle('Become a host')
   const { refresh } = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()

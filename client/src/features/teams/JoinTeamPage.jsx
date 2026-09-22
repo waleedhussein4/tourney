@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { joinTeamByCode, previewTeamByCode } from '/src/api/teams.js'
 import { PageShell } from '/src/components/layout/PageShell.jsx'
 import { Button, Card, EmptyState, ErrorState, LoadingState } from '/src/components/ui/index.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import { teamKeys } from './queries.js'
 import styles from './teams.module.css'
 
@@ -18,6 +19,8 @@ export function JoinTeamPage() {
     queryFn: () => previewTeamByCode(teamCode),
     retry: false,
   })
+
+  useDocumentTitle(preview.data?.team ? `Join ${preview.data.team.name}` : 'Join a team')
 
   const join = useMutation({
     mutationFn: () => joinTeamByCode(teamCode),

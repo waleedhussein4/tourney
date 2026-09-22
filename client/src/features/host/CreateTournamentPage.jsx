@@ -9,6 +9,7 @@ import { Button, Card, Field, Input, Select, Textarea } from '/src/components/ui
 import { RichTextField } from '/src/components/ui/RichTextField.jsx'
 import { formatMoney } from '/src/lib/format.js'
 import { richTextLimit } from '/src/lib/richText.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import { BRACKET_SIZES, toCreatePayload, totalPrize, visibleSteps } from './wizardSteps.js'
 import styles from './CreateTournamentPage.module.css'
 
@@ -22,6 +23,7 @@ function defaultSchedule() {
 }
 
 export function CreateTournamentPage() {
+  useDocumentTitle('Host a tournament')
   const navigate = useNavigate()
   const [stepIndex, setStepIndex] = useState(0)
 

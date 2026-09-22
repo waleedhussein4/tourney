@@ -1,9 +1,11 @@
 import { PageShell } from '/src/components/layout/PageShell.jsx'
 import { BracketTree } from '/src/components/brand/index.js'
 import { ButtonLink } from '/src/components/ui/index.js'
+import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import styles from './NotFoundPage.module.css'
 
 export function NotFoundPage() {
+  useDocumentTitle('Page not found')
   return (
     <PageShell width="narrow">
       <div className={styles.page}>
