@@ -6,6 +6,19 @@ import react from '@vitejs/plugin-react'
 // on Vercel. Result: no CORS anywhere.
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        // Sentry and React Query are large and rarely change alongside the app
+        // code that imports them — splitting them out keeps the main chunk
+        // small and lets browsers cache them independently of app updates.
+        manualChunks: {
+          sentry: ['@sentry/react'],
+          'react-query': ['@tanstack/react-query'],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {
