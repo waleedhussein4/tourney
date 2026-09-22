@@ -1,7 +1,7 @@
 # Design system
 
 Tourney is a place where a small community runs a competition. The interface has
-one job: make that competition legible — who is in, what is at stake, who
+one job: make that competition legible — who is in, how it is shaped, who
 advances. Everything below follows from that.
 
 The system lives in [`client/src/styles/tokens.css`](../client/src/styles/tokens.css).
