@@ -4,7 +4,9 @@ import { useDatabase } from './setup/database.js'
 import { client, guest, PASSWORD, signUp } from './setup/api.js'
 import User from '../src/models/user.model.js'
 
-vi.mock('../src/lib/mailer.js', () => ({ sendMail: vi.fn() }))
+// `mailCanSend` has to be mocked too: the service checks it before doing any
+// work, and an undefined export would make every reset look unconfigured.
+vi.mock('../src/lib/mailer.js', () => ({ sendMail: vi.fn(), mailCanSend: true }))
 const { sendMail } = await import('../src/lib/mailer.js')
 
 useDatabase()
