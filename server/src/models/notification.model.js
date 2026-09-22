@@ -15,6 +15,7 @@ export const NOTIFICATION_TYPES = [
   'result_resolved',
   'tournament_ended',
   'waitlist_promoted',
+  'participant_removed',
 ]
 
 /**

@@ -10,13 +10,17 @@ import { sanitizeRichText, toPlainText } from '../../utils/text.js'
 import {
   notifyApplicationDecided,
   notifyMatchScheduled,
+  notifyParticipantRemoved,
   notifyResultConfirmed,
   notifyResultDisputed,
   notifyResultResolved,
   notifyTournamentEnded,
   notifyTournamentPublished,
   notifyWaitlistPromoted,
+  participantUserIds,
 } from '../notifications/notification.service.js'
+import { recordModeration } from '../admin/moderation.service.js'
+import { createReport } from '../admin/report.service.js'
 
 /**
  * Runs `work` against a freshly-loaded tournament inside a transaction, then
@@ -995,6 +999,87 @@ export async function updateParticipants(tournamentId, hostId, updates) {
 
   await tournament.save()
   return tournament
+}
+
+/** Marks a participant eliminated in place, whichever shape the tournament is. */
+function markEliminated(tournament, participantId) {
+  const participant = tournament
+    .participants()
+    .find((entry) => tournament.participantId(entry) === participantId)
+  if (participant) participant.eliminated = true
+}
+
+/**
+ * The host removes a participant from their own tournament, with a reason.
+ *
+ * Before the tournament starts this frees the slot outright — the entry is
+ * gone, like they never joined. Once it has started, removing the row would
+ * corrupt the bracket (a next-round match pointing at a competitor who no
+ * longer exists) or erase history a battle-royale standings page still needs,
+ * so the participant instead forfeits: every one of their bracket matches that
+ * has not already been finalized is awarded to whoever they were playing
+ * (recorded as the host's call, the same `reportedBy`/`confirmedBy` marker
+ * `updateMatches` uses), and they are marked eliminated rather than deleted.
+ */
+export async function removeParticipant(tournamentId, hostId, participantId, reason) {
+  const tournament = await loadAsHost(tournamentId, hostId)
+  if (tournament.hasEnded) {
+    throw ApiError.badRequest('This tournament has already ended')
+  }
+  const id = String(participantId)
+
+  if (!tournament.participantIds().includes(id)) {
+    throw ApiError.notFound('That participant is not in this tournament')
+  }
+
+  const recipients = participantUserIds(tournament, id)
+
+  if (!tournament.hasStarted) {
+    tournament.enrolledUsers = tournament.enrolledUsers.filter(
+      (entry) => String(entry.userId) !== id
+    )
+    tournament.enrolledTeams = tournament.enrolledTeams.filter(
+      (entry) => String(entry.teamId) !== id
+    )
+  } else {
+    if (tournament.type === 'brackets') {
+      for (const match of tournament.matches) {
+        if (match.state === 'final' || !match.participants.includes(id)) continue
+        const opponent = match.participants.find((entry) => entry && entry !== id) ?? null
+        if (!opponent) continue
+        match.winner = opponent
+        match.state = 'final'
+        match.reportedBy = String(hostId)
+        match.confirmedBy = String(hostId)
+        advanceWinner(tournament, match, opponent)
+      }
+    }
+    markEliminated(tournament, id)
+  }
+
+  await tournament.save()
+
+  await recordModeration({
+    actor: hostId,
+    action: 'participant_removed',
+    targetType: 'tournament',
+    targetId: tournament._id,
+    reason,
+  })
+  await notifyParticipantRemoved(tournament, recipients, reason)
+
+  return tournament
+}
+
+/** Files a report against this tournament, for the admin queue. */
+export async function reportTournament(tournamentId, reporterId, reason) {
+  const tournament = await loadVisible(tournamentId, reporterId)
+  return createReport({
+    reporterId,
+    targetType: 'tournament',
+    targetId: tournament._id,
+    reason,
+  })
 }
 
 /** How many finishers the results screen shows for a battle royale. */

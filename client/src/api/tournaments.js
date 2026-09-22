@@ -104,6 +104,16 @@ export const confirmMatch = (id, matchId, agree) =>
 export const resolveMatch = (id, matchId, body) =>
   post(`/api/tournaments/${id}/matches/${matchId}/resolve`, body)
 
+// --- moderation -----------------------------------------------------------
+
+/** The host removes a participant, with a reason. Frees the slot before the
+ * tournament starts; forfeits their remaining matches once it has. */
+export const removeParticipant = (id, participantId, reason) =>
+  del(`/api/tournaments/${id}/participants/${participantId}`, { body: { reason } })
+
+/** Flags a tournament for the admin queue. */
+export const reportTournament = (id, reason) => post(`/api/tournaments/${id}/report`, { reason })
+
 // --- query keys ---------------------------------------------------------------
 
 /**

@@ -81,3 +81,18 @@
   text-decoration: line-through;
   text-decoration-color: var(--danger);
 }
+
+.reportButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.reportButton:hover,
+.reportButton:focus-visible {
+  color: var(--text);
+}

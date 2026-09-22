@@ -10,7 +10,7 @@ import styles from './StandingsTable.module.css'
  * received as a prop, which reorders the caller's data as a side effect of
  * rendering.
  */
-export function StandingsTable({ tournament }) {
+export function StandingsTable({ tournament, onReportParticipant }) {
   const participants = tournament.participants ?? []
 
   if (participants.length === 0) {
@@ -41,6 +41,11 @@ export function StandingsTable({ tournament }) {
               Score
             </th>
             <th scope="col">Status</th>
+            {onReportParticipant && (
+              <th scope="col" className="visually-hidden">
+                Actions
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -66,6 +71,19 @@ export function StandingsTable({ tournament }) {
                     <Badge tone="success">In</Badge>
                   )}
                 </td>
+                {onReportParticipant && (
+                  <td>
+                    <button
+                      type="button"
+                      className={styles.reportButton}
+                      onClick={() =>
+                        onReportParticipant({ id: participant.id, name: participant.name })
+                      }
+                    >
+                      Report
+                    </button>
+                  </td>
+                )}
               </tr>
             )
           })}

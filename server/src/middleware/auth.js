@@ -66,6 +66,13 @@ async function resolveUserId(req) {
   return exists ? String(userId) : null
 }
 
+/** Blocked once suspended — every route behind `requireAuth` is closed, host and join included. */
+export function assertNotSuspended(user) {
+  if (user?.suspended) {
+    throw new ApiError(403, 'Your account has been suspended', { code: 'ACCOUNT_SUSPENDED' })
+  }
+}
+
 /** Requires a signed-in caller. Sets `req.userId`. */
 export async function requireAuth(req, _res, next) {
   try {
@@ -74,6 +81,8 @@ export async function requireAuth(req, _res, next) {
       next(ApiError.unauthorized('You must be signed in to do that'))
       return
     }
+    const user = await User.findById(userId).select('suspended').lean()
+    assertNotSuspended(user)
     req.userId = userId
     next()
   } catch (error) {

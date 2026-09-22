@@ -52,6 +52,13 @@ export async function authenticateUser({ email, password }) {
 
   if (!user || !matches) throw ApiError.unauthorized('Incorrect email or password')
 
+  // Checked only after the credentials are confirmed correct — a suspended
+  // account's password still works, so the message must say why it was
+  // refused rather than reading like a wrong password.
+  if (user.suspended) {
+    throw new ApiError(403, 'Your account has been suspended', { code: 'ACCOUNT_SUSPENDED' })
+  }
+
   return user
 }
 
