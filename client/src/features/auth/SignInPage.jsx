@@ -19,8 +19,16 @@ export function SignInPage() {
     register,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm({ defaultValues: { email: '', password: '', rememberMe: false } })
+
+  const showDemoLogin = import.meta.env.VITE_DEMO_LOGIN !== 'false'
+
+  function fillDemoAccount() {
+    setValue('email', 'demo@tourney.app', { shouldValidate: true })
+    setValue('password', 'DemoPlayer2026', { shouldValidate: true })
+  }
 
   async function onSubmit(values) {
     try {
@@ -45,6 +53,12 @@ export function SignInPage() {
         <Card className={styles.card}>
           <h1 className={styles.title}>Sign in</h1>
           <p className={styles.subtitle}>Enter a tournament, or run one of your own.</p>
+
+          {showDemoLogin && (
+            <Button type="button" variant="secondary" onClick={fillDemoAccount}>
+              Use the demo account
+            </Button>
+          )}
 
           <form className={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
             <Field label="Email" required error={errors.email?.message}>

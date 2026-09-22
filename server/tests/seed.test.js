@@ -45,11 +45,11 @@ describe('what the seed creates', () => {
     // Twelve players, plus the demo account and the admin.
     expect(result.users).toBe(14)
     expect(result.teams).toBe(4)
-    expect(result.tournaments).toBe(10)
+    expect(result.tournaments).toBe(11)
 
     expect(await User.countDocuments()).toBe(14)
     expect(await Team.countDocuments()).toBe(4)
-    expect(await Tournament.countDocuments()).toBe(10)
+    expect(await Tournament.countDocuments()).toBe(11)
   })
 
   it('covers every state a visitor can land on', async () => {
@@ -62,7 +62,7 @@ describe('what the seed creates', () => {
     expect(upcoming).toBeGreaterThan(0)
     expect(live).toBeGreaterThan(0)
     expect(ended).toBeGreaterThan(0)
-    expect(upcoming + live + ended).toBe(10)
+    expect(upcoming + live + ended).toBe(11)
   })
 
   it('covers every shape a tournament can take', async () => {
@@ -122,7 +122,7 @@ describe('tournaments that predate publishState', () => {
     await Tournament.collection.updateMany({}, { $unset: { publishState: '' } })
 
     const list = await guest().get('/api/tournaments?limit=50').expect(200)
-    expect(list.body.tournaments).toHaveLength(10)
+    expect(list.body.tournaments).toHaveLength(11)
   })
 })
 
@@ -131,12 +131,12 @@ describe('running the seed twice', () => {
     const first = await seedDemoData()
     const second = await seedDemoData()
 
-    expect(first.tournaments).toBe(10)
+    expect(first.tournaments).toBe(11)
     expect(second.tournaments).toBe(0)
 
     expect(await User.countDocuments()).toBe(14)
     expect(await Team.countDocuments()).toBe(4)
-    expect(await Tournament.countDocuments()).toBe(10)
+    expect(await Tournament.countDocuments()).toBe(11)
   })
 })
 
@@ -152,6 +152,16 @@ describe('the accounts it creates', () => {
 
     expect(response.body.user).toMatchObject({ isHost: true, isAdmin: false })
     expect(response.body.user.plan.active).toBe(true)
+  })
+
+  it('gives the demo account exactly one draft tournament, ready to publish', async () => {
+    await seedDemoData()
+
+    const demo = await User.findOne({ email: 'demo@tourney.app' })
+    const drafts = await Tournament.find({ host: demo._id, publishState: 'draft' })
+
+    expect(drafts).toHaveLength(1)
+    expect(drafts[0].title).toBe('Your first tournament')
   })
 
   it('makes an admin who can reach the admin routes', async () => {
@@ -250,7 +260,7 @@ describe('clearing the demo data', () => {
 
     const cleared = await clearDemoData()
 
-    expect(cleared.tournaments).toBe(10)
+    expect(cleared.tournaments).toBe(11)
     expect(cleared.teams).toBe(4)
     expect(await Tournament.countDocuments()).toBe(0)
     expect(await Team.countDocuments()).toBe(0)
@@ -265,7 +275,7 @@ describe('clearing the demo data', () => {
     await clearDemoData()
 
     const again = await seedDemoData()
-    expect(again.tournaments).toBe(10)
+    expect(again.tournaments).toBe(11)
   })
 })
 

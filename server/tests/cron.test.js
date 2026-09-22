@@ -123,7 +123,7 @@ describe('POST/GET /api/cron/reseed', () => {
     }
 
     // And the reseed is still idempotent with real data present.
-    expect(await Tournament.countDocuments()).toBe(11)
+    expect(await Tournament.countDocuments()).toBe(12)
     expect(await User.countDocuments()).toBe(16)
   })
 
@@ -137,15 +137,15 @@ describe('POST/GET /api/cron/reseed', () => {
     // First run: nothing is flagged, so nothing is cleared — and the seed flags it.
     const first = await guest().get('/api/cron/reseed').set('Authorization', AUTHORISED)
     expect(first.body.cleared).toMatchObject({ users: 0, tournaments: 0, teams: 0 })
-    expect(await Tournament.countDocuments({ isDemo: true })).toBe(10)
+    expect(await Tournament.countDocuments({ isDemo: true })).toBe(11)
     expect(await Team.countDocuments({ isDemo: true })).toBe(4)
     expect(await User.countDocuments({ isDemo: true })).toBe(13)
 
     // Second run: a normal rebuild.
     const second = await guest().get('/api/cron/reseed').set('Authorization', AUTHORISED)
-    expect(second.body.cleared).toMatchObject({ users: 13, tournaments: 10, teams: 4 })
+    expect(second.body.cleared).toMatchObject({ users: 13, tournaments: 11, teams: 4 })
     expect((await User.findOne({ username: 'mei' }))._id).not.toBe(before._id)
-    expect(await Tournament.countDocuments()).toBe(10)
+    expect(await Tournament.countDocuments()).toBe(11)
   })
 
   it('is idempotent — running it twice leaves the same dataset', async () => {

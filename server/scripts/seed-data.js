@@ -307,9 +307,11 @@ function blueprints() {
       },
     },
     {
-      state: 'upcoming',
+      // Published and filling, so the demo host's manage screens and any
+      // screenshot of them show a tournament that's actually in play.
+      state: 'filling',
       host: 'demo',
-      entrants: [],
+      entrants: ['mei', 'tomas'],
       payload: {
         title: 'Open Invitational',
         type: 'battle royale',
@@ -326,6 +328,27 @@ function blueprints() {
         rules: '<p>Open to everyone. One entry per person.</p>',
         startDate: new Date(base + 9 * DAY),
         endDate: new Date(base + 10 * DAY),
+      },
+    },
+    {
+      // Left in `draft` on purpose: the one-minute demo path is sign in, open
+      // this from the profile, press Publish.
+      state: 'draft',
+      host: 'demo',
+      entrants: [],
+      payload: {
+        title: 'Your first tournament',
+        type: 'brackets',
+        category: 'chess',
+        accessibility: 'open',
+        teamSize: 1,
+        maxCapacity: 8,
+        entryFee: 0,
+        prize: 0,
+        description: 'A draft tournament, ready to publish.',
+        rules: '<p>Best of three. Report your result within ten minutes of the match.</p>',
+        startDate: new Date(base + 7 * DAY),
+        endDate: new Date(base + 8 * DAY),
       },
     },
   ]
@@ -424,9 +447,13 @@ async function buildTournament(blueprint, people, teams) {
   const id = tournament._id
 
   // Demo data is there to be browsed, so it skips the publishing fee: nobody is
-  // going to confirm a payment for a fixture at four in the morning.
-  tournament.publishState = 'published'
-  await tournament.save()
+  // going to confirm a payment for a fixture at four in the morning. A `draft`
+  // blueprint is the exception — it exists to be published *by hand* during the
+  // demo walkthrough, so it stays exactly as `createTournament` left it.
+  if (blueprint.state !== 'draft') {
+    tournament.publishState = 'published'
+    await tournament.save()
+  }
 
   // Entrants pay their way in, exactly as they would through the API.
   for (const username of blueprint.entrants ?? []) {
