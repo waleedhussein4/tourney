@@ -253,9 +253,44 @@ inactive until `SENTRY_DSN` and `VITE_SENTRY_DSN` are set as above; no code
 change needed to enable them.
 
 **Health.** `GET /api/health` is public and returns `200` with
-`{"status":"ok","database":"connected"}` when the database is reachable, and
-a non-`200` when it is not. It takes no arguments and touches no user data,
-so it is safe to poll from whatever external monitor you prefer.
+`{"status":"ok","database":"connected","emailConfigured":true,"paymentsEnabled":true}`
+when the database is reachable, and a non-`200` when it is not. `status` and
+`database` keep their exact shape — an uptime monitor may depend on them.
+`emailConfigured` and `paymentsEnabled` are booleans only (no secrets, no
+version numbers) so a misconfigured deploy — Resend or Paddle credentials
+missing or half-set — is visible from a `curl`, not just from reading
+container logs. It takes no arguments and touches no user data, so it is safe
+to poll from whatever external monitor you prefer.
+
+**Request ids and logging.** Every request gets an id — the inbound
+`x-request-id` header if the caller sent one, otherwise a generated one — and
+that id comes back on the response's `x-request-id` header, is attached to
+the Sentry scope, and is included on the one structured JSON log line the
+server writes per request (method, path, status, duration). So when a user
+reports "it broke," ask for the `x-request-id` from their network tab (or
+just the time) and grep container logs for it, or search Sentry for the
+`request_id` tag. Log lines never include request bodies, cookies, tokens, or
+email addresses.
+
+## Reading container logs
+
+**`wrangler tail` shows Worker logs only.** It does NOT show anything the
+Container logs — not `console.log`/the structured request logs above, not an
+uncaught exception, not a container crash. Assuming `wrangler tail` covers
+the API cost about an hour once, chasing a "silent" failure that was sitting
+in the Container's own logs the whole time.
+
+To see what the Express app actually logged:
+
+1. Cloudflare dashboard → Workers & Pages → the Worker → **Containers** tab →
+   select the running container → **Logs** tab.
+2. Each line is the JSON the logger wrote (`level`, `message`, `time`, and for
+   request lines `requestId`, `method`, `path`, `status`, `durationMs`) — filter
+   or search by any of those fields in the dashboard's log viewer.
+3. For a crash specifically: a container that fails to boot or dies mid-request
+   shows up here as its own log entry (or the container simply stops and
+   restarts), not as a Worker error — `wrangler tail` stays quiet the entire
+   time.
 
 ---
 
