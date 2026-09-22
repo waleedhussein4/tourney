@@ -6,6 +6,14 @@ import { UNPUBLISHED } from '../../config/publishStates.js'
 import { assertMayPublish } from '../subscriptions/subscription.service.js'
 import { ApiError } from '../../utils/ApiError.js'
 import { sanitizeRichText, toPlainText } from '../../utils/text.js'
+import {
+  notifyApplicationDecided,
+  notifyMatchScheduled,
+  notifyResultConfirmed,
+  notifyResultDisputed,
+  notifyTournamentEnded,
+  notifyTournamentPublished,
+} from '../notifications/notification.service.js'
 
 // --- loading ----------------------------------------------------------------
 
@@ -186,6 +194,7 @@ export async function publishTournament(tournamentId, hostId) {
 
   tournament.publishState = 'published'
   await tournament.save()
+  await notifyTournamentPublished(tournament)
   return tournament
 }
 
@@ -448,6 +457,7 @@ export async function acceptApplication(tournamentId, hostId, applicationId) {
 
   tournament.applications.pull({ _id: applicationId })
   await tournament.save()
+  await notifyApplicationDecided(tournament, application, true)
 
   return tournament
 }
@@ -460,6 +470,7 @@ export async function rejectApplication(tournamentId, hostId, applicationId) {
 
   tournament.applications.pull({ _id: applicationId })
   await tournament.save()
+  await notifyApplicationDecided(tournament, application, false)
 
   return tournament
 }
@@ -620,6 +631,7 @@ export async function scheduleMatches(tournamentId, hostId, matches) {
   const tournament = await loadAsHost(tournamentId, hostId)
   if (tournament.type !== 'brackets') throw ApiError.badRequest('This is not a bracket tournament')
 
+  const scheduled = []
   for (const { id, scheduledAt } of matches) {
     const match = tournament.matches.find((entry) => entry.id === id)
     if (!match) throw ApiError.badRequest(`${id} is not a match in this tournament`)
@@ -633,9 +645,13 @@ export async function scheduleMatches(tournamentId, hostId, matches) {
 
     match.scheduledAt = scheduledAt
     if (match.state === 'pending') match.state = 'scheduled'
+    scheduled.push(match)
   }
 
   await tournament.save()
+  for (const match of scheduled) {
+    await notifyMatchScheduled(tournament, match)
+  }
   return tournament
 }
 
@@ -744,6 +760,8 @@ export async function confirmMatch(tournamentId, userId, matchId, agree) {
   }
 
   await tournament.save()
+  if (agree) await notifyResultConfirmed(tournament, match)
+  else await notifyResultDisputed(tournament, match)
   return tournament
 }
 
@@ -801,6 +819,7 @@ export async function endTournament(tournamentId, hostId) {
 
   tournament.hasEnded = true
   await tournament.save()
+  await notifyTournamentEnded(tournament)
 
   return { tournament, winners: winnersOf(tournament) }
 }

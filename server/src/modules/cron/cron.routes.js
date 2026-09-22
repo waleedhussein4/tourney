@@ -5,6 +5,7 @@ import { cronLimiter } from '../../middleware/rateLimits.js'
 import { ApiError } from '../../utils/ApiError.js'
 import { asyncHandler } from '../../utils/asyncHandler.js'
 import { clearDemoData, seedDemoData } from '../../../scripts/seed-data.js'
+import { runReminderSweep } from '../notifications/notification.service.js'
 
 export const cronRouter = Router()
 
@@ -82,3 +83,27 @@ const reseed = asyncHandler(async (req, res) => {
 // hand.
 cronRouter.get('/reseed', cronLimiter, reseed)
 cronRouter.post('/reseed', cronLimiter, reseed)
+
+/**
+ * The notification reminder sweep: tournaments starting within a day, and
+ * matches starting within an hour. Guarded the same way the reseed is —
+ * `CRON_SECRET` as a bearer token, rate limited.
+ *
+ * `wrangler.jsonc` only fires one Cron Trigger, daily at 04:00 UTC. That cadence
+ * is enough for the 24-hour tournament reminder, but not for the 1-hour match
+ * reminder — a trigger that only fires once a day cannot deliver something
+ * timed to an hour's notice. Wiring an hourly trigger for this route is
+ * outside this module's scope (`wrangler.jsonc` and `worker/index.js` are not
+ * touched here); this endpoint is ready for one.
+ */
+const notifySweep = asyncHandler(async (req, res) => {
+  assertCronAuthorised(req.get('authorization'), config.cronSecret)
+
+  const startedAt = Date.now()
+  const result = await runReminderSweep()
+
+  res.json({ ok: true, ...result, durationMs: Date.now() - startedAt })
+})
+
+cronRouter.get('/notify-sweep', cronLimiter, notifySweep)
+cronRouter.post('/notify-sweep', cronLimiter, notifySweep)
