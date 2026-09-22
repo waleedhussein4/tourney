@@ -68,7 +68,7 @@ export const startTournament = (id) => post(`/api/tournaments/${id}/start`)
 
 export const endTournament = (id) => post(`/api/tournaments/${id}/end`)
 
-/** Winners by match index; `null` where the result is not in yet. */
+/** `[{ id, winner }]` — the winner of each match, by match id; `winner: null` clears it. */
 export const saveMatches = (id, matches) => patch(`/api/tournaments/${id}/matches`, { matches })
 
 /** Score and elimination edits, by participant id. */
