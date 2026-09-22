@@ -30,6 +30,26 @@ async function usernamesFor(tournaments) {
   return new Map(users.map((user) => [String(user._id), user.username]))
 }
 
+/**
+ * Bracket matches for the client. `react-brackets` wants a tree of rounds and
+ * seeds — that shaping happens client-side in `buildRounds.js` — this just
+ * turns each match subdocument into plain, string-keyed data.
+ */
+function matchesOf(tournament) {
+  return tournament.matches.map((match) => ({
+    id: String(match._id),
+    round: match.round,
+    slot: match.slot,
+    participants: match.participants.map((id) => (id ? String(id) : null)),
+    scores: match.scores,
+    winner: match.winner ? String(match.winner) : null,
+    state: match.state,
+    scheduledAt: match.scheduledAt,
+    reportedBy: match.reportedBy ? String(match.reportedBy) : null,
+    confirmedBy: match.confirmedBy ? String(match.confirmedBy) : null,
+  }))
+}
+
 function standing(entry) {
   return { score: entry.score ?? 0, eliminated: Boolean(entry.eliminated) }
 }
@@ -112,7 +132,7 @@ export async function toPublicView(tournament, viewerId) {
     publishState: tournament.publishState,
     bracketsShuffled: tournament.bracketsShuffled,
     bracketOrder: tournament.bracketOrder,
-    matches: tournament.matches,
+    matches: matchesOf(tournament),
     updates: tournament.updates,
     contactInfo: tournament.contactInfo,
     applicationForm: tournament.applicationForm,
