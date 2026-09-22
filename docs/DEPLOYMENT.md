@@ -148,22 +148,22 @@ codebase's control.
 
 ## Environment variables / Worker secrets
 
-| Name                                  | Where           | Required | Notes                                                                                                          |
-| -------------------------------------- | --------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-| `MONGODB_URI`                          | Worker secret, local server | **yes** | Atlas connection string, including the `/tourney` database name. Alias: `DATABASE_URL`.               |
-| `JWT_SECRET`                           | Worker secret, local server | **yes** | Signs the auth cookie. At least 32 characters in production. Alias: `SECRET`.                          |
-| `NODE_ENV`                             | set in the container | —   | `production` in the deployed image. Controls the cookie's `Secure` flag and request logging.                    |
-| `CLIENT_URL`                           | —                | no       | **Leave unset.** Setting it registers a `cors()` allowlist a same-origin deployment doesn't need. Alias: `FRONTEND_URL`. |
-| `PORT`                                 | local only       | no       | Defaults to `2000`, which is also what the container's `EXPOSE`/`defaultPort` use.                              |
-| `CRON_SECRET`                          | Worker secret    | no       | Bearer token the Cron Trigger presents to `/api/cron/reseed`. Unset means the route refuses to run at all. At least 16 characters. |
-| `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_CLIENT_TOKEN`, `PADDLE_PRICE_PLAN` | Worker secret | no | Card payments for the publishing fee. Unset, the app takes no cards. |
-| `PADDLE_ENV`                           | Worker secret    | no       | `sandbox` (default) or `production`.                                                                            |
-| `SEED_DEMO_PASSWORD`, `SEED_ADMIN_PASSWORD`, `SEED_PASSWORD` | Worker secret, local | no | Demo account passwords. `SEED_ADMIN_PASSWORD` is not publishable.                                     |
-| `SEED_DEMO_EMAIL`, `SEED_ADMIN_EMAIL`  | Worker secret, local | no  | Default to `demo@tourney.app` and `admin@tourney.app`.                                                          |
-| `VITE_API_URL`                         | client build     | no       | **Leave empty.** An empty value makes the client call a relative `/api`.                                        |
-| `VITE_FRONTEND_URL`                    | client build     | no       | Only used to build team invite links.                                                                           |
-| `SENTRY_DSN`                           | Worker secret     | no       | Optional server error tracking; unset, `Sentry.init` never runs.                                                |
-| `VITE_SENTRY_DSN`                      | GitHub Actions secret | no   | Optional client error tracking. Build-time only — baked into the bundle by the deploy workflow, not a Worker secret. |
+| Name                                                                                  | Where                       | Required | Notes                                                                                                                              |
+| ------------------------------------------------------------------------------------- | --------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `MONGODB_URI`                                                                         | Worker secret, local server | **yes**  | Atlas connection string, including the `/tourney` database name. Alias: `DATABASE_URL`.                                            |
+| `JWT_SECRET`                                                                          | Worker secret, local server | **yes**  | Signs the auth cookie. At least 32 characters in production. Alias: `SECRET`.                                                      |
+| `NODE_ENV`                                                                            | set in the container        | —        | `production` in the deployed image. Controls the cookie's `Secure` flag and request logging.                                       |
+| `CLIENT_URL`                                                                          | —                           | no       | **Leave unset.** Setting it registers a `cors()` allowlist a same-origin deployment doesn't need. Alias: `FRONTEND_URL`.           |
+| `PORT`                                                                                | local only                  | no       | Defaults to `2000`, which is also what the container's `EXPOSE`/`defaultPort` use.                                                 |
+| `CRON_SECRET`                                                                         | Worker secret               | no       | Bearer token the Cron Trigger presents to `/api/cron/reseed`. Unset means the route refuses to run at all. At least 16 characters. |
+| `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_CLIENT_TOKEN`, `PADDLE_PRICE_PLAN` | Worker secret               | no       | Card payments for the publishing fee. Unset, the app takes no cards.                                                               |
+| `PADDLE_ENV`                                                                          | Worker secret               | no       | `sandbox` (default) or `production`.                                                                                               |
+| `SEED_DEMO_PASSWORD`, `SEED_ADMIN_PASSWORD`, `SEED_PASSWORD`                          | Worker secret, local        | no       | Demo account passwords. `SEED_ADMIN_PASSWORD` is not publishable.                                                                  |
+| `SEED_DEMO_EMAIL`, `SEED_ADMIN_EMAIL`                                                 | Worker secret, local        | no       | Default to `demo@tourney.app` and `admin@tourney.app`.                                                                             |
+| `VITE_API_URL`                                                                        | client build                | no       | **Leave empty.** An empty value makes the client call a relative `/api`.                                                           |
+| `VITE_FRONTEND_URL`                                                                   | client build                | no       | Only used to build team invite links.                                                                                              |
+| `SENTRY_DSN`                                                                          | Worker secret               | no       | Optional server error tracking; unset, `Sentry.init` never runs.                                                                   |
+| `VITE_SENTRY_DSN`                                                                     | GitHub Actions secret       | no       | Optional client error tracking. Build-time only — baked into the bundle by the deploy workflow, not a Worker secret.               |
 
 Set names only, never values, in this file or any committed file — every
 secret above goes in as `wrangler secret put <NAME>`, which prompts

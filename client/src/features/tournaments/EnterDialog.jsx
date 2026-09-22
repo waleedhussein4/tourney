@@ -66,9 +66,7 @@ export function EnterDialog({ tournament, mode, open, onClose }) {
       onClose={onClose}
       title={isApplication ? `Apply to ${tournament.title}` : `Join ${tournament.title}`}
       description={
-        isApplication
-          ? 'The host reviews applications and decides who gets a slot.'
-          : undefined
+        isApplication ? 'The host reviews applications and decides who gets a slot.' : undefined
       }
       footer={
         <>

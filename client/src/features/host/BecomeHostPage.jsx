@@ -38,9 +38,7 @@ export function BecomeHostPage() {
         <ul className={styles.list}>
           <li>Run brackets or battle royales, solo or in teams</li>
           <li>Set your own entry fees and prize table</li>
-          <li>
-            One tournament is free to run at a time; a monthly subscription lifts that limit
-          </li>
+          <li>One tournament is free to run at a time; a monthly subscription lifts that limit</li>
         </ul>
 
         <Button variant="primary" onClick={() => upgrade.mutate()} loading={upgrade.isPending}>
