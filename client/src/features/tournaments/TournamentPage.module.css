@@ -153,55 +153,6 @@
   padding-left: var(--space-5);
 }
 
-.prizeSingle {
-  font-family: var(--font-display);
-  font-stretch: var(--stretch-display);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--text-3xl);
-  font-weight: 700;
-  letter-spacing: var(--tracking-tight);
-  color: var(--money);
-}
-
-.prizeSingle span {
-  display: block;
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: 400;
-  letter-spacing: normal;
-  color: var(--text-muted);
-}
-
-.prizeList {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.prizeList li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--border);
-}
-
-.prizeList span {
-  font-family: var(--font-display);
-  font-stretch: var(--stretch-display);
-  font-weight: 650;
-  color: var(--text-faint);
-}
-
-.prizeList strong {
-  font-family: var(--font-display);
-  font-stretch: var(--stretch-display);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-strong);
-}
-
 .updates {
   list-style: none;
   padding: 0;

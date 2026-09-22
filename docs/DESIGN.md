@@ -74,9 +74,9 @@ makes the app look like _this_ product rather than a component library. Body
 text stays in Instrument Sans, which is narrower and quieter and gets out of the
 way.
 
-Numbers are part of the personality: scores, entry fees, and prize pools
-are set in Archivo with `font-variant-numeric: tabular-nums`, so a column of
-figures lines up and a changing balance does not shuffle the layout.
+Numbers are part of the personality: scores and capacities are set in Archivo
+with `font-variant-numeric: tabular-nums`, so a column of figures lines up and
+a changing count does not shuffle the layout.
 
 The scale is roughly 1.22 per step, fluid at the two sizes that carry a page
 (`--text-3xl`, `--text-4xl`) so a hero heading works at 360px and at 1440px

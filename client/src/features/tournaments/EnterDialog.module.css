@@ -4,19 +4,6 @@
   gap: var(--space-4);
 }
 
-.cost {
-  color: var(--text);
-  font-size: var(--text-sm);
-}
-
-.cost strong {
-  font-family: var(--font-display);
-  font-stretch: var(--stretch-display);
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  color: var(--money);
-}
-
 .warning {
   padding: var(--space-3);
   background: color-mix(in srgb, var(--warning) 10%, transparent);

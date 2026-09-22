@@ -154,7 +154,7 @@ export function LifecycleSection({ tournament }) {
         loading={cancel.isPending}
         destructive
         title="Cancel this tournament?"
-        description="The tournament is deleted. Any entry fees are between you and your players — settle those off-platform."
+        description="The tournament is deleted. This cannot be undone."
         confirmLabel="Cancel it"
         cancelLabel="Keep it"
       />

@@ -8,10 +8,10 @@ This document is written against the route definitions and the zod schemas in
 `server/src/app.js` and `server/src/modules/*`. Those files are the source of
 truth — if the two ever disagree, the code is right and this file is stale.
 
-The site never moves money. Entry fees and prizes are USD amounts the host
-declares and settles directly with players, outside the app. The only payment
-the app itself takes is its own $5/month hosting subscription — see
-[Billing](#billing) and [DECISIONS.md](DECISIONS.md).
+The site never moves money between hosts and players — it only tracks
+tournaments, entrants, and standings. The only payment the app itself takes is
+its own $5/month hosting subscription — see [Billing](#billing) and
+[DECISIONS.md](DECISIONS.md).
 
 ---
 
@@ -211,16 +211,15 @@ so the only failures worth reporting are the ones a retry could fix.
 
 The catalogue. **Published tournaments only** — see [Publishing](#publishing).
 
-| Query                        |                                  |                               |
-| ---------------------------- | -------------------------------- | ----------------------------- |
-| `page`                       | integer ≥ 1                      | default 1                     |
-| `limit`                      | integer 1–50                     | default 12                    |
-| `search`                     | string ≤ 120 chars               | matches title and description |
-| `category`                   | one of the 13 category slugs     |                               |
-| `type`                       | `brackets` \| `battle royale`    |                               |
-| `accessibility`              | `open` \| `application required` |                               |
-| `status`                     | `upcoming` \| `live` \| `ended`  |                               |
-| `minEntryFee`, `maxEntryFee` | integer ≥ 0                      |                               |
+| Query           |                                  |                               |
+| --------------- | -------------------------------- | ----------------------------- |
+| `page`          | integer ≥ 1                      | default 1                     |
+| `limit`         | integer 1–50                     | default 12                    |
+| `search`        | string ≤ 120 chars               | matches title and description |
+| `category`      | one of the 13 category slugs     |                               |
+| `type`          | `brackets` \| `battle royale`    |                               |
+| `accessibility` | `open` \| `application required` |                               |
+| `status`        | `upcoming` \| `live` \| `ended`  |                               |
 
 ```json
 {
@@ -251,8 +250,8 @@ Everything the caller hosts or competes in. `200 { tournaments }`.
 
 ### `GET /api/tournaments/:tournamentId` — optional
 
-The full tournament: participants, matches, prizes, updates, contact info, and
-a `viewer` object — `{ isHost, isJoined, hasApplied, isAccepted }` — computed
+The full tournament: participants, matches, standings, updates, contact info,
+and a `viewer` object — `{ isHost, isJoined, hasApplied, isAccepted }` — computed
 by the server. The client never infers those from the participant list.
 
 `404` if there is no such tournament — or if it is not published yet and the
@@ -270,19 +269,15 @@ Shared fields:
 | `category`             | a category slug                                                                                                      |
 | `accessibility`        | `open` \| `application required`                                                                                     |
 | `teamSize`             | integer 1–16; `1` is a solo tournament                                                                               |
-| `entryFee`             | a declared USD amount, ≥ 0 — settled between host and player, never charged by the app                               |
 | `description`, `rules` | HTML, sanitised server-side. Limits are on the _visible_ text — 200 and 800 characters — not the markup              |
 | `contactInfo`          | `{ email?, phone?, socialMedia? { discord?, instagram?, twitter?, facebook? } }`, strict — unknown keys are an error |
 | `applicationForm`      | up to 10 question labels, at most 80 characters each; **required** when `accessibility` is `application required`    |
 | `startDate`, `endDate` | dates; the end must be after the start                                                                               |
 
 `type: "brackets"` adds `maxCapacity` (a **power of two**, 2–256 — a single
-elimination bracket cannot pair an odd round) and `prize`, a declared USD
-amount.
+elimination bracket cannot pair an odd round).
 
-`type: "battle royale"` adds `maxCapacity` (2–1000) and `prizes`, an array of
-`{ rank, prize }` — at least one, each rank at most once, no rank beyond the
-capacity, and each `prize` a declared USD amount.
+`type: "battle royale"` adds `maxCapacity` (2–1000).
 
 `201 { tournament }`, with `publishState: "draft"`. `403` if the account is not
 a host.
@@ -290,7 +285,7 @@ a host.
 ### `PATCH /api/tournaments/:tournamentId` — host
 
 Only `title`, `description`, `rules`, `contactInfo`, `startDate`, `endDate`.
-Strict: any other key is a `400`. Format, capacity, and prizes are deliberately
+Strict: any other key is a `400`. Format and capacity are deliberately
 immutable once the tournament exists, because entrants signed up on the
 strength of them.
 
@@ -298,13 +293,10 @@ strength of them.
 
 ### `DELETE /api/tournaments/:tournamentId` — host
 
-Cancels it. Entry fees were between the host and their entrants and were never
-held by the app, so there is nothing here to refund — whoever collected the
-money settles it the way they collected it. `200 { entrants }`, the count of
-whoever was signed up.
+Cancels it. `200 { entrants }`, the count of whoever was signed up.
 
-`400` once it has started: at that point the result is what the prizes are
-for.
+`400` once it has started — at that point there is a result to record instead
+of a cancellation.
 
 ### `POST /api/tournaments/:tournamentId/updates` — host
 
@@ -345,8 +337,7 @@ hiding a tournament mid-event isn't something this endpoint allows.
 ### Entering
 
 Every route here answers `404` for a tournament that is not published. No
-money moves on any of them — the entry fee is what the host collects from the
-player themselves; the site only records who is in.
+money moves on any of them — the site only records who is in.
 
 #### `POST /api/tournaments/:tournamentId/join/solo` — auth
 
@@ -423,9 +414,8 @@ battle-royale scoreboard. Team entries may carry per-member `members` rows.
 
 #### `POST /api/tournaments/:tournamentId/end` — host
 
-Ends the tournament and records who won — a bracket's champion, or the ranked
-prize table for a battle royale. Paying the prize is the host's to do, with
-the people who were standing in front of them; the app never holds it.
+Ends the tournament and records who won — a bracket's champion, or the top of
+the leaderboard for a battle royale.
 
 `200 { tournament, winners }`. `400` if a bracket's final has no recorded
 winner yet, or the tournament hasn't started or has already ended.

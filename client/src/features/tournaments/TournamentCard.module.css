@@ -97,11 +97,6 @@
   font-size: var(--text-sm);
 }
 
-/* Prize money is the number a reader is looking for, so it is the one in colour. */
-.prize dd {
-  color: var(--money);
-}
-
 @media (max-width: 640px) {
   .facts dt {
     font-size: var(--text-sm);

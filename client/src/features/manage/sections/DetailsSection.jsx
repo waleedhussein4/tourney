@@ -16,9 +16,9 @@ function toLocalInput(iso) {
 /**
  * The editable half of a tournament.
  *
- * Only the fields a host may still change are here — the format, capacity and
- * prizes are fixed once people can see them, because entrants decide on the
- * strength of those. The server enforces the same list with a strict schema.
+ * Only the fields a host may still change are here — the format and capacity
+ * are fixed once people can see them, because entrants decide on the strength
+ * of those. The server enforces the same list with a strict schema.
  */
 export function DetailsSection({ tournament }) {
   const locked = tournament.hasStarted

@@ -55,7 +55,7 @@ export const COPY = {
     shots: [
       {
         src: '/media/tournament.png',
-        caption: 'The tournament page, with the bracket and the prize pool',
+        caption: 'The tournament page, with the bracket and the standings',
       },
       { src: '/media/browse.png', caption: 'Your tournament listed alongside the rest' },
       {
@@ -66,7 +66,7 @@ export const COPY = {
 
     pricingTitle: 'What it costs',
     pricingBody:
-      'Hosting is free. Running more than one tournament live at the same time needs a subscription — no cut of your entry fees, ever.',
+      'Hosting is free. Running more than one tournament live at the same time needs a subscription.',
     tierHeading: 'Tournament size',
     priceHeading: 'Fee',
     pricingLine: (count, amount, interval) =>
@@ -77,16 +77,8 @@ export const COPY = {
     faqTitle: 'The questions we get',
     faq: [
       {
-        q: 'Do you take a cut of the entry fees?',
-        a: 'No. Entry fees and prizes are between you and your players — the site never holds or moves that money.',
-      },
-      {
         q: 'What if I only run one tournament?',
         a: 'Then hosting costs nothing. The subscription only matters once you want a second tournament live at the same time.',
-      },
-      {
-        q: 'Can players pay their entry fee in cash?',
-        a: 'Yes — that is between you and them. The site tracks who has entered; how they paid you is your business.',
       },
       {
         q: 'Is it in Arabic for my players?',
@@ -134,14 +126,13 @@ export const COPY = {
 
     screenshotsTitle: 'ما يراه لاعبوك',
     shots: [
-      { src: '/media/tournament.png', caption: 'صفحة البطولة، مع الجدول ومجموع الجوائز' },
+      { src: '/media/tournament.png', caption: 'صفحة البطولة، مع الجدول والترتيب' },
       { src: '/media/browse.png', caption: 'بطولتك معروضة إلى جانب البطولات الأخرى' },
       { src: '/media/manage.png', caption: 'لوحتك — المشتركون والنتائج في شاشة واحدة' },
     ],
 
     pricingTitle: 'الكلفة',
-    pricingBody:
-      'التنظيم مجاني. تشغيل أكثر من بطولة واحدة في الوقت نفسه يحتاج اشتراكاً — بلا أي نسبة من رسوم اشتراك لاعبيك.',
+    pricingBody: 'التنظيم مجاني. تشغيل أكثر من بطولة واحدة في الوقت نفسه يحتاج اشتراكاً.',
     tierHeading: 'حجم البطولة',
     priceHeading: 'الرسوم',
     pricingLine: (count, amount, interval) =>
@@ -152,16 +143,8 @@ export const COPY = {
     faqTitle: 'أسئلة تصلنا',
     faq: [
       {
-        q: 'هل تأخذون نسبة من رسوم الاشتراك؟',
-        a: 'لا. رسوم الاشتراك والجوائز أمر بينك وبين لاعبيك — الموقع لا يحفظ هذه الأموال ولا يحرّكها.',
-      },
-      {
         q: 'ماذا لو أدرت بطولة واحدة فقط؟',
         a: 'عندها التنظيم مجاني بالكامل. الاشتراك يهم فقط عندما تريد بطولة ثانية في الوقت نفسه.',
-      },
-      {
-        q: 'هل يمكن للّاعبين دفع الاشتراك نقداً؟',
-        a: 'نعم، هذا بينك وبينهم. الموقع يتابع من سجّل، وطريقة الدفع تعود لك.',
       },
       {
         q: 'هل التطبيق بالعربية للّاعبين؟',

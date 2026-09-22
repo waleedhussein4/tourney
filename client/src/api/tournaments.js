@@ -6,8 +6,7 @@ import { del, get, patch, post } from './client.js'
  * The browse list.
  *
  * @param {{page?: number, limit?: number, search?: string, category?: string,
- *          type?: string, accessibility?: string, minEntryFee?: number,
- *          maxEntryFee?: number, status?: string}} params
+ *          type?: string, accessibility?: string, status?: string}} params
  */
 export const listTournaments = (params, options) =>
   get('/api/tournaments', { ...options, query: params })

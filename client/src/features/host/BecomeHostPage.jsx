@@ -31,13 +31,13 @@ export function BecomeHostPage() {
       <Card className={styles.card}>
         <h1>Become a host</h1>
         <p className={styles.lead}>
-          Hosting lets you create tournaments, set the prizes, review applications, record the
-          results, and pay out the winners. It is free to become a host.
+          Hosting lets you create tournaments, review applications, and record the results. It is
+          free to become a host.
         </p>
 
         <ul className={styles.list}>
           <li>Run brackets or battle royales, solo or in teams</li>
-          <li>Set your own entry fees and prize table</li>
+          <li>Open-join or application-gated entry</li>
           <li>One tournament is free to run at a time; a monthly subscription lifts that limit</li>
         </ul>
 

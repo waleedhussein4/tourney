@@ -25,9 +25,6 @@ const enrolledTeamSchema = new Schema({
   // Denormalised so a bracket still reads correctly after a team is renamed or
   // deleted — the tournament records who competed, not who exists today.
   teamName: { type: String, required: true },
-  // Who paid the entry fee, so a refund goes back to the right account even if
-  // leadership changes afterwards.
-  paidBy: { type: String, ref: 'User', required: true },
   members: { type: [memberSchema], default: [] },
 })
 
@@ -66,25 +63,6 @@ const tournamentSchema = new Schema(
      * checks, and bracket-slot arithmetic alike.
      */
     maxCapacity: { type: Number, required: true, min: 2 },
-
-    /**
-     * What an entrant pays the host, in dollars.
-     *
-     * Declared, not collected: the money changes hands between the host and
-     * their players, in cash or by transfer, exactly as it did before this site
-     * existed. Nothing here ever holds it. That is deliberate — holding other
-     * people's money is a licensed activity, and running the brackets is the
-     * part organisers actually want help with.
-     */
-    entryFee: { type: Number, required: true, min: 0 },
-
-    /** Brackets: what the winner is promised, in dollars. Paid by the host. */
-    prize: { type: Number, min: 0 },
-    /** Battle royale: what each finishing rank is promised. */
-    prizes: {
-      type: [{ _id: false, rank: { type: Number, min: 1 }, prize: { type: Number, min: 0 } }],
-      default: undefined,
-    },
 
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
@@ -168,17 +146,6 @@ tournamentSchema.index({ 'enrolledTeams.members.userId': 1 })
 /** True for a tournament played by teams rather than individuals. */
 tournamentSchema.virtual('isTeamBased').get(function isTeamBased() {
   return this.teamSize > 1
-})
-
-/** Everything promised across the prize table, for display. */
-tournamentSchema.virtual('totalPrize').get(function totalPrize() {
-  if (this.type === 'brackets') return this.prize ?? 0
-  return (this.prizes ?? []).reduce((sum, entry) => sum + entry.prize, 0)
-})
-
-/** What one entry costs the payer: the fee per player, times the roster. */
-tournamentSchema.virtual('entryCost').get(function entryCost() {
-  return this.entryFee * this.teamSize
 })
 
 /** The enrolment array in play for this tournament's shape. */

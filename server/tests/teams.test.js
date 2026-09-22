@@ -217,8 +217,7 @@ describe('leader-only operations', () => {
 
 // A tournament records the entry and snapshots its roster the moment a team enters
 // — before it starts. Letting the leader empty that roster in between would
-// leave prizes owed to people who are no longer on the team, and the tournament
-// holding an entrant that no longer exists.
+// leave the tournament holding an entrant that no longer exists.
 describe('roster changes while the team is entered but the tournament has not started', () => {
   let team
   let host
@@ -232,9 +231,6 @@ describe('roster changes while the team is entered but the tournament has not st
       type: 'battle royale',
       teamSize: 2,
       maxCapacity: 2,
-      entryFee: 0,
-      prize: undefined,
-      prizes: [{ rank: 1, prize: 0 }],
     })
 
     await ada.agent
@@ -281,9 +277,6 @@ describe('roster changes while the team is competing', () => {
       type: 'battle royale',
       teamSize: 2,
       maxCapacity: 2,
-      entryFee: 0,
-      prize: undefined,
-      prizes: [{ rank: 1, prize: 0 }],
     })
 
     await ada.agent

@@ -7,10 +7,9 @@ import { createTournament, listCategories, tournamentKeys } from '/src/api/tourn
 import { PageHeader, PageShell } from '/src/components/layout/PageShell.jsx'
 import { Button, Card, Field, Input, Select, Textarea } from '/src/components/ui/index.js'
 import { RichTextField } from '/src/components/ui/RichTextField.jsx'
-import { formatMoney } from '/src/lib/format.js'
 import { richTextLimit } from '/src/lib/richText.js'
 import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
-import { BRACKET_SIZES, toCreatePayload, totalPrize, visibleSteps } from './wizardSteps.js'
+import { BRACKET_SIZES, toCreatePayload, visibleSteps } from './wizardSteps.js'
 import styles from './CreateTournamentPage.module.css'
 
 /** Tomorrow, and the day after, as the datetime-local inputs want them. */
@@ -36,11 +35,8 @@ export function CreateTournamentPage() {
       category: '',
       description: '',
       rules: '',
-      prize: 100,
-      prizes: [{ prize: 100 }],
       accessibility: 'open',
       maxCapacity: 8,
-      entryFee: 10,
       applicationForm: [{ label: '' }],
       contactEmail: '',
       contactPhone: '',
@@ -166,7 +162,7 @@ function StepFields({ step, form, categories, values }) {
               value="brackets"
               checked={values.type === 'brackets'}
               title="Brackets"
-              description="Single elimination. One winner takes the prize."
+              description="Single elimination. One winner takes the title."
               onSelect={() => {
                 setValue('type', 'brackets')
                 // Bracket capacities are powers of two; carry over the nearest.
@@ -177,7 +173,7 @@ function StepFields({ step, form, categories, values }) {
               value="battle royale"
               checked={values.type === 'battle royale'}
               title="Battle royale"
-              description="Ranked by score. Prizes go down a table of places."
+              description="Ranked by score across a leaderboard."
               onSelect={() => {
                 setValue('type', 'battle royale')
                 setValue('maxCapacity', 20)
@@ -271,30 +267,6 @@ function StepFields({ step, form, categories, values }) {
         </>
       )
 
-    case 'prizes':
-      return values.type === 'brackets' ? (
-        <Field
-          label="Winner takes"
-          required
-          hint="What you tell entrants they'll win. Paid by you, off-platform."
-          error={errors.prize?.message}
-        >
-          {(field) => (
-            <Input
-              {...field}
-              type="number"
-              min="0"
-              {...register('prize', {
-                required: 'Set a prize',
-                min: { value: 0, message: 'Cannot be negative' },
-              })}
-            />
-          )}
-        </Field>
-      ) : (
-        <PrizeTable control={control} register={register} errors={errors} />
-      )
-
     case 'entry':
       return (
         <>
@@ -304,7 +276,7 @@ function StepFields({ step, form, categories, values }) {
               value="open"
               checked={values.accessibility === 'open'}
               title="Anyone"
-              description="Entrants join directly and pay the fee."
+              description="Entrants join directly."
               onSelect={() => setValue('accessibility', 'open')}
             />
             <Choice
@@ -349,29 +321,6 @@ function StepFields({ step, form, categories, values }) {
                 />
               )
             }
-          </Field>
-
-          <Field
-            label="Entry fee, per player"
-            required
-            hint={
-              values.teamSize > 1
-                ? `What a team leader owes you for each of the ${values.teamSize} players, collected off-platform.`
-                : 'What entrants owe you, collected off-platform. Set 0 to make it free.'
-            }
-            error={errors.entryFee?.message}
-          >
-            {(field) => (
-              <Input
-                {...field}
-                type="number"
-                min="0"
-                {...register('entryFee', {
-                  required: 'Set a fee, or 0',
-                  min: { value: 0, message: 'Cannot be negative' },
-                })}
-              />
-            )}
           </Field>
 
           <div className={styles.dates}>
@@ -453,49 +402,6 @@ function Choice({ value, checked, title, description, onSelect }) {
   )
 }
 
-function PrizeTable({ control, register, errors }) {
-  const { fields, append, remove } = useFieldArray({ control, name: 'prizes' })
-
-  return (
-    <div className={styles.repeater}>
-      <p className={styles.repeaterIntro}>
-        Prizes are paid down the leaderboard: first place takes the top row.
-      </p>
-
-      {fields.map((field, index) => (
-        <div className={styles.repeaterRow} key={field.id}>
-          <Field label={`Place ${index + 1}`} error={errors.prizes?.[index]?.prize?.message}>
-            {(inner) => (
-              <Input
-                {...inner}
-                type="number"
-                min="0"
-                {...register(`prizes.${index}.prize`, {
-                  required: 'Set an amount',
-                  min: { value: 0, message: 'Cannot be negative' },
-                })}
-              />
-            )}
-          </Field>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => remove(index)}
-            disabled={fields.length === 1}
-            aria-label={`Remove the prize for place ${index + 1}`}
-          >
-            Remove
-          </Button>
-        </div>
-      ))}
-
-      <Button size="sm" onClick={() => append({ prize: 0 })}>
-        Add a place
-      </Button>
-    </div>
-  )
-}
-
 function ApplicationBuilder({ control, register, errors }) {
   const { fields, append, remove } = useFieldArray({ control, name: 'applicationForm' })
 
@@ -552,8 +458,6 @@ function Review({ values, categories }) {
     ['Category', category?.name ?? '—'],
     ['Team size', values.teamSize > 1 ? `Teams of ${values.teamSize}` : 'Solo'],
     ['Capacity', `${values.maxCapacity} ${values.teamSize > 1 ? 'teams' : 'players'}`],
-    ['Entry fee', formatMoney(Number(values.entryFee) || 0)],
-    ['Prize pool', formatMoney(totalPrize(values))],
     ['Entry', values.accessibility === 'open' ? 'Anyone can join' : 'By application'],
     ['Starts', values.startDate?.replace('T', ' ') ?? '—'],
     ['Ends', values.endDate?.replace('T', ' ') ?? '—'],
@@ -570,8 +474,8 @@ function Review({ values, categories }) {
         ))}
       </dl>
       <p className={styles.reviewNote}>
-        You can edit the details, dates and rules until the tournament starts. The format, capacity
-        and prizes are fixed once it exists, because people enter on the strength of them.
+        You can edit the details, dates and rules until the tournament starts. The format and
+        capacity are fixed once it exists, because people enter on the strength of them.
       </p>
     </>
   )

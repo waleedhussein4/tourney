@@ -17,7 +17,6 @@ import {
   formatCapacity,
   formatCategory,
   formatDateTime,
-  formatMoney,
   formatType,
   tournamentStatus,
 } from '/src/lib/format.js'
@@ -28,8 +27,8 @@ import styles from './TournamentPage.module.css'
 
 /*
  * The two heaviest things on this page, loaded only when they are actually
- * needed. The header, the facts strip and the prize table — everything a reader
- * looks at first — render from the main bundle while these arrive.
+ * needed. The header and the facts strip — everything a reader looks at
+ * first — render from the main bundle while these arrive.
  *
  * `BracketView` pulls react-brackets, styled-components and a swipeable-views
  * dependency; a battle royale never loads any of it. `RichText` pulls
@@ -132,8 +131,6 @@ export function TournamentPage() {
       <HostNotice tournament={tournament} />
 
       <dl className={styles.facts}>
-        <Fact label="Prize pool" value={formatMoney(tournament.totalPrize)} accent />
-        <Fact label="Entry fee" value={formatMoney(tournament.entryFee)} />
         <Fact
           label="Entrants"
           value={formatCapacity({
@@ -170,7 +167,6 @@ export function TournamentPage() {
         </div>
 
         <aside className={styles.side}>
-          <PrizeCard tournament={tournament} />
           <UpdatesCard updates={tournament.updates} />
           <ContactCard contact={tournament.contactInfo} />
         </aside>
@@ -316,28 +312,6 @@ function RichTextCard({ title, html, empty }) {
       <Suspense fallback={<p className={styles.muted}>Loading…</p>}>
         <RichText html={html} empty={empty} />
       </Suspense>
-    </Card>
-  )
-}
-
-function PrizeCard({ tournament }) {
-  return (
-    <Card>
-      <h2 className={styles.sectionTitle}>Prizes</h2>
-      {tournament.type === 'brackets' ? (
-        <p className={styles.prizeSingle}>
-          {formatMoney(tournament.prize)} <span>to the winner</span>
-        </p>
-      ) : (
-        <ul className={styles.prizeList}>
-          {(tournament.prizes ?? []).map((entry) => (
-            <li key={entry.rank}>
-              <span>#{entry.rank}</span>
-              <strong>{formatMoney(entry.prize)}</strong>
-            </li>
-          ))}
-        </ul>
-      )}
     </Card>
   )
 }

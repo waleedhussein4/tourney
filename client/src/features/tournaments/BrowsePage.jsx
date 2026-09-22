@@ -29,8 +29,6 @@ function readFilters(searchParams) {
     type: searchParams.get('type') ?? EMPTY,
     accessibility: searchParams.get('accessibility') ?? EMPTY,
     status: searchParams.get('status') ?? EMPTY,
-    minEntryFee: searchParams.get('minEntryFee') ?? EMPTY,
-    maxEntryFee: searchParams.get('maxEntryFee') ?? EMPTY,
     page: Number(searchParams.get('page') ?? 1),
   }
 }
@@ -84,8 +82,6 @@ export function BrowsePage() {
         type: filters.type || undefined,
         accessibility: filters.accessibility || undefined,
         status: filters.status || undefined,
-        minEntryFee: filters.minEntryFee || undefined,
-        maxEntryFee: filters.maxEntryFee || undefined,
       }),
     // Keeps the previous page on screen while the next one loads, instead of
     // flashing the whole list away.
@@ -185,31 +181,6 @@ export function BrowsePage() {
               </Select>
             )}
           </Field>
-
-          <div className={styles.feeRange}>
-            <Field label="Min fee">
-              {(field) => (
-                <Input
-                  {...field}
-                  type="number"
-                  min="0"
-                  value={filters.minEntryFee}
-                  onChange={(event) => updateFilters({ minEntryFee: event.target.value })}
-                />
-              )}
-            </Field>
-            <Field label="Max fee">
-              {(field) => (
-                <Input
-                  {...field}
-                  type="number"
-                  min="0"
-                  value={filters.maxEntryFee}
-                  onChange={(event) => updateFilters({ maxEntryFee: event.target.value })}
-                />
-              )}
-            </Field>
-          </div>
 
           {hasFilters && (
             <Button

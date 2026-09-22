@@ -48,9 +48,9 @@ All below are from `docs/media/`; the same folder holds `docs/media/demo.gif`.
 | ![The home page](docs/media/home.png)                              | ![Browsing tournaments](docs/media/browse.png)                        |
 | **Home** — the bracket motif, and the category cards               | **Browse** — filters live in the URL, so a filtered list is shareable |
 | ![A tournament](docs/media/tournament.png)                         | ![Battle royale standings](docs/media/standings.png)                  |
-| **A bracket** — who advanced, who went out                         | **A battle royale** — score-ranked, with each rank's prize            |
+| **A bracket** — who advanced, who went out                         | **A battle royale** — score-ranked, with a live leaderboard           |
 | ![The host console](docs/media/manage.png)                         | ![The create wizard](docs/media/create.png)                           |
-| **The host console** — everything a host can change, in one screen | **Creating one** — format, details, prizes, entry, review             |
+| **The host console** — everything a host can change, in one screen | **Creating one** — format, details, entry, review                     |
 
 <div align="center">
   <img alt="Tourney on a phone" src="docs/media/mobile.png" width="300">
@@ -71,9 +71,6 @@ All below are from `docs/media/`; the same folder holds `docs/media/demo.gif`.
   leader. A team that has entered a tournament is frozen until it finishes.
 - **Open-join or application-gated.** A host can let anyone in, or review and
   accept applications first.
-- **Prizes, declared and settled off-platform.** A host states what a
-  tournament pays out; the site never holds or transfers that money —
-  winners and hosts settle it directly between themselves.
 - **Publishing and the subscription.** Your first live tournament is free.
   Running more than one at a time needs the Host plan — $5/month, unlimited
   live tournaments, cancel anytime.

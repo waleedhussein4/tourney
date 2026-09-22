@@ -14,14 +14,6 @@ export function TermsPage() {
           rounds, and record standings. That is the whole of what the site does.
         </p>
 
-        <h2>Entry fees and prizes</h2>
-        <p>
-          Entry fees and prizes are arranged directly between hosts and players, outside the site.
-          Tourney displays the amounts a host declares — an entry fee, a prize pool — but it never
-          collects, holds, or pays out any of that money. Any dispute over an entry fee or a prize
-          is between the host and the player.
-        </p>
-
         <h2>Accounts</h2>
         <p>
           You are responsible for what happens under your account. Keep your password to yourself,

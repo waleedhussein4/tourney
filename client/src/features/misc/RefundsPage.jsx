@@ -20,13 +20,6 @@ export function RefundsPage() {
           If you are charged and want a refund, email <ContactEmail /> within 14 days of the charge
           and we will refund it.
         </p>
-
-        <h2>Entry fees</h2>
-        <p>
-          Entry fees and prizes are arranged directly between hosts and players — the site never
-          collects or holds that money, so we cannot refund an entry fee. Refund requests for an
-          entry fee should go to the host who ran the tournament.
-        </p>
       </div>
     </PageShell>
   )
