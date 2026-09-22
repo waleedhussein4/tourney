@@ -41,34 +41,30 @@ any of them.
 
 ## Decisions
 
-### Why serverless Express, rather than a long-running server
+### Why a Cloudflare Container, rather than rewriting onto Workers
 
-`api/index.js` imports the Express app and exports it. Vercel runs it per
-request.
+`worker/index.js` forwards every `/api/*` request to a Cloudflare Container
+running the unmodified Express app in Docker (`Dockerfile`); `server/src/index.js`
+still `listen()`s inside it exactly as it does locally.
 
-**Why.** The constraint was $0 forever, with no sleeping and no trial that
-expires. Vercel Hobby and Atlas M0 both meet that; a small VPS or a container
-host does not, and the free tiers that do (Render, Fly) sleep the app or expire
-the database. Serverless was the option that stayed up.
+**Why.** Two things ruled out running the API as Workers code directly: Mongoose
+8's TCP sockets need Node's `net` module in a form the Workers runtime doesn't
+provide (the underlying gap is tracked upstream, e.g.
+[mongoose#14613](https://github.com/Automattic/mongoose/issues/14613)), and the
+Paddle webhook needs the raw request body ahead of `express.json`, which is
+easiest to keep by not changing the runtime at all. A container preserves both
+without touching a line of `server/src/`.
 
-**What it cost.** Three things, each of which shaped the code:
+**What it cost.** A container is a long-running process again, not a
+per-request function, so the tradeoffs that shaped this code — the lazily
+connecting `ensureDatabase` middleware, and `db/connect.js` caching the
+connection on `globalThis` — are no longer strictly required for correctness,
+but they are kept: the same app object still boots identically whether a
+`node server/src/index.js` process lives for a day or restarts every request,
+and there is no deployment-only code path that the test suite doesn't also
+exercise through supertest.
 
-1. **No startup phase.** The platform imports the module and immediately hands
-   it a request, so nothing can connect at import time. The app connects lazily
-   in an `ensureDatabase` middleware.
-2. **Connections must be reused.** A container is frozen and thawed, not
-   restarted, so a new connection per invocation would exhaust M0's cap within
-   minutes. `db/connect.js` caches the connection _promise_ on `globalThis`,
-   which survives a thaw, and every caller awaits the same one.
-3. **Cold starts.** A function that has not been called in a while takes about a
-   second to answer. That is real, it is visible, and it is the honest price of
-   the free tier. It is documented in the README rather than hidden.
-
-The upside beyond cost: the same app object is what the test suite drives
-through supertest and what `server/src/index.js` calls `listen()` on locally, so
-there is no deployment-only code path that nothing tests.
-
-### Why one Vercel project instead of two
+### Why one Worker instead of two origins
 
 The client and the API are served from **one origin**. That is not a packaging
 preference — three things follow from it:
@@ -94,8 +90,8 @@ script at all.
 **What it cost.** CSRF becomes the thing to think about instead of XSS
 exfiltration. `SameSite=Lax` covers it here: the API is same-origin, and no
 state-changing route is a `GET` that a cross-site form could trigger — except
-the cron reseed, which is a `GET` only because Vercel Cron issues nothing else,
-and which requires a bearer token that a browser will never attach.
+the cron reseed, which answers `GET` (and `POST`, for triggering it by hand)
+and requires a bearer token that a browser will never attach.
 
 ### Why UUID ids instead of Mongo's ObjectId
 
@@ -279,7 +275,7 @@ optimisation, and is not worth it for this application.
 ## Layout
 
 ```
-api/index.js       the Vercel entrypoint: imports the app, exports it
+worker/index.js     the Cloudflare Worker entrypoint: routes /api/* to the container
 client/            React 18 + Vite SPA
 server/            Express + Mongoose API
 docs/              these documents

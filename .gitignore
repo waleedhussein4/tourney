@@ -13,8 +13,8 @@ build/
 !.env.example
 
 # Deployment / tooling
-.vercel/
 .turbo/
+.wrangler/
 
 # Database backups (backup.js / restore.js)
 backups/
