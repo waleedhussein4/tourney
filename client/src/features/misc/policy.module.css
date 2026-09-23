@@ -17,6 +17,12 @@
   color: var(--text-muted);
 }
 
+/* Padding grows the tap target to 40px without pushing the surrounding text
+   apart — the matching negative margin cancels the padding's effect on the
+   paragraph's own line box. */
 .prose a {
+  display: inline-block;
+  padding: 13px 0;
+  margin: -13px 0;
   color: var(--accent);
 }

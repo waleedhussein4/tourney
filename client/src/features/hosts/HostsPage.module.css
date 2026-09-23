@@ -320,7 +320,9 @@
 }
 
 .contactLink {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
   margin-top: var(--space-4);
   font-size: var(--text-sm);
   color: var(--text-muted);
