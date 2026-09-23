@@ -18,7 +18,7 @@ flowchart TB
     visitor(("visitor")) --> worker
 
     subgraph cf["Cloudflare"]
-        worker["Worker<br/>Static Assets + /api/* router<br/>+ Cron Trigger (daily reseed)"]
+        worker["Worker<br/>Static Assets + /api/* router<br/>+ Cron Triggers (daily reseed, hourly notify-sweep)"]
         container["Container<br/>node server/src/index.js"]
         worker -- "/api/*" --> container
         worker -- "everything else" --> assets["client/dist<br/>(the SPA)"]
@@ -115,19 +115,20 @@ anything is written.
 are larger, and inserts are not naturally ordered by time. At this scale neither
 matters; at a much larger one, UUIDv7 would be the answer.
 
-### Why tournaments have no entry fee or prize fields
+### Why a tournament has no cost-to-join or reward-for-winning fields
 
-A tournament only records who is in and who won — no entry fee, no prize, no
-prize table.
+A tournament only records who is in and who won — nothing about what it
+costs to join or what a winner takes home.
 
-**Why.** Even a declared, off-platform entry fee and prize pool reads as a
-wagering contract to a payment processor's review, which is what got this
-product's Paddle application rejected. Removing the fields entirely — not just
-declining to hold the money — is what got it approved. See
-[DECISIONS.md](DECISIONS.md) for the fuller reasoning.
+**Why.** Even a declared, off-platform version of those fields reads as
+something a payment processor's review classifies the same way a cash stake
+would, which is what got this product's Paddle application turned down.
+Removing the fields entirely — not just declining to hold anything on the
+app's side — is what got it approved. See [DECISIONS.md](DECISIONS.md) for
+the fuller reasoning.
 
 **What it cost.** The site cannot describe what a tournament is worth to
-enter or to win — it is a bulletin board and a scoreboard for the event, not a
+join or to win — it is a bulletin board and a scoreboard for the event, not a
 stakes tracker. That is the tradeoff for staying approved by the payment
 processor.
 
@@ -232,6 +233,72 @@ pin the entire dependency to the entry chunk, silently, with no warning from
 anything. When a bundle is bigger than the sum of what a page uses, look for a
 barrel before looking at the routes.
 
+### The match model
+
+Each tournament document embeds its matches as a `matches` subdocument array
+(`server/src/models/tournament.model.js`) rather than a separate collection.
+Every match has a `status`: `pending → scheduled → reported → disputed |
+final`. `reported` means one competitor submitted a score and is waiting on
+the other's confirmation (`POST .../matches/:matchId/confirm`); a disagreement
+moves it to `disputed`, which blocks bracket advancement until the host rules
+on it (`POST .../matches/:matchId/resolve`). See
+[DECISIONS.md](DECISIONS.md) for why matches are embedded and why a dispute
+blocks advancement instead of picking a default winner.
+
+### Notifications
+
+`Notification` documents (`server/src/models/notification.model.js`) are
+written by the same services that change tournament and match state —
+publishing, accepting an application, confirming or resolving a result,
+promoting a waitlist entry — plus two cron-driven sweeps for things that
+happen on a clock rather than an action: a tournament starting within a day,
+and a match starting within an hour.
+
+**Idempotency is a unique index, not an application check:**
+`{ user, type, subjectId }` is unique on the collection. A sweep that runs
+twice, or overlaps its own retry, hits a duplicate-key error on the second
+write rather than sending the same reminder twice — deliberately not a
+"does this already exist?" read-then-write, which races under concurrent
+sweeps in a way a database constraint can't.
+
+Delivery is in-app always, plus email for whichever `EMAIL_CATEGORIES` a
+user's preferences (`PATCH /api/notifications/preferences`) haven't turned
+off; every email footer carries a signed one-click unsubscribe link
+(`POST /api/notifications/unsubscribe`, public, token-verified).
+
+**Two cron triggers, not one, and why.** `wrangler.jsonc` fires a Cloudflare
+Cron Trigger daily at 04:00 UTC that hits `/api/cron/reseed` (wipes and
+rebuilds the demo dataset) **and** a trigger that hits
+`/api/cron/notify-sweep` **hourly**. The reseed only needs to run once a
+day — nothing about wiping demo data is time-sensitive within the day. The
+notification sweep can't share that cadence: a "starts in one hour" match
+reminder sent by a job that only runs once a day is not a one-hour
+reminder for anyone whose match doesn't happen to fall in that one window.
+Both routes are guarded the same way — `CRON_SECRET` as a bearer token,
+compared in constant time, rate limited — so adding the second trigger cost
+one more line in `wrangler.jsonc`, not a new auth path.
+
+### Moderation and the audit trail
+
+Every action that removes someone or something from the site — a host
+removing a participant, an admin suspending a user, unpublishing or deleting
+a tournament — writes a `ModerationAction` document
+(`server/src/models/moderationAction.model.js`): who did it, to what, when,
+and the reason given. Rows are never edited or deleted once written. Reports
+(`Report` documents) are the input to moderation — a user or tournament
+flagged for review; moderation actions are the output — what an admin (or a
+host, for their own tournament) actually did about it. `GET /api/admin/reports`
+surfaces the former; the audit trail is the latter.
+
+### Request tracing
+
+`middleware/requestId.js` gives every request a stable id — the inbound
+`x-request-id` if the edge already set one, otherwise a fresh UUID — echoes
+it on the response, tags the Sentry scope with it, and logs one structured
+line per request (method, path, status, duration; never the body, cookies, or
+headers). A user-reported error can be found by the id in the response
+header without reading container logs blind.
+
 ### A note on measuring it
 
 Lighthouse numbers for this app are dominated by whether the browser already
@@ -290,13 +357,14 @@ modules/<resource>/
   <resource>.service.js     the rules
 
 modules/
-  auth/           signup, login, logout
-  users/          me, become host
+  auth/           signup, login, logout, password reset, email verification
+  users/          me, become host, player + host dashboards, reporting a user
   teams/          create, join by code, roster changes
-  tournaments/    create, browse, join, apply, lifecycle, results
+  tournaments/    create, browse, join, apply, waitlist, lifecycle, match results, disputes
   subscriptions/  the hosting plan, Paddle checkout, the webhook
-  admin/          seed and clear demo data
-  cron/           the daily reseed, bearer-token gated
+  notifications/  in-app list, preferences, unsubscribe
+  admin/          seed/clear demo data, reports, suspensions, takedowns
+  cron/           the daily reseed and the hourly notification sweep, bearer-token gated
   health/         GET /api/health
 ```
 

@@ -40,7 +40,7 @@ the app stays same-origin — which is what keeps the `httpOnly`,
 ```
 Dockerfile        builds and runs the Express API in a container
 .dockerignore      keeps node_modules, .git, client/dist, and .env out of the image
-wrangler.jsonc     the Worker: container binding, static assets, cron trigger
+wrangler.jsonc     the Worker: container binding, static assets, cron triggers
 worker/index.js    routes /api/* to the container; the scheduled reseed
 client/dist/       the static build, served by Workers Static Assets
 ```
@@ -193,26 +193,33 @@ interactively.
 
 ---
 
-## The scheduled reseed
+## The scheduled reseed, and the notification sweep
 
-Unchanged in behaviour: `GET /api/cron/reseed` clears and rebuilds the demo
-dataset, guarded by `CRON_SECRET` exactly as documented in
-`server/src/modules/cron/cron.routes.js`. What changed is the trigger:
+Two Cloudflare Cron Triggers, both guarded by `CRON_SECRET` exactly as
+documented in `server/src/modules/cron/cron.routes.js`:
 
 ```jsonc
 // wrangler.jsonc
-"triggers": { "crons": ["0 4 * * *"] }
+"triggers": { "crons": ["0 4 * * *", "0 * * * *"] }
 ```
 
-The Worker's `scheduled` handler (`worker/index.js`) fires at 04:00 UTC,
-calls the container directly at `/api/cron/reseed` with
-`Authorization: Bearer $CRON_SECRET`, and the route runs exactly the
-clear-then-seed it always has.
+The Worker's `scheduled` handler (`worker/index.js`) tells the two apart by
+the cron string it's called with:
+
+- **`0 4 * * *`** (daily, 04:00 UTC) calls the container at
+  `/api/cron/reseed` with `Authorization: Bearer $CRON_SECRET` — clears and
+  rebuilds the demo dataset.
+- **`0 * * * *`** (hourly) calls `/api/cron/notify-sweep` with the same
+  header — sends the "tournament starting within a day" and "match starting
+  within an hour" reminders. It has to run hourly rather than daily because a
+  one-hour reminder delivered by a once-a-day job isn't a one-hour reminder
+  for most matches; see [ARCHITECTURE.md](ARCHITECTURE.md#notifications).
 
 ### Triggering one by hand
 
 ```bash
 curl -s https://tourneylb.com/api/cron/reseed -H "Authorization: Bearer $CRON_SECRET"
+curl -s https://tourneylb.com/api/cron/notify-sweep -H "Authorization: Bearer $CRON_SECRET"
 ```
 
 ---
