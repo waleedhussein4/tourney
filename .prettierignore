@@ -5,3 +5,9 @@ package-lock.json
 client/src/assets/
 *.min.js
 *.min.css
+
+# Local, untracked per-machine overrides. Never part of the project, and
+# formatting them makes `npm run format:check` fail on one developer's machine
+# while passing in CI — which is worse than not checking them at all.
+*.local.json
+*.local.md
