@@ -74,6 +74,23 @@ All below are from `docs/media/`; the same folder holds `docs/media/demo.gif`.
 - **Publishing and the subscription.** Your first live tournament is free.
   Running more than one at a time needs the Host plan — $5/month, unlimited
   live tournaments, cancel anytime.
+- **Accounts.** Email verification on signup, self-serve password reset, and
+  an account can be suspended by an admin if it's reported.
+- **Match results.** Either competitor reports a score; the other confirms or
+  disputes it. A dispute blocks that bracket from advancing until the host
+  rules on it. Hosts can also schedule kickoff times per match.
+- **Waitlists.** Joining a full tournament waitlists you instead of failing;
+  a withdrawal promotes the next entry automatically.
+- **Notifications.** In-app and email, with per-category preferences and a
+  one-click unsubscribe link — application decisions, matches starting soon,
+  results needing your confirmation, waitlist promotions.
+- **Moderation.** Anyone can report a user or a tournament; admins can
+  suspend accounts and unpublish or remove tournaments, and every action
+  writes an audit row.
+- **Host and player dashboards.** "What's next for you" (your next match,
+  results awaiting confirmation, applications you're waiting on) and "what
+  needs you" for hosts (open applications, disputes, reports) across
+  everything they run.
 
 ---
 
@@ -99,8 +116,11 @@ Browser ──▶ React SPA (Vite) ──▶ /api/* via Vite dev proxy ──▶
 
 In production, client and server are served same-origin, so there's no CORS
 configuration anywhere in the codebase and the auth cookie is first-party.
-Deployment specifics (currently mid-migration to Cloudflare) live in
-[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+It's deployed on **Cloudflare**: one Worker serves the static SPA (Workers
+Static Assets) and forwards `/api/*` to a Container running this same Express
+app, with GitHub Actions deploying on every push to `main`. Two Cron Triggers
+run against it — a daily reseed of the demo data and an hourly notification
+sweep. Full details in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 **Module anatomy** — each server module is four files:
 `*.routes.js` (zod validation) → `*.controller.js` (shapes the response) →
@@ -123,7 +143,7 @@ with one folder per feature: page + styles + queries.
 
 Subscriptions run through **Paddle Billing**:
 
-1. The server opens the transaction (`POST /api/subscription/checkout`) —
+1. The server opens the transaction (`POST /api/billing/checkout`) —
    never the browser, so the plan and account are ours to trust.
 2. The client hands that transaction to **Paddle.js**, which renders the
    card-entry overlay. Card details never touch our server.
@@ -148,24 +168,27 @@ sandbox test card; see [docs/SETUP.md](docs/SETUP.md) for the exact variables.
 
 ## Testing
 
-`npm test` runs the server suite (vitest + supertest) against a real
-in-memory MongoDB replica set. Coverage includes auth, the publish/subscribe
-gate on tournament creation, the full bracket and battle-royale lifecycle,
-team membership guards, the subscription webhook (including replayed and
-out-of-order events), the daily seed reset, and backup/restore.
+`npm test` runs the server suite (**319 tests**, vitest + supertest, against
+a real in-memory MongoDB replica set) and the client suite (**38 tests**,
+vitest + Testing Library). Server coverage includes auth and password
+reset/email verification, the publish/subscribe gate on tournament creation,
+the full bracket and battle-royale lifecycle (including waitlists, disputes,
+and match scheduling), team membership guards, notifications and their
+idempotency, the subscription webhook (including replayed and out-of-order
+events), moderation and reporting, the daily seed reset, and backup/restore.
+Client coverage covers the auth forms, the billing and create-tournament
+flows, the notification bell, and both dashboards.
 
 ---
 
 ## What I'd do next
 
-- Email verification and password reset.
-- Match scheduling and notifications (a host sets a time; players get
-  reminded).
 - Arabic across the whole app, not just the marketing copy.
 - Swiss and double-elimination formats alongside single-elimination and
   battle royale.
-- An audit log for host actions (bracket edits, application decisions,
-  publish/unpublish).
+- Push notifications, not just in-app and email.
+- Paginated, filterable admin views for reports and moderation history —
+  today's `GET /api/admin/reports` is a flat list.
 
 ---
 

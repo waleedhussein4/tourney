@@ -47,7 +47,21 @@ a `details` array of `{ path, message }`.
 `code` and `details` are optional. Codes in use: `VALIDATION_FAILED`,
 `INVALID_ID`, `INVALID_JSON`, `DUPLICATE`, `RATE_LIMITED`, `INTERNAL_ERROR`,
 `DATABASE_UNAVAILABLE`, `CRON_NOT_CONFIGURED`, `NO_ROUTE`, `PLAN_LIMIT_REACHED`,
-`PAYMENTS_UNAVAILABLE`.
+`PAYMENTS_UNAVAILABLE`, `MAIL_UNAVAILABLE`, `EMAIL_NOT_VERIFIED`,
+`ACCOUNT_SUSPENDED`, `VERIFY_INVALID`, `VERIFY_EXPIRED`, `VERIFY_ALREADY_DONE`,
+`UNSUBSCRIBE_INVALID`.
+
+- `503 MAIL_UNAVAILABLE` — the transactional-email provider (Resend) is
+  unconfigured or refused to send; signup and login still succeed, but a
+  verification or reset email did not go out.
+- `403 EMAIL_NOT_VERIFIED` — the account exists but has not clicked a
+  verification link yet; raised on actions that require a verified email.
+- `403 ACCOUNT_SUSPENDED` — an admin suspended this account; every route
+  behind `requireAuth` is closed, including hosting and joining.
+- `400 VERIFY_INVALID` / `VERIFY_EXPIRED` / `VERIFY_ALREADY_DONE` — the
+  verification or reset token is malformed, expired, or already used.
+- `400 UNSUBSCRIBE_INVALID` — the one-click unsubscribe link's signed token
+  does not match.
 
 Common statuses: `400` validation, or a rule the current state forbids ("this
 has already started"); `401` not signed in, or bad credentials; `402` a
@@ -117,6 +131,28 @@ telling the two apart would be a free account-enumeration oracle.
 
 Clears the cookie. `204`, no body. Safe to call when already signed out.
 
+### `POST /api/auth/forgot-password` — public, rate limited
+
+`{ "email": "…" }`. Always `200`, whether or not the address has an account —
+this is the same anti-enumeration rule as login. When it does, a reset email
+goes out through Resend. `503 MAIL_UNAVAILABLE` if the mail provider is
+unconfigured or the send failed.
+
+### `POST /api/auth/reset-password` — public, rate limited
+
+`{ "token": "…", "password": "…" }`. `200 { user }` and a fresh auth cookie.
+`400 VERIFY_INVALID` / `VERIFY_EXPIRED` for a bad or stale token.
+
+### `POST /api/auth/verify-email` — public, rate limited
+
+`{ "token": "…" }`. `200 { user }`. `400 VERIFY_INVALID` / `VERIFY_EXPIRED` /
+`VERIFY_ALREADY_DONE`.
+
+### `POST /api/auth/resend-verification` — auth, rate limited
+
+No body. Re-sends the verification email to the signed-in account. `400` if
+already verified. `503 MAIL_UNAVAILABLE` if the mail provider can't send.
+
 ---
 
 ## Users
@@ -133,6 +169,23 @@ to render a signed-in shell.
 Marks the account as a host. Free and instant — what costs money is the
 subscription that lifts the live-tournament limit, not becoming a host.
 `200 { user }`. `400` if already a host.
+
+### `GET /api/users/me/dashboard` — auth
+
+"What's next for you": the caller's next scheduled match, any match result
+awaiting their confirmation, and tournaments they've applied to but not heard
+back on yet. `200 { … }`.
+
+### `GET /api/users/me/host-dashboard` — auth
+
+"What needs you, across everything you host": open applications, disputed
+matches waiting on a ruling, and open reports, across every tournament the
+caller hosts. `200 { tournaments }` — empty for a non-host or a host who
+currently runs nothing.
+
+### `POST /api/users/:userId/report` — auth, rate limited
+
+`{ "reason": "…" }`. Flags a user for admin review. `201 { reported: true }`.
 
 ---
 
@@ -341,18 +394,25 @@ money moves on any of them — the site only records who is in.
 
 #### `POST /api/tournaments/:tournamentId/join/solo` — auth
 
-Adds the caller as a participant.
-
-`409` if the tournament is full or the caller is already in it. `400` if it
-has already started, is team-based, is application-gated, or the caller is the
-host.
+Adds the caller as a participant — or, once every slot is taken, adds them to
+the **waitlist** instead of erroring. `409` if the caller (or their waitlist
+entry) already exists. `400` if it has already started, is team-based, is
+application-gated, or the caller is the host.
 
 #### `POST /api/tournaments/:tournamentId/join/team` — auth
 
-`{ "teamId": "…" }`. The **team leader** enters on behalf of the whole team.
-The team's size must equal the tournament's `teamSize`.
+`{ "teamId": "…" }`. The **team leader** enters on behalf of the whole team,
+or waitlists it once full. The team's size must equal the tournament's
+`teamSize`.
 
 `403` if the caller does not lead that team.
+
+#### `POST /api/tournaments/:tournamentId/withdraw` — auth
+
+Pulls the caller (or, for a team, their team) out — from the roster or the
+waitlist, whichever they're on. `400` once the tournament has started. When a
+withdrawal opens a slot, the longest-waiting waitlist entry is promoted
+automatically and notified.
 
 #### `POST /api/tournaments/:tournamentId/applications` — auth
 
@@ -401,10 +461,37 @@ automatically.
 
 #### `PATCH /api/tournaments/:tournamentId/matches` — host
 
-`{ "matches": ["<winner uuid>", null, …] }` — one entry per match in bracket
-order, `null` where the result is not in yet. Every winner must be a
-participant in this tournament. `400` if the tournament has not started, has
-ended, or isn't a bracket.
+`{ "matches": [{ "id": "<match uuid>", "winner": "<participant uuid>" }, …] }`
+— `winner: null` clears a recorded result. Every winner must be a participant
+in this tournament. `400` if the tournament has not started, has ended, or
+isn't a bracket.
+
+#### `PATCH /api/tournaments/:tournamentId/matches/schedule` — host
+
+`{ "matches": [{ "id": "<match uuid>", "scheduledAt": "2026-10-01T18:00:00Z" }, …] }`
+— sets kickoff times, one call for a single match or a whole round. Feeds the
+player dashboard's "what's next" and the 1-hour match reminder (see
+[ARCHITECTURE.md](ARCHITECTURE.md#notifications)).
+
+#### `POST /api/tournaments/:tournamentId/matches/:matchId/report` — auth
+
+`{ "scores": [{ "participantId": "…", "score": 12 }, { "participantId": "…", "score": 9 }] }`
+— either competitor in the match reports both scores. `403` if the caller is
+in neither slot. `409` if a result is already recorded and awaiting the other
+side's confirmation.
+
+#### `POST /api/tournaments/:tournamentId/matches/:matchId/confirm` — auth
+
+`{ "agree": true }`. The other competitor confirms or disputes a reported
+result. Confirming advances the winner; disputing marks the match `disputed`
+and blocks bracket advancement until the host resolves it — see
+[DECISIONS.md](DECISIONS.md).
+
+#### `POST /api/tournaments/:tournamentId/matches/:matchId/resolve` — host
+
+Same body as reporting. The host's final call on a `disputed` match — settles
+the score and unblocks advancement regardless of what either competitor
+reported.
 
 #### `PATCH /api/tournaments/:tournamentId/participants` — host
 
@@ -419,6 +506,17 @@ the leaderboard for a battle royale.
 
 `200 { tournament, winners }`. `400` if a bracket's final has no recorded
 winner yet, or the tournament hasn't started or has already ended.
+
+#### `DELETE /api/tournaments/:tournamentId/participants/:participantId` — host
+
+`{ "reason": "…" }`. Removes one participant or team and, if a slot opens,
+promotes the next waitlist entry. `404` if that participant isn't in this
+tournament.
+
+#### `POST /api/tournaments/:tournamentId/report` — auth, rate limited
+
+`{ "reason": "…" }`. Flags the tournament itself for admin review. `201
+{ reported: true }`.
 
 ---
 
@@ -443,15 +541,43 @@ way in — so a code read off a screen works whatever case it is typed in.
 
 ---
 
+## Notifications
+
+All require auth except unsubscribing.
+
+|                                        |                                                                                                                                   |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/notifications`               | Paginated, newest first. `?page`, `?limit`                                                                                        |
+| `GET /api/notifications/unread-count`  | `{ count }`, for a badge                                                                                                          |
+| `POST /api/notifications/read-all`     | Marks every notification read                                                                                                     |
+| `POST /api/notifications/:id/read`     | Marks one read                                                                                                                    |
+| `GET /api/notifications/preferences`   | Which email categories this account receives                                                                                      |
+| `PATCH /api/notifications/preferences` | `{ "<category>": false, … }` — at least one key                                                                                   |
+| `POST /api/notifications/unsubscribe`  | **public.** `{ userId, category, token }` — the one-click link an email footer carries. `400 UNSUBSCRIBE_INVALID` for a bad token |
+
+Every notification also has an in-app row; email is the categories a
+preference has left on. See
+[ARCHITECTURE.md](ARCHITECTURE.md#notifications) for how delivery is kept
+idempotent and what the two cron triggers are for.
+
+---
+
 ## Admin
 
 All require `role: "admin"`, which is set by the seed or by hand in the
-database — there is no endpoint that grants it.
+database — there is no endpoint that grants it. Every moderation action here
+writes a `ModerationAction` audit row — see
+[ARCHITECTURE.md](ARCHITECTURE.md#moderation).
 
-|                          |                                                                  |
-| ------------------------ | ---------------------------------------------------------------- |
-| `POST /api/admin/seed`   | Add whatever demo data is missing                                |
-| `DELETE /api/admin/seed` | Clear demo data — all tournaments, teams, and non-admin accounts |
+|                                                       |                                                                   |
+| ----------------------------------------------------- | ----------------------------------------------------------------- |
+| `POST /api/admin/seed`                                | Add whatever demo data is missing                                 |
+| `DELETE /api/admin/seed`                              | Clear demo data — all tournaments, teams, and non-admin accounts  |
+| `GET /api/admin/reports`                              | Open reports against users and tournaments                        |
+| `POST /api/admin/users/:userId/suspend`               | `{ reason }`. Locks the account out of every `requireAuth` route  |
+| `POST /api/admin/users/:userId/unsuspend`             | `{ reason }`                                                      |
+| `POST /api/admin/tournaments/:tournamentId/unpublish` | `{ reason }`. Same effect as a host unpublishing, admin-initiated |
+| `DELETE /api/admin/tournaments/:tournamentId`         | `{ reason }`. Removes the tournament                              |
 
 ---
 
@@ -482,3 +608,12 @@ Requires `Authorization: Bearer $CRON_SECRET`, compared in constant time.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md#the-scheduled-reseed) for how it is guarded
 and what it measures.
+
+### `GET /api/cron/notify-sweep` — bearer token
+
+### `POST /api/cron/notify-sweep`
+
+The reminder sweep: tournaments starting within a day, matches starting
+within an hour. Same guard as `/reseed`. `200 { ok, sent, durationMs }`. See
+[ARCHITECTURE.md](ARCHITECTURE.md#notifications) for why this needs an hourly
+trigger and `/reseed` doesn't.
