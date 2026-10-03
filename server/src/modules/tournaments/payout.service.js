@@ -88,9 +88,9 @@ export function prizeAllocations(tournament) {
 /**
  * Turns a participant-level allocation into per-user payments.
  *
- * A solo participant is paid directly. A team's prize is split equally among the
- * members who actually competed — the original code paid the whole prize to the
- * team leader for brackets, which is not what the rules say.
+ * A solo participant is paid directly. A team's prize is split equally among
+ * every member of the enrolled team — the original code paid the whole prize to
+ * the team leader for brackets, which is not what the rules say.
  */
 function paymentsFor(tournament, allocation) {
   if (!tournament.isTeamBased) {

@@ -16,6 +16,7 @@ import {
   notifyResultResolved,
   notifyTournamentEnded,
   notifyTournamentPublished,
+  notifyWaitlistDropped,
   notifyWaitlistPromoted,
   participantUserIds,
 } from '../notifications/notification.service.js'
@@ -573,6 +574,8 @@ function findMyEntry(tournament, userId) {
  * their place in the queue rather than blocking everyone behind them.
  */
 async function promoteFromWaitlist(tournament, session) {
+  const dropped = []
+
   while (tournament.waitlist.length > 0) {
     const next = tournament.waitlist.shift()
     const payer = next.isTeam ? next.paidBy : next.userId
@@ -580,7 +583,12 @@ async function promoteFromWaitlist(tournament, session) {
     try {
       await collectEntryFee(tournament, payer, session)
     } catch (error) {
-      if (error instanceof ApiError && error.status === 400) continue
+      // Only an unaffordable fee forfeits the place. Any other failure is real
+      // and must not be swallowed as "they could not pay".
+      if (error instanceof ApiError && error.message === 'Not enough credits') {
+        dropped.push(next)
+        continue
+      }
       throw error
     }
 
@@ -594,10 +602,10 @@ async function promoteFromWaitlist(tournament, session) {
     } else {
       tournament.enrolledUsers.push({ userId: next.userId, score: 0, eliminated: false })
     }
-    return next
+    return { promoted: next, dropped }
   }
 
-  return null
+  return { promoted: null, dropped }
 }
 
 /**
@@ -633,7 +641,7 @@ function forfeitMatches(tournament, participantId) {
  * been finalized, so their opponent advances.
  */
 export async function withdraw(tournamentId, userId) {
-  const { tournament, promoted } = await withCapacityLock(
+  const { tournament, promoted, dropped } = await withCapacityLock(
     tournamentId,
     async (tournament, session) => {
       if (tournament.hasEnded) throw ApiError.badRequest('This tournament has already ended')
@@ -653,7 +661,7 @@ export async function withdraw(tournamentId, userId) {
             (user) => String(user.userId) !== String(entry.userId)
           )
         }
-        return { tournament, promoted: await promoteFromWaitlist(tournament, session) }
+        return { tournament, ...(await promoteFromWaitlist(tournament, session)) }
       }
 
       const participantId = isTeam ? String(entry.teamId) : String(entry.userId)
@@ -661,10 +669,11 @@ export async function withdraw(tournamentId, userId) {
       entry.eliminated = true
       if (tournament.type === 'brackets') forfeitMatches(tournament, participantId)
 
-      return { tournament, promoted: null }
+      return { tournament, promoted: null, dropped: [] }
     }
   )
 
+  for (const entry of dropped) await notifyWaitlistDropped(tournament, entry)
   if (promoted) await notifyWaitlistPromoted(tournament, promoted)
   return tournament
 }

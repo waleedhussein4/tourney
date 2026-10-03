@@ -261,6 +261,24 @@ export async function notifyWaitlistPromoted(tournament, entry) {
   })
 }
 
+/**
+ * Tells a waitlisted entrant that a slot came up and they could not cover the
+ * entry fee, so it went to the next in line. Without this they simply vanish
+ * from the queue with no way to find out why.
+ */
+export async function notifyWaitlistDropped(tournament, entry) {
+  const recipients = entry.isTeam
+    ? entry.members.map((member) => String(member.userId))
+    : [String(entry.userId)]
+  await notifyAll(recipients, {
+    type: 'waitlist_dropped',
+    subjectId: entry._id,
+    title: 'You lost your waitlist place',
+    body: `A slot opened up in "${tournament.title}" but your balance did not cover the ${tournament.entryCost}-credit entry fee, so it went to the next entrant.`,
+    tournamentId: tournament._id,
+  })
+}
+
 /** Tells whoever was removed by the host why, and from what. */
 export async function notifyParticipantRemoved(tournament, userIds, reason) {
   await notifyAll(userIds, {
