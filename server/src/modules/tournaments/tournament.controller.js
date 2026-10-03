@@ -48,8 +48,8 @@ export const update = asyncHandler(async (req, res) => {
 })
 
 export const remove = asyncHandler(async (req, res) => {
-  const { entrants } = await service.deleteTournament(req.params.tournamentId, req.userId)
-  res.json({ deleted: true, entrants })
+  const { refunds } = await service.deleteTournament(req.params.tournamentId, req.userId)
+  res.json({ deleted: true, refunds })
 })
 
 export const postUpdate = asyncHandler(async (req, res) => {
@@ -107,7 +107,12 @@ export const unpublish = asyncHandler(async (req, res) => {
   res.json({ tournament: await toManageView(tournament, req.userId) })
 })
 
-// --- lifecycle --------------------------------------------------------------
+// --- bank and lifecycle -----------------------------------------------------
+
+export const deposit = asyncHandler(async (req, res) => {
+  const result = await service.deposit(req.params.tournamentId, req.userId, req.body.amount)
+  res.json(result)
+})
 
 export const shuffle = asyncHandler(async (req, res) => {
   const tournament = await service.shuffleBrackets(req.params.tournamentId, req.userId)
@@ -192,6 +197,9 @@ export const reportTournament = asyncHandler(async (req, res) => {
 })
 
 export const end = asyncHandler(async (req, res) => {
-  const { tournament, winners } = await service.endTournament(req.params.tournamentId, req.userId)
-  res.json({ tournament: await toManageView(tournament, req.userId), winners })
+  const { tournament, payouts, hostRemainder } = await service.endTournament(
+    req.params.tournamentId,
+    req.userId
+  )
+  res.json({ tournament: await toManageView(tournament, req.userId), payouts, hostRemainder })
 })

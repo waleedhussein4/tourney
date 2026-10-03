@@ -3,11 +3,8 @@
 import '@fontsource-variable/noto-sans-arabic'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { billingKeys, getPlan } from '/src/api/billing.js'
 import { BracketTree } from '/src/components/brand/index.js'
-import { formatNumber, formatUsd } from '/src/lib/format.js'
-import { COPY, LANGUAGES, directionOf, intervalName } from './copy.js'
+import { COPY, LANGUAGES, directionOf } from './copy.js'
 import styles from './HostsPage.module.css'
 
 const STORED_LANGUAGE = 'tourney.hosts.language'
@@ -23,11 +20,6 @@ const STORED_LANGUAGE = 'tourney.hosts.language'
  */
 export function HostsPage() {
   const [language, setLanguage] = useState(initialLanguage)
-  const pricing = useQuery({
-    queryKey: billingKeys.plan,
-    queryFn: getPlan,
-  })
-  const contactHref = pricing.data?.contactEmail ? `mailto:${pricing.data.contactEmail}` : null
   const direction = directionOf(language)
   const t = COPY[language]
 
@@ -111,7 +103,7 @@ export function HostsPage() {
         </div>
       </section>
 
-      <Pricing t={t} data={pricing.data} language={language} />
+      <Pricing t={t} />
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>{t.faqTitle}</h2>
@@ -131,37 +123,17 @@ export function HostsPage() {
         <Link className={styles.primary} to="/signup">
           {t.closingAction}
         </Link>
-        {contactHref && (
-          <a className={styles.contactLink} href={contactHref}>
-            {t.closingContact}
-          </a>
-        )}
       </section>
     </div>
   )
 }
 
-/**
- * What hosting costs, read from the server.
- *
- * The price lives in one config file — quoting it here from a hard-coded copy
- * is exactly how this page and the billing screen would come to disagree.
- */
-function Pricing({ t, data, language }) {
+/** What hosting costs: nothing real, and the page says so. */
+function Pricing({ t }) {
   return (
     <section className={styles.section}>
       <h2 className={styles.sectionTitle}>{t.pricingTitle}</h2>
       <p className={styles.sectionLead}>{t.pricingBody}</p>
-
-      {data && (
-        <p className={styles.sectionLead}>
-          {t.pricingLine(
-            formatNumber(data.freeLiveTournaments),
-            formatUsd(data.plan.priceCents),
-            intervalName(language, data.plan.interval)
-          )}
-        </p>
-      )}
     </section>
   )
 }

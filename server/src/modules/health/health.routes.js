@@ -28,7 +28,6 @@ healthRouter.get(
       // Booleans only: enough to see a misconfiguration without reading
       // container logs, without exposing anything a secret would.
       emailConfigured: config.resend.configured,
-      paymentsEnabled: config.paddle.enabled,
     })
   })
 )

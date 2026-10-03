@@ -11,7 +11,6 @@ describe('GET /api/health', () => {
     expect(body.status).toBe('ok')
     expect(body.database).toBe('connected')
     expect(typeof body.emailConfigured).toBe('boolean')
-    expect(typeof body.paymentsEnabled).toBe('boolean')
   })
 })
 

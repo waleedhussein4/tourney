@@ -3,11 +3,11 @@ import { ACCESSIBILITY, CATEGORY_SLUGS, LIMITS, PAGE_SIZE } from '../../config/c
 
 const uuid = z.string().uuid('Not a valid id')
 
-const usdAmount = z.coerce
+const credits = z.coerce
   .number({ invalid_type_error: 'Must be a number' })
-  .int('Must be a whole number of US dollars')
+  .int('Credits are whole numbers')
   .min(0, 'Cannot be negative')
-  .max(1_000_000, 'That is more than this app deals in')
+  .max(1_000_000, 'That is more credits than this app deals in')
 
 export const tournamentIdParams = z.object({ tournamentId: uuid })
 
@@ -49,7 +49,7 @@ const commonCreateFields = {
   category: z.enum(CATEGORY_SLUGS, { errorMap: () => ({ message: 'Unknown category' }) }),
   accessibility: z.enum(ACCESSIBILITY),
   teamSize: z.coerce.number().int().min(1, 'Team size must be at least 1').max(16),
-  entryFee: usdAmount,
+  entryFee: credits,
   description: z.string().max(20_000).optional().default(''),
   rules: z.string().max(40_000).optional().default(''),
   contactInfo: contactInfoSchema.optional(),
@@ -77,14 +77,14 @@ export const createTournamentSchema = z
         .min(2)
         .max(256)
         .refine(isPowerOfTwo, 'A bracket needs a power-of-two number of slots (2, 4, 8, 16, …)'),
-      prize: usdAmount,
+      prize: credits,
     }),
     z.object({
       ...commonCreateFields,
       type: z.literal('battle royale'),
       maxCapacity: z.coerce.number().int().min(2).max(1000),
       prizes: z
-        .array(z.object({ rank: z.coerce.number().int().min(1), prize: usdAmount }))
+        .array(z.object({ rank: z.coerce.number().int().min(1), prize: credits }))
         .min(1, 'A battle royale needs at least one prize'),
     }),
   ])
@@ -139,8 +139,8 @@ export const listQuerySchema = z.object({
   category: z.enum(CATEGORY_SLUGS).optional(),
   type: z.enum(['brackets', 'battle royale']).optional(),
   accessibility: z.enum(ACCESSIBILITY).optional(),
-  minEntryFee: usdAmount.optional(),
-  maxEntryFee: usdAmount.optional(),
+  minEntryFee: credits.optional(),
+  maxEntryFee: credits.optional(),
   status: z.enum(['upcoming', 'live', 'ended']).optional(),
 })
 
@@ -165,6 +165,8 @@ export const applySchema = z.object({
 export const updateBodySchema = z.object({
   content: z.string().trim().min(1, 'An update needs some text').max(LIMITS.update),
 })
+
+export const depositSchema = z.object({ amount: credits.refine((v) => v > 0, 'Deposit something') })
 
 export const matchesSchema = z.object({
   /** Winners to record, by match id. `winner: null` clears a recorded result. */

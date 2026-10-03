@@ -1,5 +1,5 @@
 import { Badge, EmptyState } from '/src/components/ui/index.js'
-import { formatMoney } from '/src/lib/format.js'
+import { formatCredits } from '/src/lib/format.js'
 import styles from './StandingsTable.module.css'
 
 /**
@@ -73,7 +73,7 @@ export function StandingsTable({ tournament, onReportParticipant }) {
                 </td>
                 <td className={styles.number}>{participant.score ?? 0}</td>
                 <td className={`${styles.number} ${prize ? styles.prize : ''}`}>
-                  {prize ? formatMoney(prize) : <span className={styles.muted}>—</span>}
+                  {prize ? formatCredits(prize) : <span className={styles.muted}>—</span>}
                 </td>
                 <td>
                   {participant.eliminated ? (

@@ -137,6 +137,7 @@ export async function toPublicView(tournament, viewerId) {
     prize: tournament.prize,
     prizes: tournament.prizes,
     totalPrize: tournament.totalPrize,
+    bank: tournament.bank,
     startDate: tournament.startDate,
     endDate: tournament.endDate,
     hasStarted: tournament.hasStarted,
@@ -190,6 +191,8 @@ export async function toManageView(tournament, viewerId) {
     acceptedUsers: tournament.acceptedUsers,
     acceptedTeams: tournament.acceptedTeams,
     attention: attentionSummary(tournament),
+    bankRequired: tournament.totalPrize,
+    bankShortfall: Math.max(0, tournament.totalPrize - tournament.bank),
   }
 }
 

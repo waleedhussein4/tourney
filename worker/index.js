@@ -20,17 +20,12 @@ import { Container, getContainer } from '@cloudflare/containers'
 // The names the Express app reads in server/src/config/env.js. Anything
 // unset is omitted rather than passed as undefined, because the container
 // runtime expects string values and the app treats absent-and-optional
-// (SENTRY_DSN, PADDLE_*) differently from present-but-empty.
+// (SENTRY_DSN) differently from present-but-empty.
 const FORWARDED = [
   'MONGODB_URI',
   'JWT_SECRET',
   'CRON_SECRET',
   'CLIENT_URL',
-  'PADDLE_API_KEY',
-  'PADDLE_WEBHOOK_SECRET',
-  'PADDLE_CLIENT_TOKEN',
-  'PADDLE_PRICE_PLAN',
-  'PADDLE_ENV',
   'SENTRY_DSN',
   'RESEND_API_KEY',
   'MAIL_FROM',

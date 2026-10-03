@@ -12,7 +12,7 @@ let ada
 let kofi
 
 beforeEach(async () => {
-  host = await signUp('hostie', { isHost: true, plan: true })
+  host = await signUp('hostie', { isHost: true })
   mei = await signUp('mei')
   tomas = await signUp('tomas')
   ada = await signUp('ada')

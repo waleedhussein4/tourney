@@ -14,11 +14,6 @@ export const LANGUAGES = [
 
 export const directionOf = (code) => (code === 'ar' ? 'rtl' : 'ltr')
 
-// The billing API returns the interval as a plain English word ('month') —
-// there is only ever the one value, so a lookup beats a translation library.
-const INTERVAL_NAMES = { en: { month: 'month' }, ar: { month: 'شهر' } }
-export const intervalName = (code, interval) => INTERVAL_NAMES[code]?.[interval] ?? interval
-
 export const COPY = {
   en: {
     documentTitle: 'Run your tournament on Tourney',
@@ -28,7 +23,7 @@ export const COPY = {
     heroTitle: 'Run your tournament. We handle the rest.',
     heroBody:
       'Sign-ups, brackets, teams and standings. You run the competition; the site keeps track of it.',
-    heroAction: "Start hosting — it's free",
+    heroAction: 'Start hosting',
     heroSecondary: 'See a live tournament',
 
     stepsTitle: 'How it works',
@@ -39,7 +34,7 @@ export const COPY = {
       },
       {
         title: 'Publish it',
-        body: 'Your first tournament goes live for free. Running more than one at a time is a monthly subscription.',
+        body: 'Publishing is free and instant. Until you do, only you can see the tournament.',
       },
       {
         title: 'Share the link',
@@ -66,27 +61,17 @@ export const COPY = {
 
     pricingTitle: 'What it costs',
     pricingBody:
-      'Hosting is free. Running more than one tournament live at the same time needs a subscription — no cut of your entry fees, ever.',
-    tierHeading: 'Tournament size',
-    priceHeading: 'Fee',
-    pricingLine: (count, amount, interval) =>
-      `${count} tournament live at a time is free — then ${amount} a ${interval} for as many as you like.`,
-    biggerTitle: 'Running several at once?',
-    biggerBody: 'Subscribe from your billing page — no email needed.',
+      'Nothing real. Tourney runs on demo credits: they are not money, cannot be cashed out, and the checkout never takes a card. Becoming a host costs 20 credits, and anyone can top up for free.',
 
     faqTitle: 'The questions we get',
     faq: [
       {
-        q: 'Do you take a cut of the entry fees?',
-        a: 'No. Entry fees and prizes are between you and your players — the site never holds or moves that money.',
+        q: 'Is there real money involved?',
+        a: 'No. Entry fees and prizes are demo credits, held in the tournament bank and paid out to the winners. They have no cash value.',
       },
       {
-        q: 'What if I only run one tournament?',
-        a: 'Then hosting costs nothing. The subscription only matters once you want a second tournament live at the same time.',
-      },
-      {
-        q: 'Can players pay their entry fee in cash?',
-        a: 'Yes — that is between you and them. The site tracks who has entered; how they paid you is your business.',
+        q: 'What if nobody signs up?',
+        a: 'Cancel the tournament before it starts and every entry fee goes back to the player who paid it.',
       },
       {
         q: 'Is it in Arabic for my players?',
@@ -95,10 +80,8 @@ export const COPY = {
     ],
 
     closingTitle: 'Running something soon?',
-    closingBody:
-      'Start hosting free, or send us a message and we will set the first one up with you.',
-    closingAction: "Start hosting — it's free",
-    closingContact: 'Email us',
+    closingBody: 'Start hosting, or have a look at a live tournament first.',
+    closingAction: 'Start hosting',
   },
 
   ar: {
@@ -109,7 +92,7 @@ export const COPY = {
     heroTitle: 'نظّم بطولتك ونحن نتكفّل بالباقي.',
     heroBody:
       'التسجيل، جداول المباريات، الفرق والترتيب. أنت تدير المنافسة، والموقع يتابع كل التفاصيل.',
-    heroAction: 'ابدأ التنظيم — مجاناً',
+    heroAction: 'ابدأ التنظيم',
     heroSecondary: 'شاهد بطولة جارية',
 
     stepsTitle: 'كيف تعمل',
@@ -120,7 +103,7 @@ export const COPY = {
       },
       {
         title: 'انشرها',
-        body: 'بطولتك الأولى مجانية. تشغيل أكثر من بطولة في الوقت نفسه يحتاج اشتراكاً شهرياً.',
+        body: 'النشر مجاني وفوري. إلى أن تنشرها، أنت وحدك ترى البطولة.',
       },
       {
         title: 'شارك الرابط',
@@ -141,27 +124,17 @@ export const COPY = {
 
     pricingTitle: 'الكلفة',
     pricingBody:
-      'التنظيم مجاني. تشغيل أكثر من بطولة واحدة في الوقت نفسه يحتاج اشتراكاً — بلا أي نسبة من رسوم اشتراك لاعبيك.',
-    tierHeading: 'حجم البطولة',
-    priceHeading: 'الرسوم',
-    pricingLine: (count, amount, interval) =>
-      `تشغيل ${count} بطولة واحدة في الوقت نفسه مجاني — وبعدها ${amount} ${interval} لعدد غير محدود من البطولات.`,
-    biggerTitle: 'تدير أكثر من بطولة في آن واحد؟',
-    biggerBody: 'اشترك من صفحة الفوترة — بلا حاجة لمراسلتنا.',
+      'لا شيء حقيقياً. يعمل تورني برصيد تجريبي: ليس مالاً ولا يمكن صرفه، والدفع عندنا لا يقبل أي بطاقة. تصبح منظّماً مقابل ٢٠ رصيداً، ويمكن لأي شخص شحن رصيده مجاناً.',
 
     faqTitle: 'أسئلة تصلنا',
     faq: [
       {
-        q: 'هل تأخذون نسبة من رسوم الاشتراك؟',
-        a: 'لا. رسوم الاشتراك والجوائز أمر بينك وبين لاعبيك — الموقع لا يحفظ هذه الأموال ولا يحرّكها.',
+        q: 'هل هناك مال حقيقي؟',
+        a: 'لا. رسوم الاشتراك والجوائز رصيد تجريبي، يُحفظ في خزنة البطولة ويُدفع للفائزين، وليست له قيمة نقدية.',
       },
       {
-        q: 'ماذا لو أدرت بطولة واحدة فقط؟',
-        a: 'عندها التنظيم مجاني بالكامل. الاشتراك يهم فقط عندما تريد بطولة ثانية في الوقت نفسه.',
-      },
-      {
-        q: 'هل يمكن للّاعبين دفع الاشتراك نقداً؟',
-        a: 'نعم، هذا بينك وبينهم. الموقع يتابع من سجّل، وطريقة الدفع تعود لك.',
+        q: 'ماذا لو لم يسجّل أحد؟',
+        a: 'ألغِ البطولة قبل أن تبدأ فتعود كل رسوم الاشتراك إلى من دفعها.',
       },
       {
         q: 'هل التطبيق بالعربية للّاعبين؟',
@@ -170,8 +143,7 @@ export const COPY = {
     ],
 
     closingTitle: 'عندك بطولة قريباً؟',
-    closingBody: 'ابدأ التنظيم مجاناً، أو راسلنا وسنجهّز الأولى معك.',
-    closingAction: 'ابدأ التنظيم — مجاناً',
-    closingContact: 'راسلنا بالبريد',
+    closingBody: 'ابدأ التنظيم، أو تفرّج على بطولة جارية أولاً.',
+    closingAction: 'ابدأ التنظيم',
   },
 }

@@ -86,37 +86,6 @@ function loadConfig() {
     problems.push('CRON_SECRET must be at least 16 characters when it is set')
   }
 
-  // Optional as a group: with none of them set the app takes no card payments
-  // and publishing falls back to a human confirming. With some but not all of
-  // them set it would take a payment it cannot verify, which is worse than not
-  // taking one — so the three are required together or not at all.
-  const paddle = {
-    apiKey: read('PADDLE_API_KEY'),
-    webhookSecret: read('PADDLE_WEBHOOK_SECRET'),
-    clientToken: read('PADDLE_CLIENT_TOKEN'),
-    environment: read('PADDLE_ENV') ?? 'sandbox',
-    // The gateway's id for the subscription price, created in its dashboard.
-    planPriceId: read('PADDLE_PRICE_PLAN'),
-  }
-  const paddleSet = Object.entries(paddle).filter(
-    ([name]) => !['environment', 'planPriceId'].includes(name)
-  )
-  const paddleGiven = paddleSet.filter(([, value]) => value)
-  if (paddleGiven.length > 0 && paddleGiven.length < paddleSet.length) {
-    const missing = paddleSet.filter(([, value]) => !value).map(([name]) => name)
-    problems.push(
-      `Card payments need PADDLE_API_KEY, PADDLE_WEBHOOK_SECRET and PADDLE_CLIENT_TOKEN together — missing ${missing.join(', ')}`
-    )
-  }
-  if (!['sandbox', 'production'].includes(paddle.environment)) {
-    problems.push(`PADDLE_ENV must be sandbox or production, got "${paddle.environment}"`)
-  }
-  // A configured gateway with no price would send a host to a checkout that
-  // cannot charge anything.
-  if (paddleGiven.length === paddleSet.length && !paddle.planPriceId) {
-    problems.push('Card payments need PADDLE_PRICE_PLAN — the gateway price for the plan')
-  }
-
   // Password-reset email, via Resend. Unset in development, the mailer logs
   // instead of sending — nothing to configure for local work.
   //
@@ -163,9 +132,6 @@ function loadConfig() {
     // Password-reset email. `mailFrom` unset in development is fine — the
     // mailer never reads it there, since it logs instead of calling Resend.
     resend: { ...resend, configured: mailConfigured },
-    // Card payments. `enabled` is what the rest of the code asks: unset
-    // credentials mean the publish flow waits for a human instead.
-    paddle: Object.freeze({ ...paddle, enabled: paddleGiven.length === paddleSet.length }),
   })
 }
 

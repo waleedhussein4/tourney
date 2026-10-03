@@ -112,3 +112,15 @@ export function totalPrize(values) {
   if (values.type === 'brackets') return Number(values.prize) || 0
   return (values.prizes ?? []).reduce((sum, entry) => sum + (Number(entry.prize) || 0), 0)
 }
+
+/**
+ * What the entry fees will raise if every slot fills.
+ *
+ * Shown next to the prize pool because the difference is what the host has to
+ * put in themselves before the tournament can start — the single thing most
+ * likely to surprise them later.
+ */
+export function projectedIncome(values) {
+  const perEntrant = (Number(values.entryFee) || 0) * (Number(values.teamSize) || 1)
+  return perEntrant * (Number(values.maxCapacity) || 0)
+}
