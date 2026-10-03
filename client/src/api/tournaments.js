@@ -36,16 +36,11 @@ export const postUpdate = (id, content) => post(`/api/tournaments/${id}/updates`
 
 // --- publishing ---------------------------------------------------------------
 
-/**
- * What it costs to publish this tournament, and where to send the money.
- *
- * The payment number is served rather than shipped in the bundle: it lives in
- * one server config file, and a regression gate keeps it out of everywhere else.
- */
-export const getPublishInfo = (id) => get(`/api/tournaments/${id}/publish`)
-
-/** Free tiers go live at once; paid ones start waiting for a confirmed payment. */
+/** Free and instant: the draft goes live the moment the host asks. */
 export const publishTournament = (id) => post(`/api/tournaments/${id}/publish`)
+
+/** Takes it back to a draft only the host can see. */
+export const unpublishTournament = (id) => post(`/api/tournaments/${id}/unpublish`)
 
 // --- entering -----------------------------------------------------------------
 
@@ -134,7 +129,6 @@ export const tournamentKeys = {
   list: (params) => ['tournaments', 'list', params],
   detail: (id) => ['tournaments', 'detail', id],
   manage: (id) => ['tournaments', 'manage', id],
-  publish: (id) => ['tournaments', 'publish', id],
   trending: ['tournaments', 'trending'],
   categories: ['tournaments', 'categories'],
   mine: ['tournaments', 'mine'],

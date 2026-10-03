@@ -27,23 +27,13 @@ import styles from './admin.module.css'
 /**
  * The administrator's landing page.
  *
- * Unlisted and admin-gated. Publishing payments come first because a host is
- * waiting on each one; the demo-data controls below it are housekeeping.
+ * Unlisted and admin-gated. The demo-data controls, and the moderation queue.
  */
 export function AdminPage() {
   useDocumentTitle('Admin')
   const queryClient = useQueryClient()
   const [confirming, setConfirming] = useState(false)
   const [result, setResult] = useState(null)
-
-  // Cheap, and the only place anyone would notice a host is waiting to be paid
-  // attention to. Failure is silent on purpose: this card is a signpost, and the
-  // queue page reports its own errors properly.
-  const pending = useQuery({
-    queryKey: publishRequestKeys.pending,
-    queryFn: listPublishRequests,
-    select: (data) => data.requests.length,
-  })
 
   const seed = useMutation({
     mutationFn: seedDemoData,
@@ -76,28 +66,8 @@ export function AdminPage() {
       <PageHeader
         eyebrow="Administration"
         title="Administration"
-        description="Publishing payments waiting on a human, and the demo data behind the live site."
+        description="The demo data behind the live site, and what people have reported."
       />
-
-      <Card>
-        <CardHeader
-          title="Publishing payments"
-          subtitle={
-            pending.data > 0
-              ? `${pending.data} ${pending.data === 1 ? 'tournament is' : 'tournaments are'} waiting on a confirmed transfer.`
-              : 'Tournaments whose hosts have paid to publish. Nothing is waiting right now.'
-          }
-          actions={
-            <ButtonLink
-              variant={pending.data > 0 ? 'primary' : 'secondary'}
-              size="sm"
-              to="/admin/publish-requests"
-            >
-              Open the queue
-            </ButtonLink>
-          }
-        />
-      </Card>
 
       <Card>
         <CardHeader

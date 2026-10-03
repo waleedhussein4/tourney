@@ -16,8 +16,6 @@ const defaultHandlers = [
   http.get('/api/users/me', () =>
     HttpResponse.json({ error: { message: 'Not signed in' } }, { status: 401 })
   ),
-  // The footer's <ContactEmail> reads this on every page.
-  http.get('/api/billing/plan', () => HttpResponse.json({ contactEmail: 'support@tourney.app' })),
 ]
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
