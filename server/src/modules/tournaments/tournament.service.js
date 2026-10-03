@@ -111,6 +111,9 @@ export async function createTournament(hostId, input) {
     accessibility: input.accessibility,
     teamSize: input.teamSize,
     maxCapacity: input.maxCapacity,
+    entryFee: input.entryFee,
+    prize: input.type === 'brackets' ? input.prize : undefined,
+    prizes: input.type === 'battle royale' ? input.prizes : undefined,
     startDate: input.startDate,
     endDate: input.endDate,
     description,
@@ -171,6 +174,12 @@ function buildFilter(query) {
   if (query.category) filter.category = query.category
   if (query.type) filter.type = query.type
   if (query.accessibility) filter.accessibility = query.accessibility
+
+  if (query.minEntryFee !== undefined || query.maxEntryFee !== undefined) {
+    filter.entryFee = {}
+    if (query.minEntryFee !== undefined) filter.entryFee.$gte = query.minEntryFee
+    if (query.maxEntryFee !== undefined) filter.entryFee.$lte = query.maxEntryFee
+  }
 
   if (query.status === 'upcoming') Object.assign(filter, { hasStarted: false })
   if (query.status === 'live') Object.assign(filter, { hasStarted: true, hasEnded: false })
@@ -285,8 +294,10 @@ export async function postUpdate(tournamentId, hostId, content) {
 /**
  * Cancels a tournament.
  *
- * Only before it starts — once people are playing, there is a result to record
- * instead.
+ * Only before it starts: once people are playing, the result is what the prizes
+ * are for. Entry fees are between the host and their entrants and were never
+ * held here, so there is nothing to give back — whoever collected the money
+ * settles it the way they collected it.
  */
 export async function deleteTournament(tournamentId, hostId) {
   const tournament = await loadAsHost(tournamentId, hostId)
@@ -688,7 +699,8 @@ function drawBracket(tournament) {
  * Starts the tournament.
  *
  * Entries close and the draw is locked. What it takes is a full bracket, or two
- * entrants for a battle royale.
+ * entrants for a battle royale — the prize is the host's promise to keep, not
+ * something this site can hold or verify.
  */
 export async function startTournament(tournamentId, hostId) {
   const tournament = await loadAsHost(tournamentId, hostId)
@@ -1082,13 +1094,11 @@ export async function reportTournament(tournamentId, reporterId, reason) {
   })
 }
 
-/** How many finishers the results screen shows for a battle royale. */
-const RESULTS_DEPTH = 3
-
 /**
  * Ends the tournament.
  *
- * Records that it is over and who won.
+ * Records that it is over and who won; paying the prize is the host's to do,
+ * with the people who were standing in front of them.
  */
 export async function endTournament(tournamentId, hostId) {
   const tournament = await loadAsHost(tournamentId, hostId)
@@ -1108,21 +1118,23 @@ export async function endTournament(tournamentId, hostId) {
 }
 
 /**
- * Who finished on top, for the results screen.
+ * Who finished on top, for the host to pay and for the results screen.
  *
  * A bracket has one winner — the last match's. A battle royale is ranked by
- * score, down to `RESULTS_DEPTH` places.
+ * score, and only as deep as the prize table goes.
  */
 function winnersOf(tournament) {
   if (tournament.type === 'brackets') {
-    const champion = tournament.matches[tournament.matches.length - 1]?.winner
-    return champion ? [{ rank: 1, id: String(champion) }] : []
+    const champion = tournament.matches[tournament.matches.length - 1]
+    return champion ? [{ rank: 1, id: String(champion), prize: tournament.prize ?? 0 }] : []
   }
 
   const ranked = [...tournament.participants()].sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-  return ranked
-    .slice(0, RESULTS_DEPTH)
-    .map((participant, index) => ({ rank: index + 1, id: tournament.participantId(participant) }))
+  return (tournament.prizes ?? []).map((entry) => ({
+    rank: entry.rank,
+    id: ranked[entry.rank - 1] ? tournament.participantId(ranked[entry.rank - 1]) : null,
+    prize: entry.prize,
+  }))
 }
 
 // --- host attention ----------------------------------------------------------

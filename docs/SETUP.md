@@ -75,7 +75,8 @@ choose your own.
 
 > The app never takes a real card outside its own $5/month hosting
 > subscription, and that only runs against Paddle's sandbox unless
-> `PADDLE_ENV=production` is set.
+> `PADDLE_ENV=production` is set. Entry fees and prizes are numbers hosts and
+> players agree between themselves — the app never charges or holds them.
 
 ## Everyday commands
 

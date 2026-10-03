@@ -25,6 +25,8 @@ beforeEach(async () => {
 async function liveTournament(overrides = {}) {
   const tournament = await createTournament(host.agent, {
     maxCapacity: 4,
+    entryFee: 10,
+    prize: 40,
     ...overrides,
   })
 
@@ -107,7 +109,7 @@ describe('operations only the host may perform', () => {
   })
 
   it.each(hostOnly)('refuses a participant trying to %s', async (_label, build) => {
-    const tournament = await createTournament(host.agent)
+    const tournament = await createTournament(host.agent, { entryFee: 0, prize: 0 })
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
 
     const [method, path, body] = build(tournament.id)
@@ -132,15 +134,18 @@ describe('the host edit endpoint', () => {
   it('rejects fields a host is not allowed to change', async () => {
     const tournament = await createTournament(host.agent)
 
-    // The schema is strict, so a field the host is not allowed to change on an
-    // edit is a 400 rather than a silent drop.
+    // Editing the prize after people have paid to enter would move the
+    // goalposts; the schema is strict, so it is a 400 rather than a silent drop.
+    await host.agent.patch(`/api/tournaments/${tournament.id}`).send({ prize: 999_999 }).expect(400)
     await host.agent
       .patch(`/api/tournaments/${tournament.id}`)
       .send({ maxCapacity: 128 })
       .expect(400)
+    await host.agent.patch(`/api/tournaments/${tournament.id}`).send({ entryFee: 999 }).expect(400)
 
     const unchanged = await Tournament.findById(tournament.id)
-    expect(unchanged.maxCapacity).toBe(4)
+    expect(unchanged.prize).toBe(40)
+    expect(unchanged.entryFee).toBe(10)
   })
 
   it('refuses edits once the tournament has started', async () => {
@@ -160,7 +165,7 @@ describe('joining', () => {
   })
 
   it('refuses a second entry', async () => {
-    const tournament = await createTournament(host.agent)
+    const tournament = await createTournament(host.agent, { entryFee: 10 })
 
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(409)
@@ -184,12 +189,23 @@ describe('joining', () => {
   })
 
   it('refuses after the tournament has started', async () => {
-    const tournament = await createTournament(host.agent, { maxCapacity: 2 })
+    const tournament = await createTournament(host.agent, { maxCapacity: 2, entryFee: 0, prize: 0 })
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
     await tomas.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
     await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(200)
 
     await ada.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(400)
+  })
+
+  it('lets anyone in whatever the entry fee says, because it collects nothing', async () => {
+    const skint = await signUp('skint')
+    const tournament = await createTournament(host.agent, { entryFee: 500 })
+
+    await skint.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
+
+    // The fee is what the host charges their players face to face. The site
+    // records who entered; it has never held the money and cannot check it.
+    expect((await Tournament.findById(tournament.id)).enrolledUsers).toHaveLength(1)
   })
 
   it('refuses a team entry into a solo tournament, and the reverse', async () => {
@@ -204,6 +220,8 @@ describe('joining', () => {
     const teamBased = await createTournament(host.agent, {
       teamSize: 2,
       maxCapacity: 2,
+      entryFee: 0,
+      prize: 0,
     })
     await mei.agent.post(`/api/tournaments/${teamBased.id}/join/solo`).expect(400)
   })
@@ -214,6 +232,8 @@ describe('joining', () => {
       const tournament = await createTournament(host.agent, {
         teamSize: 2,
         maxCapacity: 2,
+        entryFee: 10,
+        prize: 40,
       })
 
       await tomas.agent
@@ -227,6 +247,8 @@ describe('joining', () => {
       const tournament = await createTournament(host.agent, {
         teamSize: 2,
         maxCapacity: 2,
+        entryFee: 10,
+        prize: 40,
       })
 
       const response = await mei.agent
@@ -241,6 +263,8 @@ describe('joining', () => {
       const tournament = await createTournament(host.agent, {
         teamSize: 2,
         maxCapacity: 2,
+        entryFee: 0,
+        prize: 0,
       })
 
       const first = await createTeam(mei.agent, [tomas.agent], 'Night Owls')
@@ -260,7 +284,7 @@ describe('joining', () => {
 
 describe('starting', () => {
   it('refuses a bracket that is not full', async () => {
-    const tournament = await createTournament(host.agent, { maxCapacity: 4 })
+    const tournament = await createTournament(host.agent, { maxCapacity: 4, entryFee: 0, prize: 0 })
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
 
     const response = await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(400)
@@ -271,6 +295,9 @@ describe('starting', () => {
     const tournament = await createTournament(host.agent, {
       type: 'battle royale',
       maxCapacity: 8,
+      entryFee: 0,
+      prize: undefined,
+      prizes: [{ rank: 1, prize: 0 }],
     })
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
 
@@ -359,8 +386,11 @@ describe('applications', () => {
     return createTournament(host.agent, {
       type: 'battle royale',
       maxCapacity: 2,
+      entryFee: 0,
       accessibility: 'application required',
       applicationForm: ['Name'],
+      prize: undefined,
+      prizes: [{ rank: 1, prize: 0 }],
     })
   }
 

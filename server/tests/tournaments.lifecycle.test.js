@@ -58,6 +58,8 @@ describe('a solo bracket, from creation to a crowned champion', () => {
     const tournament = await createTournament(host.agent, {
       title: 'Solo Ladder Open',
       maxCapacity: 4,
+      entryFee: 10,
+      prize: 60,
     })
 
     expect(tournament.matches).toHaveLength(3)
@@ -84,7 +86,7 @@ describe('a solo bracket, from creation to a crowned champion', () => {
     const ended = await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
 
     expect(ended.body.tournament.hasEnded).toBe(true)
-    expect(ended.body.winners).toEqual([{ rank: 1, id: champion }])
+    expect(ended.body.winners).toEqual([{ rank: 1, id: champion, prize: 60 }])
   })
 })
 
@@ -97,6 +99,8 @@ describe('a team bracket', () => {
       title: 'Team Title Run',
       teamSize: 2,
       maxCapacity: 2,
+      entryFee: 10,
+      prize: 41,
     })
 
     // The documented rule: the leader enters on the team's behalf.
@@ -119,7 +123,7 @@ describe('a team bracket', () => {
       .expect(200)
 
     const ended = await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
-    expect(ended.body.winners).toEqual([{ rank: 1, id: owls.id }])
+    expect(ended.body.winners).toEqual([{ rank: 1, id: owls.id, prize: 41 }])
   })
 })
 
@@ -129,7 +133,16 @@ describe('a battle royale', () => {
       title: 'Score Attack',
       type: 'battle royale',
       maxCapacity: 4,
+      entryFee: 10,
+      prize: undefined,
+      prizes: [
+        { rank: 1, prize: 25 },
+        { rank: 2, prize: 10 },
+        { rank: 3, prize: 5 },
+      ],
     })
+
+    expect(tournament.totalPrize).toBe(40)
 
     for (const name of ['mei', 'tomas', 'ada', 'kofi']) {
       await players[name].agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
@@ -152,9 +165,9 @@ describe('a battle royale', () => {
     const ended = await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
 
     expect(ended.body.winners).toEqual([
-      { rank: 1, id: players.kofi.user.id },
-      { rank: 2, id: players.ada.user.id },
-      { rank: 3, id: players.tomas.user.id },
+      { rank: 1, id: players.kofi.user.id, prize: 25 },
+      { rank: 2, id: players.ada.user.id, prize: 10 },
+      { rank: 3, id: players.tomas.user.id, prize: 5 },
     ])
   })
 
@@ -175,6 +188,12 @@ describe('a battle royale', () => {
       type: 'battle royale',
       teamSize: 3,
       maxCapacity: 2,
+      entryFee: 5,
+      prize: undefined,
+      prizes: [
+        { rank: 1, prize: 20 },
+        { rank: 2, prize: 10 },
+      ],
     })
 
     await players.mei.agent
@@ -200,8 +219,8 @@ describe('a battle royale', () => {
 
     const ended = await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
     expect(ended.body.winners).toEqual([
-      { rank: 1, id: larks.id },
-      { rank: 2, id: owls.id },
+      { rank: 1, id: larks.id, prize: 20 },
+      { rank: 2, id: owls.id, prize: 10 },
     ])
   })
 })
@@ -212,8 +231,11 @@ describe('an application-gated tournament', () => {
       title: 'By Invitation',
       type: 'battle royale',
       maxCapacity: 4,
+      entryFee: 10,
       accessibility: 'application required',
       applicationForm: ['In-game name', 'Region'],
+      prize: undefined,
+      prizes: [{ rank: 1, prize: 20 }],
     })
 
     // Walking in is refused.
@@ -258,6 +280,9 @@ describe('an application-gated tournament', () => {
       type: 'battle royale',
       accessibility: 'application required',
       applicationForm: ['Name'],
+      prize: undefined,
+      prizes: [{ rank: 1, prize: 0 }],
+      entryFee: 0,
     })
 
     await players.mei.agent
@@ -285,6 +310,9 @@ describe('cancelling before the start', () => {
     const tournament = await createTournament(host.agent, {
       type: 'battle royale',
       maxCapacity: 4,
+      entryFee: 25,
+      prize: undefined,
+      prizes: [{ rank: 1, prize: 80 }],
     })
 
     await players.mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
@@ -299,6 +327,9 @@ describe('cancelling before the start', () => {
     const tournament = await createTournament(host.agent, {
       type: 'battle royale',
       maxCapacity: 2,
+      entryFee: 0,
+      prize: undefined,
+      prizes: [{ rank: 1, prize: 0 }],
     })
 
     await players.mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
@@ -327,6 +358,13 @@ describe('creating a tournament', () => {
     await host.agent
       .post('/api/tournaments')
       .send(tournamentPayload({ startDate: start, endDate: start }))
+      .expect(400)
+  })
+
+  it('refuses a battle royale described with a bracket prize', async () => {
+    await host.agent
+      .post('/api/tournaments')
+      .send(tournamentPayload({ type: 'battle royale', prize: 100 }))
       .expect(400)
   })
 

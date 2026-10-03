@@ -73,6 +73,8 @@ export function tournamentPayload(overrides = {}) {
     accessibility: 'open',
     teamSize: 1,
     maxCapacity: 4,
+    entryFee: 10,
+    prize: 40,
     startDate: new Date(now + DAY).toISOString(),
     endDate: new Date(now + 3 * DAY).toISOString(),
     ...overrides,

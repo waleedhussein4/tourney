@@ -1,10 +1,13 @@
 import { Badge, EmptyState } from '/src/components/ui/index.js'
+import { formatMoney } from '/src/lib/format.js'
 import styles from './StandingsTable.module.css'
 
 /**
  * The battle-royale leaderboard.
  *
- * Sorted by score, highest first.
+ * Sorted by score, with the prize each finishing rank pays shown against the
+ * competitor currently holding it — so a reader can see what is at stake rather
+ * than working it out from a separate prize table.
  *
  * The sort copies the array first. The original called `.sort()` on the array it
  * received as a prop, which reorders the caller's data as a side effect of
@@ -23,6 +26,7 @@ export function StandingsTable({ tournament, onReportParticipant }) {
   }
 
   const standings = [...participants].sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+  const prizeByRank = new Map((tournament.prizes ?? []).map((entry) => [entry.rank, entry.prize]))
   const isTeamBased = tournament.teamSize > 1
 
   return (
@@ -40,6 +44,9 @@ export function StandingsTable({ tournament, onReportParticipant }) {
             <th scope="col" className={styles.number}>
               Score
             </th>
+            <th scope="col" className={styles.number}>
+              Prize
+            </th>
             <th scope="col">Status</th>
             {onReportParticipant && (
               <th scope="col" className="visually-hidden">
@@ -51,6 +58,7 @@ export function StandingsTable({ tournament, onReportParticipant }) {
         <tbody>
           {standings.map((participant, index) => {
             const rank = index + 1
+            const prize = prizeByRank.get(rank)
 
             return (
               <tr key={participant.id} className={participant.eliminated ? styles.out : ''}>
@@ -64,6 +72,9 @@ export function StandingsTable({ tournament, onReportParticipant }) {
                   )}
                 </td>
                 <td className={styles.number}>{participant.score ?? 0}</td>
+                <td className={`${styles.number} ${prize ? styles.prize : ''}`}>
+                  {prize ? formatMoney(prize) : <span className={styles.muted}>—</span>}
+                </td>
                 <td>
                   {participant.eliminated ? (
                     <Badge tone="danger">Out</Badge>

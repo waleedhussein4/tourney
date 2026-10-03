@@ -177,11 +177,12 @@ export async function deleteTeam(teamId, userId) {
  *
  * The window that matters opens when the team *enters*, not when the tournament
  * starts: the entry is recorded from that moment, and the tournament has
- * snapshotted the roster it will place in the standings. A leader who could
- * dissolve the team in between would leave the tournament holding a phantom
- * entrant, and a member who could leave would still show up in the standings.
+ * snapshotted the roster it will place in the standings. A leader who could dissolve the
+ * team in between would leave the tournament holding a phantom entrant, and a
+ * member who could leave would still collect a share of the prize.
  *
- * Once the tournament has ended the roster is free again.
+ * Once the tournament has ended the roster is free again — the snapshot has
+ * already been paid out against.
  */
 async function assertRosterIsMutable(team, action) {
   const entered = await Tournament.exists({

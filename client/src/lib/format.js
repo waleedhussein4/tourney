@@ -66,7 +66,8 @@ export function utcToLocalInput(value) {
  * Real money, from cents: "$5", "$12.50".
  *
  * Used for the one amount the site actually charges — the hosting
- * subscription.
+ * subscription. Everything else money-shaped (an entry fee, a prize) is a
+ * plain dollar amount the host typed, and goes through `formatMoney` instead.
  *
  * Wrapped in bidi isolates (U+2068/U+2069) so the amount keeps its order and
  * punctuation inside right-to-left text — the hosts page renders this in
@@ -87,6 +88,17 @@ export function formatUsd(cents) {
  */
 export function formatNumber(value) {
   return `⁨${value.toLocaleString('en-US')}⁩`
+}
+
+/**
+ * What a host says an entry fee or a prize is worth: "$5", "$12.50", "Free".
+ *
+ * This money never touches the site — it changes hands between the host and
+ * their players — so this is a label, not a balance.
+ */
+export function formatMoney(amount) {
+  if (!amount) return 'Free'
+  return USD.format(amount)
 }
 
 /**
