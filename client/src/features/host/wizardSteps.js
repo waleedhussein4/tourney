@@ -22,10 +22,16 @@ export const STEPS = [
     fields: ['title', 'category', 'description', 'rules'],
   },
   {
+    id: 'prizes',
+    title: 'Prizes',
+    summary: 'What the winners take home.',
+    fields: ['prize', 'prizes'],
+  },
+  {
     id: 'entry',
     title: 'Entry',
-    summary: 'Who can enter, and how many.',
-    fields: ['accessibility', 'maxCapacity', 'startDate', 'endDate'],
+    summary: 'Who can enter, how many, and what it costs.',
+    fields: ['accessibility', 'maxCapacity', 'entryFee', 'startDate', 'endDate'],
   },
   {
     id: 'application',
@@ -62,6 +68,8 @@ export const BRACKET_SIZES = [2, 4, 8, 16, 32, 64, 128, 256]
  * validate and to lay out; the API wants them nested.
  */
 export function toCreatePayload(values) {
+  const isBracket = values.type === 'brackets'
+
   return {
     title: values.title.trim(),
     type: values.type,
@@ -69,6 +77,7 @@ export function toCreatePayload(values) {
     accessibility: values.accessibility,
     teamSize: Number(values.teamSize),
     maxCapacity: Number(values.maxCapacity),
+    entryFee: Number(values.entryFee) || 0,
     description: values.description ?? '',
     rules: values.rules ?? '',
     startDate: new Date(values.startDate).toISOString(),
@@ -87,5 +96,31 @@ export function toCreatePayload(values) {
         facebook: values.facebook?.trim() || undefined,
       },
     },
+    ...(isBracket
+      ? { prize: Number(values.prize) || 0 }
+      : {
+          prizes: values.prizes.map((entry, index) => ({
+            rank: index + 1,
+            prize: Number(entry.prize) || 0,
+          })),
+        }),
   }
+}
+
+/** Total prize money, for the review step and the running summary. */
+export function totalPrize(values) {
+  if (values.type === 'brackets') return Number(values.prize) || 0
+  return (values.prizes ?? []).reduce((sum, entry) => sum + (Number(entry.prize) || 0), 0)
+}
+
+/**
+ * What the entry fees will raise if every slot fills.
+ *
+ * Shown next to the prize pool because the difference is what the host has to
+ * put in themselves before the tournament can start — the single thing most
+ * likely to surprise them later.
+ */
+export function projectedIncome(values) {
+  const perEntrant = (Number(values.entryFee) || 0) * (Number(values.teamSize) || 1)
+  return perEntrant * (Number(values.maxCapacity) || 0)
 }

@@ -45,7 +45,7 @@ jobs:
 
       # Builds the container image (Docker is available on ubuntu-latest) and
       # deploys the Worker. Runtime secrets — MONGODB_URI, JWT_SECRET,
-      # CRON_SECRET, the PADDLE_* values — are Worker secrets set once with
+      # CRON_SECRET, the Resend keys — are Worker secrets set once with
       # `wrangler secret put`, not GitHub secrets, so this step never touches
       # them.
       - name: Deploy with Wrangler

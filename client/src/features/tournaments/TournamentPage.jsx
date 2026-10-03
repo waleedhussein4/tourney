@@ -18,6 +18,7 @@ import {
 import {
   formatCapacity,
   formatCategory,
+  formatCredits,
   formatDateTime,
   formatType,
   tournamentStatus,
@@ -31,8 +32,8 @@ import styles from './TournamentPage.module.css'
 
 /*
  * The two heaviest things on this page, loaded only when they are actually
- * needed. The header and the facts strip — everything a reader looks at
- * first — render from the main bundle while these arrive.
+ * needed. The header, the facts strip and the prize table — everything a reader
+ * looks at first — render from the main bundle while these arrive.
  *
  * `BracketView` pulls react-brackets, styled-components and a swipeable-views
  * dependency; a battle royale never loads any of it. `RichText` pulls
@@ -160,6 +161,8 @@ export function TournamentPage() {
       <ReportLink tournament={tournament} onReport={() => setReporting(true)} />
 
       <dl className={styles.facts}>
+        <Fact label="Prize pool" value={formatCredits(tournament.totalPrize)} accent />
+        <Fact label="Entry fee" value={formatCredits(tournament.entryFee)} />
         <Fact
           label="Entrants"
           value={formatCapacity({
@@ -201,6 +204,7 @@ export function TournamentPage() {
         </div>
 
         <aside className={styles.side}>
+          <PrizeCard tournament={tournament} />
           <UpdatesCard updates={tournament.updates} />
           <ContactCard contact={tournament.contactInfo} />
         </aside>
@@ -277,14 +281,23 @@ function HostNotice({ tournament }) {
   if (!tournament.viewer.isHost) return null
   if (tournament.publishState === 'published') return null
 
+  const waiting = tournament.publishState === 'pending_payment'
+
   return (
-    <aside className={styles.hostNotice}>
+    <aside className={`${styles.hostNotice} ${waiting ? styles.hostNoticeWaiting : ''}`}>
       <p className={styles.hostNoticeBody}>
-        <strong>This is a draft</strong> — only you can see it. Publish it to open it up for
-        entries.
+        <strong>{waiting ? 'Waiting for your payment' : 'This is a draft'}</strong> — only you can
+        see it.{' '}
+        {waiting
+          ? 'We will put it live as soon as the transfer is confirmed.'
+          : 'Publish it to open it up for entries.'}
       </p>
-      <ButtonLink variant="primary" size="sm" to={`/tournament/${tournament.id}/manage`}>
-        Publish it
+      <ButtonLink
+        variant={waiting ? 'ghost' : 'primary'}
+        size="sm"
+        to={`/tournament/${tournament.id}/manage`}
+      >
+        {waiting ? 'See the details' : 'Publish it'}
       </ButtonLink>
     </aside>
   )
@@ -400,7 +413,7 @@ function EntryActions({ tournament, onJoin, onApply, onWithdraw, withdrawing }) 
   return (
     <div className={styles.actions}>
       <Button variant="primary" onClick={onJoin}>
-        {isFull ? 'Join the waitlist' : 'Join'}
+        {isFull ? 'Join the waitlist (free)' : `Join for ${formatCredits(tournament.entryCost)}`}
       </Button>
     </div>
   )
@@ -414,6 +427,61 @@ function RichTextCard({ title, html, empty }) {
         <RichText html={html} empty={empty} />
       </Suspense>
     </Card>
+  )
+}
+
+function PrizeCard({ tournament }) {
+  return (
+    <Card>
+      <h2 className={styles.sectionTitle}>Prizes</h2>
+      {tournament.type === 'brackets' ? (
+        <p className={styles.prizeSingle}>
+          {formatCredits(tournament.prize)} <span>to the winner</span>
+        </p>
+      ) : (
+        <ul className={styles.prizeList}>
+          {(tournament.prizes ?? []).map((entry) => (
+            <li key={entry.rank}>
+              <span>#{entry.rank}</span>
+              <strong>{formatCredits(entry.prize)}</strong>
+            </li>
+          ))}
+        </ul>
+      )}
+      <BankMeter bank={tournament.bank} target={tournament.totalPrize} />
+    </Card>
+  )
+}
+
+/**
+ * How full the escrow bank is.
+ *
+ * Entry fees are held here, and the tournament cannot start until the bank
+ * covers the advertised prizes. That is the rule the whole economy rests on, so
+ * it gets drawn rather than only written.
+ */
+function BankMeter({ bank, target }) {
+  const filled = target > 0 ? Math.min(1, bank / target) : 1
+
+  return (
+    <div className={styles.bank}>
+      <p className={styles.bankLabel}>
+        <span>Prize bank</span>
+        <span>
+          <strong>{bank}</strong> of <strong>{target}</strong> credits
+        </span>
+      </p>
+      <div
+        className={styles.bankTrack}
+        role="meter"
+        aria-valuenow={bank}
+        aria-valuemin={0}
+        aria-valuemax={target}
+        aria-label="Prize bank"
+      >
+        <div className={styles.bankFill} style={{ width: `${filled * 100}%` }} />
+      </div>
+    </div>
   )
 }
 

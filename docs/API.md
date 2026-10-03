@@ -8,10 +8,9 @@ This document is written against the route definitions and the zod schemas in
 `server/src/app.js` and `server/src/modules/*`. Those files are the source of
 truth — if the two ever disagree, the code is right and this file is stale.
 
-The site never moves money between hosts and players — it only tracks
-tournaments, entrants, and standings. The only payment the app itself takes is
-its own $5/month hosting subscription — see [Billing](#billing) and
-[DECISIONS.md](DECISIONS.md).
+There is no real money anywhere. Entry fees and prizes are **credits**, a demo
+currency with no cash value; the checkout is a labelled demo that reads no card.
+See [Credits](#credits) and [DECISIONS.md](DECISIONS.md).
 
 ---
 
@@ -46,8 +45,8 @@ a `details` array of `{ path, message }`.
 
 `code` and `details` are optional. Codes in use: `VALIDATION_FAILED`,
 `INVALID_ID`, `INVALID_JSON`, `DUPLICATE`, `RATE_LIMITED`, `INTERNAL_ERROR`,
-`DATABASE_UNAVAILABLE`, `CRON_NOT_CONFIGURED`, `NO_ROUTE`, `PLAN_LIMIT_REACHED`,
-`PAYMENTS_UNAVAILABLE`, `MAIL_UNAVAILABLE`, `EMAIL_NOT_VERIFIED`,
+`DATABASE_UNAVAILABLE`, `CRON_NOT_CONFIGURED`, `NO_ROUTE`,
+`MAIL_UNAVAILABLE`, `EMAIL_NOT_VERIFIED`,
 `ACCOUNT_SUSPENDED`, `VERIFY_INVALID`, `VERIFY_EXPIRED`, `VERIFY_ALREADY_DONE`,
 `UNSUBSCRIBE_INVALID`.
 
@@ -64,12 +63,11 @@ a `details` array of `{ path, message }`.
   does not match.
 
 Common statuses: `400` validation, or a rule the current state forbids ("this
-has already started"); `401` not signed in, or bad credentials; `402` a
-subscription is required to go further (`PLAN_LIMIT_REACHED`); `403` signed in
+has already started"); `401` not signed in, or bad credentials; `403` signed in
 but not allowed; `404` no such resource; `409` a conflict with something that
 already holds — a taken email, a full tournament, an entry you already have;
-`429` rate limited; `500` a bug; `503` the database or the payment gateway is
-unreachable (`DATABASE_UNAVAILABLE`, `PAYMENTS_UNAVAILABLE`).
+`429` rate limited; `500` a bug; `503` the database is unreachable
+(`DATABASE_UNAVAILABLE`).
 
 The split between `400` and `409` is deliberate: `400` means _not now_, `409`
 means _not again_.
@@ -78,7 +76,7 @@ means _not again_.
 Mongo's `ObjectId`. Anything documented as an id is a UUID.
 
 **Rate limits.** `/api/auth/signup` and `/api/auth/login`: 20 per 15 minutes
-per address. `/api/billing/checkout`: 10 per hour per account. `/api/cron/*`:
+per address. `/api/credits/checkout/:productId`: 5 per hour per account. `/api/cron/*`:
 10 per hour. Limits are enforced in production only.
 
 ---
@@ -160,15 +158,28 @@ already verified. `503 MAIL_UNAVAILABLE` if the mail provider can't send.
 ### `GET /api/users/me` — auth
 
 `200 { user }`, where `user` is
-`{ id, username, email, isHost, isAdmin, hostingPlan: { status, active, renewsAt } }`.
+`{ id, username, email, emailVerified, credits, isHost, isAdmin }`.
 `401` when signed out — which is normal, and is how the client decides whether
 to render a signed-in shell.
 
 ### `POST /api/users/me/become-host` — auth
 
-Marks the account as a host. Free and instant — what costs money is the
-subscription that lifts the live-tournament limit, not becoming a host.
-`200 { user }`. `400` if already a host.
+Charges `HOST_UPGRADE_COST` (20 credits) once and sets `isHost`. In a
+transaction, with a ledger row. `200 { user }`.
+
+`400` if already a host, or if the balance is short. `403 EMAIL_NOT_VERIFIED`
+until the account's email is verified.
+
+### `GET /api/users/me/transactions` — auth
+
+| Query   |               |            |
+| ------- | ------------- | ---------- |
+| `limit` | integer 1–100 | default 50 |
+
+`200 { transactions }`, newest first. Each row is
+`{ _id, userId, type, amount, description, createdAt }` where `type` is one of
+`purchase`, `entry_fee`, `bank_deposit`, `payout`, `host_upgrade`, `refund`, and
+`amount` is the signed change to that account's balance.
 
 ### `GET /api/users/me/dashboard` — auth
 
@@ -189,72 +200,30 @@ currently runs nothing.
 
 ---
 
-## Billing
+## Credits
 
-The hosting subscription. See [DECISIONS.md](DECISIONS.md) for why it exists
-and why Paddle.
+### `GET /api/products` — public
 
-### `GET /api/billing/plan` — public
+### `GET /api/products/:productId` — public
 
-The price list. Public so the landing page can quote it while signed out; it
-carries no account state and no secret.
+The credit packages. Public, so a guest can see what credits cost before signing
+up. `404` for an unknown id.
 
-```json
-{
-  "plan": { "name": "Host", "priceCents": 500, "interval": "month" },
-  "freeLiveTournaments": 1,
-  "contactEmail": "…",
-  "currency": "USD"
-}
-```
+### `POST /api/credits/checkout/:productId` — auth, rate limited
 
-### `GET /api/billing/me` — auth
+**The demo checkout.** No payment is processed and no card details are accepted
+— the request body carries only the package id, which is in the URL. The card
+fields in the UI are a mock-up that never leaves the browser, and
+`npm run check:regressions` has a gate that fails the build if they ever do.
 
-What this account may do right now, and what a checkout would need. One call
-answers the billing screen and the publish button, so the two can never
-disagree.
+Grants the package's credits in a transaction, with a `purchase` ledger row.
 
 ```json
-{
-  "billing": {
-    "status": "active",
-    "active": true,
-    "renewsAt": "2026-10-01T00:00:00.000Z",
-    "plan": { "name": "Host", "priceCents": 500, "interval": "month" },
-    "liveTournaments": 2,
-    "freeLiveTournaments": 1,
-    "canPublish": true,
-    "contactEmail": "…",
-    "gateway": { "provider": "paddle", "clientToken": "…", "environment": "sandbox" }
-  }
-}
+{ "demo": true, "granted": 100, "product": { … }, "user": { … } }
 ```
 
-`status` is one of `none`, `active`, `past_due`, `canceled` — `past_due` counts
-as active, since a card retry is a poor reason to take someone's tournaments
-offline. `gateway` is `null` when Paddle is not configured on this deployment.
-
-### `POST /api/billing/checkout` — auth, rate limited
-
-No body. Opens a Paddle transaction for the subscription and returns
-`{ checkout: { transactionId } }`, which the client hands to Paddle's overlay.
-
-`409` if the account already has an active plan. `503 PAYMENTS_UNAVAILABLE` if
-the gateway is not configured or refuses to open a checkout.
-
-### `POST /api/webhooks/paddle` — the payment gateway
-
-Not for callers. Verifies the gateway's signature over the **raw** request
-body (mounted ahead of `express.json` for exactly this reason) and, on a
-subscription event, writes the account's plan status.
-
-Idempotent: a stored `lastEventId` makes a replayed delivery a no-op, and an
-event older than what is already recorded (`hostingPlan.updatedAt`) is
-ignored, so out-of-order deliveries can't resurrect a cancelled plan.
-
-Answers `400` to a delivery it cannot verify and `200` to everything else,
-including events it does nothing with — a gateway retries a non-2xx for days,
-so the only failures worth reporting are the ones a retry could fix.
+`429` after 5 in an hour — the cap is per account rather than per address,
+because credits are free here.
 
 ---
 
@@ -264,15 +233,16 @@ so the only failures worth reporting are the ones a retry could fix.
 
 The catalogue. **Published tournaments only** — see [Publishing](#publishing).
 
-| Query           |                                  |                               |
-| --------------- | -------------------------------- | ----------------------------- |
-| `page`          | integer ≥ 1                      | default 1                     |
-| `limit`         | integer 1–50                     | default 12                    |
-| `search`        | string ≤ 120 chars               | matches title and description |
-| `category`      | one of the 13 category slugs     |                               |
-| `type`          | `brackets` \| `battle royale`    |                               |
-| `accessibility` | `open` \| `application required` |                               |
-| `status`        | `upcoming` \| `live` \| `ended`  |                               |
+| Query                        |                                  |                               |
+| ---------------------------- | -------------------------------- | ----------------------------- |
+| `page`                       | integer ≥ 1                      | default 1                     |
+| `limit`                      | integer 1–50                     | default 12                    |
+| `search`                     | string ≤ 120 chars               | matches title and description |
+| `category`                   | one of the 13 category slugs     |                               |
+| `type`                       | `brackets` \| `battle royale`    |                               |
+| `accessibility`              | `open` \| `application required` |                               |
+| `status`                     | `upcoming` \| `live` \| `ended`  |                               |
+| `minEntryFee`, `maxEntryFee` | integer ≥ 0                      |                               |
 
 ```json
 {
@@ -303,8 +273,8 @@ Everything the caller hosts or competes in. `200 { tournaments }`.
 
 ### `GET /api/tournaments/:tournamentId` — optional
 
-The full tournament: participants, matches, standings, updates, contact info,
-and a `viewer` object — `{ isHost, isJoined, hasApplied, isAccepted }` — computed
+The full tournament: participants, matches, prizes, updates, contact info, and
+a `viewer` object — `{ isHost, isJoined, hasApplied, isAccepted }` — computed
 by the server. The client never infers those from the participant list.
 
 `404` if there is no such tournament — or if it is not published yet and the
@@ -322,15 +292,18 @@ Shared fields:
 | `category`             | a category slug                                                                                                      |
 | `accessibility`        | `open` \| `application required`                                                                                     |
 | `teamSize`             | integer 1–16; `1` is a solo tournament                                                                               |
+| `entryFee`             | integer 0–1,000,000 credits; a team pays `entryFee × teamSize`                                                       |
 | `description`, `rules` | HTML, sanitised server-side. Limits are on the _visible_ text — 200 and 800 characters — not the markup              |
 | `contactInfo`          | `{ email?, phone?, socialMedia? { discord?, instagram?, twitter?, facebook? } }`, strict — unknown keys are an error |
 | `applicationForm`      | up to 10 question labels, at most 80 characters each; **required** when `accessibility` is `application required`    |
 | `startDate`, `endDate` | dates; the end must be after the start                                                                               |
 
 `type: "brackets"` adds `maxCapacity` (a **power of two**, 2–256 — a single
-elimination bracket cannot pair an odd round).
+elimination bracket cannot pair an odd round) and `prize`, in credits.
 
-`type: "battle royale"` adds `maxCapacity` (2–1000).
+`type: "battle royale"` adds `maxCapacity` (2–1000) and `prizes`, an array of
+`{ rank, prize }` — at least one, each rank at most once, and no rank beyond the
+capacity.
 
 `201 { tournament }`, with `publishState: "draft"`. `403` if the account is not
 a host.
@@ -338,7 +311,7 @@ a host.
 ### `PATCH /api/tournaments/:tournamentId` — host
 
 Only `title`, `description`, `rules`, `contactInfo`, `startDate`, `endDate`.
-Strict: any other key is a `400`. Format and capacity are deliberately
+Strict: any other key is a `400`. Format, capacity, and prizes are deliberately
 immutable once the tournament exists, because entrants signed up on the
 strength of them.
 
@@ -346,10 +319,13 @@ strength of them.
 
 ### `DELETE /api/tournaments/:tournamentId` — host
 
-Cancels it. `200 { entrants }`, the count of whoever was signed up.
+Cancels it and, in one transaction, refunds every entry fee to whoever paid it
+and returns the remaining bank — the host's own top-up — to the host. So a
+cancelled tournament leaves the same number of credits in the world as it found.
+`200 { deleted, refunds }`.
 
-`400` once it has started — at that point there is a result to record instead
-of a cancellation.
+`400` once it has started: at that point the result is what the prizes are
+for.
 
 ### `POST /api/tournaments/:tournamentId/updates` — host
 
@@ -370,14 +346,10 @@ draft ──publish──▶ published ──unpublish──▶ draft
 
 #### `POST /api/tournaments/:tournamentId/publish` — host
 
-No body. Publishing is free and instant — there is no payment step on this
-endpoint. What gates it is how many tournaments the host already has live: the
-free tier allows `FREE_LIVE_TOURNAMENTS` (currently 1) live at once; beyond
-that the account needs an active subscription (see [Billing](#billing)).
+No body. Publishing is free and instant, with no limit on how many tournaments a
+host has live.
 
-`200 { tournament }`. `409` unless the tournament is a `draft`. `402
-PLAN_LIMIT_REACHED` if the host is on the free tier and already has a live
-tournament — the message names the limit and points at the subscription.
+`200 { tournament }`. `409` unless the tournament is a `draft`.
 
 #### `POST /api/tournaments/:tournamentId/unpublish` — host
 
@@ -389,20 +361,22 @@ hiding a tournament mid-event isn't something this endpoint allows.
 
 ### Entering
 
-Every route here answers `404` for a tournament that is not published. No
-money moves on any of them — the site only records who is in.
+Every route here answers `404` for a tournament that is not published.
 
 #### `POST /api/tournaments/:tournamentId/join/solo` — auth
 
-Adds the caller as a participant — or, once every slot is taken, adds them to
-the **waitlist** instead of erroring. `409` if the caller (or their waitlist
+Moves the entry fee from the caller's wallet into the tournament bank and adds
+them as a participant — transactional, with a ledger row. Once every slot is
+taken, adds them to the **waitlist** instead of erroring, free of charge; the fee
+is taken only if a withdrawal later promotes them. `409` if the caller (or their waitlist
 entry) already exists. `400` if it has already started, is team-based, is
-application-gated, or the caller is the host.
+application-gated, the caller is the host, or the balance is short.
 
 #### `POST /api/tournaments/:tournamentId/join/team` — auth
 
 `{ "teamId": "…" }`. The **team leader** enters on behalf of the whole team,
-or waitlists it once full. The team's size must equal the tournament's
+or waitlists it once full. The leader pays `entryFee × teamSize` for the whole
+team. The team's size must equal the tournament's
 `teamSize`.
 
 `403` if the caller does not lead that team.
@@ -410,9 +384,10 @@ or waitlists it once full. The team's size must equal the tournament's
 #### `POST /api/tournaments/:tournamentId/withdraw` — auth
 
 Pulls the caller (or, for a team, their team) out — from the roster or the
-waitlist, whichever they're on. `400` once the tournament has started. When a
-withdrawal opens a slot, the longest-waiting waitlist entry is promoted
-automatically and notified.
+waitlist, whichever they're on. `400` once the tournament has started. Leaving
+the roster refunds the entry fee from the bank to whoever paid it. When that
+opens a slot, the longest-waiting waitlist entry who can afford the fee is
+promoted, charged, and notified.
 
 #### `POST /api/tournaments/:tournamentId/applications` — auth
 
@@ -433,7 +408,14 @@ tournament is open to all, has started, or the team is not the right size.
 #### `GET /api/tournaments/:tournamentId/manage` — host
 
 The management view: everything the public endpoint returns, plus the list of
-open applications.
+open applications and the bank's state (`bankRequired`, `bankShortfall`).
+
+#### `POST /api/tournaments/:tournamentId/bank/deposit` — host
+
+`{ "amount": 150 }` — a positive integer. Moves credits from the host's wallet
+into the tournament bank. The deposit is `min(amount, shortfall)`, so a host
+cannot over-fund a bank by fat-fingering a zero. `400` if the bank is already
+full. `200 { deposited, bank, required }`.
 
 #### `POST /api/tournaments/:tournamentId/applications/:applicationId/accept` — host
 
@@ -450,7 +432,8 @@ started, or if the tournament isn't a bracket.
 
 #### `POST /api/tournaments/:tournamentId/start` — host
 
-`400` unless the tournament is published, and:
+The gate the whole economy rests on. `400` unless the tournament is published,
+**the bank covers the advertised prize total**, and:
 
 - a **bracket** has every slot filled — a single-elimination draw cannot pair
   a half-empty field;
@@ -501,16 +484,18 @@ battle-royale scoreboard. Team entries may carry per-member `members` rows.
 
 #### `POST /api/tournaments/:tournamentId/end` — host
 
-Ends the tournament and records who won — a bracket's champion, or the top of
-the leaderboard for a battle royale.
+Ends the tournament and pays out from the bank in one transaction, one ledger
+row per payout: a bracket's champion (the winner of the final match), or the
+ranked prize table for a battle royale. A team's prize is split in whole
+credits among its members. Whatever the prizes did not claim returns to the host.
 
-`200 { tournament, winners }`. `400` if a bracket's final has no recorded
-winner yet, or the tournament hasn't started or has already ended.
+`200 { tournament, payouts, hostRemainder }`. `400` if a bracket's final has not
+been played and confirmed, or the tournament hasn't started or has already ended.
 
 #### `DELETE /api/tournaments/:tournamentId/participants/:participantId` — host
 
 `{ "reason": "…" }`. Removes one participant or team and, if a slot opens,
-promotes the next waitlist entry. `404` if that participant isn't in this
+promotes the next waitlist entry. Before the start the entry fee is refunded. `404` if that participant isn't in this
 tournament.
 
 #### `POST /api/tournaments/:tournamentId/report` — auth, rate limited

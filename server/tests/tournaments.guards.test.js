@@ -1,9 +1,18 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useDatabase } from './setup/database.js'
-import { createTeam, createTournament, guest, signUp } from './setup/api.js'
+import {
+  createTeam,
+  createTournament,
+  creditsOf,
+  guest,
+  signUp,
+  totalCredits,
+} from './setup/api.js'
 import Tournament from '../src/models/tournament.model.js'
 
 useDatabase()
+
+const START = 500
 
 let host
 let stranger
@@ -13,18 +22,20 @@ let ada
 let kofi
 
 beforeEach(async () => {
-  host = await signUp('hostie', { isHost: true, plan: true })
-  stranger = await signUp('mallory', { isHost: true, plan: true })
-  mei = await signUp('mei')
-  tomas = await signUp('tomas')
-  ada = await signUp('ada')
-  kofi = await signUp('kofi')
+  host = await signUp('hostie', { credits: START, isHost: true })
+  stranger = await signUp('mallory', { credits: START, isHost: true })
+  mei = await signUp('mei', { credits: START })
+  tomas = await signUp('tomas', { credits: START })
+  ada = await signUp('ada', { credits: START })
+  kofi = await signUp('kofi', { credits: START })
 })
 
 /** A four-slot solo bracket that is full and under way. */
 async function liveTournament(overrides = {}) {
   const tournament = await createTournament(host.agent, {
     maxCapacity: 4,
+    entryFee: 10,
+    prize: 40,
     ...overrides,
   })
 
@@ -72,6 +83,10 @@ describe('operations only the host may perform', () => {
     ['start', (id) => ['post', `/api/tournaments/${id}/start`, {}]],
     ['end', (id) => ['post', `/api/tournaments/${id}/end`, {}]],
     ['post an update', (id) => ['post', `/api/tournaments/${id}/updates`, { content: 'hello' }]],
+    [
+      'deposit into the bank',
+      (id) => ['post', `/api/tournaments/${id}/bank/deposit`, { amount: 5 }],
+    ],
     ['shuffle the bracket', (id) => ['post', `/api/tournaments/${id}/shuffle`, {}]],
     ['edit the tournament', (id) => ['patch', `/api/tournaments/${id}`, { title: 'Mine now' }]],
     [
@@ -107,7 +122,7 @@ describe('operations only the host may perform', () => {
   })
 
   it.each(hostOnly)('refuses a participant trying to %s', async (_label, build) => {
-    const tournament = await createTournament(host.agent)
+    const tournament = await createTournament(host.agent, { entryFee: 0, prize: 0 })
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
 
     const [method, path, body] = build(tournament.id)
@@ -130,17 +145,20 @@ describe('operations only the host may perform', () => {
 
 describe('the host edit endpoint', () => {
   it('rejects fields a host is not allowed to change', async () => {
-    const tournament = await createTournament(host.agent)
+    const tournament = await createTournament(host.agent, { prize: 40 })
 
-    // The schema is strict, so a field the host is not allowed to change on an
-    // edit is a 400 rather than a silent drop.
+    // Editing the prize after people have paid to enter would move the
+    // goalposts; the schema is strict, so it is a 400 rather than a silent drop.
+    await host.agent.patch(`/api/tournaments/${tournament.id}`).send({ prize: 999_999 }).expect(400)
     await host.agent
       .patch(`/api/tournaments/${tournament.id}`)
       .send({ maxCapacity: 128 })
       .expect(400)
+    await host.agent.patch(`/api/tournaments/${tournament.id}`).send({ bank: 999 }).expect(400)
 
     const unchanged = await Tournament.findById(tournament.id)
-    expect(unchanged.maxCapacity).toBe(4)
+    expect(unchanged.prize).toBe(40)
+    expect(unchanged.bank).toBe(0)
   })
 
   it('refuses edits once the tournament has started', async () => {
@@ -157,14 +175,16 @@ describe('joining', () => {
     const tournament = await createTournament(host.agent)
 
     await host.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(400)
+    expect(await creditsOf(host.user.id)).toBe(START)
   })
 
-  it('refuses a second entry', async () => {
-    const tournament = await createTournament(host.agent)
+  it('refuses a second entry and charges only once', async () => {
+    const tournament = await createTournament(host.agent, { entryFee: 10 })
 
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(409)
 
+    expect(await creditsOf(mei.user.id)).toBe(START - 10)
     expect((await Tournament.findById(tournament.id)).enrolledUsers).toHaveLength(1)
   })
 
@@ -181,15 +201,26 @@ describe('joining', () => {
     expect(response.body.tournament.waitlistCount).toBe(1)
 
     await ada.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(409)
+    expect(await creditsOf(ada.user.id)).toBe(START)
   })
 
   it('refuses after the tournament has started', async () => {
-    const tournament = await createTournament(host.agent, { maxCapacity: 2 })
+    const tournament = await createTournament(host.agent, { maxCapacity: 2, entryFee: 0, prize: 0 })
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
     await tomas.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
     await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(200)
 
     await ada.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(400)
+  })
+
+  it('refuses a player who cannot cover the fee, and charges nothing', async () => {
+    const broke = await signUp('skint', { credits: 5 })
+    const tournament = await createTournament(host.agent, { entryFee: 10 })
+
+    await broke.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(400)
+
+    expect(await creditsOf(broke.user.id)).toBe(5)
+    expect((await Tournament.findById(tournament.id)).bank).toBe(0)
   })
 
   it('refuses a team entry into a solo tournament, and the reverse', async () => {
@@ -204,22 +235,28 @@ describe('joining', () => {
     const teamBased = await createTournament(host.agent, {
       teamSize: 2,
       maxCapacity: 2,
+      entryFee: 0,
+      prize: 0,
     })
     await mei.agent.post(`/api/tournaments/${teamBased.id}/join/solo`).expect(400)
   })
 
   describe('as a team', () => {
-    it('refuses anyone but the leader', async () => {
+    it('refuses anyone but the leader, who is the one who pays', async () => {
       const team = await createTeam(mei.agent, [tomas.agent], 'Night Owls')
       const tournament = await createTournament(host.agent, {
         teamSize: 2,
         maxCapacity: 2,
+        entryFee: 10,
+        prize: 40,
       })
 
       await tomas.agent
         .post(`/api/tournaments/${tournament.id}/join/team`)
         .send({ teamId: team.id })
         .expect(403)
+
+      expect(await creditsOf(tomas.user.id)).toBe(START)
     })
 
     it('refuses a team of the wrong size', async () => {
@@ -227,6 +264,8 @@ describe('joining', () => {
       const tournament = await createTournament(host.agent, {
         teamSize: 2,
         maxCapacity: 2,
+        entryFee: 10,
+        prize: 40,
       })
 
       const response = await mei.agent
@@ -235,12 +274,15 @@ describe('joining', () => {
         .expect(400)
 
       expect(response.body.error.message).toMatch(/exactly 2/)
+      expect(await creditsOf(mei.user.id)).toBe(START)
     })
 
     it('refuses a team whose member is already competing individually', async () => {
       const tournament = await createTournament(host.agent, {
         teamSize: 2,
         maxCapacity: 2,
+        entryFee: 0,
+        prize: 0,
       })
 
       const first = await createTeam(mei.agent, [tomas.agent], 'Night Owls')
@@ -260,7 +302,7 @@ describe('joining', () => {
 
 describe('starting', () => {
   it('refuses a bracket that is not full', async () => {
-    const tournament = await createTournament(host.agent, { maxCapacity: 4 })
+    const tournament = await createTournament(host.agent, { maxCapacity: 4, entryFee: 0, prize: 0 })
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
 
     const response = await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(400)
@@ -271,10 +313,26 @@ describe('starting', () => {
     const tournament = await createTournament(host.agent, {
       type: 'battle royale',
       maxCapacity: 8,
+      entryFee: 0,
+      prize: undefined,
+      prizes: [{ rank: 1, prize: 0 }],
     })
     await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
 
     await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(400)
+  })
+
+  it('refuses while the bank is short of the advertised prizes', async () => {
+    const tournament = await createTournament(host.agent, {
+      maxCapacity: 2,
+      entryFee: 1,
+      prize: 100,
+    })
+    await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
+    await tomas.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
+
+    const response = await host.agent.post(`/api/tournaments/${tournament.id}/start`).expect(400)
+    expect(response.body.error.message).toMatch(/2 of the 100/)
   })
 
   it('refuses a second start', async () => {
@@ -338,6 +396,9 @@ describe('ending', () => {
 
     const response = await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(400)
     expect(response.body.error.message).toMatch(/final/i)
+
+    // Nothing was paid out on the failed attempt.
+    expect((await Tournament.findById(tournament.id)).bank).toBe(40)
   })
 
   it('refuses a tournament that has not started', async () => {
@@ -345,12 +406,60 @@ describe('ending', () => {
     await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(400)
   })
 
-  it('refuses a second end', async () => {
+  it('refuses a second end, and pays out only once', async () => {
+    const worldBefore = await totalCredits()
     const tournament = await liveTournament()
     await recordChampion(tournament.id, host)
 
     await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(200)
     await host.agent.post(`/api/tournaments/${tournament.id}/end`).expect(400)
+
+    expect(await totalCredits()).toBe(worldBefore)
+    expect((await Tournament.findById(tournament.id)).bank).toBe(0)
+  })
+})
+
+describe('the bank', () => {
+  it('caps an oversized deposit instead of destroying the difference', async () => {
+    const tournament = await createTournament(host.agent, { entryFee: 0, prize: 30 })
+
+    const response = await host.agent
+      .post(`/api/tournaments/${tournament.id}/bank/deposit`)
+      .send({ amount: 500 })
+      .expect(200)
+
+    expect(response.body.deposited).toBe(30)
+    expect(await creditsOf(host.user.id)).toBe(START - 30)
+  })
+
+  it('refuses a deposit into a bank that is already full', async () => {
+    const tournament = await createTournament(host.agent, { entryFee: 0, prize: 10 })
+    await host.agent
+      .post(`/api/tournaments/${tournament.id}/bank/deposit`)
+      .send({ amount: 10 })
+      .expect(200)
+
+    await host.agent
+      .post(`/api/tournaments/${tournament.id}/bank/deposit`)
+      .send({ amount: 1 })
+      .expect(400)
+
+    expect(await creditsOf(host.user.id)).toBe(START - 10)
+  })
+
+  it('refuses a zero or negative deposit', async () => {
+    const tournament = await createTournament(host.agent, { entryFee: 0, prize: 30 })
+
+    await host.agent
+      .post(`/api/tournaments/${tournament.id}/bank/deposit`)
+      .send({ amount: 0 })
+      .expect(400)
+    await host.agent
+      .post(`/api/tournaments/${tournament.id}/bank/deposit`)
+      .send({ amount: -50 })
+      .expect(400)
+
+    expect(await creditsOf(host.user.id)).toBe(START)
   })
 })
 
@@ -359,8 +468,11 @@ describe('applications', () => {
     return createTournament(host.agent, {
       type: 'battle royale',
       maxCapacity: 2,
+      entryFee: 0,
       accessibility: 'application required',
       applicationForm: ['Name'],
+      prize: undefined,
+      prizes: [{ rank: 1, prize: 0 }],
     })
   }
 

@@ -13,7 +13,7 @@ let mei
 
 beforeEach(async () => {
   admin = await signUp('rootadmin', { role: 'admin' })
-  host = await signUp('hostie', { isHost: true, plan: true })
+  host = await signUp('hostie', { isHost: true })
   mei = await signUp('mei')
 })
 

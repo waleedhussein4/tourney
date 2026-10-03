@@ -1,20 +1,15 @@
 #!/usr/bin/env node
-// Emits static HTML for /terms, /privacy and /refunds into client/dist, so a
-// plain HTTP GET (no JavaScript) gets real policy content and a contact
-// address — Workers Static Assets serves a file at `<slug>/index.html` for a
+// Emits static HTML for /terms and /privacy into client/dist, so a
+// plain HTTP GET (no JavaScript) gets real policy content — Workers Static Assets serves a file at `<slug>/index.html` for a
 // request to `/<slug>` before falling back to the SPA. Run after `vite build`.
 //
 // Content comes from client/src/content/policyContent.js — the same data the
-// React pages render — so there is one source of truth for the prose. The
-// contact address comes from server/src/config/plans.js, the one file allowed
-// to name it (see scripts/check-regressions.sh), so it is read here rather
-// than duplicated.
+// React pages render — so there is one source of truth for the prose.
 
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { POLICY_PAGES } from '../client/src/content/policyContent.js'
-import { CONTACT_EMAIL } from '../server/src/config/plans.js'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url)) + '/..'
 const distDir = path.join(rootDir, 'client', 'dist')
@@ -24,11 +19,10 @@ const escapeHtml = (s) =>
 
 const renderPart = (part) => {
   if (typeof part === 'string') return escapeHtml(part)
-  if (part.type === 'contact') return `<a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a>`
   return `<a href="${part.href}">${escapeHtml(part.text)}</a>`
 }
 
-const SLUGS = { terms: 'terms', privacy: 'privacy', refunds: 'refunds' }
+const SLUGS = { terms: 'terms', privacy: 'privacy' }
 
 const renderPage = (pageKey) => {
   const page = POLICY_PAGES[pageKey]
@@ -61,10 +55,9 @@ const renderPage = (pageKey) => {
     </style>
   </head>
   <body>
-    <nav aria-label="Legal and contact">
+    <nav aria-label="Legal">
       <a href="/">Tourney home</a>
       ${otherSlugs.map(([, slug]) => `<a href="/${slug}">${slug[0].toUpperCase()}${slug.slice(1)}</a>`).join('\n      ')}
-      <a href="mailto:${CONTACT_EMAIL}">Contact</a>
     </nav>
     <h1>${escapeHtml(page.title)}</h1>
     ${body}

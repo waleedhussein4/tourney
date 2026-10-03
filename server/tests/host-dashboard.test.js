@@ -9,7 +9,7 @@ let host
 let players
 
 beforeEach(async () => {
-  host = await signUp('hostie', { isHost: true, plan: true })
+  host = await signUp('hostie', { isHost: true })
   players = {}
   for (const name of ['mei', 'tomas', 'ada', 'kofi']) {
     players[name] = await signUp(name)
@@ -149,7 +149,7 @@ describe('host attention summary', () => {
 
 describe('host dashboard across tournaments', () => {
   it('shows only tournaments this host runs, with per-tournament counts', async () => {
-    const otherHost = await signUp('otherhost', { isHost: true, plan: true })
+    const otherHost = await signUp('otherhost', { isHost: true })
 
     const mine = await createTournament(host.agent, {
       title: 'Gated Cup',

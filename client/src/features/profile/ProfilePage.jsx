@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { getMyTransactions } from '/src/api/users.js'
 import { listMyTournaments, tournamentKeys } from '/src/api/tournaments.js'
 import { useAuth } from '/src/features/auth/useAuth.js'
 import { TournamentCard } from '/src/features/tournaments/TournamentCard.jsx'
@@ -17,12 +18,28 @@ import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import { HostDashboard } from './HostDashboard.jsx'
 import { NotificationPreferences } from './NotificationPreferences.jsx'
 import { PlayerDashboard } from './PlayerDashboard.jsx'
+import { formatDateTime } from '/src/lib/format.js'
 import styles from './profile.module.css'
+
+/** How each kind of ledger row reads to the person it happened to. */
+const TRANSACTION_LABELS = {
+  purchase: 'Bought credits',
+  entry_fee: 'Tournament entry',
+  bank_deposit: 'Added to a prize bank',
+  payout: 'Prize payout',
+  host_upgrade: 'Host upgrade',
+  refund: 'Refund',
+}
 
 export function ProfilePage() {
   // The route guard has already established there is a user here.
   const { user } = useAuth()
   useDocumentTitle(user.username)
+
+  const transactions = useQuery({
+    queryKey: ['transactions', 'mine'],
+    queryFn: () => getMyTransactions(50),
+  })
 
   const tournaments = useQuery({
     queryKey: tournamentKeys.mine,
@@ -35,6 +52,14 @@ export function ProfilePage() {
 
       <div className={styles.grid}>
         <Card>
+          <p className={styles.statLabel}>Credits</p>
+          <p className={styles.statValue}>{user.credits}</p>
+          <Link to="/credits" className={styles.link}>
+            Buy more
+          </Link>
+        </Card>
+
+        <Card>
           <p className={styles.statLabel}>Account</p>
           <div className={styles.badges}>
             <Badge tone={user.isHost ? 'accent' : 'neutral'}>
@@ -45,11 +70,6 @@ export function ProfilePage() {
           {!user.isHost && (
             <Link to="/become-host" className={styles.link}>
               Become a host
-            </Link>
-          )}
-          {user.isHost && (
-            <Link to="/billing" className={styles.link}>
-              Manage billing
             </Link>
           )}
         </Card>
@@ -84,6 +104,64 @@ export function ProfilePage() {
       </Card>
 
       <NotificationPreferences />
+      <Card className={styles.section}>
+        <CardHeader
+          title="Credit history"
+          subtitle="Every credit that has moved in or out of your account."
+        />
+        {transactions.isPending ? (
+          <LoadingState label="Loading your history" rows={2} />
+        ) : transactions.isError ? (
+          <ErrorState error={transactions.error} onRetry={() => transactions.refetch()} />
+        ) : transactions.data.transactions.length === 0 ? (
+          <EmptyState
+            title="No activity yet"
+            body="Buying credits or entering a tournament will show up here."
+            action={
+              <ButtonLink variant="primary" to="/credits">
+                Buy credits
+              </ButtonLink>
+            }
+          />
+        ) : (
+          <table className={styles.ledger}>
+            <caption className="visually-hidden">Your credit history, newest first</caption>
+            <thead>
+              <tr>
+                <th scope="col">When</th>
+                <th scope="col">What</th>
+                <th scope="col" className={styles.amount}>
+                  Amount
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.data.transactions.map((entry) => (
+                <tr key={entry._id}>
+                  <td>
+                    <time dateTime={entry.createdAt}>{formatDateTime(entry.createdAt)}</time>
+                  </td>
+                  <td>
+                    <span className={styles.ledgerKind}>
+                      {TRANSACTION_LABELS[entry.type] ?? entry.type}
+                    </span>
+                    {entry.description && (
+                      <span className={styles.ledgerDetail}>{entry.description}</span>
+                    )}
+                  </td>
+                  {/* The sign is the whole point of the row, so it is never dropped. */}
+                  <td
+                    className={`${styles.amount} ${entry.amount >= 0 ? styles.amountIn : styles.amountOut}`}
+                  >
+                    {entry.amount >= 0 ? '+' : ''}
+                    {entry.amount}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
     </PageShell>
   )
 }

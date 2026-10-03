@@ -19,7 +19,7 @@ describe('CreateTournamentPage wizard', () => {
     mockCategories()
     renderWithProviders(<CreateTournamentPage />)
 
-    expect(screen.getByText('Step 1 of 5')).toBeInTheDocument()
+    expect(screen.getByText('Step 1 of 6')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Create a tournament' })).toBeInTheDocument()
   })
 
@@ -34,7 +34,7 @@ describe('CreateTournamentPage wizard', () => {
     await user.click(screen.getByRole('button', { name: 'Continue' }))
 
     expect(await screen.findByText('At least 1')).toBeInTheDocument()
-    expect(screen.getByText('Step 1 of 5')).toBeInTheDocument()
+    expect(screen.getByText('Step 1 of 6')).toBeInTheDocument()
   })
 
   it('advances to the details step once the format step is valid', async () => {
@@ -44,6 +44,6 @@ describe('CreateTournamentPage wizard', () => {
 
     await user.click(screen.getByRole('button', { name: 'Continue' }))
 
-    expect(await screen.findByText('Step 2 of 5')).toBeInTheDocument()
+    expect(await screen.findByText('Step 2 of 6')).toBeInTheDocument()
   })
 })

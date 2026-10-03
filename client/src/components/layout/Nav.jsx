@@ -55,11 +55,10 @@ export function Nav() {
               flashes "Sign in" at someone who is already signed in. */}
           {isLoading ? null : user ? (
             <>
-              {isHost && (
-                <NavLink to="/billing" className={styles.link}>
-                  Billing
-                </NavLink>
-              )}
+              <NavLink to="/credits" className={styles.credits}>
+                <span className={styles.creditsValue}>{user.credits}</span>
+                <span className={styles.creditsLabel}>credits</span>
+              </NavLink>
               <NavLink to="/profile" className={styles.link}>
                 {user.username}
               </NavLink>

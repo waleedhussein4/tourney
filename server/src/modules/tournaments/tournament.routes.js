@@ -79,6 +79,13 @@ tournamentRouter.post(
 )
 
 tournamentRouter.post(
+  '/:tournamentId/bank/deposit',
+  requireAuth,
+  validate({ params: schemas.tournamentIdParams, body: schemas.depositSchema }),
+  controller.deposit
+)
+
+tournamentRouter.post(
   '/:tournamentId/shuffle',
   requireAuth,
   validate({ params: schemas.tournamentIdParams }),

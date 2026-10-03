@@ -15,14 +15,14 @@ import { BecomeHostPage } from '/src/features/host/BecomeHostPage.jsx'
 import { TeamsPage } from '/src/features/teams/TeamsPage.jsx'
 import { TeamPage } from '/src/features/teams/TeamPage.jsx'
 import { JoinTeamPage } from '/src/features/teams/JoinTeamPage.jsx'
-import { BillingPage } from '/src/features/billing/BillingPage.jsx'
+import { CreditsPage } from '/src/features/credits/CreditsPage.jsx'
+import { CheckoutPage } from '/src/features/credits/CheckoutPage.jsx'
 import { ProfilePage } from '/src/features/profile/ProfilePage.jsx'
 import { UnsubscribePage } from '/src/features/profile/UnsubscribePage.jsx'
 import { HostsPage } from '/src/features/hosts/HostsPage.jsx'
 import { NotFoundPage } from '/src/features/misc/NotFoundPage.jsx'
 import { TermsPage } from '/src/features/misc/TermsPage.jsx'
 import { PrivacyPage } from '/src/features/misc/PrivacyPage.jsx'
-import { RefundsPage } from '/src/features/misc/RefundsPage.jsx'
 
 /**
  * The two host-only pages are split out of the main bundle.
@@ -79,11 +79,11 @@ export function Router() {
         <Route path="/" element={<HomePage />} />
         <Route path="/tournaments" element={<BrowsePage />} />
         <Route path="/tournament/:UUID" element={<TournamentPage />} />
+        <Route path="/credits" element={<CreditsPage />} />
         {/* Outside the app shell on purpose: it is a sales page, not a screen. */}
         <Route path="/hosts" element={<HostsPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/refunds" element={<RefundsPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/unsubscribe" element={<UnsubscribePage />} />
 
@@ -101,7 +101,7 @@ export function Router() {
           <Route path="/teams" element={<TeamsPage />} />
           <Route path="/team/view" element={<TeamPage />} />
           <Route path="/team/join/:teamCode" element={<JoinTeamPage />} />
-          <Route path="/billing" element={<BillingPage />} />
+          <Route path="/purchase/:product" element={<CheckoutPage />} />
           <Route path="/become-host" element={<BecomeHostPage />} />
         </Route>
 

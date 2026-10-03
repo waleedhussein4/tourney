@@ -7,6 +7,7 @@ import { publishStatus, tournamentStatus } from '/src/lib/format.js'
 import { useDocumentTitle } from '/src/lib/useDocumentTitle.js'
 import { AttentionSummary } from './AttentionSummary.jsx'
 import { DetailsSection } from './sections/DetailsSection.jsx'
+import { BankSection } from './sections/BankSection.jsx'
 import { ApplicationsSection } from './sections/ApplicationsSection.jsx'
 import { ParticipantsSection } from './sections/ParticipantsSection.jsx'
 import { MatchesSection } from './sections/MatchesSection.jsx'
@@ -80,6 +81,7 @@ export function ManagePage() {
         <AttentionSummary tournament={tournament} />
         <PublishSection tournament={tournament} />
         <LifecycleSection tournament={tournament} />
+        <BankSection tournament={tournament} />
         {tournament.accessibility === 'application required' && (
           <ApplicationsSection tournament={tournament} />
         )}

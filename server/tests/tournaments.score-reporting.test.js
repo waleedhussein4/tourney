@@ -9,7 +9,7 @@ let host
 let players
 
 beforeEach(async () => {
-  host = await signUp('hostie', { isHost: true, plan: true })
+  host = await signUp('hostie', { isHost: true })
   players = {}
   for (const name of ['mei', 'tomas', 'ada', 'kofi']) {
     players[name] = await signUp(name)

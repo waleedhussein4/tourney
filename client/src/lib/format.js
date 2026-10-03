@@ -23,13 +23,6 @@ const MATCH_TIME = new Intl.DateTimeFormat(undefined, {
   timeZoneName: 'short',
 })
 
-const USD = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  // $5 rather than $5.00, but $12.50 keeps its cents.
-  trailingZeroDisplay: 'stripIfInteger',
-})
-
 export const formatDate = (value) => (value ? DATE.format(new Date(value)) : '')
 
 export const formatDateTime = (value) => (value ? DATE_TIME.format(new Date(value)) : '')
@@ -62,31 +55,10 @@ export function utcToLocalInput(value) {
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16)
 }
 
-/**
- * Real money, from cents: "$5", "$12.50".
- *
- * Used for the one amount the site actually charges — the hosting
- * subscription.
- *
- * Wrapped in bidi isolates (U+2068/U+2069) so the amount keeps its order and
- * punctuation inside right-to-left text — the hosts page renders this in
- * Arabic.
- */
-export function formatUsd(cents) {
-  if (cents === 0) return 'Free'
-  if (cents == null) return ''
-  return `⁨${USD.format(cents / 100)}⁩`
-}
-
-/**
- * Grouped western digits, isolated from the text around them: "150,000".
- *
- * U+2068 and U+2069 fence the number off from the bidirectional algorithm, so
- * it keeps its comma and its order inside an Arabic sentence instead of being
- * reordered around the surrounding right-to-left run.
- */
-export function formatNumber(value) {
-  return `⁨${value.toLocaleString('en-US')}⁩`
+/** "12 credits", "1 credit", "Free". */
+export function formatCredits(amount) {
+  if (!amount) return 'Free'
+  return `${amount} ${amount === 1 ? 'credit' : 'credits'}`
 }
 
 /**
@@ -122,6 +94,7 @@ export function tournamentStatus(tournament) {
  */
 export function publishStatus(publishState) {
   if (publishState === 'draft') return { label: 'Draft', tone: 'neutral' }
+  if (publishState === 'pending_payment') return { label: 'Awaiting payment', tone: 'warning' }
   return null
 }
 

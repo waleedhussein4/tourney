@@ -29,6 +29,9 @@ const enrolledTeamSchema = new Schema({
   // Denormalised so a bracket still reads correctly after a team is renamed or
   // deleted — the tournament records who competed, not who exists today.
   teamName: { type: String, required: true },
+  // Who paid the entry fee, so a refund goes back to the right account even if
+  // leadership changes afterwards.
+  paidBy: { type: String, ref: 'User', required: true },
   members: { type: [memberSchema], default: [] },
 })
 
@@ -143,6 +146,19 @@ const tournamentSchema = new Schema(
      */
     maxCapacity: { type: Number, required: true, min: 2 },
 
+    entryFee: { type: Number, required: true, min: 0 },
+
+    /** Brackets: the single prize the winner takes. */
+    prize: { type: Number, min: 0 },
+    /** Battle royale: what each finishing rank pays. */
+    prizes: {
+      type: [{ _id: false, rank: { type: Number, min: 1 }, prize: { type: Number, min: 0 } }],
+      default: undefined,
+    },
+
+    /** Escrow. Entry fees flow in; payouts flow out; the remainder goes to the host. */
+    bank: { type: Number, default: 0, min: 0 },
+
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     hasStarted: { type: Boolean, default: false },
@@ -153,10 +169,7 @@ const tournamentSchema = new Schema(
 
     /**
      * Whether anyone but the host can see this. A tournament is born a `draft`;
-     * only a published one is listed, joinable, or startable. What it takes to
-     * publish is in the subscriptions module — see docs/MONETISATION.md.
-     */
-    /**
+     * only `published` ones are listed, joinable, or startable.
      * No schema default on purpose. Mongoose applies a default when it hydrates
      * a document that lacks the field, so `default: 'draft'` would turn every
      * tournament written before this feature into a draft the moment it was
@@ -239,6 +252,17 @@ tournamentSchema.index({ acceptedTeams: 1 })
 /** True for a tournament played by teams rather than individuals. */
 tournamentSchema.virtual('isTeamBased').get(function isTeamBased() {
   return this.teamSize > 1
+})
+
+/** What the bank must hold before the tournament can start. */
+tournamentSchema.virtual('totalPrize').get(function totalPrize() {
+  if (this.type === 'brackets') return this.prize ?? 0
+  return (this.prizes ?? []).reduce((sum, entry) => sum + entry.prize, 0)
+})
+
+/** What one participant pays to enter: the fee per player, times the roster. */
+tournamentSchema.virtual('entryCost').get(function entryCost() {
+  return this.entryFee * this.teamSize
 })
 
 /** The enrolment array in play for this tournament's shape. */

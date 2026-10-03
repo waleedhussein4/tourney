@@ -3,10 +3,12 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { useDatabase } from './setup/database.js'
-import { client, guest } from './setup/api.js'
+import { client, guest, totalCredits } from './setup/api.js'
 import User from '../src/models/user.model.js'
 import Team from '../src/models/team.model.js'
 import Tournament from '../src/models/tournament.model.js'
+import Transaction from '../src/models/transaction.model.js'
+import Product from '../src/models/product.model.js'
 import {
   clearDemoData,
   generatePassword,
@@ -50,6 +52,7 @@ describe('what the seed creates', () => {
     expect(await User.countDocuments()).toBe(14)
     expect(await Team.countDocuments()).toBe(4)
     expect(await Tournament.countDocuments()).toBe(11)
+    expect(await Product.countDocuments()).toBeGreaterThan(0)
   })
 
   it('covers every state a visitor can land on', async () => {
@@ -98,21 +101,46 @@ describe('what the seed creates', () => {
   })
 
   // The seeded tournaments are built through the same services the API uses, so
-  // an "ended" one really was played out rather than written straight to the
-  // database with the flags set.
-  it('produces coherent data: ended tournaments have a recorded winner', async () => {
+  // an "ended" one really was played and paid out rather than written straight
+  // to the database with the flags set.
+  it('produces coherent data: ended tournaments have empty banks and real payouts', async () => {
     await seedDemoData()
 
     const ended = await Tournament.find({ hasEnded: true })
     expect(ended.length).toBeGreaterThan(0)
 
     for (const tournament of ended) {
-      if (tournament.type === 'brackets') {
-        expect(tournament.matches[tournament.matches.length - 1].winner).not.toBeNull()
-      } else {
-        expect(tournament.participants().some((p) => p.score > 0)).toBe(true)
-      }
+      expect(tournament.bank).toBe(0)
+      expect(
+        await Transaction.countDocuments({ tournamentId: tournament._id, type: 'payout' })
+      ).toBeGreaterThan(0)
     }
+  })
+
+  // Bank balances have no ledger rows of their own, so this reconstructs them
+  // from the rows on the other side of each movement: what went in as entry fees
+  // and top-ups, less what came out as payouts and refunds.
+  it('produces banks that the ledger accounts for exactly', async () => {
+    await seedDemoData()
+
+    const byType = Object.fromEntries(
+      (await Transaction.aggregate([{ $group: { _id: '$type', total: { $sum: '$amount' } } }])).map(
+        (row) => [row._id, row.total]
+      )
+    )
+
+    const paidIn = -((byType.entry_fee ?? 0) + (byType.bank_deposit ?? 0))
+    const paidOut = (byType.payout ?? 0) + (byType.refund ?? 0)
+
+    const banked = await Tournament.aggregate([{ $group: { _id: null, total: { $sum: '$bank' } } }])
+
+    expect(banked[0]?.total ?? 0).toBe(paidIn - paidOut)
+    expect(paidIn).toBeGreaterThan(0)
+    expect(paidOut).toBeGreaterThan(0)
+
+    // And the two ways of counting the world agree.
+    const wallets = await User.aggregate([{ $group: { _id: null, total: { $sum: '$credits' } } }])
+    expect(await totalCredits()).toBe((wallets[0]?.total ?? 0) + (banked[0]?.total ?? 0))
   })
 })
 
@@ -133,15 +161,25 @@ describe('running the seed twice', () => {
 
     expect(first.tournaments).toBe(11)
     expect(second.tournaments).toBe(0)
+    expect(second.products).toBe(0)
 
     expect(await User.countDocuments()).toBe(14)
     expect(await Team.countDocuments()).toBe(4)
     expect(await Tournament.countDocuments()).toBe(11)
   })
+
+  it('does not duplicate the payouts of an already-ended tournament', async () => {
+    await seedDemoData()
+    const payouts = await Transaction.countDocuments({ type: 'payout' })
+
+    await seedDemoData()
+
+    expect(await Transaction.countDocuments({ type: 'payout' })).toBe(payouts)
+  })
 })
 
 describe('the accounts it creates', () => {
-  it('makes demo@tourney.app a host, signable-in with the printed password', async () => {
+  it('makes demo@tourney.app a host with credits, signable-in with the printed password', async () => {
     await seedDemoData()
     const credentials = seedCredentials()
 
@@ -151,7 +189,7 @@ describe('the accounts it creates', () => {
       .expect(200)
 
     expect(response.body.user).toMatchObject({ isHost: true, isAdmin: false })
-    expect(response.body.user.plan.active).toBe(true)
+    expect(response.body.user.credits).toBeGreaterThan(0)
   })
 
   it('gives the demo account exactly one draft tournament, ready to publish', async () => {
@@ -264,6 +302,7 @@ describe('clearing the demo data', () => {
     expect(cleared.teams).toBe(4)
     expect(await Tournament.countDocuments()).toBe(0)
     expect(await Team.countDocuments()).toBe(0)
+    expect(await Transaction.countDocuments()).toBe(0)
 
     const survivors = await User.find({}).lean()
     expect(survivors).toHaveLength(1)

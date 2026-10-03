@@ -1,6 +1,9 @@
 import User from '../../models/user.model.js'
 import Team from '../../models/team.model.js'
 import Tournament from '../../models/tournament.model.js'
+import Transaction from '../../models/transaction.model.js'
+import { HOST_UPGRADE_COST } from '../../config/constants.js'
+import { withTransaction } from '../../db/withTransaction.js'
 import { ApiError } from '../../utils/ApiError.js'
 import { attentionSummary } from '../tournaments/tournament.service.js'
 
@@ -17,33 +20,55 @@ export async function getUser(userId) {
   return user
 }
 
+/** The signed-in user's ledger, newest first. */
+export function listTransactions(userId, { limit }) {
+  return Transaction.find({ userId }).sort({ createdAt: -1 }).limit(limit).lean()
+}
+
 /**
- * Turns an account into a host.
+ * Upgrades an account to a host for a fixed price in credits.
  *
- * Free, and instant. What costs money is publishing more than one tournament at
- * a time, and that is the subscription — charging twice, once to hold the title
- * and again to use it, is a toll booth in front of a toll booth.
- *
- * Requires a verified email: `createTournament` already requires `isHost`, so
- * gating this one endpoint is enough to keep an unproven address off the whole
- * hosting path, publish included, without duplicating the check everywhere.
+ * Requires a verified email. Debit and ledger entry commit together, and the debit is conditional on the
+ * balance still being sufficient — so two simultaneous requests cannot both pass
+ * a read-then-write check and take the user negative.
  */
 export async function becomeHost(userId) {
-  const updated = await User.findOneAndUpdate(
-    { _id: userId, isHost: false, emailVerified: true },
-    { $set: { isHost: true } },
-    { new: true }
-  )
-  if (updated) return updated
+  return withTransaction(async (session) => {
+    const user = await User.findById(userId).session(session)
+    if (!user) throw ApiError.notFound('User not found')
+    if (!user.emailVerified) {
+      throw new ApiError(403, 'Verify your email before you can become a host', {
+        code: 'EMAIL_NOT_VERIFIED',
+      })
+    }
+    if (user.isHost) throw ApiError.badRequest('You are already a host')
+    if (user.credits < HOST_UPGRADE_COST) {
+      throw ApiError.badRequest(
+        `Becoming a host costs ${HOST_UPGRADE_COST} credits — you have ${user.credits}`
+      )
+    }
 
-  const user = await User.findById(userId)
-  if (!user) throw ApiError.notFound('User not found')
-  if (!user.emailVerified) {
-    throw new ApiError(403, 'Verify your email before you can become a host', {
-      code: 'EMAIL_NOT_VERIFIED',
-    })
-  }
-  throw ApiError.badRequest('You are already a host')
+    const updated = await User.findOneAndUpdate(
+      { _id: userId, isHost: false, emailVerified: true, credits: { $gte: HOST_UPGRADE_COST } },
+      { $inc: { credits: -HOST_UPGRADE_COST }, $set: { isHost: true } },
+      { new: true, session }
+    )
+    if (!updated) throw ApiError.conflict('Your account changed while we were processing this')
+
+    await Transaction.create(
+      [
+        {
+          userId,
+          type: 'host_upgrade',
+          amount: -HOST_UPGRADE_COST,
+          description: 'Host account upgrade',
+        },
+      ],
+      { session }
+    )
+
+    return updated
+  })
 }
 
 // --- dashboard ----------------------------------------------------------

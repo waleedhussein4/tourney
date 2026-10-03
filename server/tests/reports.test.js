@@ -9,7 +9,7 @@ let host
 let mei
 
 beforeEach(async () => {
-  host = await signUp('hostie', { isHost: true, plan: true })
+  host = await signUp('hostie', { isHost: true })
   mei = await signUp('mei')
 })
 

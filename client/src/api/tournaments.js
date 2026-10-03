@@ -6,7 +6,8 @@ import { del, get, patch, post } from './client.js'
  * The browse list.
  *
  * @param {{page?: number, limit?: number, search?: string, category?: string,
- *          type?: string, accessibility?: string, status?: string}} params
+ *          type?: string, accessibility?: string, minEntryFee?: number,
+ *          maxEntryFee?: number, status?: string}} params
  */
 export const listTournaments = (params, options) =>
   get('/api/tournaments', { ...options, query: params })
@@ -35,7 +36,7 @@ export const postUpdate = (id, content) => post(`/api/tournaments/${id}/updates`
 
 // --- publishing ---------------------------------------------------------------
 
-/** 402 with `error.code === 'PLAN_LIMIT_REACHED'` when the free plan is full. */
+/** Free and instant: the draft goes live the moment the host asks. */
 export const publishTournament = (id) => post(`/api/tournaments/${id}/publish`)
 
 /** Takes it back to a draft only the host can see. */
@@ -64,6 +65,9 @@ export const rejectApplication = (id, applicationId) =>
   post(`/api/tournaments/${id}/applications/${applicationId}/reject`)
 
 // --- running it ---------------------------------------------------------------
+
+export const depositIntoBank = (id, amount) =>
+  post(`/api/tournaments/${id}/bank/deposit`, { amount })
 
 export const shuffleBracket = (id) => post(`/api/tournaments/${id}/shuffle`)
 

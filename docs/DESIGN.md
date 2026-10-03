@@ -25,12 +25,9 @@ every generated dashboard looks like. So:
   `#000`: pure black flattens every shadow and makes the app one sheet of paper.
 - **One saturated accent.** Violet `#7c5cff`. It marks what advances — the node
   in the bracket, the active nav link, the primary action — and nothing else.
-- **A disciplined semantic set.** Green for success and for an active plan,
+- **A disciplined semantic set.** Green for success and for a published tournament,
   red for eliminated and destructive, amber for pending. Three signals, each
   with a readable step for text and a solid step for fills.
-
-An active subscription reads as green rather than a fourth colour on purpose:
-it is the same "cleared to go" signal a published tournament or a win gets.
 
 ## Colour
 
@@ -74,9 +71,9 @@ makes the app look like _this_ product rather than a component library. Body
 text stays in Instrument Sans, which is narrower and quieter and gets out of the
 way.
 
-Numbers are part of the personality: scores and capacities are set in Archivo
-with `font-variant-numeric: tabular-nums`, so a column of figures lines up and
-a changing count does not shuffle the layout.
+Numbers are part of the personality: scores, entry fees, and prize pools
+are set in Archivo with `font-variant-numeric: tabular-nums`, so a column of
+figures lines up and a changing balance does not shuffle the layout.
 
 The scale is roughly 1.22 per step, fluid at the two sizes that carry a page
 (`--text-3xl`, `--text-4xl`) so a hero heading works at 360px and at 1440px

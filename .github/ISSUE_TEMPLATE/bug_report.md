@@ -21,7 +21,7 @@ assignees: ''
 ## Scope
 
 - Area: <!-- client / server / both -->
-- Affected feature: <!-- tournaments, teams, billing, auth, ... -->
+- Affected feature: <!-- tournaments, teams, credits, auth, ... -->
 - Signed in as: <!-- guest / user / host / admin -->
 
 ## Environment

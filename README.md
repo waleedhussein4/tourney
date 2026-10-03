@@ -19,6 +19,10 @@ score-ranked battle royales, solo or in teams, open-join or application-gated.
 
 **[→ Open the live demo](https://tourneylb.com)**
 
+> **Tourney is a demo.** The credits it runs on are not money, cannot be bought
+> with money, and cannot be cashed out. The checkout is a mock-up — its card
+> fields are visual only and nothing typed into them ever leaves your browser.
+
 </div>
 
 ---
@@ -48,9 +52,9 @@ All below are from `docs/media/`; the same folder holds `docs/media/demo.gif`.
 | ![The home page](docs/media/home.png)                              | ![Browsing tournaments](docs/media/browse.png)                        |
 | **Home** — the bracket motif, and the category cards               | **Browse** — filters live in the URL, so a filtered list is shareable |
 | ![A tournament](docs/media/tournament.png)                         | ![Battle royale standings](docs/media/standings.png)                  |
-| **A bracket** — who advanced, who went out                         | **A battle royale** — score-ranked, with a live leaderboard           |
+| **A bracket** — who advanced, who went out                         | **A battle royale** — score-ranked, with each rank's prize            |
 | ![The host console](docs/media/manage.png)                         | ![The create wizard](docs/media/create.png)                           |
-| **The host console** — everything a host can change, in one screen | **Creating one** — format, details, entry, review                     |
+| **The host console** — everything a host can change, in one screen | **Creating one** — format, details, prizes, entry, review             |
 
 <div align="center">
   <img alt="Tourney on a phone" src="docs/media/mobile.png" width="300">
@@ -64,16 +68,20 @@ All below are from `docs/media/`; the same folder holds `docs/media/demo.gif`.
 ## What it does
 
 - **Hosts and players.** Anyone can browse as a guest; signing in lets you
-  enter tournaments and, once subscribed, host them.
+  enter tournaments and, for 20 credits, become a host.
 - **Two formats.** Single-elimination brackets, and score-ranked battle
   royales with per-rank standings.
 - **Solo or teams.** Create a team, invite by link or join code, promote a new
   leader. A team that has entered a tournament is frozen until it finishes.
 - **Open-join or application-gated.** A host can let anyone in, or review and
   accept applications first.
-- **Publishing and the subscription.** Your first live tournament is free.
-  Running more than one at a time needs the Host plan — $5/month, unlimited
-  live tournaments, cancel anytime.
+- **Credits, entry fees and prizes.** Credits are a demo currency. Buy a
+  package at the demo checkout (free, no card is read), pay 20 to become a
+  host, and pay a tournament's entry fee into its **bank**. The bank must cover
+  the advertised prizes before the tournament can start; on the end, prizes
+  are paid out of it and whatever is left returns to the host.
+- **Publishing.** A tournament is a draft only its host can see until they
+  publish it. Publishing is free and instant.
 - **Accounts.** Email verification on signup, self-serve password reset, and
   an account can be suspended by an admin if it's reported.
 - **Match results.** Either competitor reports a score; the other confirms or
@@ -139,44 +147,33 @@ with one folder per feature: page + styles + queries.
 
 ---
 
-## Payments
+## Credits, and why there are no real payments
 
-Subscriptions run through **Paddle Billing**:
+Every credit movement is a Mongoose transaction that writes a `Transaction`
+ledger row alongside it: the demo checkout grants credits, the host upgrade
+burns 20, entry fees move from player to bank, payouts and refunds move back.
+`server/tests/conservation.test.js` proves the total across wallets and banks
+is exactly what the checkout granted minus what the host upgrade burned, and
+that the ledger reconstructs every balance to the credit.
 
-1. The server opens the transaction (`POST /api/billing/checkout`) —
-   never the browser, so the plan and account are ours to trust.
-2. The client hands that transaction to **Paddle.js**, which renders the
-   card-entry overlay. Card details never touch our server.
-3. Paddle calls back a webhook (`server/src/modules/subscriptions/webhook.routes.js`)
-   mounted ahead of the JSON body parser, so the signature check runs over the
-   **raw request body** — a re-serialised body would break it.
-4. The handler applies the new status idempotently: each event carries an id,
-   and a repeat delivery with an id already recorded is a no-op, so Paddle's
-   retries can never double-apply a change.
-5. An account's plan is one of `none`, `active`, `past_due`, or `canceled`.
-   `past_due` still counts as active — a retrying card shouldn't take a
-   host's tournaments offline.
-
-To run it locally, put Paddle **sandbox** keys in `server/.env` and use a
-sandbox test card; see [docs/SETUP.md](docs/SETUP.md) for the exact variables.
-
-<div align="center">
-  <img alt="The billing screen" src="docs/media/billing.png" width="480">
-</div>
+The checkout is a **demo**. Its card fields are validated for realism and
+then discarded; the purchase request carries no body, so there is nothing to
+leak. An earlier version of this project charged real money through a payment
+provider. That was abandoned, and the reasons are in
+[docs/DECISIONS.md](docs/DECISIONS.md).
 
 ---
 
 ## Testing
 
-`npm test` runs the server suite (**319 tests**, vitest + supertest, against
-a real in-memory MongoDB replica set) and the client suite (**38 tests**,
+`npm test` runs the server suite (**342 tests**, vitest + supertest, against
+a real in-memory MongoDB replica set) and the client suite (**33 tests**,
 vitest + Testing Library). Server coverage includes auth and password
-reset/email verification, the publish/subscribe gate on tournament creation,
-the full bracket and battle-royale lifecycle (including waitlists, disputes,
+reset/email verification, free publishing, credit conservation through
+checkout, entry fees, the waitlist, withdrawals and payouts, the full bracket and battle-royale lifecycle (including waitlists, disputes,
 and match scheduling), team membership guards, notifications and their
-idempotency, the subscription webhook (including replayed and out-of-order
-events), moderation and reporting, the daily seed reset, and backup/restore.
-Client coverage covers the auth forms, the billing and create-tournament
+idempotency, moderation and reporting, the daily seed reset, and backup/restore.
+Client coverage covers the auth forms, the create-tournament
 flows, the notification bell, and both dashboards.
 
 ---

@@ -27,8 +27,7 @@ import styles from './admin.module.css'
 /**
  * The administrator's landing page.
  *
- * Unlisted and admin-gated. Just the demo data controls — publishing is now
- * gated by the subscription, which the payment gateway settles on its own.
+ * Unlisted and admin-gated. The demo-data controls, and the moderation queue.
  */
 export function AdminPage() {
   useDocumentTitle('Admin')
@@ -51,7 +50,7 @@ export function AdminPage() {
     onSuccess: (data) => {
       queryClient.invalidateQueries()
       setResult(
-        `Cleared ${data.tournaments} tournaments, ${data.teams} teams, ${data.users} users.`
+        `Cleared ${data.tournaments} tournaments, ${data.teams} teams, ${data.users} users, ${data.transactions} ledger rows.`
       )
       toast.success('Demo data cleared')
       setConfirming(false)
@@ -67,7 +66,7 @@ export function AdminPage() {
       <PageHeader
         eyebrow="Administration"
         title="Administration"
-        description="The demo data behind the live site."
+        description="The demo data behind the live site, and what people have reported."
       />
 
       <Card>
@@ -83,7 +82,7 @@ export function AdminPage() {
       <Card>
         <CardHeader
           title="Clear"
-          subtitle="Deletes every tournament, team and non-admin account."
+          subtitle="Deletes every tournament, team, non-admin account and ledger row."
         />
         <Button variant="danger" onClick={() => setConfirming(true)} loading={clear.isPending}>
           Clear demo data
@@ -105,7 +104,7 @@ export function AdminPage() {
         loading={clear.isPending}
         destructive
         title="Clear all demo data?"
-        description="Every tournament, team and non-admin account is deleted. Administrator accounts are kept. This cannot be undone."
+        description="Every tournament, team, non-admin account and ledger row is deleted. Administrator accounts are kept. This cannot be undone."
         confirmLabel="Clear everything"
       />
     </PageShell>

@@ -26,14 +26,15 @@ export const authLimiter = limiter({
 })
 
 /**
- * Opening a checkout. Capped per account rather than per address: one organiser
- * behind a shared connection must not be able to lock out everyone else on it.
+ * Demo checkout. Credits are free money in this app, so the cap is per account
+ * rather than per address — otherwise one user behind a shared IP could block
+ * everyone else, and one user with many addresses could mint without limit.
  */
-export const checkoutLimiter = limiter({
+export const creditsLimiter = limiter({
   windowMs: 60 * 60 * 1000,
-  max: 10,
+  max: 5,
   keyGenerator: (req) => req.userId ?? req.ip,
-  message: 'Too many checkout attempts in the last hour.',
+  message: 'Too many credit purchases in the last hour.',
 })
 
 /**

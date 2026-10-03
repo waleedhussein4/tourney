@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { useDatabase } from './setup/database.js'
 import { createTournament, signUp } from './setup/api.js'
 import Tournament from '../src/models/tournament.model.js'
+import Notification from '../src/models/notification.model.js'
+import User from '../src/models/user.model.js'
 
 useDatabase()
 
@@ -12,7 +14,7 @@ let ada
 let kofi
 
 beforeEach(async () => {
-  host = await signUp('hostie', { isHost: true, plan: true })
+  host = await signUp('hostie', { isHost: true })
   mei = await signUp('mei')
   tomas = await signUp('tomas')
   ada = await signUp('ada')
@@ -51,6 +53,38 @@ describe('withdrawing before a tournament starts', () => {
     const adaView = await ada.agent.get(`/api/tournaments/${tournament.id}`).expect(200)
     expect(adaView.body.tournament.viewer.isJoined).toBe(true)
     expect(adaView.body.tournament.viewer.isWaitlisted).toBe(false)
+  })
+
+  it('skips a waitlisted entrant who cannot cover the fee, and tells them why', async () => {
+    const tournament = await createTournament(host.agent, {
+      maxCapacity: 2,
+      entryFee: 10,
+      prize: 0,
+    })
+
+    await User.updateMany(
+      { _id: { $in: [mei.user.id, tomas.user.id, ada.user.id, kofi.user.id] } },
+      { $set: { credits: 10 } }
+    )
+
+    await mei.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
+    await tomas.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
+    // ada is first in the queue but will not be able to pay; kofi can.
+    await ada.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
+    await kofi.agent.post(`/api/tournaments/${tournament.id}/join/solo`).expect(200)
+
+    await User.updateOne({ _id: ada.user.id }, { $set: { credits: 0 } })
+
+    await mei.agent.post(`/api/tournaments/${tournament.id}/withdraw`).expect(200)
+
+    const stored = await Tournament.findById(tournament.id)
+    expect(stored.participantIds()).toContain(kofi.user.id)
+    expect(stored.participantIds()).not.toContain(ada.user.id)
+    expect(stored.waitlist).toHaveLength(0)
+
+    const told = await Notification.findOne({ user: ada.user.id, type: 'waitlist_dropped' })
+    expect(told).not.toBeNull()
+    expect(told.body).toContain('10-credit entry fee')
   })
 
   it('refuses to withdraw someone who was never in the tournament', async () => {

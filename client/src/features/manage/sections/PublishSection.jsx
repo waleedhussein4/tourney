@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { publishTournament, unpublishTournament } from '/src/api/tournaments.js'
 import { Button, Card, CardHeader } from '/src/components/ui/index.js'
 import { useManageMutation } from '../useManageMutation.js'
@@ -25,8 +24,6 @@ export function PublishSection({ tournament }) {
     mutationFn: () => unpublishTournament(tournament.id),
     success: 'Back to a draft — only you can see it now',
   })
-
-  const limitReached = publish.error?.code === 'PLAN_LIMIT_REACHED'
 
   if (publishState === 'published') {
     return (
@@ -56,17 +53,11 @@ export function PublishSection({ tournament }) {
         subtitle="Nobody can find or join it until you do. You can still edit everything."
       />
 
-      {limitReached ? (
-        <p className={styles.blockers}>
-          {publish.error.message} <Link to="/billing">See billing</Link>
-        </p>
-      ) : (
-        <div className={styles.actions}>
-          <Button variant="primary" onClick={() => publish.mutate()} loading={publish.isPending}>
-            Publish now
-          </Button>
-        </div>
-      )}
+      <div className={styles.actions}>
+        <Button variant="primary" onClick={() => publish.mutate()} loading={publish.isPending}>
+          Publish now
+        </Button>
+      </div>
     </Card>
   )
 }

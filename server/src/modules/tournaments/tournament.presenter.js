@@ -94,8 +94,10 @@ export function toListItem(tournament) {
     type: tournament.type,
     accessibility: tournament.accessibility,
     teamSize: tournament.teamSize,
+    entryFee: tournament.entryFee,
     maxCapacity: tournament.maxCapacity,
     participantCount: tournament.participantCount(),
+    totalPrize: tournament.totalPrize,
     startDate: tournament.startDate,
     endDate: tournament.endDate,
     hasStarted: tournament.hasStarted,
@@ -129,7 +131,13 @@ export async function toPublicView(tournament, viewerId) {
     category: tournament.category,
     accessibility: tournament.accessibility,
     teamSize: tournament.teamSize,
+    entryFee: tournament.entryFee,
+    entryCost: tournament.entryCost,
     maxCapacity: tournament.maxCapacity,
+    prize: tournament.prize,
+    prizes: tournament.prizes,
+    totalPrize: tournament.totalPrize,
+    bank: tournament.bank,
     startDate: tournament.startDate,
     endDate: tournament.endDate,
     hasStarted: tournament.hasStarted,
@@ -183,6 +191,8 @@ export async function toManageView(tournament, viewerId) {
     acceptedUsers: tournament.acceptedUsers,
     acceptedTeams: tournament.acceptedTeams,
     attention: attentionSummary(tournament),
+    bankRequired: tournament.totalPrize,
+    bankShortfall: Math.max(0, tournament.totalPrize - tournament.bank),
   }
 }
 

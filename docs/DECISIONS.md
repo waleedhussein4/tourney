@@ -1,53 +1,50 @@
 # Decisions
 
 History, not a spec — see [ARCHITECTURE.md](ARCHITECTURE.md) for what exists
-today. The one file allowed to mention the old credits model, and entry fees
-and prizes.
+today.
 
-## 2026-09-22 — Why entry fees and prizes were removed from tournaments
+## Real payments were abandoned; the demo credits economy is back
 
-Paddle reviewed the site and rejected it, classifying it as "Gambling,
-betting, wagering." The previous fix (below) had already stopped the app from
-holding or moving that money, but every tournament still _advertised_ an
-entry fee players paid in and a prize pool a winner took out — declared, not
-collected, but still the shape of a wager from the outside. Paddle's review
-looks at what the product describes, not just what it processes.
+The site briefly took real money: first a per-tournament publishing fee, then a
+$5/month hosting subscription, both through Paddle as merchant of record, with
+entry fees and prizes declared in dollars and settled off-platform. Paddle
+rejected the site three times as gambling (an entry fee plus a prize is the
+shape of a wager to a compliance reviewer, however it is framed) and then the
+account failed business verification. The owner chose to stop pursuing real
+payments altogether rather than keep reshaping the product around a payment
+provider's review.
 
-The fix: `entryFee`, `prize`, and `prizes` are gone — from the tournament
-model, the API, and every screen. A tournament now only tracks who is
-competing, brackets, and standings. The only paid product left is the
-$5/month hosting subscription in `server/src/config/plans.js`, which Paddle
-approved once the wagering shape was gone. A migration
-(`server/scripts/drop-money-fields.js`) clears the stray fields off documents
-written before this change.
+In their place the **demo credits economy** was restored, as it was before any
+of that: credits are a play currency with no cash value and no cash-out path,
+the checkout is a labelled demo whose card fields are visual only, becoming a
+host costs 20 credits, and entry fees escrow into a per-tournament bank that
+must cover the prizes before the tournament starts. Every multi-document credit
+movement runs in a Mongoose transaction and writes a `Transaction` row;
+`server/tests/conservation.test.js` proves credits are conserved.
 
-## Why the credits economy was replaced by a subscription
+What was removed: the Paddle SDK and webhook, the subscription module and the
+`/billing` page, the plan limit on publishing, the contact address that existed
+only to satisfy the payment provider, the Refunds page, and the regression gate
+against wagering language. What was kept: everything else built in the
+meantime — Cloudflare hosting, password reset and email verification, match
+subdocuments, scheduling, score reporting, disputes, notifications, moderation,
+dashboards, and the client test suite.
 
-The original design escrowed entry fees into a per-tournament bank and paid
-prizes out of it — the app moving other people's money. That's money
-transmission, and a paid bracket with a payout is a wagering contract in most
-places, i.e. gambling — both licensed activities. Worse, credits had no
-cash-out path: money went in (a demo checkout, never real) and never came out,
-so the "economy" could never legally become real.
+Two things changed in the restoration rather than being restored verbatim:
 
-The fix: the site stops touching money entirely. Entry fees and prizes are
-declared USD amounts the host and players settle directly, outside the app.
-The app charges its own $5/month hosting subscription instead — a fee for
-using the software, not a cut of anyone's winnings.
+- **Publishing is free and instant.** The earlier publish flow priced tiers in
+  US dollars and waited on a card payment or an admin confirming a bank
+  transfer. With no real money that flow has nothing to wait for, so a draft
+  simply goes live when its host publishes it, and the publish-request queue
+  was not restored.
+- **The payout finds the champion from the final match.** Matches are now
+  subdocuments, not a flat array of winner ids, so the champion is the winner
+  of the final match, and only once that match is `final`.
 
-## Why Paddle
-
-Paddle is a merchant of record: it is the seller on the card statement,
-handles sales tax/VAT itself, and pays out to Payoneer, which this project's
-owner can receive. A plain processor (Stripe, etc.) would leave tax
-compliance to us, out of scope for a $5/month hobby-priced product.
-
-## Why exactly one free live tournament
-
-Zero means nobody tries the product; unlimited means nobody subscribes. One
-live tournament is a genuine full trial — a real event, start to finish — and
-the limit only bites the moment a second would run concurrently, exactly when
-the subscription starts being worth something.
+Joining a full tournament waitlists the entrant without charging them; the fee
+is taken only when a withdrawal promotes them (and an entrant who can no longer
+afford it loses their place rather than blocking the queue). Leaving before the
+start, or being removed by the host, refunds the fee from the bank.
 
 ## Why matches are an embedded subdocument, not a collection
 
@@ -74,8 +71,9 @@ nobody agreed to.
 
 ## Why the app moved off Vercel to Cloudflare Containers
 
-Vercel's Hobby tier forbids commercial use, and the site now takes real
-subscription payments. Containers beat rewriting onto Workers: Workers alone
+Vercel's Hobby tier forbids commercial use, and at the time the site took real
+subscription payments (it no longer does; see above, and Cloudflare stayed).
+Containers beat rewriting onto Workers: Workers alone
 can't run this app, since Mongoose's TCP sockets need Node's `net` module in a
 form Workers doesn't provide. A Container runs the existing Express/Mongoose
 server unchanged, with a Worker serving the SPA and forwarding `/api/*` to it.

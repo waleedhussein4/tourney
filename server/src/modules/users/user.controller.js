@@ -12,6 +12,11 @@ export const getMe = asyncHandler(async (req, res) => {
   res.json({ user: user.toPublicJSON() })
 })
 
+export const getMyTransactions = asyncHandler(async (req, res) => {
+  const transactions = await userService.listTransactions(req.userId, req.query)
+  res.json({ transactions })
+})
+
 export const becomeHost = asyncHandler(async (req, res) => {
   const user = await userService.becomeHost(req.userId)
   res.json({ user: user.toPublicJSON() })

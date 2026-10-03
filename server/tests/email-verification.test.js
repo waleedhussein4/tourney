@@ -123,7 +123,7 @@ describe('what an unverified account cannot do', () => {
   })
 
   it('can become a host once verified', async () => {
-    const { agent } = await signUp('ada', { emailVerified: false })
+    const { agent } = await signUp('ada', { emailVerified: false, credits: 20 })
     const token = tokenFromLastEmail()
     await guest().post('/api/auth/verify-email').send({ token }).expect(200)
 
