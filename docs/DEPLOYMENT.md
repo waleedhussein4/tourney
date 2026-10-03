@@ -4,9 +4,9 @@ Tourney runs as **one Cloudflare Worker**: Workers Static Assets serves the
 built React client, and a Cloudflare **Container** runs the Express API,
 unchanged, in Docker. The database is a MongoDB Atlas **M0** cluster.
 
-This replaced Vercel because the app now takes real $5/month subscription
-payments — commercial use Vercel's Hobby tier forbids — and the owner already
-pays for Cloudflare.
+This replaced Vercel, whose Hobby tier forbids commercial use, and the owner
+already pays for Cloudflare. The app takes no real payments (see
+[DECISIONS.md](DECISIONS.md)); Cloudflare stayed regardless.
 
 ---
 
@@ -18,10 +18,8 @@ Rewriting the API onto the Workers runtime was considered and rejected:
    `net` module in a form the Workers runtime doesn't provide;
    [mongoose#14613](https://github.com/Automattic/mongoose/issues/14613) is
    open, and MongoDB's own guidance calls the workarounds exactly that.
-2. **The Paddle webhook needs the raw request body** for signature
-   verification, mounted ahead of `express.json` in `server/src/app.js`. That
-   ordering, and Express's body handling generally, is easiest to keep by not
-   changing the runtime at all.
+2. **The app relies on multi-document transactions** through the Node MongoDB
+   driver, which is easiest to keep by not changing the runtime at all.
 
 Cloudflare Containers runs the existing Express app in Docker with no source
 changes. Workers Static Assets serves `client/dist` from the same Worker, so
@@ -96,10 +94,6 @@ npx wrangler login   # one-time, from any machine — not needed for CI deploys 
 wrangler secret put MONGODB_URI
 wrangler secret put JWT_SECRET   # 32+ characters in production
 wrangler secret put CRON_SECRET
-wrangler secret put PADDLE_API_KEY
-wrangler secret put PADDLE_WEBHOOK_SECRET
-wrangler secret put PADDLE_CLIENT_TOKEN
-wrangler secret put PADDLE_PRICE_PLAN
 wrangler secret put SEED_DEMO_PASSWORD
 wrangler secret put SEED_ADMIN_PASSWORD
 wrangler secret put SEED_PASSWORD
@@ -107,17 +101,11 @@ wrangler secret put RESEND_API_KEY
 wrangler secret put MAIL_FROM
 ```
 
-`PADDLE_ENV` and `SENTRY_DSN` are optional; set them the same way if used.
+`SENTRY_DSN` is optional; set it the same way if used.
 
 Password-reset email is sent through Resend. `MAIL_FROM` must be an address on
 a domain **verified in Resend**, or every send fails with a 403 — Resend
-rejects the send at request time, it does not queue or bounce it later. The
-verified sending domain is **walenehq.com** (`MAIL_FROM` is an address at that
-domain); the Resend account is on the free tier, which allows only one sending
-domain, so `tourneylb.com` cannot be added as a second one. This is unrelated
-to the contact address shown on the site (`CONTACT_EMAIL` in
-`server/src/config/plans.js`) — that address is display-only and is never
-used as a `From` header.
+rejects the send at request time, it does not queue or bounce it later. `MAIL_FROM` is an address at a domain you have verified in Resend; the free tier allows only one sending domain.
 
 Both secrets are forwarded from the Worker to the container via the
 `FORWARDED` array in `worker/index.js` — a secret set with `wrangler secret
@@ -168,24 +156,22 @@ codebase's control.
 
 ## Environment variables / Worker secrets
 
-| Name                                                                                  | Where                       | Required | Notes                                                                                                                                     |
-| ------------------------------------------------------------------------------------- | --------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `MONGODB_URI`                                                                         | Worker secret, local server | **yes**  | Atlas connection string, including the `/tourney` database name. Alias: `DATABASE_URL`.                                                   |
-| `JWT_SECRET`                                                                          | Worker secret, local server | **yes**  | Signs the auth cookie. At least 32 characters in production. Alias: `SECRET`.                                                             |
-| `NODE_ENV`                                                                            | set in the container        | —        | `production` in the deployed image. Controls the cookie's `Secure` flag and request logging.                                              |
-| `CLIENT_URL`                                                                          | —                           | no       | **Leave unset.** Setting it registers a `cors()` allowlist a same-origin deployment doesn't need. Alias: `FRONTEND_URL`.                  |
-| `PORT`                                                                                | local only                  | no       | Defaults to `2000`, which is also what the container's `EXPOSE`/`defaultPort` use.                                                        |
-| `CRON_SECRET`                                                                         | Worker secret               | no       | Bearer token the Cron Trigger presents to `/api/cron/reseed`. Unset means the route refuses to run at all. At least 16 characters.        |
-| `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_CLIENT_TOKEN`, `PADDLE_PRICE_PLAN` | Worker secret               | no       | Card payments for the publishing fee. Unset, the app takes no cards.                                                                      |
-| `PADDLE_ENV`                                                                          | Worker secret               | no       | `sandbox` (default) or `production`.                                                                                                      |
-| `RESEND_API_KEY`                                                                      | Worker secret               | no       | Password-reset email. Unset means the server logs the email instead of sending it in dev/test, and 503s the reset endpoint in production. |
-| `MAIL_FROM`                                                                           | Worker secret               | no       | Sender address for password-reset email. Must be on a domain verified in Resend (**walenehq.com**) or sends fail with 403.                |
-| `SEED_DEMO_PASSWORD`, `SEED_ADMIN_PASSWORD`, `SEED_PASSWORD`                          | Worker secret, local        | no       | Demo account passwords. `SEED_ADMIN_PASSWORD` is not publishable.                                                                         |
-| `SEED_DEMO_EMAIL`, `SEED_ADMIN_EMAIL`                                                 | Worker secret, local        | no       | Default to `demo@tourney.app` and `admin@tourney.app`.                                                                                    |
-| `VITE_API_URL`                                                                        | client build                | no       | **Leave empty.** An empty value makes the client call a relative `/api`.                                                                  |
-| `VITE_FRONTEND_URL`                                                                   | client build                | no       | Only used to build team invite links.                                                                                                     |
-| `SENTRY_DSN`                                                                          | Worker secret               | no       | Optional server error tracking; unset, `Sentry.init` never runs.                                                                          |
-| `VITE_SENTRY_DSN`                                                                     | GitHub Actions secret       | no       | Optional client error tracking. Build-time only — baked into the bundle by the deploy workflow, not a Worker secret.                      |
+| Name                                                         | Where                       | Required | Notes                                                                                                                                     |
+| ------------------------------------------------------------ | --------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `MONGODB_URI`                                                | Worker secret, local server | **yes**  | Atlas connection string, including the `/tourney` database name. Alias: `DATABASE_URL`.                                                   |
+| `JWT_SECRET`                                                 | Worker secret, local server | **yes**  | Signs the auth cookie. At least 32 characters in production. Alias: `SECRET`.                                                             |
+| `NODE_ENV`                                                   | set in the container        | —        | `production` in the deployed image. Controls the cookie's `Secure` flag and request logging.                                              |
+| `CLIENT_URL`                                                 | —                           | no       | **Leave unset.** Setting it registers a `cors()` allowlist a same-origin deployment doesn't need. Alias: `FRONTEND_URL`.                  |
+| `PORT`                                                       | local only                  | no       | Defaults to `2000`, which is also what the container's `EXPOSE`/`defaultPort` use.                                                        |
+| `CRON_SECRET`                                                | Worker secret               | no       | Bearer token the Cron Trigger presents to `/api/cron/reseed`. Unset means the route refuses to run at all. At least 16 characters.        |
+| `RESEND_API_KEY`                                             | Worker secret               | no       | Password-reset email. Unset means the server logs the email instead of sending it in dev/test, and 503s the reset endpoint in production. |
+| `MAIL_FROM`                                                  | Worker secret               | no       | Sender address for password-reset email. Must be on a domain you have verified in Resend or sends fail with 403.                          |
+| `SEED_DEMO_PASSWORD`, `SEED_ADMIN_PASSWORD`, `SEED_PASSWORD` | Worker secret, local        | no       | Demo account passwords. `SEED_ADMIN_PASSWORD` is not publishable.                                                                         |
+| `SEED_DEMO_EMAIL`, `SEED_ADMIN_EMAIL`                        | Worker secret, local        | no       | Default to `demo@tourney.app` and `admin@tourney.app`.                                                                                    |
+| `VITE_API_URL`                                               | client build                | no       | **Leave empty.** An empty value makes the client call a relative `/api`.                                                                  |
+| `VITE_FRONTEND_URL`                                          | client build                | no       | Only used to build team invite links.                                                                                                     |
+| `SENTRY_DSN`                                                 | Worker secret               | no       | Optional server error tracking; unset, `Sentry.init` never runs.                                                                          |
+| `VITE_SENTRY_DSN`                                            | GitHub Actions secret       | no       | Optional client error tracking. Build-time only — baked into the bundle by the deploy workflow, not a Worker secret.                      |
 
 Set names only, never values, in this file or any committed file — every
 secret above goes in as `wrangler secret put <NAME>`, which prompts
@@ -249,7 +235,7 @@ curl -I https://tourneylb.com/assets/<file>  # a real file, not the SPA fallback
 ```
 
 Then in a browser: sign in as the demo account, open a tournament, and
-confirm the subscription checkout flow works end to end.
+confirm the demo checkout grants credits.
 
 ---
 
@@ -260,12 +246,11 @@ inactive until `SENTRY_DSN` and `VITE_SENTRY_DSN` are set as above; no code
 change needed to enable them.
 
 **Health.** `GET /api/health` is public and returns `200` with
-`{"status":"ok","database":"connected","emailConfigured":true,"paymentsEnabled":true}`
+`{"status":"ok","database":"connected","emailConfigured":true}`
 when the database is reachable, and a non-`200` when it is not. `status` and
 `database` keep their exact shape — an uptime monitor may depend on them.
-`emailConfigured` and `paymentsEnabled` are booleans only (no secrets, no
-version numbers) so a misconfigured deploy — Resend or Paddle credentials
-missing or half-set — is visible from a `curl`, not just from reading
+`emailConfigured` is a boolean only (no secrets, no version numbers) so a
+misconfigured deploy — Resend credentials missing or half-set — is visible from a `curl`, not just from reading
 container logs. It takes no arguments and touches no user data, so it is safe
 to poll from whatever external monitor you prefer.
 

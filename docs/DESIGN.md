@@ -25,12 +25,9 @@ every generated dashboard looks like. So:
   `#000`: pure black flattens every shadow and makes the app one sheet of paper.
 - **One saturated accent.** Violet `#7c5cff`. It marks what advances — the node
   in the bracket, the active nav link, the primary action — and nothing else.
-- **A disciplined semantic set.** Green for success and for an active plan,
+- **A disciplined semantic set.** Green for success and for a published tournament,
   red for eliminated and destructive, amber for pending. Three signals, each
   with a readable step for text and a solid step for fills.
-
-An active subscription reads as green rather than a fourth colour on purpose:
-it is the same "cleared to go" signal a published tournament or a win gets.
 
 ## Colour
 

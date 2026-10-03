@@ -61,11 +61,11 @@ host's would.
 
 The script prints the three sign-ins when it finishes:
 
-| Account                                       | Set with                                   |
-| --------------------------------------------- | ------------------------------------------ |
-| `demo@tourney.app` — a host, on the free plan | `SEED_DEMO_EMAIL` / `SEED_DEMO_PASSWORD`   |
-| `admin@tourney.app` — reaches the admin page  | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` |
-| The twelve demo players                       | `SEED_PASSWORD`                            |
+| Account                                      | Set with                                   |
+| -------------------------------------------- | ------------------------------------------ |
+| `demo@tourney.app` — a host, with credits    | `SEED_DEMO_EMAIL` / `SEED_DEMO_PASSWORD`   |
+| `admin@tourney.app` — reaches the admin page | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` |
+| The twelve demo players                      | `SEED_PASSWORD`                            |
 
 **No password is committed.** Anything left unset is generated for that run and
 printed once — so read the output, or set the variables in `server/.env` and
@@ -73,10 +73,8 @@ choose your own.
 
 `npm run seed -- --reset` clears the demo data first.
 
-> The app never takes a real card outside its own $5/month hosting
-> subscription, and that only runs against Paddle's sandbox unless
-> `PADDLE_ENV=production` is set. Entry fees and prizes are numbers hosts and
-> players agree between themselves — the app never charges or holds them.
+> The app never takes real money. Credits are a demo currency, and the checkout
+> is a labelled demo: its card fields are visual only and never leave the browser.
 
 ## Everyday commands
 
