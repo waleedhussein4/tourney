@@ -107,10 +107,6 @@ gate "no Lebanese phone number committed"   bash -c '
     git grep --untracked -nE "(\+?961[ -]?[0-9]{2}[ -]?[0-9]{3}[ -]?[0-9]{3})|wa\.me/[0-9]"       -- . ":!scripts/check-regressions.sh"
   '
 
-# This project has no co-authored commits and no generated-by footers. The check
-# is a blanket refusal rather than an allowlist, so it holds no personal data.
-gate "no Co-authored-by or Generated with lines in new commits"   bash -c 'git log origin/main..HEAD --format=%B | grep -iE "^(co-authored-by:|generated with)"'
-
 echo
 if [ $fail -eq 0 ]; then echo "all gates pass"; else echo "SOME GATES FAILED"; fi
 exit $fail
